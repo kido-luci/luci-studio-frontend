@@ -2,8 +2,7 @@
   "name": "luci-dev",
   "compatibility_date": "2024-04-20",
   "assets": {
-    "directory": "./dist",
-    "binding": "ASSETS"
+    "directory": "./dist"
   },
   "observability": {
     "enabled": true
