@@ -1,0 +1,93 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Portfolio and Blog of a Fullstack Developer and Artist" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+		<script is:inline src="https://cdn.tailwindcss.com"></script>
+		<script is:inline>
+			tailwind.config = {
+				theme: {
+					extend: {
+						animation: {
+							'fade-in-up': 'fadeInUp 1s ease-out forwards',
+							'blob': 'blob 7s infinite alternate',
+							'gradient-xy': 'gradient-xy 15s ease infinite',
+						},
+						keyframes: {
+							fadeInUp: {
+								'0%': { opacity: '0', transform: 'translateY(30px)' },
+								'100%': { opacity: '1', transform: 'translateY(0)' },
+							},
+							blob: {
+								'0%': { transform: 'translate(0, 0) scale(1)' },
+								'33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+								'66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+								'100%': { transform: 'translate(0, 0) scale(1)' },
+							},
+							'gradient-xy': {
+								'0%, 100%': {
+									'background-size': '400% 400%',
+									'background-position': 'left center',
+								},
+								'50%': {
+									'background-size': '200% 200%',
+									'background-position': 'right center',
+								},
+							},
+						},
+					},
+				},
+			}
+		</script>
+		<title>{title}</title>
+	</head>
+	<body class="bg-[#050505] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif]">
+		<slot />
+		<style is:global>
+			:root {
+				--accent: 136, 58, 234;
+				--accent-light: 224, 204, 250;
+				--accent-dark: 49, 10, 101;
+				--accent-gradient: linear-gradient(
+					45deg,
+					rgb(var(--accent)),
+					rgb(var(--accent-light)) 30%,
+					white 60%
+				);
+			}
+			h1, h2, h3, h4, h5, h6 {
+				font-family: 'Outfit', sans-serif;
+			}
+			::selection {
+				background-color: rgba(139, 92, 246, 0.3);
+				color: white;
+			}
+			::-webkit-scrollbar {
+				width: 10px;
+			}
+			::-webkit-scrollbar-track {
+				background: #050505;
+			}
+			::-webkit-scrollbar-thumb {
+				background: #222;
+				border-radius: 5px;
+			}
+			::-webkit-scrollbar-thumb:hover {
+				background: #333;
+			}
+		</style>
+	</body>
+</html>

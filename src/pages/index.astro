@@ -1,0 +1,234 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Luci | Fullstack Developer & Artist">
+	<!-- Noise Texture Overlay -->
+	<div class="fixed inset-0 z-[100] pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+
+	<!-- Background Elements -->
+	<div class="fixed inset-0 -z-10 bg-[#050505]">
+		<div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse"></div>
+		<div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" style="animation-delay: 2s;"></div>
+	</div>
+
+	<!-- Navigation -->
+	<nav class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/5 backdrop-blur-xl bg-black/20">
+		<div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+			<a href="/" class="group flex items-center gap-3">
+				<div class="relative w-10 h-10 overflow-hidden rounded-xl">
+					<div class="absolute inset-0 bg-gradient-to-tr from-purple-600 to-blue-500 animate-gradient-xy"></div>
+					<div class="absolute inset-[2px] bg-black rounded-[10px] flex items-center justify-center">
+						<span class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-tr from-purple-400 to-blue-400">L</span>
+					</div>
+				</div>
+				<span class="text-2xl font-black tracking-tighter text-white">LUCI<span class="text-purple-500">.</span></span>
+			</a>
+			
+			<div class="hidden md:flex items-center gap-10">
+				<a href="#work" class="text-sm font-medium text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Work</a>
+				<a href="#art" class="text-sm font-medium text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Art</a>
+				<a href="#blog" class="text-sm font-medium text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Blog</a>
+				<a href="#about" class="text-sm font-medium text-gray-400 hover:text-white transition-colors uppercase tracking-widest">About</a>
+			</div>
+
+			<a href="#contact" class="px-6 py-2.5 bg-white text-black text-sm font-bold rounded-full hover:bg-purple-500 hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-white/5">
+				Let's Talk
+			</a>
+		</div>
+	</nav>
+
+	<main>
+		<!-- Hero Section -->
+		<section class="relative min-h-screen flex flex-col items-center justify-center pt-20 px-6 overflow-hidden">
+			<div class="relative z-10 text-center max-w-5xl mx-auto">
+				<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 animate-fade-in-up">
+					<span class="relative flex h-2 w-2">
+						<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+						<span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+					</span>
+					<span class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Available for projects</span>
+				</div>
+
+				<h1 class="text-6xl md:text-8xl lg:text-[120px] font-black tracking-tighter leading-[0.9] mb-12 animate-fade-in-up" style="animation-delay: 0.2s;">
+					CRAFTING <br />
+					<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-blue-500">DIGITAL ART</span> <br />
+					WITH CODE
+				</h1>
+
+				<p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-in-up" style="animation-delay: 0.4s;">
+					Fullstack Developer by day, Digital Artist by night. I build scalable applications and create immersive visual experiences.
+				</p>
+
+				<div class="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up" style="animation-delay: 0.6s;">
+					<a href="#work" class="group relative px-10 py-5 bg-purple-600 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(147,51,234,0.3)]">
+						<div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+						<span class="relative text-lg font-bold text-white uppercase tracking-widest">Explore Work</span>
+					</a>
+					<a href="#art" class="px-10 py-5 bg-white/5 border border-white/10 rounded-2xl text-lg font-bold text-white uppercase tracking-widest hover:bg-white/10 transition-all duration-300">
+						View Art
+					</a>
+				</div>
+			</div>
+
+			<!-- Floating Art Elements -->
+			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none -z-10">
+				<div class="absolute top-[10%] left-[5%] w-64 h-64 bg-purple-500/10 blur-[100px] animate-blob"></div>
+				<div class="absolute bottom-[10%] right-[5%] w-64 h-64 bg-blue-500/10 blur-[100px] animate-blob" style="animation-delay: 4s;"></div>
+				<div class="absolute top-[40%] right-[10%] w-32 h-32 bg-pink-500/10 blur-[80px] animate-blob" style="animation-delay: 2s;"></div>
+			</div>
+
+			<!-- Scroll Indicator -->
+			<div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
+				<div class="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center">
+					<div class="w-1 h-2 bg-white/40 rounded-full mt-2"></div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Split Section: Dev & Art -->
+		<section class="py-32 px-6">
+			<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+				<!-- Developer Side -->
+				<div class="group relative p-12 bg-[#0a0a0a] border border-white/5 rounded-[40px] overflow-hidden hover:border-purple-500/30 transition-all duration-500">
+					<div class="absolute top-0 right-0 p-8">
+						<svg class="w-12 h-12 text-purple-500/20 group-hover:text-purple-500/40 transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12l-5.657 5.657-1.414-1.414L21.172 12l-4.243-4.243 1.414-1.414L24 12zM2.828 12l4.243 4.243-1.414 1.414L0 12l5.657-5.657 1.414 1.414L2.828 12zm9.172 0l-2 2-1.414-1.414L10 12l-1.414-1.414L10 9.172l2-2 1.414 1.414L12 10l1.414 1.414L12 14.828z"/></svg>
+					</div>
+					<h2 class="text-4xl font-black mb-6 tracking-tight">THE <br/><span class="text-purple-500">ENGINEER.</span></h2>
+					<p class="text-gray-400 text-lg mb-8 leading-relaxed">
+						Specializing in building robust, high-performance web applications using modern technologies like React, Next.js, Astro, and Node.js. Focused on clean code and user-centric architecture.
+					</p>
+					<div class="flex flex-wrap gap-3">
+						{['TypeScript', 'React', 'Node.js', 'PostgreSQL', 'Docker'].map(tech => (
+							<span class="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-gray-400 uppercase tracking-widest">{tech}</span>
+						))}
+					</div>
+				</div>
+
+				<!-- Artist Side -->
+				<div class="group relative p-12 bg-[#0a0a0a] border border-white/5 rounded-[40px] overflow-hidden hover:border-blue-500/30 transition-all duration-500">
+					<div class="absolute top-0 right-0 p-8">
+						<svg class="w-12 h-12 text-blue-500/20 group-hover:text-blue-500/40 transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0L15.39 8.26L24 9.27L17.5 15.14L19.27 24L12 19.56L4.73 24L6.5 15.14L0 9.27L8.61 8.26L12 0Z"/></svg>
+					</div>
+					<h2 class="text-4xl font-black mb-6 tracking-tight">THE <br/><span class="text-blue-500">ARTIST.</span></h2>
+					<p class="text-gray-400 text-lg mb-8 leading-relaxed">
+						Exploring the boundaries of generative art, digital illustration, and 3D modeling. Creating visual narratives that blend mathematical precision with organic creativity.
+					</p>
+					<div class="flex flex-wrap gap-3">
+						{['Generative Art', '3D Modeling', 'UI/UX Design', 'Illustration', 'Motion'].map(skill => (
+							<span class="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-gray-400 uppercase tracking-widest">{skill}</span>
+						))}
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Selected Work -->
+		<section id="work" class="py-32 bg-[#080808]">
+			<div class="max-w-7xl mx-auto px-6">
+				<div class="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+					<div>
+						<span class="text-purple-500 font-bold uppercase tracking-[0.3em] text-xs mb-4 block">Portfolio</span>
+						<h2 class="text-5xl md:text-7xl font-black tracking-tighter">SELECTED WORK</h2>
+					</div>
+					<a href="#" class="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
+						View All Projects 
+						<svg class="w-4 h-4 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+					</a>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+					{[1, 2].map(i => (
+						<div class="group relative aspect-[4/3] rounded-[40px] overflow-hidden bg-white/5 border border-white/10">
+							<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
+							<div class="absolute bottom-0 left-0 p-10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+								<h3 class="text-3xl font-black mb-2">Project Name {i}</h3>
+								<p class="text-gray-400 mb-6 max-w-sm">A brief description of the technical challenge and solution implemented for this project.</p>
+								<div class="flex gap-4">
+									<span class="text-xs font-bold uppercase tracking-widest px-3 py-1 bg-white/10 rounded-full">Next.js</span>
+									<span class="text-xs font-bold uppercase tracking-widest px-3 py-1 bg-white/10 rounded-full">Tailwind</span>
+								</div>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<!-- Blog Section -->
+		<section id="blog" class="py-32 px-6">
+			<div class="max-w-7xl mx-auto">
+				<div class="text-center mb-20">
+					<span class="text-blue-500 font-bold uppercase tracking-[0.3em] text-xs mb-4 block">Insights</span>
+					<h2 class="text-5xl md:text-7xl font-black tracking-tighter">LATEST ARTICLES</h2>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+					{[1, 2, 3].map(i => (
+						<article class="group">
+							<div class="aspect-video rounded-3xl overflow-hidden bg-white/5 mb-8 border border-white/5 group-hover:border-blue-500/30 transition-all">
+								<div class="w-full h-full bg-gradient-to-br from-gray-800 to-black group-hover:scale-105 transition-transform duration-700"></div>
+							</div>
+							<div class="flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
+								<span>April 20, 2024</span>
+								<span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+								<span>5 min read</span>
+							</div>
+							<h3 class="text-2xl font-bold mb-4 group-hover:text-blue-400 transition-colors">The future of generative UI in modern applications</h3>
+							<p class="text-gray-400 leading-relaxed mb-6">Exploring how AI is reshaping the way we build and interact with user interfaces in the next decade...</p>
+							<a href="#" class="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2 group-hover:gap-4 transition-all">
+								Read Article 
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+							</a>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<!-- CTA Section -->
+		<section id="contact" class="py-32 px-6">
+			<div class="max-w-7xl mx-auto relative rounded-[60px] overflow-hidden bg-gradient-to-br from-purple-900/40 to-blue-900/40 p-12 md:p-24 text-center border border-white/10">
+				<div class="absolute inset-0 -z-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+				<h2 class="text-5xl md:text-8xl font-black tracking-tighter mb-12">HAVE AN <br/>IDEA?</h2>
+				<p class="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto mb-16">
+					I'm always open to discussing new projects, creative ideas or opportunities to be part of your visions.
+				</p>
+				<a href="mailto:hello@luci.dev" class="inline-block px-12 py-6 bg-white text-black text-xl font-black rounded-[30px] hover:scale-105 transition-all duration-300 shadow-2xl shadow-white/10">
+					SAY HELLO
+				</a>
+			</div>
+		</section>
+	</main>
+
+	<!-- Footer -->
+	<footer class="py-20 border-t border-white/5">
+		<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-12">
+			<div>
+				<div class="flex items-center gap-3 mb-6">
+					<div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-blue-500"></div>
+					<span class="text-2xl font-black tracking-tighter text-white uppercase">LUCI.</span>
+				</div>
+				<p class="text-gray-500 text-sm max-w-xs">Building digital products, brands, and experience with passion and precision.</p>
+			</div>
+
+			<div class="flex gap-12">
+				<div class="flex flex-col gap-4">
+					<span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Social</span>
+					<a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Twitter</a>
+					<a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">GitHub</a>
+					<a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Dribbble</a>
+				</div>
+				<div class="flex flex-col gap-4">
+					<span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Links</span>
+					<a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Work</a>
+					<a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Art</a>
+					<a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Blog</a>
+				</div>
+			</div>
+		</div>
+		<div class="max-w-7xl mx-auto px-6 mt-20 text-center border-t border-white/5 pt-10">
+			<p class="text-gray-600 text-xs uppercase tracking-widest">© 2024 LUCI STUDIO. ALL RIGHTS RESERVED.</p>
+		</div>
+	</footer>
+</Layout>
