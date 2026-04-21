@@ -162,7 +162,7 @@ import Layout from "../layouts/Layout.astro";
             { title: 'QuanhTa', year: '2022–2024', desc: 'Real estate marketplace with polygon Maps search, gRPC chat, Flutter Web & Jenkins/Docker CD pipeline. For Vidieu, Vietnam.', tags: ['Flutter','Riverpod','gRPC','Docker'], img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=900' },
             { title: 'Luci Studio', year: '2026', desc: 'The very portfolio you are viewing — blazing-fast static site with premium animations, deployed to Cloudflare Edge.', tags: ['Astro','Tailwind','Cloudflare'], img: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=900' },
           ].map((p, i) => (
-            <div data-reveal="scale" data-delay={String((i%2)+1)} class="tilt-card group relative aspect-[4/3] rounded-[40px] overflow-hidden border border-white/8 hover:border-violet-500/30 transition-all duration-700 cursor-pointer">
+            <div data-project={p.title} data-reveal="scale" data-delay={String((i%2)+1)} class="tilt-card group relative aspect-[4/3] rounded-[40px] overflow-hidden border border-white/8 hover:border-violet-500/30 transition-all duration-700 cursor-pointer">
               <img src={p.img} alt={p.title} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-50" />
               <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
               <div class="absolute inset-0 p-10 flex flex-col justify-between">
@@ -202,62 +202,11 @@ import Layout from "../layouts/Layout.astro";
           </h3>
           <div class="space-y-4">
             { [
-            { 
-              y: '2024–Now', 
-              role: 'Frontend Flutter Developer', 
-              co: 'TBchat · Nexsoft', 
-              loc: 'Vietnam & Hong Kong', 
-              desc: 'Building a blockchain messaging platform across Android, iOS, macOS, and Windows.',
-              details: [
-                'Engineered foundational deep-linking architecture for cross-module content sharing.',
-                'Implemented real-time location sharing using WebSockets, Isolates, and background tracking.',
-                'Developed audio chat with custom waveforms and secure on-device speech-to-text transcription.',
-                'Built crypto wallet functionality with gas fee monitoring and offline L1 transaction signing.',
-                'Architected multi-environment configurations using Flutter Flavors (Dev, Staging, Prod).'
-              ],
-              tech: ['Bloc', 'ObjectBox', 'WebSocket', 'Retrofit', 'Go Router', 'Freezed'],
-              links: [
-                { label: 'App Store', url: 'https://apps.apple.com/us/app/tbchat-web3/id6739870518' },
-              ]
-            },
-            { 
-              y: '2024–Now', 
-              role: 'Full Stack Flutter Developer', 
-              co: 'memoirMe · The Nartus', 
-              loc: 'Australia (Freelance)', 
-              desc: 'Architected an interactive E2E encrypted diary application with enterprise-grade security.',
-              details: [
-                'Architected zero-knowledge E2E encryption using RSA and AES cryptographic algorithms.',
-                'Engineered subscription management with In-App Purchases (IAP) to drive monetization.',
-                'Built resilient media management with resumable background upload/download capabilities.',
-                'Integrated Firebase Analytics & Crashlytics for robust production health monitoring.',
-                'Developed local auto-save and offline-first data synchronization logic.'
-              ],
-              tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch'],
-              links: [{ label: 'The Nartus', url: 'https://www.thenartus.com/' }]
-            },
-            { 
-              y: '2022–2024', 
-              role: 'Full Stack Flutter Developer', 
-              co: 'QuanhTa · Vidieu', 
-              loc: 'Vietnam', 
-              desc: 'Real estate marketplace with advanced map-based search and automated data processing.',
-              details: [
-                'Engineered custom Google Maps integration with polygon-based area selection and filters.',
-                'Implemented real-time chat facilitating buyer-seller communication using gRPC.',
-                'Optimized Flutter Web performance and resolved Safari-specific CanvasKit renderer issues.',
-                'Built automated web scraping pipeline using Python, Selenium, and Scrapy.',
-                'Established complete CD pipeline for Flutter apps using Jenkins and Docker.'
-              ],
-              tech: ['Riverpod', 'Isar', 'gRPC', 'Python/Selenium', 'Jenkins', 'Docker'],
-              links: [
-                { label: 'Web App', url: 'https://quanhta.vn/map/land' },
-                { label: 'App Store', url: 'https://apps.apple.com/vn/app/quanh-ta/id6453535963' },
-                { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=vn.quanhta.superapp&hl=en' }
-              ]
-            },
-          ].map((j, i) => (
-              <div data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
+              { id: 'TBchat', y: '2024–Now', role: 'Frontend Flutter Developer', co: 'TBchat · Nexsoft', loc: 'Vietnam & Hong Kong', desc: 'Building a blockchain messaging platform across Android, iOS, macOS, and Windows.', details: ['Engineered foundational deep-linking architecture for cross-module content sharing.', 'Implemented real-time location sharing using WebSockets, Isolates, and background tracking.', 'Developed audio chat with custom waveforms and secure on-device speech-to-text transcription.', 'Built crypto wallet functionality with gas fee monitoring and offline L1 transaction signing.', 'Architected multi-environment configurations using Flutter Flavors (Dev, Staging, Prod).'], tech: ['Bloc', 'ObjectBox', 'WebSocket', 'Retrofit', 'Go Router', 'Freezed'], links: [{ label: 'App Store', url: 'https://apps.apple.com/us/app/tbchat-web3/id6739870518' }] },
+              { id: 'memoirMe', y: '2024–Now', role: 'Full Stack Flutter Developer', co: 'memoirMe · The Nartus', loc: 'Australia (Freelance)', desc: 'Architected an interactive E2E encrypted diary application with enterprise-grade security.', details: ['Architected zero-knowledge E2E encryption using RSA and AES cryptographic algorithms.', 'Engineered subscription management with In-App Purchases (IAP) to drive monetization.', 'Built resilient media management with resumable background upload/download capabilities.', 'Integrated Firebase Analytics & Crashlytics for robust production health monitoring.', 'Developed local auto-save and offline-first data synchronization logic.'], tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch'], links: [{ label: 'The Nartus', url: 'https://www.thenartus.com/' }] },
+              { id: 'QuanhTa', y: '2022–2024', role: 'Full Stack Flutter Developer', co: 'QuanhTa · Vidieu', loc: 'Vietnam', desc: 'Real estate marketplace with advanced map-based search and automated data processing.', details: ['Engineered custom Google Maps integration with polygon-based area selection and filters.', 'Implemented real-time chat facilitating buyer-seller communication using gRPC.', 'Optimized Flutter Web performance and resolved Safari-specific CanvasKit renderer issues.', 'Built automated web scraping pipeline using Python, Selenium, and Scrapy.', 'Established complete CD pipeline for Flutter apps using Jenkins and Docker.'], tech: ['Riverpod', 'Isar', 'gRPC', 'Python/Selenium', 'Jenkins', 'Docker'], links: [{ label: 'Web App', url: 'https://quanhta.vn/map/land' }, { label: 'App Store', url: 'https://apps.apple.com/vn/app/quanh-ta/id6453535963' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=vn.quanhta.superapp&hl=en' }] },
+            ].map((j, i) => (
+              <div id={j.id} data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                   <div class="md:col-span-2 flex items-start pt-1">
                     <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
@@ -351,55 +300,11 @@ import Layout from "../layouts/Layout.astro";
           </h3>
           <div class="space-y-4">
             { [
-            { 
-              y: '2026', 
-              role: 'Founder & Full Stack Developer', 
-              co: 'Luci Studio', 
-              loc: 'Vietnam', 
-              desc: 'Built the high-performance web portfolio and technical blog you are currently viewing.',
-              details: [
-                'Designed a premium, motion-rich UX/UI with custom-built interactive components.',
-                'Engineered for maximum performance (95+ Lighthouse score) using Astro static generation.',
-                'Implemented complex responsive layouts and magnetic hover interactions.',
-                'Deployed a global-first infrastructure using Cloudflare Pages edge delivery.'
-              ],
-              tech: ['Astro', 'Tailwind CSS', 'JavaScript', 'Cloudflare Pages'],
-              links: [{ label: 'Live Site', url: 'https://luci-studio.com/' }]
-            },
-            { 
-              y: '2024', 
-              role: 'Full Stack Developer', 
-              co: 'UwU EBOOK', 
-              loc: 'Owner Project', 
-              desc: 'Digital publishing platform for Vietnamese content with full-stack automation.',
-              details: [
-                'Architected microservices backend using Golang and the Ent framework.',
-                'Built complex data crawler system with Python and Scrapy for automated content gathering.',
-                'Deployed containerized infrastructure using Docker for seamless scalability.'
-              ],
-              tech: ['Golang', 'Ent', 'MySQL', 'Python', 'Docker'],
-              links: []
-            },
-            { 
-              y: '2021–2022', 
-              role: 'Flutter Developer & UI/UX Designer', 
-              co: 'IU PETSHOP', 
-              loc: 'Captain Project · FPT University', 
-              desc: 'Pet care ecosystem with blockchain identification and secure payment processing.',
-              details: [
-                'Implemented blockchain-based microchip identification system for pet tracking.',
-                'Integrated VNPay payment gateway through WebView for sandbox testing environment.',
-                'Designed complete mobile interface using Adobe XD and custom Flutter animations.',
-                'Integrated Firebase OAuth for secure user authentication across the platform.'
-              ],
-              tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth'],
-              links: [
-                { label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' },
-                { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }
-              ]
-            },
-          ].map((j, i) => (
-              <div data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
+              { id: 'Luci Studio', y: '2026', role: 'Founder & Full Stack Developer', co: 'Luci Studio', loc: 'Vietnam', desc: 'Built the high-performance web portfolio and technical blog you are currently viewing.', details: ['Designed a premium, motion-rich UX/UI with custom-built interactive components.', 'Engineered for maximum performance (95+ Lighthouse score) using Astro static generation.', 'Implemented complex responsive layouts and magnetic hover interactions.', 'Deployed a global-first infrastructure using Cloudflare Pages edge delivery.'], tech: ['Astro', 'Tailwind CSS', 'JavaScript', 'Cloudflare Pages'], links: [{ label: 'Live Site', url: 'https://luci-studio.com/' }] },
+              { id: 'UwU EBOOK', y: '2024', role: 'Full Stack Developer', co: 'UwU EBOOK', loc: 'Owner Project', desc: 'Digital publishing platform for Vietnamese content with full-stack automation.', details: ['Architected microservices backend using Golang and the Ent framework.', 'Built complex data crawler system with Python and Scrapy for automated content gathering.', 'Deployed containerized infrastructure using Docker for seamless scalability.'], tech: ['Golang', 'Ent', 'MySQL', 'Python', 'Docker'], links: [] },
+              { id: 'IU PETSHOP', y: '2021–2022', role: 'Flutter Developer & UI/UX Designer', co: 'IU PETSHOP', loc: 'Captain Project · FPT University', desc: 'Pet care ecosystem with blockchain identification and secure payment processing.', details: ['Implemented blockchain-based microchip identification system for pet tracking.', 'Integrated VNPay payment gateway through WebView for sandbox testing environment.', 'Designed complete mobile interface using Adobe XD and custom Flutter animations.', 'Integrated Firebase OAuth for secure user authentication across the platform.'], tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth'], links: [{ label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' }, { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }] },
+            ].map((j, i) => (
+              <div id={j.id} data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                   <div class="md:col-span-2 flex items-start pt-1">
                     <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
