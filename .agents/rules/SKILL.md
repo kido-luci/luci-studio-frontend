@@ -60,8 +60,9 @@ public/
 └── .assetsignore           # Required empty file for Cloudflare Workers deployment
 ```
 
-*   **Layout vs Page:** `Layout.astro` is the HTML shell (head, fonts, body, global CSS). Pages contain sections and content. Keep them separate.
-*   **Component Extraction Rule:** Extract to a component when a UI pattern appears 3+ times, or when it exceeds ~60 lines. Name components descriptively (e.g., `ProjectCard.astro`, `BlogPostCard.astro`).
+*   **DRY (Don't Repeat Yourself):** Mandatory. All repeated UI patterns, complex sections, or data-driven blocks must be abstracted into reusable components. Duplicate markup longer than 20 lines is unacceptable.
+*   **Component Extraction Rule:** Extract to a component when a UI pattern appears 2+ times, or when a code block exceeds ~60 lines. Name components descriptively (e.g., `ProjectCard.astro`, `TimelineItem.astro`).
+*   **Data-Driven UI:** Decouple data from structure. Define content arrays (e.g., `projects`, `experience`) in the frontmatter of pages/components and map them to sub-components.
 *   **Always define `interface Props`** in component frontmatter for type safety.
 
 ---
@@ -171,6 +172,6 @@ When assisting with this project, Antigravity must strictly follow:
 2.  **Preserve the established design language.** All new UI must use the defined color palette, typography scale, and component patterns. Never introduce plain colors or default browser styles.
 3.  **Astro-native first.** Suggest `.astro` component solutions before any client-side framework.
 4.  **Maintain the wrangler.jsonc rules.** Never add `binding` to the static assets config.
-5.  **No unsolicited refactoring.** Do not modify existing working code unless it is explicitly requested or blocks a critical fix.
+5.  **Strict DRY Enforcement.** proactively identify and refactor repeated code into reusable, data-driven components. Never suggest copy-pasting large blocks of markup.
 6.  **Premium aesthetics always.** Any new section, page, or component must meet the "wow factor" standard — glassmorphism, gradient accents, smooth transitions, and the Outfit/Inter font pairing.
 7.  **Check before installing packages.** This environment has network restrictions. Confirm network availability before proposing `npm install` commands.
