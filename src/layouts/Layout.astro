@@ -25,6 +25,8 @@ const { title } = Astro.props;
 							'fade-in-up': 'fadeInUp 1s ease-out forwards',
 							'blob': 'blob 7s infinite alternate',
 							'gradient-xy': 'gradient-xy 15s ease infinite',
+							'spin-slow': 'spin 12s linear infinite',
+							'reverse-spin': 'reverse-spin 8s linear infinite',
 						},
 						keyframes: {
 							fadeInUp: {
@@ -46,6 +48,10 @@ const { title } = Astro.props;
 									'background-size': '200% 200%',
 									'background-position': 'right center',
 								},
+							},
+							'reverse-spin': {
+								'from': { transform: 'rotate(360deg)' },
+								'to': { transform: 'rotate(0deg)' },
 							},
 						},
 					},
