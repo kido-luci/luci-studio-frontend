@@ -47,7 +47,7 @@ const { title } = Astro.props;
 		</script>
 		<title>{title}</title>
 	</head>
-	<body class="bg-[#030303] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden">
+	<body class="bg-[#0a0a0a] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden">
 		<!-- Custom Cursor -->
 		<div id="cursor-dot" class="fixed w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference transition-transform duration-100" style="top:-10px;left:-10px;"></div>
 		<div id="cursor-ring" class="fixed w-10 h-10 border border-white/40 rounded-full pointer-events-none z-[9998] mix-blend-difference" style="top:-20px;left:-20px;"></div>
@@ -55,10 +55,18 @@ const { title } = Astro.props;
 		<slot />
 
 		<style is:global>
+			body { 
+				background-color: #0a0a0a;
+				background-image: 
+					radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+					radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.15) 0%, transparent 20%),
+					radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+				background-attachment: fixed;
+			}
 			h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; }
 			::selection { background-color: rgba(139, 92, 246, 0.3); color: white; }
 			::-webkit-scrollbar { width: 6px; }
-			::-webkit-scrollbar-track { background: #030303; }
+			::-webkit-scrollbar-track { background: #0a0a0a; }
 			::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
 			::-webkit-scrollbar-thumb:hover { background: #444; }
 
@@ -250,10 +258,10 @@ const { title } = Astro.props;
 		const nav = document.querySelector('nav') as HTMLElement;
 		window.addEventListener('scroll', () => {
 			if (window.scrollY > 80) {
-				nav.style.background = 'rgba(3,3,3,0.85)';
+				nav.style.background = 'rgba(10,10,10,0.85)';
 				nav.style.backdropFilter = 'blur(24px)';
 			} else {
-				nav.style.background = 'rgba(3,3,3,0.1)';
+				nav.style.background = 'rgba(10,10,10,0.1)';
 				nav.style.backdropFilter = 'blur(12px)';
 			}
 		}, { passive: true });
