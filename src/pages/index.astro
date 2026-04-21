@@ -202,8 +202,8 @@ import Layout from "../layouts/Layout.astro";
                 desc: "Custom-coded visual systems and digital art pieces tailored for brands and collectors.",
                 icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z",
               },
-            ].map((service) => (
-              <div class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-300">
+            ].map((service, i) => (
+              <div data-reveal data-reveal-delay={String(i * 200)} class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-white/20 transition-all duration-300">
                 <div class="w-12 h-12 bg-purple-600/10 rounded-2xl flex items-center justify-center mb-6">
                   <svg
                     class="w-6 h-6 text-purple-500"
@@ -237,6 +237,7 @@ import Layout from "../layouts/Layout.astro";
       <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
         <!-- Developer Side -->
         <div
+          data-reveal="left"
           class="group relative p-12 bg-[#0a0a0a] border border-white/5 rounded-[40px] overflow-hidden hover:border-purple-500/30 transition-all duration-500"
         >
           <div class="absolute top-0 right-0 p-8">
@@ -272,6 +273,8 @@ import Layout from "../layouts/Layout.astro";
 
         <!-- Artist Side -->
         <div
+          data-reveal="right"
+          data-reveal-delay="200"
           class="group relative p-12 bg-[#0a0a0a] border border-white/5 rounded-[40px] overflow-hidden hover:border-blue-500/30 transition-all duration-500"
         >
           <div class="absolute top-0 right-0 p-8">
@@ -322,8 +325,8 @@ import Layout from "../layouts/Layout.astro";
             { number: "30+", label: "Projects Shipped" },
             { number: "15+", label: "Artworks Created" },
             { number: "∞", label: "Curiosity" },
-          ].map((stat) => (
-            <div>
+          ].map((stat, i) => (
+            <div data-reveal data-reveal-delay={String(i * 150)}>
               <div class="text-5xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 mb-3">
                 {stat.number}
               </div>
@@ -363,7 +366,7 @@ import Layout from "../layouts/Layout.astro";
     <section class="py-32 px-6">
       <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-          <div>
+          <div data-reveal="left">
             <span
               class="text-pink-500 font-bold uppercase tracking-[0.3em] text-xs mb-4 block"
               >Mindset</span
@@ -409,7 +412,7 @@ import Layout from "../layouts/Layout.astro";
               }
             </div>
           </div>
-          <div class="relative aspect-square rounded-[60px] overflow-hidden">
+          <div data-reveal="right" data-reveal-delay="200" class="relative aspect-square rounded-[60px] overflow-hidden">
             <div
               class="absolute inset-0 bg-gradient-to-tr from-purple-600/20 to-blue-600/20 animate-pulse"
             >
@@ -449,6 +452,7 @@ import Layout from "../layouts/Layout.astro";
     <section id="work" class="py-32 bg-[#080808]">
       <div class="max-w-7xl mx-auto px-6">
         <div
+          data-reveal
           class="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8"
         >
           <div>
@@ -496,8 +500,8 @@ import Layout from "../layouts/Layout.astro";
                 image:
                   "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800",
               },
-            ].map((project) => (
-              <div class="group relative aspect-[4/3] rounded-[40px] overflow-hidden border border-white/10 hover:border-purple-500/30 transition-all duration-500">
+            ].map((project, i) => (
+              <div data-reveal="scale" data-reveal-delay={String(i * 200)} class="group relative aspect-[4/3] rounded-[40px] overflow-hidden border border-white/10 hover:border-purple-500/30 transition-all duration-500">
                 <img
                   src={project.image}
                   alt={project.title}
@@ -582,8 +586,10 @@ import Layout from "../layouts/Layout.astro";
                 label: "Circuit",
                 year: "2023",
               },
-            ].map((art) => (
+            ].map((art, i) => (
               <div
+                data-reveal="scale"
+                data-reveal-delay={String(i * 100)}
                 class={`group relative ${art.span} aspect-square rounded-3xl overflow-hidden cursor-pointer`}
               >
                 <img
@@ -720,7 +726,7 @@ import Layout from "../layouts/Layout.astro";
                 desc: "Building and maintaining multiple SaaS products from scratch. Focusing on performance optimization and user experience.",
               },
             ].map((job, i) => (
-              <div class="group relative grid grid-cols-1 md:grid-cols-12 gap-8 p-10 bg-[#0a0a0a] border border-white/5 rounded-[40px] hover:border-blue-500/30 transition-all duration-500">
+              <div data-reveal data-reveal-delay={String(i * 150)} class="group relative grid grid-cols-1 md:grid-cols-12 gap-8 p-10 bg-[#0a0a0a] border border-white/5 rounded-[40px] hover:border-blue-500/30 transition-all duration-500">
                 <div class="md:col-span-3">
                   <span class="text-sm font-bold text-blue-500 uppercase tracking-widest">
                     {job.year}
@@ -743,7 +749,7 @@ import Layout from "../layouts/Layout.astro";
     <!-- Blog Section -->
     <section id="blog" class="py-32 px-6">
       <div class="max-w-7xl mx-auto">
-        <div class="text-center mb-20">
+        <div data-reveal class="text-center mb-20">
           <span
             class="text-blue-500 font-bold uppercase tracking-[0.3em] text-xs mb-4 block"
             >Insights</span
@@ -780,8 +786,8 @@ import Layout from "../layouts/Layout.astro";
                 image:
                   "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80&w=800",
               },
-            ].map((post) => (
-              <article class="group">
+            ].map((post, i) => (
+              <article data-reveal data-reveal-delay={String(i * 200)} class="group">
                 <div class="aspect-video rounded-3xl overflow-hidden mb-8 border border-white/5 group-hover:border-blue-500/30 transition-all duration-500">
                   <img
                     src={post.image}
@@ -828,7 +834,7 @@ import Layout from "../layouts/Layout.astro";
     <!-- FAQ / Fun Facts -->
     <section class="py-32 px-6 bg-[#080808]">
       <div class="max-w-4xl mx-auto">
-        <div class="text-center mb-20">
+        <div data-reveal class="text-center mb-20">
           <span
             class="text-pink-500 font-bold uppercase tracking-[0.3em] text-xs mb-4 block"
             >Curiosities</span
@@ -856,8 +862,8 @@ import Layout from "../layouts/Layout.astro";
                 q: "Next Goal?",
                 a: "Mastering shaders and WebGL to bring more movement to my digital canvases.",
               },
-            ].map((fact) => (
-              <div class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-pink-500/30 transition-all duration-500">
+            ].map((fact, i) => (
+              <div data-reveal data-reveal-delay={String(i * 150)} class="p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-pink-500/30 transition-all duration-500">
                 <h4 class="text-lg font-bold text-white mb-3">{fact.q}</h4>
                 <p class="text-gray-500 leading-relaxed">{fact.a}</p>
               </div>
@@ -871,7 +877,7 @@ import Layout from "../layouts/Layout.astro";
     <section class="py-32 px-6">
       <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-          <div class="relative">
+          <div data-reveal="left" class="relative">
             <div
               class="absolute -inset-4 bg-gradient-to-tr from-purple-600/20 to-blue-600/20 blur-3xl rounded-[60px]"
             >
@@ -901,7 +907,7 @@ import Layout from "../layouts/Layout.astro";
               </div>
             </div>
           </div>
-          <div>
+          <div data-reveal="right" data-reveal-delay="200">
             <span
               class="text-blue-500 font-bold uppercase tracking-[0.3em] text-xs mb-4 block"
               >Partnership</span
@@ -945,6 +951,7 @@ import Layout from "../layouts/Layout.astro";
     <!-- CTA Section -->
     <section id="contact" class="py-32 px-6">
       <div
+        data-reveal="scale"
         class="max-w-7xl mx-auto relative rounded-[60px] overflow-hidden bg-gradient-to-br from-purple-900/40 to-blue-900/40 p-12 md:p-24 text-center border border-white/10"
       >
         <div
@@ -1043,4 +1050,49 @@ import Layout from "../layouts/Layout.astro";
       </p>
     </div>
   </footer>
+
+  <script>
+    // Scroll Reveal: IntersectionObserver powers all data-reveal animations
+    const revealEls = document.querySelectorAll('[data-reveal]');
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            // Unobserve after reveal so it doesn't re-trigger
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: '0px 0px -60px 0px',
+      }
+    );
+
+    revealEls.forEach((el) => observer.observe(el));
+
+    // Parallax-lite: subtle vertical shift on the hero background blobs
+    const blobs = document.querySelectorAll('.animate-blob');
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      blobs.forEach((blob, i) => {
+        const speed = i % 2 === 0 ? 0.04 : -0.04;
+        (blob as HTMLElement).style.transform = `translateY(${scrollY * speed}px)`;
+      });
+    }, { passive: true });
+
+    // Nav shrink on scroll
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 60) {
+        nav?.classList.add('bg-black/60');
+        nav?.classList.remove('bg-black/20');
+      } else {
+        nav?.classList.add('bg-black/20');
+        nav?.classList.remove('bg-black/60');
+      }
+    }, { passive: true });
+  </script>
 </Layout>

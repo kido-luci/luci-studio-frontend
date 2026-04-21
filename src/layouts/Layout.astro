@@ -94,6 +94,32 @@ const { title } = Astro.props;
 			::-webkit-scrollbar-thumb:hover {
 				background: #333;
 			}
+
+			/* Scroll Reveal */
+			[data-reveal] {
+				opacity: 0;
+				transform: translateY(40px);
+				transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+			}
+			[data-reveal='left'] {
+				transform: translateX(-50px);
+			}
+			[data-reveal='right'] {
+				transform: translateX(50px);
+			}
+			[data-reveal='scale'] {
+				transform: scale(0.92);
+			}
+			[data-reveal].is-visible {
+				opacity: 1;
+				transform: translateY(0) translateX(0) scale(1);
+			}
+			[data-reveal-delay='100'] { transition-delay: 0.1s; }
+			[data-reveal-delay='200'] { transition-delay: 0.2s; }
+			[data-reveal-delay='300'] { transition-delay: 0.3s; }
+			[data-reveal-delay='400'] { transition-delay: 0.4s; }
+			[data-reveal-delay='500'] { transition-delay: 0.5s; }
+			[data-reveal-delay='600'] { transition-delay: 0.6s; }
 		</style>
 	</body>
 </html>
