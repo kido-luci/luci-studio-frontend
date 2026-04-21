@@ -59,12 +59,12 @@ const indieProjects = [
 
 
         <h1 class="text-[clamp(3rem,10vw,9rem)] font-black tracking-[-0.04em] leading-[0.9] mb-8" data-word-reveal>
-          {['FLUTTER', 'DEVELOPER', '&', 'SOFTWARE', 'ENGINEER'].map((w, i) => (
-            <span class="reveal-word" style={`transition-delay:${i*90}ms`}>
-              <span class={w === '&' ? 'text-shimmer mx-4' : 'text-white'}>{w} </span>
-            </span>
-          ))}
-        </h1>
+           {['FLUTTER', 'DEVELOPER', '&', 'SOFTWARE', 'ENGINEER'].map((w, i) => (
+             <span class="reveal-word">
+               <span class={w === '&' ? 'text-shimmer mx-4' : 'text-white'}>{w} </span>
+             </span>
+           ))}
+         </h1>
 
         <p class="text-lg md:text-xl text-gray-500 max-w-xl mx-auto mb-12" style="opacity:0;animation:fadeSlideUp 0.8s 0.7s forwards">
           Crafting production-grade Flutter apps with clean architecture, BLoC state management, and end-to-end encryption. 5+ years shipping real products.

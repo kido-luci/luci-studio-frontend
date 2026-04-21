@@ -81,9 +81,9 @@ const { title } = Astro.props;
 			}
 			.reveal-word span {
 				display: inline-block;
-				transform: translateY(110%);
+				transform: translateY(60px);
 				opacity: 0;
-				transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+				transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease-out;
 			}
 			.reveal-word.revealed span {
 				transform: translateY(0);
@@ -201,7 +201,7 @@ const { title } = Astro.props;
 				if (e.isIntersecting) {
 					const words = e.target.querySelectorAll('.reveal-word');
 					words.forEach((w, i) => {
-						setTimeout(() => w.classList.add('revealed'), i * 80);
+						setTimeout(() => w.classList.add('revealed'), i * 120);
 					});
 					wordIo.unobserve(e.target);
 				}
