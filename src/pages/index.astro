@@ -238,7 +238,10 @@ import Layout from "../layouts/Layout.astro";
                 'Built crypto wallet functionality with gas fee monitoring and offline L1 transaction signing.',
                 'Architected multi-environment configurations using Flutter Flavors (Dev, Staging, Prod).'
               ],
-              tech: ['Bloc', 'ObjectBox', 'WebSocket', 'Retrofit', 'Go Router', 'Freezed']
+              tech: ['Bloc', 'ObjectBox', 'WebSocket', 'Retrofit', 'Go Router', 'Freezed'],
+              links: [
+                { label: 'App Store', url: 'https://apps.apple.com/us/app/tbchat-web3/id6739870518' },
+              ]
             },
             { 
               y: '2024–Now', 
@@ -253,7 +256,8 @@ import Layout from "../layouts/Layout.astro";
                 'Integrated Firebase Analytics & Crashlytics for robust production health monitoring.',
                 'Developed local auto-save and offline-first data synchronization logic.'
               ],
-              tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch']
+              tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch'],
+              links: [{ label: 'The Nartus', url: 'https://www.thenartus.com/' }]
             },
             { 
               y: '2022–2024', 
@@ -268,7 +272,12 @@ import Layout from "../layouts/Layout.astro";
                 'Built automated web scraping pipeline using Python, Selenium, and Scrapy.',
                 'Established complete CD pipeline for Flutter apps using Jenkins and Docker.'
               ],
-              tech: ['Riverpod', 'Isar', 'gRPC', 'Python/Selenium', 'Jenkins', 'Docker']
+              tech: ['Riverpod', 'Isar', 'gRPC', 'Python/Selenium', 'Jenkins', 'Docker'],
+              links: [
+                { label: 'Web App', url: 'https://quanhta.vn/map/land' },
+                { label: 'App Store', url: 'https://apps.apple.com/vn/app/quanh-ta/id6453535963' },
+                { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=vn.quanhta.superapp&hl=en' }
+              ]
             },
             { 
               y: '2024', 
@@ -281,7 +290,8 @@ import Layout from "../layouts/Layout.astro";
                 'Built complex data crawler system with Python and Scrapy for automated content gathering.',
                 'Deployed containerized infrastructure using Docker for seamless scalability.'
               ],
-              tech: ['Golang', 'Ent', 'MySQL', 'Python', 'Docker']
+              tech: ['Golang', 'Ent', 'MySQL', 'Python', 'Docker'],
+              links: []
             },
             { 
               y: '2021–2022', 
@@ -295,7 +305,11 @@ import Layout from "../layouts/Layout.astro";
                 'Designed complete mobile interface using Adobe XD and custom Flutter animations.',
                 'Integrated Firebase OAuth for secure user authentication across the platform.'
               ],
-              tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth']
+              tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth'],
+              links: [
+                { label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' },
+                { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }
+              ]
             },
           ].map((j, i) => (
             <div data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
@@ -328,9 +342,17 @@ import Layout from "../layouts/Layout.astro";
                       </div>
                       <div>
                         <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Stack</h4>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="flex flex-wrap gap-2 mb-8">
                           {j.tech.map(t => (
                             <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                          ))}
+                        </div>
+                        <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Links</h4>
+                        <div class="flex flex-wrap gap-3">
+                          {j.links.map(l => (
+                            <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
+                              {l.label} ↗
+                            </a>
                           ))}
                         </div>
                       </div>
@@ -407,8 +429,8 @@ import Layout from "../layouts/Layout.astro";
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
       <span class="text-2xl font-black tracking-tighter">LUCI<span class="text-violet-500">.</span></span>
       <div class="flex items-center gap-8">
-        {[['GitHub','#'],['Twitter','#'],['Dribbble','#']].map(([l,h]) => (
-          <a href={h} class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">{l}</a>
+        {[['GitHub','https://github.com/kido-luci'],['LinkedIn','https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/'],['Medium','https://medium.com/@lapl1412.work']].map(([l,h]) => (
+          <a href={h} target="_blank" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">{l}</a>
         ))}
       </div>
       <p class="text-xs text-gray-700 uppercase tracking-widest">© 2026 Luci - Trung Lap · Ho Chi Minh City</p>
