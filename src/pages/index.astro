@@ -159,8 +159,8 @@ const indieProjects = [
               { title: 'Generative art with code: where math meets beauty', date: 'Apr 10, 2026', read: '6 min', tag: 'Art & Code', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800' },
               { title: 'Why I chose Astro for my portfolio in 2026', date: 'Apr 1, 2026', read: '4 min', tag: 'Web Dev', img: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80&w=800' },
             ].map((p, i) => (
-              <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer">
-                <div class="aspect-video rounded-3xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
+              <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-6 rounded-[32px] border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
+                <div class="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
                   <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 </div>
                 <div class="flex items-center gap-3 mb-4">
