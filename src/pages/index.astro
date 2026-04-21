@@ -1,5 +1,27 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import TimelineItem from "../components/TimelineItem.astro";
+
+const projects = [
+  { title: 'memoirMe', year: '2024–Now', desc: 'AI diary with RSA/AES E2E encryption, geolocation, IAP subscriptions & resumable uploads. For The Nartus, Australia.', tags: ['Flutter','BLoC','Firebase','Crypto'], img: 'https://lh3.googleusercontent.com/sitesv/AA5AbUDep4gRWxezXz-MBeWd2fnJtuGA4THdCebXHYiLMKIkKNuaT9yQslZ-Y0_udz1L-YF1ZOOq2Z_9CTltU4ztRU7OnWVDizmSJTsVAsg2s2OC3ZQ0I1l47WFLYp7sl9EXTgruaFkudM1HHMhLsHtLySzHnStAxV03ESKnZuRWjajw9TmVa4JxCIbu01WMomUPe236m0JoVGHfhCTOH9uzsUY5IbcUDyKwVYJbhLM=w1280' },
+  { title: 'TBchat', year: '2024–Now', desc: 'Blockchain messaging platform with crypto wallet, miner staking, real-time location & audio waveforms. For Nexsoft, Vietnam/HK.', tags: ['Flutter','BLoC','ObjectBox','WebSocket'], img: 'https://pbs.twimg.com/media/HEaRJfHbcAA-Oh7?format=jpg&name=large' },
+  { title: 'QuanhTa', year: '2022–2024', desc: 'Real estate marketplace with polygon Maps search, gRPC chat, Flutter Web & Jenkins/Docker CD pipeline. For Vidieu, Vietnam.', tags: ['Flutter','Riverpod','gRPC','Docker'], img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=900' },
+  { title: 'Survive in Shadow', year: '2018', desc: 'Minimalist 2D top-down survival game built with Unity. Features procedural enemy spawning and custom lighting.', tags: ['Unity','C#','2D Game'], img: 'https://scontent.fsgn2-3.fna.fbcdn.net/v/t1.6435-9/81149923_876340826101477_7736307505457790976_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=FK2oKQTNYEgQ7kNvwG0DYTO&_nc_oc=Adpml3GtlYT4uUObgrPWIK0YQ3JmHzpH1wtPZDsMkoRI6AUYhdo1nKYV49Rjqf_4iVM&_nc_zt=23&_nc_ht=scontent.fsgn2-3.fna&_nc_gid=mNqQi3TFDfK4Z2l4iLxKHw&_nc_ss=7a3a8&oh=00_Af0YgzsvZ00r8aLXPpnvxDkmuPxNoQP1ALbSdO69NRErhw&oe=6A0E9479' },
+];
+
+const experience = [
+  { id: 'TBchat', y: '2024–Now', role: 'Frontend Flutter Developer', co: 'TBchat · Nexsoft', loc: 'Vietnam & Hong Kong', desc: 'Building a blockchain messaging platform across Android, iOS, macOS, and Windows.', details: ['Engineered foundational deep-linking architecture for cross-module content sharing.', 'Implemented real-time location sharing using WebSockets, Isolates, and background tracking.', 'Developed audio chat with custom waveforms and secure on-device speech-to-text transcription.', 'Built crypto wallet functionality with gas fee monitoring and offline L1 transaction signing.', 'Architected multi-environment configurations using Flutter Flavors (Dev, Staging, Prod).'], tech: ['Bloc', 'ObjectBox', 'WebSocket', 'Retrofit', 'Go Router', 'Freezed'], links: [{ label: 'App Store', url: 'https://apps.apple.com/us/app/tbchat-web3/id6739870518' }] },
+  { id: 'memoirMe', y: '2024–Now', role: 'Full Stack Flutter Developer', co: 'memoirMe · The Nartus', loc: 'Australia (Freelance)', desc: 'Architected an interactive E2E encrypted diary application with enterprise-grade security.', details: ['Architected zero-knowledge E2E encryption using RSA and AES cryptographic algorithms.', 'Engineered subscription management with In-App Purchases (IAP) to drive monetization.', 'Built resilient media management with resumable background upload/download capabilities.', 'Integrated Firebase Analytics & Crashlytics for robust production health monitoring.', 'Developed local auto-save and offline-first data synchronization logic.'], tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch'], links: [{ label: 'The Nartus', url: 'https://www.thenartus.com/' }] },
+  { id: 'QuanhTa', y: '2022–2024', role: 'Full Stack Flutter Developer', co: 'QuanhTa · Vidieu', loc: 'Vietnam', desc: 'Real estate marketplace with advanced map-based search and automated data processing.', details: ['Engineered custom Google Maps integration with polygon-based area selection and filters.', 'Implemented real-time chat facilitating buyer-seller communication using gRPC.', 'Optimized Flutter Web performance and resolved Safari-specific CanvasKit renderer issues.', 'Built automated web scraping pipeline using Python, Selenium, and Scrapy.', 'Established complete CD pipeline for Flutter apps using Jenkins and Docker.'], tech: ['Riverpod', 'Isar', 'gRPC', 'Python/Selenium', 'Jenkins', 'Docker'], links: [{ label: 'Web App', url: 'https://quanhta.vn/map/land' }, { label: 'App Store', url: 'https://apps.apple.com/vn/app/quanh-ta/id6453535963' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=vn.quanhta.superapp&hl=en' }] },
+];
+
+const indieProjects = [
+  { id: 'Luci Studio', y: '2026', role: 'Founder & Full Stack Developer', co: 'Luci Studio', loc: 'Vietnam', desc: 'Built the high-performance web portfolio and technical blog you are currently viewing.', details: ['Designed a premium, motion-rich UX/UI with custom-built interactive components.', 'Engineered for maximum performance (95+ Lighthouse score) using Astro static generation.', 'Implemented complex responsive layouts and magnetic hover interactions.', 'Deployed a global-first infrastructure using Cloudflare Pages edge delivery.'], tech: ['Astro', 'Tailwind CSS', 'JavaScript', 'Cloudflare Pages'], links: [{ label: 'Live Site', url: 'https://luci-studio.com/' }] },
+  { id: 'UwU EBOOK', y: '2024', role: 'Full Stack Developer', co: 'UwU EBOOK', loc: 'Owner Project', desc: 'Digital publishing platform for Vietnamese content with full-stack automation.', details: ['Architected microservices backend using Golang and the Ent framework.', 'Built complex data crawler system with Python and Scrapy for automated content gathering.', 'Deployed containerized infrastructure using Docker for seamless scalability.'], tech: ['Golang', 'Ent', 'MySQL', 'Python', 'Docker'], links: [] },
+  { id: 'IU PETSHOP', y: '2021–2022', role: 'Flutter Developer & UI/UX Designer', co: 'IU PETSHOP', loc: 'Captain Project · FPT University', desc: 'Pet care ecosystem with blockchain identification and secure payment processing.', details: ['Implemented blockchain-based microchip identification system for pet tracking.', 'Integrated VNPay payment gateway through WebView for sandbox testing environment.', 'Designed complete mobile interface using Adobe XD and custom Flutter animations.', 'Integrated Firebase OAuth for secure user authentication across the platform.'], tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth'], links: [{ label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' }, { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }] },
+  { id: 'Survive in Shadow', y: '2018', role: 'Game Developer', co: 'Survive in Shadow', loc: 'Independent Project', desc: 'A minimalist 2D top-down survival game built with Unity.', details: ['Designed core survival mechanics including resource management and procedural enemy spawning.', 'Implemented custom 2D lighting system to enhance atmospheric tension.', 'Developed responsive player controls and inventory management systems.'], tech: ['Unity', 'C#', '2D Art'], links: [{ label: 'itch.io', url: 'https://lapl1412.itch.io/survive-in-shadow' }] },
+];
 ---
 
 <Layout title="Luci | Flutter Developer & Software Engineer">
@@ -156,28 +178,8 @@ import Layout from "../layouts/Layout.astro";
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            { title: 'memoirMe', year: '2024–Now', desc: 'AI diary with RSA/AES E2E encryption, geolocation, IAP subscriptions & resumable uploads. For The Nartus, Australia.', tags: ['Flutter','BLoC','Firebase','Crypto'], img: 'https://lh3.googleusercontent.com/sitesv/AA5AbUDep4gRWxezXz-MBeWd2fnJtuGA4THdCebXHYiLMKIkKNuaT9yQslZ-Y0_udz1L-YF1ZOOq2Z_9CTltU4ztRU7OnWVDizmSJTsVAsg2s2OC3ZQ0I1l47WFLYp7sl9EXTgruaFkudM1HHMhLsHtLySzHnStAxV03ESKnZuRWjajw9TmVa4JxCIbu01WMomUPe236m0JoVGHfhCTOH9uzsUY5IbcUDyKwVYJbhLM=w1280' },
-            { title: 'TBchat', year: '2024–Now', desc: 'Blockchain messaging platform with crypto wallet, miner staking, real-time location & audio waveforms. For Nexsoft, Vietnam/HK.', tags: ['Flutter','BLoC','ObjectBox','WebSocket'], img: 'https://pbs.twimg.com/media/HEaRJfHbcAA-Oh7?format=jpg&name=large' },
-            { title: 'QuanhTa', year: '2022–2024', desc: 'Real estate marketplace with polygon Maps search, gRPC chat, Flutter Web & Jenkins/Docker CD pipeline. For Vidieu, Vietnam.', tags: ['Flutter','Riverpod','gRPC','Docker'], img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=900' },
-            { title: 'Survive in Shadow', year: '2018', desc: 'Minimalist 2D top-down survival game built with Unity. Features procedural enemy spawning and custom lighting.', tags: ['Unity','C#','2D Game'], img: 'https://scontent.fsgn2-3.fna.fbcdn.net/v/t1.6435-9/81149923_876340826101477_7736307505457790976_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=FK2oKQTNYEgQ7kNvwG0DYTO&_nc_oc=Adpml3GtlYT4uUObgrPWIK0YQ3JmHzpH1wtPZDsMkoRI6AUYhdo1nKYV49Rjqf_4iVM&_nc_zt=23&_nc_ht=scontent.fsgn2-3.fna&_nc_gid=mNqQi3TFDfK4Z2l4iLxKHw&_nc_ss=7a3a8&oh=00_Af0YgzsvZ00r8aLXPpnvxDkmuPxNoQP1ALbSdO69NRErhw&oe=6A0E9479' },
-          ].map((p, i) => (
-            <div data-project={p.title} data-reveal="scale" data-delay={String((i%2)+1)} class="tilt-card group relative aspect-[4/3] rounded-[40px] overflow-hidden border border-white/10 hover:border-violet-500/40 transition-all duration-700 cursor-pointer bg-white/[0.03]">
-              <div class="absolute inset-0 bg-gradient-to-br from-pink-500/20 via-violet-500/10 to-transparent opacity-100"></div>
-              <img src={p.img} alt={p.title} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110 brightness-100" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-              <div class="absolute inset-0 p-10 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold uppercase tracking-widest text-gray-400 bg-black/40 px-3 py-1 rounded-full border border-white/10">{p.year}</span>
-                  <span class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white opacity-40 group-hover:opacity-100 transition-all duration-500">↗</span>
-                </div>
-                <div class="translate-y-0 transition-transform duration-500">
-                  <h3 class="text-4xl font-black tracking-tight mb-3 text-shimmer" style="filter: drop-shadow(0 8px 16px rgba(0,0,0,0.9));">{p.title}</h3>
-                  <p class="text-gray-300 text-sm mb-5 opacity-90 transition-opacity duration-500">{p.desc}</p>
-                  <div class="flex gap-2">{p.tags.map(t => <span class="text-xs font-bold bg-white/10 px-3 py-1 rounded-full border border-white/10">{t}</span>)}</div>
-                </div>
-              </div>
-            </div>
+          {projects.map((p, i) => (
+            <ProjectCard {...p} index={i} />
           ))}
         </div>
       </div>
@@ -201,98 +203,9 @@ import Layout from "../layouts/Layout.astro";
             Professional Experience
             <div class="h-px flex-1 bg-white/5"></div>
           </h3>
-          <div class="space-y-4">
-            { [
-              { id: 'TBchat', y: '2024–Now', role: 'Frontend Flutter Developer', co: 'TBchat · Nexsoft', loc: 'Vietnam & Hong Kong', desc: 'Building a blockchain messaging platform across Android, iOS, macOS, and Windows.', details: ['Engineered foundational deep-linking architecture for cross-module content sharing.', 'Implemented real-time location sharing using WebSockets, Isolates, and background tracking.', 'Developed audio chat with custom waveforms and secure on-device speech-to-text transcription.', 'Built crypto wallet functionality with gas fee monitoring and offline L1 transaction signing.', 'Architected multi-environment configurations using Flutter Flavors (Dev, Staging, Prod).'], tech: ['Bloc', 'ObjectBox', 'WebSocket', 'Retrofit', 'Go Router', 'Freezed'], links: [{ label: 'App Store', url: 'https://apps.apple.com/us/app/tbchat-web3/id6739870518' }] },
-              { id: 'memoirMe', y: '2024–Now', role: 'Full Stack Flutter Developer', co: 'memoirMe · The Nartus', loc: 'Australia (Freelance)', desc: 'Architected an interactive E2E encrypted diary application with enterprise-grade security.', details: ['Architected zero-knowledge E2E encryption using RSA and AES cryptographic algorithms.', 'Engineered subscription management with In-App Purchases (IAP) to drive monetization.', 'Built resilient media management with resumable background upload/download capabilities.', 'Integrated Firebase Analytics & Crashlytics for robust production health monitoring.', 'Developed local auto-save and offline-first data synchronization logic.'], tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch'], links: [{ label: 'The Nartus', url: 'https://www.thenartus.com/' }] },
-              { id: 'QuanhTa', y: '2022–2024', role: 'Full Stack Flutter Developer', co: 'QuanhTa · Vidieu', loc: 'Vietnam', desc: 'Real estate marketplace with advanced map-based search and automated data processing.', details: ['Engineered custom Google Maps integration with polygon-based area selection and filters.', 'Implemented real-time chat facilitating buyer-seller communication using gRPC.', 'Optimized Flutter Web performance and resolved Safari-specific CanvasKit renderer issues.', 'Built automated web scraping pipeline using Python, Selenium, and Scrapy.', 'Established complete CD pipeline for Flutter apps using Jenkins and Docker.'], tech: ['Riverpod', 'Isar', 'gRPC', 'Python/Selenium', 'Jenkins', 'Docker'], links: [{ label: 'Web App', url: 'https://quanhta.vn/map/land' }, { label: 'App Store', url: 'https://apps.apple.com/vn/app/quanh-ta/id6453535963' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=vn.quanhta.superapp&hl=en' }] },
-            ].map((j, i) => (
-              <div id={j.id} data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[40px] border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-xl transition-all duration-500 overflow-hidden shadow-2xl">
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                  <div class="md:col-span-2 flex items-start pt-1">
-                    <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
-                  </div>
-                  <div class="md:col-span-10">
-                    <div class="flex items-center justify-between mb-1">
-                      <h3 class="text-2xl font-black text-white drop-shadow-xl flex items-baseline gap-2">
-                        <span class="text-shimmer">{j.role}</span>
-                        <span class="text-gray-600 font-medium text-lg whitespace-nowrap">— {j.co}</span>
-                      </h3>
-                      <div class="flex items-center gap-4">
-                        <span class="text-[10px] font-black text-pink-500/0 group-hover:text-pink-500/60 uppercase tracking-[0.2em] transition-all duration-500 translate-x-4 group-hover:translate-x-0 hidden sm:block">Tap to explore</span>
-                        <div class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:text-pink-500 group-hover:border-pink-500/30 group-hover:bg-pink-500/5 transition-all duration-500 shadow-lg group-hover:shadow-pink-500/10">
-                          <svg class="w-5 h-5 transform group-[.active]:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                        </div>
-                      </div>
-                    </div>
-                    <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{j.loc}</p>
-                    <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
-                    
-                    {/* Faded Preview (Hidden when active) */}
-                    <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden" 
-                         style="mask-image: linear-gradient(to bottom, black 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);">
-                      <div class="grid grid-cols-2 gap-4 opacity-30">
-                        <div>
-                          <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
-                          <ul class="space-y-1">
-                            {j.details.slice(0, 3).map(item => (
-                              <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-300">
-                                <span class="text-pink-500/50">▹</span>
-                                <span class="truncate">{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Stack</h4>
-                          <div class="flex flex-wrap gap-1">
-                            {j.tech.slice(0, 3).map(t => (
-                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bottom Indicator Arrow (Hidden when active) */}
-                    <div class="group-[.active]:hidden flex justify-center mt-3 opacity-50 group-hover:opacity-100 transition-all duration-500">
-                      <svg class="w-4 h-4 text-pink-500/80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
-                    </div>
-                    
-                    <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
-                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
-                        <div>
-                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
-                          <ul class="space-y-3">
-                            {j.details.map(item => (
-                              <li class="flex items-start gap-3 text-sm text-gray-300 leading-snug">
-                                <span class="text-pink-500 mt-1">▹</span>
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Stack</h4>
-                          <div class="flex flex-wrap gap-2 mb-8">
-                            {j.tech.map(t => (
-                              <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
-                            ))}
-                          </div>
-                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Links</h4>
-                          <div class="flex flex-wrap gap-3">
-                            {j.links.map(l => (
-                              <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
-                                {l.label} ↗
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div class="space-y-4 timeline-container">
+            {experience.map((j, i) => (
+              <TimelineItem {...j} index={i} />
             ))}
           </div>
         </div>
@@ -302,99 +215,9 @@ import Layout from "../layouts/Layout.astro";
             Independent & University Projects
             <div class="h-px flex-1 bg-white/5"></div>
           </h3>
-          <div class="space-y-4">
-            { [
-              { id: 'Luci Studio', y: '2026', role: 'Founder & Full Stack Developer', co: 'Luci Studio', loc: 'Vietnam', desc: 'Built the high-performance web portfolio and technical blog you are currently viewing.', details: ['Designed a premium, motion-rich UX/UI with custom-built interactive components.', 'Engineered for maximum performance (95+ Lighthouse score) using Astro static generation.', 'Implemented complex responsive layouts and magnetic hover interactions.', 'Deployed a global-first infrastructure using Cloudflare Pages edge delivery.'], tech: ['Astro', 'Tailwind CSS', 'JavaScript', 'Cloudflare Pages'], links: [{ label: 'Live Site', url: 'https://luci-studio.com/' }] },
-              { id: 'UwU EBOOK', y: '2024', role: 'Full Stack Developer', co: 'UwU EBOOK', loc: 'Owner Project', desc: 'Digital publishing platform for Vietnamese content with full-stack automation.', details: ['Architected microservices backend using Golang and the Ent framework.', 'Built complex data crawler system with Python and Scrapy for automated content gathering.', 'Deployed containerized infrastructure using Docker for seamless scalability.'], tech: ['Golang', 'Ent', 'MySQL', 'Python', 'Docker'], links: [] },
-              { id: 'IU PETSHOP', y: '2021–2022', role: 'Flutter Developer & UI/UX Designer', co: 'IU PETSHOP', loc: 'Captain Project · FPT University', desc: 'Pet care ecosystem with blockchain identification and secure payment processing.', details: ['Implemented blockchain-based microchip identification system for pet tracking.', 'Integrated VNPay payment gateway through WebView for sandbox testing environment.', 'Designed complete mobile interface using Adobe XD and custom Flutter animations.', 'Integrated Firebase OAuth for secure user authentication across the platform.'], tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth'], links: [{ label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' }, { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }] },
-              { id: 'Survive in Shadow', y: '2018', role: 'Game Developer', co: 'Survive in Shadow', loc: 'Independent Project', desc: 'A minimalist 2D top-down survival game built with Unity.', details: ['Designed core survival mechanics including resource management and procedural enemy spawning.', 'Implemented custom 2D lighting system to enhance atmospheric tension.', 'Developed responsive player controls and inventory management systems.'], tech: ['Unity', 'C#', '2D Art'], links: [{ label: 'itch.io', url: 'https://lapl1412.itch.io/survive-in-shadow' }] },
-            ].map((j, i) => (
-              <div id={j.id} data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-xl transition-all duration-500 overflow-hidden shadow-2xl">
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                  <div class="md:col-span-2 flex items-start pt-1">
-                    <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
-                  </div>
-                  <div class="md:col-span-10">
-                    <div class="flex items-center justify-between mb-1">
-                      <h3 class="text-2xl font-black text-white drop-shadow-xl flex items-baseline gap-2">
-                        <span class="text-shimmer">{j.role}</span>
-                        <span class="text-gray-600 font-medium text-lg whitespace-nowrap">— {j.co}</span>
-                      </h3>
-                      <div class="flex items-center gap-4">
-                        <span class="text-[10px] font-black text-pink-500/0 group-hover:text-pink-500/60 uppercase tracking-[0.2em] transition-all duration-500 translate-x-4 group-hover:translate-x-0 hidden sm:block">Tap to explore</span>
-                        <div class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:text-pink-500 group-hover:border-pink-500/30 group-hover:bg-pink-500/5 transition-all duration-500 shadow-lg group-hover:shadow-pink-500/10">
-                          <svg class="w-5 h-5 transform group-[.active]:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                        </div>
-                      </div>
-                    </div>
-                    <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{j.loc}</p>
-                    <p class="text-gray-300 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
-                    
-                    {/* Faded Preview (Hidden when active) */}
-                    <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden" 
-                         style="mask-image: linear-gradient(to bottom, black 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);">
-                      <div class="grid grid-cols-2 gap-4">
-                        <div>
-                          <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
-                          <ul class="space-y-1">
-                            {j.details.slice(0, 3).map(item => (
-                              <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-300">
-                                <span class="text-pink-500/50">▹</span>
-                                <span class="truncate">{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Stack</h4>
-                          <div class="flex flex-wrap gap-1">
-                            {j.tech.slice(0, 3).map(t => (
-                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bottom Indicator Arrow (Hidden when active) */}
-                    <div class="group-[.active]:hidden flex justify-center mt-3 opacity-50 group-hover:opacity-100 transition-all duration-500">
-                      <svg class="w-4 h-4 text-pink-500/80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
-                    </div>
-                    
-                    <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
-                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
-                        <div>
-                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
-                          <ul class="space-y-3">
-                            {j.details.map(item => (
-                              <li class="flex items-start gap-3 text-sm text-gray-300 leading-snug">
-                                <span class="text-pink-500 mt-1">▹</span>
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Stack</h4>
-                          <div class="flex flex-wrap gap-2 mb-8">
-                            {j.tech.map(t => (
-                              <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
-                            ))}
-                          </div>
-                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Links</h4>
-                          <div class="flex flex-wrap gap-3">
-                            {j.links.map(l => (
-                              <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
-                                {l.label} ↗
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div class="space-y-4 timeline-container">
+            {indieProjects.map((j, i) => (
+              <TimelineItem {...j} index={i} />
             ))}
           </div>
         </div>
