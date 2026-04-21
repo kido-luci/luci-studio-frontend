@@ -385,70 +385,62 @@ const indieProjects = [
             <span class="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] mb-3 block">Expertise</span>
             <h2 class="text-6xl md:text-8xl font-black tracking-tighter">SKILLS<span class="text-emerald-500">.</span></h2>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div data-reveal class="p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-500">
-              <h3 class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-6">Mobile</h3>
-              <div class="space-y-4">
-                {[{n:'Flutter / Dart',p:95},{n:'BLoC / Riverpod',p:90},{n:'Clean Architecture',p:88},{n:'Custom UI & Animations',p:85}].map(s => (
-                  <div>
-                    <div class="flex justify-between mb-1.5">
-                      <span class="text-sm font-bold text-gray-300">{s.n}</span>
-                      <span class="text-xs font-black text-violet-400">{s.p}%</span>
-                    </div>
-                    <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                      <div class="h-full bg-gradient-to-r from-violet-600 to-violet-400 rounded-full" style={`width:${s.p}%`}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Mobile Card -->
+            <div data-reveal class="group p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-500 relative overflow-hidden">
+               <div class="absolute -right-4 -top-4 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all"></div>
+               <h3 class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+                 <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                 Mobile
+               </h3>
+               <div class="flex flex-wrap gap-2">
+                 {['Flutter','Dart','BLoC','Riverpod','Clean Architecture','Custom UI','Animations','ObjectBox'].map(s => (
+                   <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-violet-500/40 hover:bg-violet-500/10 transition-all cursor-default">{s}</span>
+                 ))}
+               </div>
             </div>
-            <div data-reveal data-delay="2" class="p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:border-blue-500/20 transition-all duration-500">
-              <h3 class="text-xs font-black text-blue-500 uppercase tracking-[0.3em] mb-6">Backend & APIs</h3>
-              <div class="space-y-4">
-                {[{n:'Golang',p:72},{n:'gRPC / REST',p:80},{n:'Firebase / GCP',p:85},{n:'Python / Scrapy',p:70}].map(s => (
-                  <div>
-                    <div class="flex justify-between mb-1.5">
-                      <span class="text-sm font-bold text-gray-300">{s.n}</span>
-                      <span class="text-xs font-black text-blue-400">{s.p}%</span>
-                    </div>
-                    <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                      <div class="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full" style={`width:${s.p}%`}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
+            <!-- Backend Card -->
+            <div data-reveal data-delay="1" class="group p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:border-blue-500/20 transition-all duration-500 relative overflow-hidden">
+               <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"></div>
+               <h3 class="text-xs font-black text-blue-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+                 <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                 Backend
+               </h3>
+               <div class="flex flex-wrap gap-2">
+                 {['Golang','gRPC','REST API','Firebase','GCP','PostgreSQL','MySQL','Redis'].map(s => (
+                   <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-blue-500/40 hover:bg-blue-500/10 transition-all cursor-default">{s}</span>
+                 ))}
+               </div>
             </div>
-            <div data-reveal data-delay="3" class="p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:border-cyan-500/20 transition-all duration-500">
-              <h3 class="text-xs font-black text-cyan-500 uppercase tracking-[0.3em] mb-6">DevOps & Infra</h3>
-              <div class="space-y-4">
-                {[{n:'Docker / CI-CD',p:75},{n:'GitHub Actions',p:78},{n:'Cloudflare Pages',p:80},{n:'Jenkins',p:65}].map(s => (
-                  <div>
-                    <div class="flex justify-between mb-1.5">
-                      <span class="text-sm font-bold text-gray-300">{s.n}</span>
-                      <span class="text-xs font-black text-cyan-400">{s.p}%</span>
-                    </div>
-                    <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                      <div class="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 rounded-full" style={`width:${s.p}%`}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
+            <!-- DevOps Card -->
+            <div data-reveal data-delay="2" class="group p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:border-cyan-500/20 transition-all duration-500 relative overflow-hidden">
+               <div class="absolute -right-4 -top-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all"></div>
+               <h3 class="text-xs font-black text-cyan-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+                 <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                 DevOps
+               </h3>
+               <div class="flex flex-wrap gap-2">
+                 {['Docker','CI/CD','GitHub Actions','Jenkins','Cloudflare','Docker Compose','Linux'].map(s => (
+                   <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-cyan-500/40 hover:bg-cyan-500/10 transition-all cursor-default">{s}</span>
+                 ))}
+               </div>
             </div>
-            <div data-reveal data-delay="4" class="p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:border-pink-500/20 transition-all duration-500">
-              <h3 class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-6">Security & AI</h3>
-              <div class="space-y-4">
-                {[{n:'E2E Encryption (RSA/AES)',p:88},{n:'Web3 / Blockchain SDK',p:75},{n:'Local LLM Integration',p:68},{n:'On-device AI',p:65}].map(s => (
-                  <div>
-                    <div class="flex justify-between mb-1.5">
-                      <span class="text-sm font-bold text-gray-300">{s.n}</span>
-                      <span class="text-xs font-black text-pink-400">{s.p}%</span>
-                    </div>
-                    <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                      <div class="h-full bg-gradient-to-r from-pink-600 to-pink-400 rounded-full" style={`width:${s.p}%`}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
+            <!-- Security & AI Card -->
+            <div data-reveal data-delay="3" class="group p-8 rounded-[32px] border border-white/5 bg-white/[0.02] hover:border-pink-500/20 transition-all duration-500 relative overflow-hidden">
+               <div class="absolute -right-4 -top-4 w-24 h-24 bg-pink-500/10 rounded-full blur-2xl group-hover:bg-pink-500/20 transition-all"></div>
+               <h3 class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+                 <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+                 Specialized
+               </h3>
+               <div class="flex flex-wrap gap-2">
+                 {['RSA/AES','Web3','Blockchain','Local LLM','llama.cpp','On-device AI','Security'].map(s => (
+                   <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-pink-500/40 hover:bg-pink-500/10 transition-all cursor-default">{s}</span>
+                 ))}
+               </div>
             </div>
           </div>
         </div>
