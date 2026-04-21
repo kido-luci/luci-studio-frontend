@@ -55,7 +55,7 @@ const { title } = Astro.props;
 		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2]"></div>
 
 		<!-- Scroll-based Background Dimmer -->
-		<div id="bg-dimmer" class="fixed inset-0 w-full h-full pointer-events-none z-[-1] bg-black/20 transition-all duration-500"></div>
+		<div id="bg-dimmer" class="fixed inset-0 w-full h-full pointer-events-none z-[-1] bg-black/40 backdrop-blur-[6px] transition-all duration-500"></div>
 
 		<!-- Custom Cursor -->
 		<div id="cursor-dot" class="fixed w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference transition-transform duration-100" style="top:-10px;left:-10px;"></div>
@@ -70,7 +70,10 @@ const { title } = Astro.props;
 			body {
 				background-color: #0a0a0a;
 			}
-			h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; }
+			h1, h2, h3, h4, h5, h6 { 
+				font-family: 'Outfit', sans-serif; 
+				filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4));
+			}
 			::selection { background-color: rgba(139, 92, 246, 0.3); color: white; }
 			::-webkit-scrollbar { width: 6px; }
 			::-webkit-scrollbar-track { background: #0a0a0a; }
@@ -118,6 +121,8 @@ const { title } = Astro.props;
 			.tilt-card {
 				transform-style: preserve-3d;
 				transition: transform 0.15s ease;
+				backdrop-filter: blur(12px);
+				background-color: rgba(10, 10, 10, 0.4);
 			}
 			.tilt-card-inner {
 				transform: translateZ(20px);
@@ -297,25 +302,23 @@ const { title } = Astro.props;
 
 			// Nav background change
 			if (scrollY > 80) {
-				nav.style.background = 'rgba(10,10,10,0.85)';
-				nav.style.backdropFilter = 'blur(24px)';
+				nav.style.background = 'rgba(10,10,10,0.9)';
+				nav.style.backdropFilter = 'blur(32px)';
 			} else {
-				nav.style.background = 'rgba(10,10,10,0.1)';
-				nav.style.backdropFilter = 'blur(12px)';
+				nav.style.background = 'rgba(10,10,10,0.2)';
+				nav.style.backdropFilter = 'blur(16px)';
 			}
 
 			// Background dimmer and blur based on scroll
-			// Start dimming after scrolling past hero section (windowHeight)
-			// Fully dimmed at 2x window height
-			const dimStart = windowHeight * 0.8;
-			const dimEnd = windowHeight * 1.5;
-			let dimOpacity = 0;
-			let blurAmount = 0;
+			const dimStart = windowHeight * 0.2; // Start dimming earlier
+			const dimEnd = windowHeight * 1.2;
+			let dimOpacity = 0.4; // Base opacity
+			let blurAmount = 6;   // Base blur
 
 			if (scrollY > dimStart) {
 				const progress = Math.min((scrollY - dimStart) / (dimEnd - dimStart), 1);
-				dimOpacity = progress * 0.6;
-				blurAmount = progress * 8; // Max 8px blur
+				dimOpacity = 0.4 + (progress * 0.45); // Max 0.85 opacity
+				blurAmount = 6 + (progress * 24);    // Max 30px blur
 			}
 
 			bgDimmer.style.opacity = dimOpacity.toString();
