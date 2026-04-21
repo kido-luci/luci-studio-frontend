@@ -225,34 +225,34 @@ import Layout from "../layouts/Layout.astro";
                     <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
                     
                     {/* Faded Preview (Hidden when active) */}
-                    <div class="group-[.active]:opacity-0 group-[.active]:h-0 relative mt-4 transition-all duration-500 overflow-hidden max-h-32">
-                      <div class="grid grid-cols-2 gap-4 opacity-50">
+                    <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden" 
+                         style="mask-image: linear-gradient(to bottom, black 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);">
+                      <div class="grid grid-cols-2 gap-4 opacity-30">
                         <div>
-                          <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
+                          <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
                           <ul class="space-y-1">
                             {j.details.slice(0, 3).map(item => (
-                              <li class="flex items-start gap-1 text-[11px] leading-tight text-gray-400">
-                                <span class="text-pink-500">▹</span>
+                              <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-400">
+                                <span class="text-pink-500/50">▹</span>
                                 <span class="truncate">{item}</span>
                               </li>
                             ))}
                           </ul>
                         </div>
                         <div>
-                          <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Stack</h4>
+                          <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Stack</h4>
                           <div class="flex flex-wrap gap-1">
                             {j.tech.slice(0, 3).map(t => (
-                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
                             ))}
                           </div>
                         </div>
                       </div>
-                      <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[rgba(3,3,3,0.7)] pointer-events-none"></div>
                     </div>
 
                     {/* Bottom Indicator Arrow (Hidden when active) */}
-                    <div class="group-[.active]:hidden flex justify-center mt-2 opacity-30 group-hover:opacity-100 transition-all duration-500">
-                      <svg class="w-4 h-4 text-pink-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                    <div class="group-[.active]:hidden flex justify-center mt-3 opacity-50 group-hover:opacity-100 transition-all duration-500">
+                      <svg class="w-4 h-4 text-pink-500/80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
                     </div>
                     
                     <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
@@ -323,34 +323,34 @@ import Layout from "../layouts/Layout.astro";
                     <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
                     
                     {/* Faded Preview (Hidden when active) */}
-                    <div class="group-[.active]:opacity-0 group-[.active]:h-0 relative mt-4 transition-all duration-500 overflow-hidden max-h-24">
-                      <div class="grid grid-cols-2 gap-4 opacity-50">
+                    <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden" 
+                         style="mask-image: linear-gradient(to bottom, black 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);">
+                      <div class="grid grid-cols-2 gap-4 opacity-30">
                         <div>
-                          <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
+                          <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
                           <ul class="space-y-1">
                             {j.details.slice(0, 3).map(item => (
-                              <li class="flex items-start gap-1 text-[11px] leading-tight text-gray-400">
-                                <span class="text-pink-500">▹</span>
+                              <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-400">
+                                <span class="text-pink-500/50">▹</span>
                                 <span class="truncate">{item}</span>
                               </li>
                             ))}
                           </ul>
                         </div>
                         <div>
-                          <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Stack</h4>
+                          <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Stack</h4>
                           <div class="flex flex-wrap gap-1">
                             {j.tech.slice(0, 3).map(t => (
-                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
                             ))}
                           </div>
                         </div>
                       </div>
-                      <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[rgba(3,3,3,0.7)] pointer-events-none"></div>
                     </div>
 
                     {/* Bottom Indicator Arrow (Hidden when active) */}
-                    <div class="group-[.active]:hidden flex justify-center mt-2 opacity-30 group-hover:opacity-100 transition-all duration-500">
-                      <svg class="w-4 h-4 text-pink-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                    <div class="group-[.active]:hidden flex justify-center mt-3 opacity-50 group-hover:opacity-100 transition-all duration-500">
+                      <svg class="w-4 h-4 text-pink-500/80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
                     </div>
                     
                     <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
