@@ -207,7 +207,7 @@ import Layout from "../layouts/Layout.astro";
               { id: 'memoirMe', y: '2024–Now', role: 'Full Stack Flutter Developer', co: 'memoirMe · The Nartus', loc: 'Australia (Freelance)', desc: 'Architected an interactive E2E encrypted diary application with enterprise-grade security.', details: ['Architected zero-knowledge E2E encryption using RSA and AES cryptographic algorithms.', 'Engineered subscription management with In-App Purchases (IAP) to drive monetization.', 'Built resilient media management with resumable background upload/download capabilities.', 'Integrated Firebase Analytics & Crashlytics for robust production health monitoring.', 'Developed local auto-save and offline-first data synchronization logic.'], tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch'], links: [{ label: 'The Nartus', url: 'https://www.thenartus.com/' }] },
               { id: 'QuanhTa', y: '2022–2024', role: 'Full Stack Flutter Developer', co: 'QuanhTa · Vidieu', loc: 'Vietnam', desc: 'Real estate marketplace with advanced map-based search and automated data processing.', details: ['Engineered custom Google Maps integration with polygon-based area selection and filters.', 'Implemented real-time chat facilitating buyer-seller communication using gRPC.', 'Optimized Flutter Web performance and resolved Safari-specific CanvasKit renderer issues.', 'Built automated web scraping pipeline using Python, Selenium, and Scrapy.', 'Established complete CD pipeline for Flutter apps using Jenkins and Docker.'], tech: ['Riverpod', 'Isar', 'gRPC', 'Python/Selenium', 'Jenkins', 'Docker'], links: [{ label: 'Web App', url: 'https://quanhta.vn/map/land' }, { label: 'App Store', url: 'https://apps.apple.com/vn/app/quanh-ta/id6453535963' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=vn.quanhta.superapp&hl=en' }] },
             ].map((j, i) => (
-              <div id={j.id} data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
+              <div id={j.id} data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[40px] border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-xl transition-all duration-500 overflow-hidden shadow-2xl">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                   <div class="md:col-span-2 flex items-start pt-1">
                     <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
@@ -230,10 +230,10 @@ import Layout from "../layouts/Layout.astro";
                          style="mask-image: linear-gradient(to bottom, black 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);">
                       <div class="grid grid-cols-2 gap-4 opacity-30">
                         <div>
-                          <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
+                          <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
                           <ul class="space-y-1">
                             {j.details.slice(0, 3).map(item => (
-                              <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-400">
+                              <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-300">
                                 <span class="text-pink-500/50">▹</span>
                                 <span class="truncate">{item}</span>
                               </li>
@@ -241,10 +241,10 @@ import Layout from "../layouts/Layout.astro";
                           </ul>
                         </div>
                         <div>
-                          <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Stack</h4>
+                          <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Stack</h4>
                           <div class="flex flex-wrap gap-1">
                             {j.tech.slice(0, 3).map(t => (
-                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
                             ))}
                           </div>
                         </div>
@@ -259,10 +259,10 @@ import Layout from "../layouts/Layout.astro";
                     <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
                         <div>
-                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
+                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
                           <ul class="space-y-3">
                             {j.details.map(item => (
-                              <li class="flex items-start gap-3 text-sm text-gray-400 leading-snug">
+                              <li class="flex items-start gap-3 text-sm text-gray-300 leading-snug">
                                 <span class="text-pink-500 mt-1">▹</span>
                                 {item}
                               </li>
@@ -270,13 +270,13 @@ import Layout from "../layouts/Layout.astro";
                           </ul>
                         </div>
                         <div>
-                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Stack</h4>
+                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Stack</h4>
                           <div class="flex flex-wrap gap-2 mb-8">
                             {j.tech.map(t => (
-                              <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                              <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
                             ))}
                           </div>
-                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Links</h4>
+                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Links</h4>
                           <div class="flex flex-wrap gap-3">
                             {j.links.map(l => (
                               <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
@@ -306,7 +306,7 @@ import Layout from "../layouts/Layout.astro";
               { id: 'IU PETSHOP', y: '2021–2022', role: 'Flutter Developer & UI/UX Designer', co: 'IU PETSHOP', loc: 'Captain Project · FPT University', desc: 'Pet care ecosystem with blockchain identification and secure payment processing.', details: ['Implemented blockchain-based microchip identification system for pet tracking.', 'Integrated VNPay payment gateway through WebView for sandbox testing environment.', 'Designed complete mobile interface using Adobe XD and custom Flutter animations.', 'Integrated Firebase OAuth for secure user authentication across the platform.'], tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth'], links: [{ label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' }, { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }] },
               { id: 'Survive in Shadow', y: '2018', role: 'Game Developer', co: 'Survive in Shadow', loc: 'Independent Project', desc: 'A minimalist 2D top-down survival game built with Unity.', details: ['Designed core survival mechanics including resource management and procedural enemy spawning.', 'Implemented custom 2D lighting system to enhance atmospheric tension.', 'Developed responsive player controls and inventory management systems.'], tech: ['Unity', 'C#', '2D Art'], links: [{ label: 'itch.io', url: 'https://lapl1412.itch.io/survive-in-shadow' }] },
             ].map((j, i) => (
-              <div id={j.id} data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
+              <div id={j.id} data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-xl transition-all duration-500 overflow-hidden shadow-2xl">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                   <div class="md:col-span-2 flex items-start pt-1">
                     <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
@@ -322,17 +322,17 @@ import Layout from "../layouts/Layout.astro";
                       </div>
                     </div>
                     <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{j.loc}</p>
-                    <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
+                    <p class="text-gray-300 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
                     
                     {/* Faded Preview (Hidden when active) */}
                     <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden" 
                          style="mask-image: linear-gradient(to bottom, black 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);">
-                      <div class="grid grid-cols-2 gap-4 opacity-30">
+                      <div class="grid grid-cols-2 gap-4">
                         <div>
-                          <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
+                          <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
                           <ul class="space-y-1">
                             {j.details.slice(0, 3).map(item => (
-                              <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-400">
+                              <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-300">
                                 <span class="text-pink-500/50">▹</span>
                                 <span class="truncate">{item}</span>
                               </li>
@@ -340,10 +340,10 @@ import Layout from "../layouts/Layout.astro";
                           </ul>
                         </div>
                         <div>
-                          <h4 class="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Stack</h4>
+                          <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Stack</h4>
                           <div class="flex flex-wrap gap-1">
                             {j.tech.slice(0, 3).map(t => (
-                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                              <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
                             ))}
                           </div>
                         </div>
@@ -358,10 +358,10 @@ import Layout from "../layouts/Layout.astro";
                     <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
                         <div>
-                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
+                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
                           <ul class="space-y-3">
                             {j.details.map(item => (
-                              <li class="flex items-start gap-3 text-sm text-gray-400 leading-snug">
+                              <li class="flex items-start gap-3 text-sm text-gray-300 leading-snug">
                                 <span class="text-pink-500 mt-1">▹</span>
                                 {item}
                               </li>
@@ -369,13 +369,13 @@ import Layout from "../layouts/Layout.astro";
                           </ul>
                         </div>
                         <div>
-                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Stack</h4>
+                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Stack</h4>
                           <div class="flex flex-wrap gap-2 mb-8">
                             {j.tech.map(t => (
-                              <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                              <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
                             ))}
                           </div>
-                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Links</h4>
+                          <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Links</h4>
                           <div class="flex flex-wrap gap-3">
                             {j.links.map(l => (
                               <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
