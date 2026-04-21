@@ -186,6 +186,7 @@ import Layout from "../layouts/Layout.astro";
     </div>
 
 
+    
     <!-- EXPERIENCE -->
     <section class="py-16 px-6">
       <div class="max-w-7xl mx-auto">
@@ -193,23 +194,14 @@ import Layout from "../layouts/Layout.astro";
           <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">Journey</span>
           <h2 class="text-6xl md:text-8xl font-black tracking-tighter">EXPERIENCE<span class="text-pink-500">.</span></h2>
         </div>
-        <div class="space-y-4">
-          {[
-            { 
-              y: '2026', 
-              role: 'Founder & Full Stack Developer', 
-              co: 'Luci Studio', 
-              loc: 'Vietnam', 
-              desc: 'Built the high-performance web portfolio and technical blog you are currently viewing.',
-              details: [
-                'Designed a premium, motion-rich UX/UI with custom-built interactive components.',
-                'Engineered for maximum performance (95+ Lighthouse score) using Astro static generation.',
-                'Implemented complex responsive layouts and magnetic hover interactions.',
-                'Deployed a global-first infrastructure using Cloudflare Pages edge delivery.'
-              ],
-              tech: ['Astro', 'Tailwind CSS', 'JavaScript', 'Cloudflare Pages'],
-              links: [{ label: 'Live Site', url: 'https://luci-studio.com/' }]
-            },
+
+        <div class="mb-12">
+          <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
+            Professional Experience
+            <div class="h-px flex-1 bg-white/5"></div>
+          </h3>
+          <div class="space-y-4">
+            { [
             { 
               y: '2024–Now', 
               role: 'Frontend Flutter Developer', 
@@ -264,6 +256,82 @@ import Layout from "../layouts/Layout.astro";
                 { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=vn.quanhta.superapp&hl=en' }
               ]
             },
+          ].map((j, i) => (
+              <div data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                  <div class="md:col-span-2 flex items-start pt-1">
+                    <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
+                  </div>
+                  <div class="md:col-span-10">
+                    <div class="flex items-center justify-between mb-1">
+                      <h3 class="text-2xl font-black text-white">{j.role} <span class="text-gray-600 font-medium text-lg">— {j.co}</span></h3>
+                      <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:text-pink-500 transition-colors">
+                        <svg class="w-4 h-4 transform group-[.active]:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                      </div>
+                    </div>
+                    <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{j.loc}</p>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
+                    
+                    <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
+                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
+                        <div>
+                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
+                          <ul class="space-y-3">
+                            {j.details.map(item => (
+                              <li class="flex items-start gap-3 text-sm text-gray-400 leading-snug">
+                                <span class="text-pink-500 mt-1">▹</span>
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Stack</h4>
+                          <div class="flex flex-wrap gap-2 mb-8">
+                            {j.tech.map(t => (
+                              <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                            ))}
+                          </div>
+                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Links</h4>
+                          <div class="flex flex-wrap gap-3">
+                            {j.links.map(l => (
+                              <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
+                                {l.label} ↗
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
+            Independent & University Projects
+            <div class="h-px flex-1 bg-white/5"></div>
+          </h3>
+          <div class="space-y-4">
+            { [
+            { 
+              y: '2026', 
+              role: 'Founder & Full Stack Developer', 
+              co: 'Luci Studio', 
+              loc: 'Vietnam', 
+              desc: 'Built the high-performance web portfolio and technical blog you are currently viewing.',
+              details: [
+                'Designed a premium, motion-rich UX/UI with custom-built interactive components.',
+                'Engineered for maximum performance (95+ Lighthouse score) using Astro static generation.',
+                'Implemented complex responsive layouts and magnetic hover interactions.',
+                'Deployed a global-first infrastructure using Cloudflare Pages edge delivery.'
+              ],
+              tech: ['Astro', 'Tailwind CSS', 'JavaScript', 'Cloudflare Pages'],
+              links: [{ label: 'Live Site', url: 'https://luci-studio.com/' }]
+            },
             { 
               y: '2024', 
               role: 'Full Stack Developer', 
@@ -297,59 +365,61 @@ import Layout from "../layouts/Layout.astro";
               ]
             },
           ].map((j, i) => (
-            <div data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
-              <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                <div class="md:col-span-2 flex items-start pt-1">
-                  <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
-                </div>
-                <div class="md:col-span-10">
-                  <div class="flex items-center justify-between mb-1">
-                    <h3 class="text-2xl font-black text-white">{j.role} <span class="text-gray-600 font-medium text-lg">— {j.co}</span></h3>
-                    <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:text-pink-500 transition-colors">
-                      <svg class="w-4 h-4 transform group-[.active]:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                    </div>
+              <div data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                  <div class="md:col-span-2 flex items-start pt-1">
+                    <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
                   </div>
-                  <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{j.loc}</p>
-                  <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
-                  
-                  <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
-                      <div>
-                        <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
-                        <ul class="space-y-3">
-                          {j.details.map(item => (
-                            <li class="flex items-start gap-3 text-sm text-gray-400 leading-snug">
-                              <span class="text-pink-500 mt-1">▹</span>
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
+                  <div class="md:col-span-10">
+                    <div class="flex items-center justify-between mb-1">
+                      <h3 class="text-2xl font-black text-white">{j.role} <span class="text-gray-600 font-medium text-lg">— {j.co}</span></h3>
+                      <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:text-pink-500 transition-colors">
+                        <svg class="w-4 h-4 transform group-[.active]:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                       </div>
-                      <div>
-                        <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Stack</h4>
-                        <div class="flex flex-wrap gap-2 mb-8">
-                          {j.tech.map(t => (
-                            <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
-                          ))}
+                    </div>
+                    <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{j.loc}</p>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
+                    
+                    <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
+                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
+                        <div>
+                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
+                          <ul class="space-y-3">
+                            {j.details.map(item => (
+                              <li class="flex items-start gap-3 text-sm text-gray-400 leading-snug">
+                                <span class="text-pink-500 mt-1">▹</span>
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Links</h4>
-                        <div class="flex flex-wrap gap-3">
-                          {j.links.map(l => (
-                            <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
-                              {l.label} ↗
-                            </a>
-                          ))}
+                        <div>
+                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Stack</h4>
+                          <div class="flex flex-wrap gap-2 mb-8">
+                            {j.tech.map(t => (
+                              <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                            ))}
+                          </div>
+                          <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Links</h4>
+                          <div class="flex flex-wrap gap-3">
+                            {j.links.map(l => (
+                              <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
+                                {l.label} ↗
+                              </a>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
+
     <div class="flex flex-col items-center py-6 opacity-20">
       <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
     </div>
