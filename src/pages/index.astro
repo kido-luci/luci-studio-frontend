@@ -225,18 +225,118 @@ import Layout from "../layouts/Layout.astro";
         </div>
         <div class="space-y-4">
           {[
-            { y: '2024–Now', role: 'Frontend Flutter Developer', co: 'TBchat · Nexsoft', loc: 'Vietnam & Hong Kong', desc: 'Building a blockchain messaging platform (Android, iOS, macOS, Windows) with crypto wallet, miner staking, real-time location, audio waveforms, and deep linking architecture.' },
-            { y: '2024–Now', role: 'Full Stack Flutter Developer', co: 'memoirMe · The Nartus', loc: 'Australia (Freelance)', desc: 'Architected E2E encrypted diary app with RSA/AES crypto, resumable media uploads, IAP subscriptions, offline-first mode, and Firebase Analytics/Crashlytics.' },
-            { y: '2022–2024', role: 'Full Stack Flutter Developer', co: 'QuanhTa · Vidieu', loc: 'Vietnam', desc: 'Real estate marketplace with custom Google Maps polygon search, gRPC chat, Flutter Web optimization, and a complete Jenkins/Docker CD pipeline.' },
+            { 
+              y: '2024–Now', 
+              role: 'Frontend Flutter Developer', 
+              co: 'TBchat · Nexsoft', 
+              loc: 'Vietnam & Hong Kong', 
+              desc: 'Building a blockchain messaging platform across Android, iOS, macOS, and Windows.',
+              details: [
+                'Engineered foundational deep-linking architecture for cross-module content sharing.',
+                'Implemented real-time location sharing using WebSockets, Isolates, and background tracking.',
+                'Developed audio chat with custom waveforms and secure on-device speech-to-text transcription.',
+                'Built crypto wallet functionality with gas fee monitoring and offline L1 transaction signing.',
+                'Architected multi-environment configurations using Flutter Flavors (Dev, Staging, Prod).'
+              ],
+              tech: ['Bloc', 'ObjectBox', 'WebSocket', 'Retrofit', 'Go Router', 'Freezed']
+            },
+            { 
+              y: '2024–Now', 
+              role: 'Full Stack Flutter Developer', 
+              co: 'memoirMe · The Nartus', 
+              loc: 'Australia (Freelance)', 
+              desc: 'Architected an interactive E2E encrypted diary application with enterprise-grade security.',
+              details: [
+                'Architected zero-knowledge E2E encryption using RSA and AES cryptographic algorithms.',
+                'Engineered subscription management with In-App Purchases (IAP) to drive monetization.',
+                'Built resilient media management with resumable background upload/download capabilities.',
+                'Integrated Firebase Analytics & Crashlytics for robust production health monitoring.',
+                'Developed local auto-save and offline-first data synchronization logic.'
+              ],
+              tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch']
+            },
+            { 
+              y: '2022–2024', 
+              role: 'Full Stack Flutter Developer', 
+              co: 'QuanhTa · Vidieu', 
+              loc: 'Vietnam', 
+              desc: 'Real estate marketplace with advanced map-based search and automated data processing.',
+              details: [
+                'Engineered custom Google Maps integration with polygon-based area selection and filters.',
+                'Implemented real-time chat facilitating buyer-seller communication using gRPC.',
+                'Optimized Flutter Web performance and resolved Safari-specific CanvasKit renderer issues.',
+                'Built automated web scraping pipeline using Python, Selenium, and Scrapy.',
+                'Established complete CD pipeline for Flutter apps using Jenkins and Docker.'
+              ],
+              tech: ['Riverpod', 'Isar', 'gRPC', 'Python/Selenium', 'Jenkins', 'Docker']
+            },
+            { 
+              y: '2024', 
+              role: 'Full Stack Developer', 
+              co: 'UwU EBOOK', 
+              loc: 'Owner Project', 
+              desc: 'Digital publishing platform for Vietnamese content with full-stack automation.',
+              details: [
+                'Architected microservices backend using Golang and the Ent framework.',
+                'Built complex data crawler system with Python and Scrapy for automated content gathering.',
+                'Deployed containerized infrastructure using Docker for seamless scalability.'
+              ],
+              tech: ['Golang', 'Ent', 'MySQL', 'Python', 'Docker']
+            },
+            { 
+              y: '2021–2022', 
+              role: 'Flutter Developer & UI/UX Designer', 
+              co: 'IU PETSHOP', 
+              loc: 'Captain Project · FPT University', 
+              desc: 'Pet care ecosystem with blockchain identification and secure payment processing.',
+              details: [
+                'Implemented blockchain-based microchip identification system for pet tracking.',
+                'Integrated VNPay payment gateway through WebView for sandbox testing environment.',
+                'Designed complete mobile interface using Adobe XD and custom Flutter animations.',
+                'Integrated Firebase OAuth for secure user authentication across the platform.'
+              ],
+              tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth']
+            },
           ].map((j, i) => (
-            <div data-reveal data-delay={String(i+1)} class="tilt-card group grid grid-cols-1 md:grid-cols-12 gap-6 p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500">
-              <div class="md:col-span-2 flex items-center">
-                <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
-              </div>
-              <div class="md:col-span-10">
-                <h3 class="text-2xl font-black text-white mb-1">{j.role} <span class="text-gray-600 font-medium text-lg">— {j.co}</span></h3>
-                <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-2">{j.loc}</p>
-                <p class="text-gray-500 text-sm">{j.desc}</p>
+            <div data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="md:col-span-2 flex items-start pt-1">
+                  <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{j.y}</span>
+                </div>
+                <div class="md:col-span-10">
+                  <div class="flex items-center justify-between mb-1">
+                    <h3 class="text-2xl font-black text-white">{j.role} <span class="text-gray-600 font-medium text-lg">— {j.co}</span></h3>
+                    <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:text-pink-500 transition-colors">
+                      <svg class="w-4 h-4 transform group-[.active]:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                  </div>
+                  <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{j.loc}</p>
+                  <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{j.desc}</p>
+                  
+                  <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
+                      <div>
+                        <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
+                        <ul class="space-y-3">
+                          {j.details.map(item => (
+                            <li class="flex items-start gap-3 text-sm text-gray-400 leading-snug">
+                              <span class="text-pink-500 mt-1">▹</span>
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Stack</h4>
+                        <div class="flex flex-wrap gap-2">
+                          {j.tech.map(t => (
+                            <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-wider">{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

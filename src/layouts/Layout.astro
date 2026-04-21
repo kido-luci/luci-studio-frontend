@@ -257,6 +257,17 @@ const { title } = Astro.props;
 				nav.style.backdropFilter = 'blur(12px)';
 			}
 		}, { passive: true });
+
+		// Timeline toggle
+		document.querySelectorAll('.timeline-item').forEach(item => {
+			item.addEventListener('click', () => {
+				const isActive = item.classList.contains('active');
+				// Close all other items
+				document.querySelectorAll('.timeline-item').forEach(other => other.classList.remove('active'));
+				// Toggle current
+				if (!isActive) item.classList.add('active');
+			});
+		});
 		</script>
 	</body>
 </html>
