@@ -16,6 +16,9 @@ const { title } = Astro.props;
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js"></script>
 		<script is:inline>
 			tailwind.config = {
 				theme: {
@@ -48,6 +51,12 @@ const { title } = Astro.props;
 		<title>{title}</title>
 	</head>
 	<body class="bg-[#0a0a0a] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden max-w-full">
+		<!-- Vanta.js Background Animation -->
+		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2]"></div>
+
+		<!-- Scroll-based Background Dimmer -->
+		<div id="bg-dimmer" class="fixed inset-0 w-full h-full pointer-events-none z-[-1] bg-black/20 transition-all duration-500"></div>
+
 		<!-- Custom Cursor -->
 		<div id="cursor-dot" class="fixed w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference transition-transform duration-100" style="top:-10px;left:-10px;"></div>
 		<div id="cursor-ring" class="fixed w-10 h-10 border border-white/40 rounded-full pointer-events-none z-[9998] mix-blend-difference" style="top:-20px;left:-20px;"></div>
@@ -333,16 +342,39 @@ const { title } = Astro.props;
 			el.addEventListener('mouseleave', () => { el.style.transform = ''; });
 		});
 
-		// Nav scroll
+		// Nav scroll and background dimmer
 		const nav = document.querySelector('nav') as HTMLElement;
+		const bgDimmer = document.getElementById('bg-dimmer') as HTMLElement;
+
 		window.addEventListener('scroll', () => {
-			if (window.scrollY > 80) {
+			const scrollY = window.scrollY;
+			const windowHeight = window.innerHeight;
+
+			// Nav background change
+			if (scrollY > 80) {
 				nav.style.background = 'rgba(10,10,10,0.85)';
 				nav.style.backdropFilter = 'blur(24px)';
 			} else {
 				nav.style.background = 'rgba(10,10,10,0.1)';
 				nav.style.backdropFilter = 'blur(12px)';
 			}
+
+			// Background dimmer and blur based on scroll
+			// Start dimming after scrolling past hero section (windowHeight)
+			// Fully dimmed at 2x window height
+			const dimStart = windowHeight * 0.8;
+			const dimEnd = windowHeight * 1.5;
+			let dimOpacity = 0;
+			let blurAmount = 0;
+
+			if (scrollY > dimStart) {
+				const progress = Math.min((scrollY - dimStart) / (dimEnd - dimStart), 1);
+				dimOpacity = progress * 0.6;
+				blurAmount = progress * 8; // Max 8px blur
+			}
+
+			bgDimmer.style.opacity = dimOpacity.toString();
+			bgDimmer.style.backdropFilter = `blur(${blurAmount}px)`;
 		}, { passive: true });
 
 		// Timeline toggle
@@ -369,6 +401,24 @@ const { title } = Astro.props;
 					}, 800);
 				}
 			});
+		});
+
+		// Vanta.js Halo Background Animation
+		const vantaEffect = (window as any).VANTA.HALO({
+			el: "#vanta-bg",
+			mouseControls: true,
+			touchControls: true,
+			gyroControls: false,
+			minHeight: 200.00,
+			minWidth: 200.00,
+			backgroundColor: 0x0a0a0a,
+			amplitudeFactor: 0.50,
+			ringFactor: 0.30,
+			rotationFactor: 0.20,
+			size: 1.20,
+			baseColor: 0x8b5cf6,
+			secondaryColor: 0x3b82f6,
+			tertiaryColor: 0xec4899
 		});
 		</script>
 	</body>
