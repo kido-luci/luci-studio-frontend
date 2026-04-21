@@ -68,7 +68,7 @@ const indieProjects = [
   <main>
 
     <!-- HERO -->
-    <section class="relative min-h-screen flex flex-col justify-center items-center pt-20 px-6 overflow-hidden">
+    <section class="relative min-h-screen flex flex-col justify-center items-center pt-20 px-6 overflow-x-hidden">
       <!-- Vanta.js halo is handled in Layout.astro -->
 
       <!-- Floating orbs for depth -->
@@ -506,16 +506,18 @@ const indieProjects = [
 .hero-line {
   display: flex;
   align-items: baseline;
-  gap: 0.3em;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.25em;
   line-height: 1;
 }
 .hero-line-top {
-  font-size: clamp(3.2rem, 11vw, 9.5rem);
+  font-size: clamp(2.4rem, 11vw, 9.5rem);
   font-weight: 900;
   letter-spacing: -0.045em;
 }
 .hero-line-bottom {
-  font-size: clamp(2rem, 7.5vw, 6.8rem);
+  font-size: clamp(1.6rem, 7.5vw, 6.8rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   color: rgba(255,255,255,0.55);
@@ -552,11 +554,12 @@ const indieProjects = [
 
 /* ── Subtitle ── */
 .hero-subtitle {
-  font-size: clamp(0.95rem, 2vw, 1.15rem);
+  font-size: clamp(0.88rem, 2vw, 1.15rem);
   color: rgba(156,163,175,0.85);
   max-width: 540px;
-  margin: 0 auto 2.5rem;
+  margin: 0 auto 2rem;
   line-height: 1.75;
+  padding: 0 0.5rem;
 }
 
 /* ── Stat pills ── */
@@ -594,6 +597,57 @@ const indieProjects = [
   background: linear-gradient(135deg, rgba(204, 95, 150, 0.1) 0%, rgba(3, 3, 3, 1) 40%, rgba(3, 3, 3, 1) 100%) !important;
   border-color: rgba(236, 72, 153, 0.4) !important;
   box-shadow: 0 20px 40px -20px rgba(236, 72, 153, 0.2);
+}
+
+/* ── Mobile overrides (< 480px) ── */
+@media (max-width: 480px) {
+  .hero-badge {
+    margin-bottom: 1.2rem;
+  }
+  .hero-headline {
+    margin-bottom: 1.2rem;
+  }
+  .hero-line {
+    /* Stack each word on its own line on very small screens */
+    flex-direction: column;
+    align-items: center;
+    gap: 0.05em;
+  }
+  .hero-line-top {
+    /* Each word becomes its own full-width line */
+    font-size: clamp(2.6rem, 18vw, 4.5rem);
+    letter-spacing: -0.03em;
+  }
+  .hero-line-bottom {
+    font-size: clamp(1.8rem, 12vw, 3rem);
+    letter-spacing: -0.02em;
+  }
+  .hero-divider {
+    width: 70vw;
+    margin: 0.4rem 0 0.2rem;
+  }
+  .hero-subtitle {
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.65;
+  }
+  .hero-stats {
+    margin-top: 1.5rem;
+    gap: 6px;
+  }
+  .hero-stat-sep {
+    display: none;
+  }
+}
+
+/* ── Tablet overrides (480–768px) ── */
+@media (min-width: 481px) and (max-width: 768px) {
+  .hero-line-top {
+    font-size: clamp(2.4rem, 9vw, 6rem);
+  }
+  .hero-line-bottom {
+    font-size: clamp(1.6rem, 6.5vw, 4rem);
+  }
 }
 </style>
 
