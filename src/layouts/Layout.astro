@@ -16,7 +16,6 @@ const { title } = Astro.props;
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js"></script>
 		<script is:inline>
@@ -72,7 +71,7 @@ const { title } = Astro.props;
 			}
 			h1, h2, h3, h4, h5, h6 { 
 				font-family: 'Outfit', sans-serif; 
-				filter: drop-shadow(0 4px 20px rgba(0,0,0,0.4));
+				filter: drop-shadow(0 4px 30px rgba(0,0,0,0.6));
 			}
 			::selection { background-color: rgba(139, 92, 246, 0.3); color: white; }
 			::-webkit-scrollbar { width: 6px; }
@@ -171,39 +170,45 @@ const { title } = Astro.props;
 		const dot = document.getElementById('cursor-dot') as HTMLElement;
 		const ring = document.getElementById('cursor-ring') as HTMLElement;
 		let ringX = 0, ringY = 0, mouseX = 0, mouseY = 0;
+		const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-		document.addEventListener('mousemove', (e) => {
-			mouseX = e.clientX; mouseY = e.clientY;
-			dot.style.left = mouseX - 4 + 'px';
-			dot.style.top = mouseY - 4 + 'px';
-		});
-
-		// Smooth ring follow
-		(function animateRing() {
-			ringX += (mouseX - ringX) * 0.12;
-			ringY += (mouseY - ringY) * 0.12;
-			ring.style.left = ringX - 20 + 'px';
-			ring.style.top = ringY - 20 + 'px';
-			requestAnimationFrame(animateRing);
-		})();
-
-		// Enhanced cursor interactions
-		document.querySelectorAll('a, button, .tilt-card, .magnetic').forEach(el => {
-			el.addEventListener('mouseenter', () => {
-				ring.style.transform = 'scale(2)';
-				ring.style.borderColor = 'rgba(139,92,246,0.8)';
-				ring.style.boxShadow = '0 0 20px rgba(139,92,246,0.3)';
-				dot.style.transform = 'scale(1.5)';
-				dot.style.backgroundColor = '#8b5cf6';
+		if (isTouchDevice) {
+			dot.style.display = 'none';
+			ring.style.display = 'none';
+		} else {
+			document.addEventListener('mousemove', (e) => {
+				mouseX = e.clientX; mouseY = e.clientY;
+				dot.style.left = mouseX - 4 + 'px';
+				dot.style.top = mouseY - 4 + 'px';
 			});
-			el.addEventListener('mouseleave', () => {
-				ring.style.transform = 'scale(1)';
-				ring.style.borderColor = 'rgba(255,255,255,0.4)';
-				ring.style.boxShadow = 'none';
-				dot.style.transform = 'scale(1)';
-				dot.style.backgroundColor = 'white';
+
+			// Smooth ring follow
+			(function animateRing() {
+				ringX += (mouseX - ringX) * 0.12;
+				ringY += (mouseY - ringY) * 0.12;
+				ring.style.left = ringX - 20 + 'px';
+				ring.style.top = ringY - 20 + 'px';
+				requestAnimationFrame(animateRing);
+			})();
+
+			// Enhanced cursor interactions
+			document.querySelectorAll('a, button, .tilt-card, .magnetic').forEach(el => {
+				el.addEventListener('mouseenter', () => {
+					ring.style.transform = 'scale(2)';
+					ring.style.borderColor = 'rgba(139,92,246,0.8)';
+					ring.style.boxShadow = '0 0 20px rgba(139,92,246,0.3)';
+					dot.style.transform = 'scale(1.5)';
+					dot.style.backgroundColor = '#8b5cf6';
+				});
+				el.addEventListener('mouseleave', () => {
+					ring.style.transform = 'scale(1)';
+					ring.style.borderColor = 'rgba(255,255,255,0.4)';
+					ring.style.boxShadow = 'none';
+					dot.style.transform = 'scale(1)';
+					dot.style.backgroundColor = 'white';
+				});
 			});
-		});
+		}
 
 		// Interactive background elements
 		document.addEventListener('mousemove', (e) => {
