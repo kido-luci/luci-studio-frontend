@@ -48,38 +48,8 @@ const indieProjects = [
 
     <!-- HERO -->
     <section class="relative min-h-screen flex flex-col justify-center items-center pt-20 px-6 overflow-hidden">
-      <!-- Particles -->
-      <div class="absolute inset-0 -z-10">
-        {Array.from({length: 50}, (_, i) => (
-          <div
-            class="absolute w-1 h-1 bg-white/20 rounded-full animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`
-            }}
-          />
-        ))}
-      </div>
+      <!-- Vanta.js halo is handled in Layout.astro -->
 
-      <!-- Floating geometric shapes -->
-      <div class="absolute inset-0 -z-10">
-        <div data-parallax class="absolute top-1/4 left-1/4 w-32 h-32 border border-violet-500/20 rotate-45 animate-spin-slow"></div>
-        <div data-parallax class="absolute top-3/4 right-1/4 w-24 h-24 border border-blue-500/20 rounded-full animate-float" style="animation-delay: 1s"></div>
-        <div data-parallax class="absolute top-1/2 left-3/4 w-16 h-16 bg-pink-500/10 rotate-12 animate-bounce" style="animation-delay: 2s; animation-duration: 3s"></div>
-        <div data-parallax class="absolute bottom-1/4 left-1/3 w-20 h-20 border border-cyan-500/20 rounded-lg animate-pulse" style="animation-delay: 0.5s"></div>
-      </div>
-
-      <!-- Orbs -->
-      <div class="absolute inset-0 -z-10">
-        <div data-parallax class="absolute top-1/4 left-1/4 w-[700px] h-[700px] bg-violet-700/15 rounded-full blur-[140px]" style="animation:float 8s ease-in-out infinite"></div>
-        <div data-parallax class="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-blue-700/15 rounded-full blur-[140px]" style="animation:float 10s ease-in-out infinite reverse"></div>
-        <div data-parallax class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-pink-700/10 rounded-full blur-[100px]" style="animation:float 6s ease-in-out infinite 2s"></div>
-      </div>
-
-      <!-- Animated grid lines -->
-      <div class="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:80px_80px] animate-pulse" style="animation-duration: 4s"></div>
 
       <div class="relative z-10 text-center max-w-6xl mx-auto">
 
