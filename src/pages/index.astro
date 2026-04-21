@@ -157,12 +157,13 @@ import Layout from "../layouts/Layout.astro";
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            { title: 'memoirMe', year: '2024–Now', desc: 'AI diary with RSA/AES E2E encryption, geolocation, IAP subscriptions & resumable uploads. For The Nartus, Australia.', tags: ['Flutter','BLoC','Firebase','Crypto'], img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=900' },
+            { title: 'memoirMe', year: '2024–Now', desc: 'AI diary with RSA/AES E2E encryption, geolocation, IAP subscriptions & resumable uploads. For The Nartus, Australia.', tags: ['Flutter','BLoC','Firebase','Crypto'], img: 'https://lh3.googleusercontent.com/sitesv/AA5AbUDep4gRWxezXz-MBeWd2fnJtuGA4THdCebXHYiLMKIkKNuaT9yQslZ-Y0_udz1L-YF1ZOOq2Z_9CTltU4ztRU7OnWVDizmSJTsVAsg2s2OC3ZQ0I1l47WFLYp7sl9EXTgruaFkudM1HHMhLsHtLySzHnStAxV03ESKnZuRWjajw9TmVa4JxCIbu01WMomUPe236m0JoVGHfhCTOH9uzsUY5IbcUDyKwVYJbhLM=w1280' },
             { title: 'TBchat', year: '2024–Now', desc: 'Blockchain messaging platform with crypto wallet, miner staking, real-time location & audio waveforms. For Nexsoft, Vietnam/HK.', tags: ['Flutter','BLoC','ObjectBox','WebSocket'], img: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&q=80&w=900' },
             { title: 'QuanhTa', year: '2022–2024', desc: 'Real estate marketplace with polygon Maps search, gRPC chat, Flutter Web & Jenkins/Docker CD pipeline. For Vidieu, Vietnam.', tags: ['Flutter','Riverpod','gRPC','Docker'], img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=900' },
-            { title: 'Luci Studio', year: '2026', desc: 'The very portfolio you are viewing — blazing-fast static site with premium animations, deployed to Cloudflare Edge.', tags: ['Astro','Tailwind','Cloudflare'], img: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=900' },
+            { title: 'Survive in Shadow', year: '2018', desc: 'Minimalist 2D top-down survival game built with Unity. Features procedural enemy spawning and custom lighting.', tags: ['Unity','C#','2D Game'], img: 'https://scontent.fsgn2-3.fna.fbcdn.net/v/t1.6435-9/81149923_876340826101477_7736307505457790976_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=FK2oKQTNYEgQ7kNvwG0DYTO&_nc_oc=Adpml3GtlYT4uUObgrPWIK0YQ3JmHzpH1wtPZDsMkoRI6AUYhdo1nKYV49Rjqf_4iVM&_nc_zt=23&_nc_ht=scontent.fsgn2-3.fna&_nc_gid=mNqQi3TFDfK4Z2l4iLxKHw&_nc_ss=7a3a8&oh=00_Af0YgzsvZ00r8aLXPpnvxDkmuPxNoQP1ALbSdO69NRErhw&oe=6A0E9479' },
           ].map((p, i) => (
-            <div data-project={p.title} data-reveal="scale" data-delay={String((i%2)+1)} class="tilt-card group relative aspect-[4/3] rounded-[40px] overflow-hidden border border-white/8 hover:border-violet-500/30 transition-all duration-700 cursor-pointer">
+            <div data-project={p.title} data-reveal="scale" data-delay={String((i%2)+1)} class="tilt-card group relative aspect-[4/3] rounded-[40px] overflow-hidden border border-white/10 hover:border-violet-500/40 transition-all duration-700 cursor-pointer bg-white/[0.03]">
+              <div class="absolute inset-0 bg-gradient-to-br from-pink-500/20 via-violet-500/10 to-transparent opacity-100"></div>
               <img src={p.img} alt={p.title} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-50" />
               <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
               <div class="absolute inset-0 p-10 flex flex-col justify-between">
@@ -303,6 +304,7 @@ import Layout from "../layouts/Layout.astro";
               { id: 'Luci Studio', y: '2026', role: 'Founder & Full Stack Developer', co: 'Luci Studio', loc: 'Vietnam', desc: 'Built the high-performance web portfolio and technical blog you are currently viewing.', details: ['Designed a premium, motion-rich UX/UI with custom-built interactive components.', 'Engineered for maximum performance (95+ Lighthouse score) using Astro static generation.', 'Implemented complex responsive layouts and magnetic hover interactions.', 'Deployed a global-first infrastructure using Cloudflare Pages edge delivery.'], tech: ['Astro', 'Tailwind CSS', 'JavaScript', 'Cloudflare Pages'], links: [{ label: 'Live Site', url: 'https://luci-studio.com/' }] },
               { id: 'UwU EBOOK', y: '2024', role: 'Full Stack Developer', co: 'UwU EBOOK', loc: 'Owner Project', desc: 'Digital publishing platform for Vietnamese content with full-stack automation.', details: ['Architected microservices backend using Golang and the Ent framework.', 'Built complex data crawler system with Python and Scrapy for automated content gathering.', 'Deployed containerized infrastructure using Docker for seamless scalability.'], tech: ['Golang', 'Ent', 'MySQL', 'Python', 'Docker'], links: [] },
               { id: 'IU PETSHOP', y: '2021–2022', role: 'Flutter Developer & UI/UX Designer', co: 'IU PETSHOP', loc: 'Captain Project · FPT University', desc: 'Pet care ecosystem with blockchain identification and secure payment processing.', details: ['Implemented blockchain-based microchip identification system for pet tracking.', 'Integrated VNPay payment gateway through WebView for sandbox testing environment.', 'Designed complete mobile interface using Adobe XD and custom Flutter animations.', 'Integrated Firebase OAuth for secure user authentication across the platform.'], tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth'], links: [{ label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' }, { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }] },
+              { id: 'Survive in Shadow', y: '2018', role: 'Game Developer', co: 'Survive in Shadow', loc: 'Independent Project', desc: 'A minimalist 2D top-down survival game built with Unity.', details: ['Designed core survival mechanics including resource management and procedural enemy spawning.', 'Implemented custom 2D lighting system to enhance atmospheric tension.', 'Developed responsive player controls and inventory management systems.'], tech: ['Unity', 'C#', '2D Art'], links: [{ label: 'itch.io', url: 'https://lapl1412.itch.io/survive-in-shadow' }] },
             ].map((j, i) => (
               <div id={j.id} data-reveal data-delay={String(i+1)} class="timeline-item group cursor-pointer p-8 rounded-[36px] border border-white/5 hover:border-pink-500/20 bg-white/[0.02] transition-all duration-500 overflow-hidden">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -506,7 +508,13 @@ import Layout from "../layouts/Layout.astro";
           <a href={h} target="_blank" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">{l}</a>
         ))}
       </div>
-      <p class="text-xs text-gray-700 uppercase tracking-widest">© 2026 Luci - Trung Lap · Ho Chi Minh City</p>
+      <div class="flex flex-col items-center md:items-end gap-3">
+        <div class="flex flex-col items-center md:items-end gap-1">
+          <a href="mailto:lapl1412.work@gmail.com" class="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">lapl1412.work@gmail.com</a>
+          <a href="tel:+84363050702" class="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">+84 363 050 702</a>
+        </div>
+        <p class="text-xs text-gray-700 uppercase tracking-widest">© 2026 Luci - Trung Lap · Ho Chi Minh City</p>
+      </div>
     </div>
   </footer>
 
