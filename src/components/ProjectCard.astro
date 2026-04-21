@@ -11,23 +11,40 @@ interface Props {
 const { title, year, desc, tags, img, index } = Astro.props;
 ---
 
-<div data-project={title} data-reveal="scale" data-delay={String((index % 2) + 1)} class="tilt-card group relative aspect-[4/3] rounded-[40px] overflow-hidden border border-white/10 hover:border-violet-500/40 transition-all duration-700 cursor-pointer bg-white/[0.03]">
-  <div class="absolute inset-0 bg-gradient-to-br from-pink-500/20 via-violet-500/10 to-transparent opacity-100"></div>
-  <img src={img} alt={title} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110 brightness-100" />
-  <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-  <div class="absolute inset-0 p-10 flex flex-col justify-between">
-    <div class="flex items-center justify-between">
-      <span class="text-xs font-bold uppercase tracking-widest text-gray-400 bg-black/40 px-3 py-1 rounded-full border border-white/10">{year}</span>
-      <span class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white opacity-40 group-hover:opacity-100 transition-all duration-500">↗</span>
+<div data-project={title} data-reveal="scale" data-delay={String((index % 2) + 1)} class="tilt-card group relative flex flex-col p-6 rounded-[48px] border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-700 cursor-pointer overflow-hidden h-full">
+  <!-- Image Container -->
+  <div class="relative aspect-[16/10] rounded-[32px] overflow-hidden mb-8 border border-white/5 shadow-2xl">
+    <div class="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10"></div>
+    <img src={img} alt={title} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110" />
+    
+    <!-- Year Tag -->
+    <div class="absolute top-5 left-5 z-20">
+      <span class="text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 text-white/90">{year}</span>
     </div>
-    <div class="translate-y-0 transition-transform duration-500">
-      <h3 class="text-4xl font-black tracking-tight mb-3 text-shimmer" style="filter: drop-shadow(0 8px 16px rgba(0,0,0,0.9));">{title}</h3>
-      <p class="text-gray-300 text-sm mb-5 opacity-90 transition-opacity duration-500">{desc}</p>
-      <div class="flex gap-2">
-        {tags.map(t => (
-          <span class="text-xs font-bold bg-white/10 px-3 py-1 rounded-full border border-white/10">{t}</span>
-        ))}
+  </div>
+
+  <!-- Content -->
+  <div class="px-2 flex flex-col flex-1">
+    <div class="flex items-start justify-between mb-4">
+      <h3 class="text-4xl font-black tracking-tighter text-white drop-shadow-sm group-hover:text-shimmer transition-all duration-500 leading-none">
+        {title}<span class="text-violet-500">.</span>
+      </h3>
+      <div class="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center text-white/20 group-hover:text-white group-hover:border-violet-500/40 group-hover:bg-violet-500/5 transition-all duration-500 shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 7l-10 10M17 7H7M17 7v10"/></svg>
       </div>
+    </div>
+
+    <p class="text-gray-400 text-sm leading-relaxed mb-8 line-clamp-3 group-hover:text-gray-300 transition-colors duration-500">
+      {desc}
+    </p>
+
+    <!-- Tags -->
+    <div class="mt-auto flex flex-wrap gap-2">
+      {tags.map(t => (
+        <span class="text-[10px] font-black px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/5 text-gray-500 uppercase tracking-widest group-hover:text-violet-300 group-hover:border-violet-500/20 group-hover:bg-violet-500/5 transition-all duration-500">
+          {t}
+        </span>
+      ))}
     </div>
   </div>
 </div>
