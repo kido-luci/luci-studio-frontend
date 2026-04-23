@@ -16,22 +16,17 @@ const { title } = Astro.props;
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
-		<!-- Three.js + Vanta loaded only on non-Windows to skip ~600KB parse cost -->
+		<!-- Three.js + Vanta: always loaded on all platforms -->
 		<script is:inline>
 			(function() {
-				var isWin = navigator.platform.startsWith('Win') ||
-					(navigator.userAgentData && navigator.userAgentData.platform === 'Windows') ||
-					/Windows/.test(navigator.userAgent);
-				if (!isWin) {
-					var s1 = document.createElement('script');
-					s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
-					s1.onload = function() {
-						var s2 = document.createElement('script');
-						s2.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js';
-						document.head.appendChild(s2);
-					};
-					document.head.appendChild(s1);
-				}
+				var s1 = document.createElement('script');
+				s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
+				s1.onload = function() {
+					var s2 = document.createElement('script');
+					s2.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js';
+					document.head.appendChild(s2);
+				};
+				document.head.appendChild(s1);
 			})();
 		</script>
 		<script is:inline>
@@ -237,13 +232,16 @@ const { title } = Astro.props;
 
 		<script>
 		// ── Platform Detection ──────────────────────────────────────────────────
-		// Detect Windows to disable GPU-heavy effects that perform poorly there.
 		const isWindows = navigator.platform.startsWith('Win') ||
 			((navigator as any).userAgentData?.platform === 'Windows') ||
 			(/Windows/.test(navigator.userAgent));
+		// Edge has Microsoft's D3D12 GPU path and handles all effects fine.
+		// Only throttle on Windows Chrome (Blink without the Edge GPU optimisations).
+		const isEdge = /Edg\//.test(navigator.userAgent);
+		const isWindowsChrome = isWindows && !isEdge;
 
 		// Apply CSS perf-mode class immediately so overrides land before first paint
-		if (isWindows) document.body.classList.add('win-perf-mode');
+		if (isWindowsChrome) document.body.classList.add('win-perf-mode');
 
 		// ── Custom Cursor ───────────────────────────────────────────────────────
 		const dot = document.getElementById('cursor-dot') as HTMLElement;
@@ -255,8 +253,8 @@ const { title } = Astro.props;
 			dot.style.display = 'none';
 			ring.style.display = 'none';
 		} else {
-			// Windows: remove mix-blend-difference (causes full-page repaints)
-			if (isWindows) {
+			// Windows Chrome: remove mix-blend-difference (causes full-page repaints)
+			if (isWindowsChrome) {
 				dot.style.mixBlendMode = 'normal';
 				dot.style.backgroundColor = 'rgba(139,92,246,0.9)';
 				ring.style.mixBlendMode = 'normal';
@@ -269,15 +267,15 @@ const { title } = Astro.props;
 				dot.style.top = mouseY - 4 + 'px';
 			});
 
-			if (isWindows) {
-				// Windows: CSS transition instead of infinite rAF loop
+			if (isWindowsChrome) {
+				// Windows Chrome: CSS transition instead of infinite rAF loop
 				ring.style.transition = 'left 0.12s ease-out, top 0.12s ease-out, transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease';
 				document.addEventListener('mousemove', (e) => {
 					ring.style.left = e.clientX - 20 + 'px';
 					ring.style.top = e.clientY - 20 + 'px';
 				});
 			} else {
-				// macOS/other: smooth rAF ring follow (original)
+				// macOS/Edge: smooth rAF ring follow (original)
 				(function animateRing() {
 					ringX += (mouseX - ringX) * 0.12;
 					ringY += (mouseY - ringY) * 0.12;
@@ -297,10 +295,10 @@ const { title } = Astro.props;
 				});
 				el.addEventListener('mouseleave', () => {
 					ring.style.transform = 'scale(1)';
-					ring.style.borderColor = isWindows ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.4)';
+					ring.style.borderColor = isWindowsChrome ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.4)';
 					ring.style.boxShadow = 'none';
 					dot.style.transform = 'scale(1)';
-					dot.style.backgroundColor = isWindows ? 'rgba(139,92,246,0.9)' : 'white';
+					dot.style.backgroundColor = isWindowsChrome ? 'rgba(139,92,246,0.9)' : 'white';
 				});
 			});
 		}
@@ -308,7 +306,7 @@ const { title } = Astro.props;
 		// ── Parallax Mousemove (throttled on Windows) ───────────────────────────
 		let parallaxFrame = false;
 		document.addEventListener('mousemove', (e) => {
-			if (isWindows) {
+			if (isWindowsChrome) {
 				if (parallaxFrame) return;
 				parallaxFrame = true;
 				requestAnimationFrame(() => {
@@ -373,7 +371,7 @@ const { title } = Astro.props;
 		document.querySelectorAll('[data-count]').forEach(el => counterIo.observe(el));
 
 		// ── Card Tilt (disabled on Windows — 3D compositing is costly) ──────────
-		if (!isWindows) {
+		if (!isWindowsChrome) {
 			document.querySelectorAll('.tilt-card').forEach((card) => {
 				const el = card as HTMLElement;
 				el.addEventListener('mousemove', (e) => {
@@ -388,7 +386,7 @@ const { title } = Astro.props;
 				el.addEventListener('mouseleave', () => { el.style.transform = ''; });
 			});
 		} else {
-			// Windows: simple scale hover instead of 3D tilt
+			// Windows Chrome: simple scale hover instead of 3D tilt
 			document.querySelectorAll('.tilt-card').forEach((card) => {
 				const el = card as HTMLElement;
 				el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.02)'; });
@@ -412,9 +410,9 @@ const { title } = Astro.props;
 		const nav = document.querySelector('nav') as HTMLElement;
 		const bgDimmer = document.getElementById('bg-dimmer') as HTMLElement;
 
-		// Windows: disable dynamic backdrop-filter on bg-dimmer (very expensive).
+		// Windows Chrome: disable dynamic backdrop-filter on bg-dimmer (very expensive).
 		// Also clear the nav's initial inline style backdrop-filter.
-		if (isWindows) {
+		if (isWindowsChrome) {
 			bgDimmer.style.backdropFilter = 'none';
 			(bgDimmer.style as any).webkitBackdropFilter = 'none';
 			// Override the nav's inline style blur set in the HTML attribute
@@ -434,12 +432,12 @@ const { title } = Astro.props;
 
 				if (scrollY > 80) {
 					nav.style.background = 'rgba(10,10,10,0.9)';
-					// Windows: solid bg, no blur — backdrop-filter on a full-width sticky
+					// Windows Chrome: solid bg, no blur — backdrop-filter on a full-width sticky
 					// nav triggers a full-viewport GPU layer on every scroll event in Chrome.
-					if (!isWindows) nav.style.backdropFilter = 'blur(32px)';
+					if (!isWindowsChrome) nav.style.backdropFilter = 'blur(32px)';
 				} else {
-					nav.style.background = isWindows ? 'rgba(10,10,10,0.92)' : 'rgba(10,10,10,0.2)';
-					if (!isWindows) nav.style.backdropFilter = 'blur(16px)';
+					nav.style.background = isWindowsChrome ? 'rgba(10,10,10,0.92)' : 'rgba(10,10,10,0.2)';
+					if (!isWindowsChrome) nav.style.backdropFilter = 'blur(16px)';
 				}
 
 				const dimStart = windowHeight * 0.4;
@@ -447,14 +445,14 @@ const { title } = Astro.props;
 				if (scrollY > dimStart) {
 					const progress = Math.min((scrollY - dimStart) / (dimEnd - dimStart), 1);
 					const dimOpacity = progress * 0.85;
-					if (!isWindows) {
+					if (!isWindowsChrome) {
 						bgDimmer.style.opacity = dimOpacity.toString();
 						bgDimmer.style.backdropFilter = `blur(${progress * 30}px)`;
 					} else {
 						bgDimmer.style.backgroundColor = `rgba(0,0,0,${dimOpacity * 0.7})`;
 					}
 				} else {
-					if (!isWindows) {
+					if (!isWindowsChrome) {
 						bgDimmer.style.opacity = '0';
 						bgDimmer.style.backdropFilter = 'blur(0px)';
 					} else {
@@ -488,42 +486,32 @@ const { title } = Astro.props;
 			});
 		});
 
-		// ── Vanta.js Halo Background ─────────────────────────────────────────────
-		// Skip on Windows: Three.js WebGL is the single biggest perf hit.
-		// Windows users get a lightweight CSS gradient fallback instead.
-		if (!isWindows) {
-			// Vanta is loaded dynamically/async — poll until ready
-			let vantaAttempts = 0;
-			const tryVanta = () => {
-				if ((window as any).VANTA && (window as any).VANTA.HALO) {
-					(window as any).VANTA.HALO({
-						el: "#vanta-bg",
-						mouseControls: true,
-						touchControls: true,
-						gyroControls: false,
-						minHeight: 200.00,
-						minWidth: 200.00,
-						backgroundColor: 0x0a0a0a,
-						amplitudeFactor: 0.50,
-						ringFactor: 0.30,
-						rotationFactor: 0.20,
-						size: 1.20,
-						baseColor: 0x8b5cf6,
-						secondaryColor: 0x3b82f6,
-						tertiaryColor: 0xec4899
-					});
-				} else if (vantaAttempts++ < 50) {
-					setTimeout(tryVanta, 100);
-				}
-			};
-			tryVanta();
-		} else {
-			// Windows: static radial gradient mimicking the halo glow
-			const vantaBg = document.getElementById('vanta-bg') as HTMLElement;
-			vantaBg.style.background =
-				'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(139,92,246,0.12) 0%, rgba(59,130,246,0.06) 40%, transparent 70%),' +
-				'radial-gradient(ellipse 60% 40% at 30% 70%, rgba(236,72,153,0.08) 0%, transparent 60%)';
-		}
+		// ── Vanta.js Halo Background (always on, all platforms) ──────────────────
+		// Vanta is loaded dynamically/async — poll until ready
+		let vantaAttempts = 0;
+		const tryVanta = () => {
+			if ((window as any).VANTA && (window as any).VANTA.HALO) {
+				(window as any).VANTA.HALO({
+					el: "#vanta-bg",
+					mouseControls: true,
+					touchControls: true,
+					gyroControls: false,
+					minHeight: 200.00,
+					minWidth: 200.00,
+					backgroundColor: 0x0a0a0a,
+					amplitudeFactor: 0.50,
+					ringFactor: 0.30,
+					rotationFactor: 0.20,
+					size: 1.20,
+					baseColor: 0x8b5cf6,
+					secondaryColor: 0x3b82f6,
+					tertiaryColor: 0xec4899
+				});
+			} else if (vantaAttempts++ < 50) {
+				setTimeout(tryVanta, 100);
+			}
+		};
+		tryVanta();
 		</script>
 	</body>
 </html>
