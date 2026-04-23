@@ -16,8 +16,24 @@ const { title } = Astro.props;
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js"></script>
+		<!-- Three.js + Vanta loaded only on non-Windows to skip ~600KB parse cost -->
+		<script is:inline>
+			(function() {
+				var isWin = navigator.platform.startsWith('Win') ||
+					(navigator.userAgentData && navigator.userAgentData.platform === 'Windows') ||
+					/Windows/.test(navigator.userAgent);
+				if (!isWin) {
+					var s1 = document.createElement('script');
+					s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
+					s1.onload = function() {
+						var s2 = document.createElement('script');
+						s2.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js';
+						document.head.appendChild(s2);
+					};
+					document.head.appendChild(s1);
+				}
+			})();
+		</script>
 		<script is:inline>
 			tailwind.config = {
 				theme: {
@@ -128,6 +144,22 @@ const { title } = Astro.props;
 				transform-style: preserve-3d;
 			}
 
+			/* === WINDOWS PERFORMANCE MODE === */
+			/* Applied via JS when Windows is detected. Disables expensive GPU ops. */
+			body.win-perf-mode .tilt-card {
+				transform-style: flat;
+				backdrop-filter: none;
+				-webkit-backdrop-filter: none;
+			}
+			body.win-perf-mode .tilt-card-inner {
+				transform: none;
+				transform-style: flat;
+			}
+			body.win-perf-mode #cursor-dot,
+			body.win-perf-mode #cursor-ring {
+				mix-blend-mode: normal;
+			}
+
 			/* === MAGNETIC BUTTON === */
 			.magnetic { display: inline-block; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 
@@ -166,7 +198,16 @@ const { title } = Astro.props;
 		</style>
 
 		<script>
-		// Custom cursor
+		// ── Platform Detection ──────────────────────────────────────────────────
+		// Detect Windows to disable GPU-heavy effects that perform poorly there.
+		const isWindows = navigator.platform.startsWith('Win') ||
+			((navigator as any).userAgentData?.platform === 'Windows') ||
+			(/Windows/.test(navigator.userAgent));
+
+		// Apply CSS perf-mode class immediately so overrides land before first paint
+		if (isWindows) document.body.classList.add('win-perf-mode');
+
+		// ── Custom Cursor ───────────────────────────────────────────────────────
 		const dot = document.getElementById('cursor-dot') as HTMLElement;
 		const ring = document.getElementById('cursor-ring') as HTMLElement;
 		let ringX = 0, ringY = 0, mouseX = 0, mouseY = 0;
@@ -176,22 +217,38 @@ const { title } = Astro.props;
 			dot.style.display = 'none';
 			ring.style.display = 'none';
 		} else {
+			// Windows: remove mix-blend-difference (causes full-page repaints)
+			if (isWindows) {
+				dot.style.mixBlendMode = 'normal';
+				dot.style.backgroundColor = 'rgba(139,92,246,0.9)';
+				ring.style.mixBlendMode = 'normal';
+				ring.style.borderColor = 'rgba(139,92,246,0.5)';
+			}
+
 			document.addEventListener('mousemove', (e) => {
 				mouseX = e.clientX; mouseY = e.clientY;
 				dot.style.left = mouseX - 4 + 'px';
 				dot.style.top = mouseY - 4 + 'px';
 			});
 
-			// Smooth ring follow
-			(function animateRing() {
-				ringX += (mouseX - ringX) * 0.12;
-				ringY += (mouseY - ringY) * 0.12;
-				ring.style.left = ringX - 20 + 'px';
-				ring.style.top = ringY - 20 + 'px';
-				requestAnimationFrame(animateRing);
-			})();
+			if (isWindows) {
+				// Windows: CSS transition instead of infinite rAF loop
+				ring.style.transition = 'left 0.12s ease-out, top 0.12s ease-out, transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease';
+				document.addEventListener('mousemove', (e) => {
+					ring.style.left = e.clientX - 20 + 'px';
+					ring.style.top = e.clientY - 20 + 'px';
+				});
+			} else {
+				// macOS/other: smooth rAF ring follow (original)
+				(function animateRing() {
+					ringX += (mouseX - ringX) * 0.12;
+					ringY += (mouseY - ringY) * 0.12;
+					ring.style.left = ringX - 20 + 'px';
+					ring.style.top = ringY - 20 + 'px';
+					requestAnimationFrame(animateRing);
+				})();
+			}
 
-			// Enhanced cursor interactions
 			document.querySelectorAll('a, button, .tilt-card, .magnetic').forEach(el => {
 				el.addEventListener('mouseenter', () => {
 					ring.style.transform = 'scale(2)';
@@ -202,29 +259,40 @@ const { title } = Astro.props;
 				});
 				el.addEventListener('mouseleave', () => {
 					ring.style.transform = 'scale(1)';
-					ring.style.borderColor = 'rgba(255,255,255,0.4)';
+					ring.style.borderColor = isWindows ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.4)';
 					ring.style.boxShadow = 'none';
 					dot.style.transform = 'scale(1)';
-					dot.style.backgroundColor = 'white';
+					dot.style.backgroundColor = isWindows ? 'rgba(139,92,246,0.9)' : 'white';
 				});
 			});
 		}
 
-		// Interactive background elements
+		// ── Parallax Mousemove (throttled on Windows) ───────────────────────────
+		let parallaxFrame = false;
 		document.addEventListener('mousemove', (e) => {
-			const mouseX = e.clientX / window.innerWidth;
-			const mouseY = e.clientY / window.innerHeight;
-
-			// Subtle parallax effect on background elements
-			document.querySelectorAll('[data-parallax]').forEach((el, i) => {
-				const speed = (i + 1) * 0.5;
-				const x = (mouseX - 0.5) * speed;
-				const y = (mouseY - 0.5) * speed;
-				(el as HTMLElement).style.transform = `translate(${x}px, ${y}px)`;
-			});
+			if (isWindows) {
+				if (parallaxFrame) return;
+				parallaxFrame = true;
+				requestAnimationFrame(() => {
+					parallaxFrame = false;
+					const mx = e.clientX / window.innerWidth;
+					const my = e.clientY / window.innerHeight;
+					document.querySelectorAll('[data-parallax]').forEach((el, i) => {
+						const speed = (i + 1) * 0.5;
+						(el as HTMLElement).style.transform = `translate(${(mx-0.5)*speed}px, ${(my-0.5)*speed}px)`;
+					});
+				});
+			} else {
+				const mx = e.clientX / window.innerWidth;
+				const my = e.clientY / window.innerHeight;
+				document.querySelectorAll('[data-parallax]').forEach((el, i) => {
+					const speed = (i + 1) * 0.5;
+					(el as HTMLElement).style.transform = `translate(${(mx-0.5)*speed}px, ${(my-0.5)*speed}px)`;
+				});
+			}
 		});
 
-		// IntersectionObserver reveals
+		// ── IntersectionObserver Reveals ────────────────────────────────────────
 		const io = new IntersectionObserver((entries) => {
 			entries.forEach(e => {
 				if (e.isIntersecting) {
@@ -235,21 +303,17 @@ const { title } = Astro.props;
 		}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 		document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
 
-		// Word reveal
 		const wordIo = new IntersectionObserver((entries) => {
 			entries.forEach(e => {
 				if (e.isIntersecting) {
 					const words = e.target.querySelectorAll('.reveal-word');
-					words.forEach((w, i) => {
-						setTimeout(() => w.classList.add('revealed'), i * 120);
-					});
+					words.forEach((w, i) => { setTimeout(() => w.classList.add('revealed'), i * 120); });
 					wordIo.unobserve(e.target);
 				}
 			});
 		}, { threshold: 0.2 });
 		document.querySelectorAll('[data-word-reveal]').forEach(el => wordIo.observe(el));
 
-		// Counter animation
 		const counterIo = new IntersectionObserver((entries) => {
 			entries.forEach(e => {
 				if (!e.isIntersecting) return;
@@ -270,22 +334,31 @@ const { title } = Astro.props;
 		}, { threshold: 0.5 });
 		document.querySelectorAll('[data-count]').forEach(el => counterIo.observe(el));
 
-		// Card tilt
-		document.querySelectorAll('.tilt-card').forEach((card) => {
-			const el = card as HTMLElement;
-			el.addEventListener('mousemove', (e) => {
-				const rect = el.getBoundingClientRect();
-				const x = (e as MouseEvent).clientX - rect.left;
-				const y = (e as MouseEvent).clientY - rect.top;
-				const cx = rect.width / 2, cy = rect.height / 2;
-				const rx = ((y - cy) / cy) * -8;
-				const ry = ((x - cx) / cx) * 8;
-				el.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
+		// ── Card Tilt (disabled on Windows — 3D compositing is costly) ──────────
+		if (!isWindows) {
+			document.querySelectorAll('.tilt-card').forEach((card) => {
+				const el = card as HTMLElement;
+				el.addEventListener('mousemove', (e) => {
+					const rect = el.getBoundingClientRect();
+					const x = (e as MouseEvent).clientX - rect.left;
+					const y = (e as MouseEvent).clientY - rect.top;
+					const cx = rect.width / 2, cy = rect.height / 2;
+					const rx = ((y - cy) / cy) * -8;
+					const ry = ((x - cx) / cx) * 8;
+					el.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
+				});
+				el.addEventListener('mouseleave', () => { el.style.transform = ''; });
 			});
-			el.addEventListener('mouseleave', () => { el.style.transform = ''; });
-		});
+		} else {
+			// Windows: simple scale hover instead of 3D tilt
+			document.querySelectorAll('.tilt-card').forEach((card) => {
+				const el = card as HTMLElement;
+				el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.02)'; });
+				el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+			});
+		}
 
-		// Magnetic buttons
+		// ── Magnetic Buttons ────────────────────────────────────────────────────
 		document.querySelectorAll('.magnetic').forEach((btn) => {
 			const el = btn as HTMLElement;
 			el.addEventListener('mousemove', (e) => {
@@ -297,51 +370,65 @@ const { title } = Astro.props;
 			el.addEventListener('mouseleave', () => { el.style.transform = ''; });
 		});
 
-		// Nav scroll and background dimmer
+		// ── Nav Scroll & Background Dimmer ──────────────────────────────────────
 		const nav = document.querySelector('nav') as HTMLElement;
 		const bgDimmer = document.getElementById('bg-dimmer') as HTMLElement;
 
+		// Windows: disable dynamic backdrop-filter on bg-dimmer (very expensive).
+		if (isWindows) {
+			bgDimmer.style.backdropFilter = 'none';
+			(bgDimmer.style as any).webkitBackdropFilter = 'none';
+		}
+
+		let scrollRaf = false;
 		window.addEventListener('scroll', () => {
-			const scrollY = window.scrollY;
-			const windowHeight = window.innerHeight;
+			if (scrollRaf) return;
+			scrollRaf = true;
+			requestAnimationFrame(() => {
+				scrollRaf = false;
+				const scrollY = window.scrollY;
+				const windowHeight = window.innerHeight;
 
-			// Nav background change
-			if (scrollY > 80) {
-				nav.style.background = 'rgba(10,10,10,0.9)';
-				nav.style.backdropFilter = 'blur(32px)';
-			} else {
-				nav.style.background = 'rgba(10,10,10,0.2)';
-				nav.style.backdropFilter = 'blur(16px)';
-			}
+				if (scrollY > 80) {
+					nav.style.background = 'rgba(10,10,10,0.9)';
+					nav.style.backdropFilter = 'blur(32px)';
+				} else {
+					nav.style.background = 'rgba(10,10,10,0.2)';
+					nav.style.backdropFilter = 'blur(16px)';
+				}
 
-			// Background dimmer and blur based on scroll
-			const dimStart = windowHeight * 0.4; // Start dimming after hero
-			const dimEnd = windowHeight * 1.5;
-			let dimOpacity = 0;
-			let blurAmount = 0;
-
-			if (scrollY > dimStart) {
-				const progress = Math.min((scrollY - dimStart) / (dimEnd - dimStart), 1);
-				dimOpacity = progress * 0.85; // Max 0.85 opacity
-				blurAmount = progress * 30;   // Max 30px blur
-			}
-
-			bgDimmer.style.opacity = dimOpacity.toString();
-			bgDimmer.style.backdropFilter = `blur(${blurAmount}px)`;
+				const dimStart = windowHeight * 0.4;
+				const dimEnd = windowHeight * 1.5;
+				if (scrollY > dimStart) {
+					const progress = Math.min((scrollY - dimStart) / (dimEnd - dimStart), 1);
+					const dimOpacity = progress * 0.85;
+					if (!isWindows) {
+						bgDimmer.style.opacity = dimOpacity.toString();
+						bgDimmer.style.backdropFilter = `blur(${progress * 30}px)`;
+					} else {
+						bgDimmer.style.backgroundColor = `rgba(0,0,0,${dimOpacity * 0.7})`;
+					}
+				} else {
+					if (!isWindows) {
+						bgDimmer.style.opacity = '0';
+						bgDimmer.style.backdropFilter = 'blur(0px)';
+					} else {
+						bgDimmer.style.backgroundColor = 'rgba(0,0,0,0)';
+					}
+				}
+			});
 		}, { passive: true });
 
-		// Timeline toggle
+		// ── Timeline Toggle ─────────────────────────────────────────────────────
 		document.querySelectorAll('.timeline-item').forEach(item => {
 			item.addEventListener('click', () => {
 				const isActive = item.classList.contains('active');
-				// Close all other items
 				document.querySelectorAll('.timeline-item').forEach(other => other.classList.remove('active'));
-				// Toggle current
 				if (!isActive) item.classList.add('active');
 			});
 		});
 
-		// Portfolio to Timeline navigation
+		// ── Portfolio → Timeline Navigation ─────────────────────────────────────
 		document.querySelectorAll('[data-project]').forEach(card => {
 			card.addEventListener('click', () => {
 				const projectTitle = (card as HTMLElement).dataset.project;
@@ -356,23 +443,42 @@ const { title } = Astro.props;
 			});
 		});
 
-		// Vanta.js Halo Background Animation
-		const vantaEffect = (window as any).VANTA.HALO({
-			el: "#vanta-bg",
-			mouseControls: true,
-			touchControls: true,
-			gyroControls: false,
-			minHeight: 200.00,
-			minWidth: 200.00,
-			backgroundColor: 0x0a0a0a,
-			amplitudeFactor: 0.50,
-			ringFactor: 0.30,
-			rotationFactor: 0.20,
-			size: 1.20,
-			baseColor: 0x8b5cf6,
-			secondaryColor: 0x3b82f6,
-			tertiaryColor: 0xec4899
-		});
+		// ── Vanta.js Halo Background ─────────────────────────────────────────────
+		// Skip on Windows: Three.js WebGL is the single biggest perf hit.
+		// Windows users get a lightweight CSS gradient fallback instead.
+		if (!isWindows) {
+			// Vanta is loaded dynamically/async — poll until ready
+			let vantaAttempts = 0;
+			const tryVanta = () => {
+				if ((window as any).VANTA && (window as any).VANTA.HALO) {
+					(window as any).VANTA.HALO({
+						el: "#vanta-bg",
+						mouseControls: true,
+						touchControls: true,
+						gyroControls: false,
+						minHeight: 200.00,
+						minWidth: 200.00,
+						backgroundColor: 0x0a0a0a,
+						amplitudeFactor: 0.50,
+						ringFactor: 0.30,
+						rotationFactor: 0.20,
+						size: 1.20,
+						baseColor: 0x8b5cf6,
+						secondaryColor: 0x3b82f6,
+						tertiaryColor: 0xec4899
+					});
+				} else if (vantaAttempts++ < 50) {
+					setTimeout(tryVanta, 100);
+				}
+			};
+			tryVanta();
+		} else {
+			// Windows: static radial gradient mimicking the halo glow
+			const vantaBg = document.getElementById('vanta-bg') as HTMLElement;
+			vantaBg.style.background =
+				'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(139,92,246,0.12) 0%, rgba(59,130,246,0.06) 40%, transparent 70%),' +
+				'radial-gradient(ellipse 60% 40% at 30% 70%, rgba(236,72,153,0.08) 0%, transparent 60%)';
+		}
 		</script>
 	</body>
 </html>
