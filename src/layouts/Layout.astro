@@ -60,7 +60,7 @@ const { title } = Astro.props;
 		</script>
 		<title>{title}</title>
 	</head>
-	<body class="bg-[#0a0a0a] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden max-w-full">
+	<body class="bg-[#0a0a0a] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden max-w-full transition-colors duration-500">
 		<!-- Vanta.js Background Animation -->
 		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2]"></div>
 
@@ -74,21 +74,70 @@ const { title } = Astro.props;
 		<slot />
 
 		<style is:global>
+			:root {
+				--bg-primary: #0a0a0a;
+				--bg-secondary: rgba(10, 10, 10, 0.4);
+				--bg-card: rgba(10, 10, 10, 0.85);
+				--bg-card-hover: rgba(255, 255, 255, 0.02);
+				--text-primary: rgb(243, 244, 246);
+				--text-secondary: rgb(156, 163, 175);
+				--text-tertiary: rgb(107, 114, 128);
+				--border-color: rgba(255, 255, 255, 0.05);
+				--border-hover: rgba(139, 92, 246, 0.2);
+				--cursor-color: white;
+				--cursor-ring: rgba(255, 255, 255, 0.4);
+				--vanta-bg: 0x0a0a0a;
+				--dimmer-bg: rgba(0, 0, 0, 0);
+				--nav-bg: rgba(10, 10, 10, 0.2);
+				--nav-bg-scroll: rgba(10, 10, 10, 0.9);
+			}
+
+			body.light-mode {
+				--bg-primary: #ffffff;
+				--bg-secondary: rgba(255, 255, 255, 0.7);
+				--bg-card: rgba(255, 255, 255, 0.9);
+				--bg-card-hover: rgba(139, 92, 246, 0.05);
+				--text-primary: rgb(17, 24, 39);
+				--text-secondary: rgb(75, 85, 99);
+				--text-tertiary: rgb(156, 163, 175);
+				--border-color: rgba(0, 0, 0, 0.08);
+				--border-hover: rgba(139, 92, 246, 0.3);
+				--cursor-color: #8b5cf6;
+				--cursor-ring: rgba(139, 92, 246, 0.5);
+				--vanta-bg: 0xffffff;
+				--dimmer-bg: rgba(255, 255, 255, 0);
+				--nav-bg: rgba(255, 255, 255, 0.7);
+				--nav-bg-scroll: rgba(255, 255, 255, 0.95);
+			}
+
 			html {
 				overflow-x: hidden;
 			}
 			body {
-				background-color: #0a0a0a;
+				background-color: var(--bg-primary);
+				color: var(--text-primary);
 			}
 			h1, h2, h3, h4, h5, h6 { 
 				font-family: 'Outfit', sans-serif; 
 				filter: drop-shadow(0 4px 30px rgba(0,0,0,0.6));
+				color: var(--text-primary);
+			}
+			body.light-mode h1,
+			body.light-mode h2,
+			body.light-mode h3,
+			body.light-mode h4,
+			body.light-mode h5,
+			body.light-mode h6 {
+				filter: drop-shadow(0 2px 10px rgba(0,0,0,0.1));
 			}
 			::selection { background-color: rgba(139, 92, 246, 0.3); color: white; }
+			body.light-mode ::selection { background-color: rgba(139, 92, 246, 0.2); color: rgb(17, 24, 39); }
 			::-webkit-scrollbar { width: 6px; }
-			::-webkit-scrollbar-track { background: #0a0a0a; }
+			::-webkit-scrollbar-track { background: var(--bg-primary); }
 			::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+			body.light-mode ::-webkit-scrollbar-thumb { background: #ddd; }
 			::-webkit-scrollbar-thumb:hover { background: #444; }
+			body.light-mode ::-webkit-scrollbar-thumb:hover { background: #bbb; }
 
 			/* === CLIP-PATH REVEAL === */
 			.reveal-word {
@@ -105,6 +154,11 @@ const { title } = Astro.props;
 			.reveal-word.revealed span {
 				transform: translateY(0);
 				opacity: 1;
+			}
+			/* Allow shimmer gradient to paint beyond the clipping box */
+			.reveal-word .text-shimmer {
+				padding-bottom: 0.1em;
+				margin-bottom: -0.1em;
 			}
 
 			/* === FADE SLIDE === */
@@ -132,7 +186,11 @@ const { title } = Astro.props;
 				transform-style: preserve-3d;
 				transition: transform 0.15s ease;
 				backdrop-filter: blur(12px);
-				background-color: rgba(10, 10, 10, 0.4);
+				background-color: var(--bg-card);
+				border-color: var(--border-color);
+			}
+			body.light-mode .tilt-card {
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 			}
 			.tilt-card-inner {
 				transform: translateZ(20px);
@@ -175,6 +233,15 @@ const { title } = Astro.props;
 				-webkit-text-fill-color: transparent;
 				background-clip: text;
 			}
+			/* Exception: keep shimmer animated on the hero headline — it's the key visual */
+			body.win-perf-mode .hero-word-accent .text-shimmer {
+				animation: shimmer 6s linear infinite;
+				background: linear-gradient(90deg, #a78bfa, #818cf8, #38bdf8, #e879f9, #a78bfa);
+				background-size: 200% auto;
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
 			body.win-perf-mode .hero-orb {
 				animation: none;
 				filter: blur(80px);
@@ -209,6 +276,15 @@ const { title } = Astro.props;
 				background-clip: text;
 				animation: shimmer 6s linear infinite;
 			}
+			/* Shimmer stays vivid in light mode — slightly richer contrast */
+			body.light-mode .text-shimmer {
+				background: linear-gradient(90deg, #7c3aed, #6366f1, #0ea5e9, #d946ef, #7c3aed);
+				background-size: 200% auto;
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				animation: shimmer 6s linear infinite;
+			}
 
 			/* === COUNTER === */
 			.count-up { font-variant-numeric: tabular-nums; }
@@ -228,9 +304,132 @@ const { title } = Astro.props;
 				60% { clip-path: inset(10% 0 80% 0); transform: translate(-2px); }
 				80% { clip-path: inset(80% 0 5% 0); transform: translate(2px); }
 			}
+
+			/* === LIGHT MODE: COMPONENTS === */
+
+			/* ProjectCard */
+			body.light-mode .tilt-card[data-project] {
+				background-color: rgba(255, 255, 255, 0.9) !important;
+				border-color: rgba(0, 0, 0, 0.07) !important;
+				box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+			}
+			body.light-mode .tilt-card[data-project]:hover {
+				border-color: rgba(139, 92, 246, 0.25) !important;
+				box-shadow: 0 12px 40px rgba(139, 92, 246, 0.12);
+			}
+			body.light-mode .tilt-card[data-project] h3 {
+				color: rgb(17, 24, 39) !important;
+			}
+			body.light-mode .tilt-card[data-project] p {
+				color: rgb(75, 85, 99) !important;
+			}
+			body.light-mode .tilt-card[data-project] p.group-hover\:text-gray-300 {
+				color: rgb(55, 65, 81) !important;
+			}
+			body.light-mode .tilt-card[data-project] .text-gray-500 {
+				color: rgb(107, 114, 128) !important;
+			}
+			/* Year tag on card image */
+			body.light-mode .tilt-card[data-project] .bg-black\/60 {
+				background-color: rgba(255, 255, 255, 0.85) !important;
+				border-color: rgba(0, 0, 0, 0.1) !important;
+				color: rgb(17, 24, 39) !important;
+			}
+			/* Arrow icon circle */
+			body.light-mode .tilt-card[data-project] .border-white\/5 {
+				border-color: rgba(0, 0, 0, 0.08) !important;
+				color: rgba(0, 0, 0, 0.2) !important;
+			}
+			/* Tag pills */
+			body.light-mode .tilt-card[data-project] span.bg-white\/\[0\.03\] {
+				background-color: rgba(0, 0, 0, 0.03) !important;
+				border-color: rgba(0, 0, 0, 0.07) !important;
+				color: rgb(107, 114, 128) !important;
+			}
+
+			/* TimelineItem */
+			body.light-mode .timeline-item {
+				background-color: rgba(255, 255, 255, 0.85) !important;
+				border-color: rgba(0, 0, 0, 0.08) !important;
+				box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+			}
+			body.light-mode .timeline-item:hover {
+				border-color: rgba(236, 72, 153, 0.3) !important;
+			}
+			body.light-mode .timeline-item h3 {
+				color: rgb(17, 24, 39) !important;
+			}
+			body.light-mode .timeline-item .text-gray-400 {
+				color: rgb(75, 85, 99) !important;
+			}
+			body.light-mode .timeline-item .text-gray-300 {
+				color: rgb(55, 65, 81) !important;
+			}
+			body.light-mode .timeline-item .border-white\/5 {
+				border-color: rgba(0, 0, 0, 0.06) !important;
+			}
+			body.light-mode .timeline-item .bg-white\/5 {
+				background-color: rgba(0, 0, 0, 0.03) !important;
+			}
+			body.light-mode .timeline-item .border-white\/10 {
+				border-color: rgba(0, 0, 0, 0.08) !important;
+			}
+			/* Tech stack pills in timeline */
+			body.light-mode .timeline-item span.bg-white\/5 {
+				background-color: rgba(0, 0, 0, 0.04) !important;
+				border-color: rgba(0, 0, 0, 0.08) !important;
+				color: rgb(75, 85, 99) !important;
+			}
+			/* Preview image border */
+			body.light-mode .timeline-item .border-white\/5.shadow-2xl {
+				border-color: rgba(0, 0, 0, 0.08) !important;
+			}
 		</style>
 
 		<script>
+		// ── Theme Management ────────────────────────────────────────────────────
+		// Initialize theme from localStorage or system preference
+		const initTheme = () => {
+			const savedTheme = localStorage.getItem('theme');
+			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+			
+			if (theme === 'light') {
+				document.body.classList.add('light-mode');
+			}
+			return theme;
+		};
+
+		// Apply theme immediately to prevent flash
+		const currentTheme = initTheme();
+
+		// Theme toggle function
+		const toggleTheme = () => {
+			const isLight = document.body.classList.toggle('light-mode');
+			localStorage.setItem('theme', isLight ? 'light' : 'dark');
+			
+			// Update Vanta background color
+			if ((window as any).vantaEffect) {
+				(window as any).vantaEffect.setOptions({
+					backgroundColor: isLight ? 0xffffff : 0x0a0a0a
+				});
+			}
+			
+			// Update cursor colors for non-Windows
+			if (!isWindows) {
+				if (isLight) {
+					dot.style.backgroundColor = '#8b5cf6';
+					ring.style.borderColor = 'rgba(139,92,246,0.5)';
+				} else {
+					dot.style.backgroundColor = 'white';
+					ring.style.borderColor = 'rgba(255,255,255,0.4)';
+				}
+			}
+		};
+
+		// Expose toggle function globally for button click
+		(window as any).toggleTheme = toggleTheme;
+
 		// ── Platform Detection ──────────────────────────────────────────────────
 		// All Windows browsers (Chrome + Edge) get perf-mode:
 		// backdrop-filter is expensive on Windows regardless of browser.
@@ -257,6 +456,13 @@ const { title } = Astro.props;
 				dot.style.backgroundColor = 'rgba(139,92,246,0.9)';
 				ring.style.mixBlendMode = 'normal';
 				ring.style.borderColor = 'rgba(139,92,246,0.5)';
+			} else {
+				// Set initial cursor colors based on theme
+				const isLight = document.body.classList.contains('light-mode');
+				if (isLight) {
+					dot.style.backgroundColor = '#8b5cf6';
+					ring.style.borderColor = 'rgba(139,92,246,0.5)';
+				}
 			}
 
 			document.addEventListener('mousemove', (e) => {
@@ -416,7 +622,7 @@ const { title } = Astro.props;
 			// Override the nav's inline style blur set in the HTML attribute
 			nav.style.backdropFilter = 'none';
 			(nav.style as any).webkitBackdropFilter = 'none';
-			nav.style.background = 'rgba(10,10,10,0.92)';
+			nav.style.background = 'var(--nav-bg-scroll)';
 		}
 
 		let scrollRaf = false;
@@ -427,14 +633,15 @@ const { title } = Astro.props;
 				scrollRaf = false;
 				const scrollY = window.scrollY;
 				const windowHeight = window.innerHeight;
+				const isLight = document.body.classList.contains('light-mode');
 
 				if (scrollY > 80) {
-					nav.style.background = 'rgba(10,10,10,0.9)';
+					nav.style.background = isLight ? 'var(--nav-bg-scroll)' : 'rgba(10,10,10,0.9)';
 					// Windows: solid bg, no blur — backdrop-filter on a full-width sticky
 					// nav triggers a full-viewport GPU layer on every scroll event in Chrome.
 					if (!isWindows) nav.style.backdropFilter = 'blur(32px)';
 				} else {
-					nav.style.background = isWindows ? 'rgba(10,10,10,0.92)' : 'rgba(10,10,10,0.2)';
+					nav.style.background = isLight ? 'var(--nav-bg)' : (isWindows ? 'rgba(10,10,10,0.92)' : 'rgba(10,10,10,0.2)');
 					if (!isWindows) nav.style.backdropFilter = 'blur(16px)';
 				}
 
@@ -447,14 +654,15 @@ const { title } = Astro.props;
 						bgDimmer.style.opacity = dimOpacity.toString();
 						bgDimmer.style.backdropFilter = `blur(${progress * 30}px)`;
 					} else {
-						bgDimmer.style.backgroundColor = `rgba(0,0,0,${dimOpacity * 0.7})`;
+						const bgColor = isLight ? `rgba(255,255,255,${dimOpacity * 0.5})` : `rgba(0,0,0,${dimOpacity * 0.7})`;
+						bgDimmer.style.backgroundColor = bgColor;
 					}
 				} else {
 					if (!isWindows) {
 						bgDimmer.style.opacity = '0';
 						bgDimmer.style.backdropFilter = 'blur(0px)';
 					} else {
-						bgDimmer.style.backgroundColor = 'rgba(0,0,0,0)';
+						bgDimmer.style.backgroundColor = isLight ? 'rgba(255,255,255,0)' : 'rgba(0,0,0,0)';
 					}
 				}
 			});
@@ -489,14 +697,15 @@ const { title } = Astro.props;
 		let vantaAttempts = 0;
 		const tryVanta = () => {
 			if ((window as any).VANTA && (window as any).VANTA.HALO) {
-				(window as any).VANTA.HALO({
+				const isLight = document.body.classList.contains('light-mode');
+				(window as any).vantaEffect = (window as any).VANTA.HALO({
 					el: "#vanta-bg",
 					mouseControls: true,
 					touchControls: true,
 					gyroControls: false,
 					minHeight: 200.00,
 					minWidth: 200.00,
-					backgroundColor: 0x0a0a0a,
+					backgroundColor: isLight ? 0xffffff : 0x0a0a0a,
 					amplitudeFactor: 0.50,
 					ringFactor: 0.30,
 					rotationFactor: 0.20,

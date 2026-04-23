@@ -27,7 +27,7 @@ const indieProjects = [
 <Layout title="Luci | Flutter Developer & Software Engineer">
 
   <!-- NAV -->
-  <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-white/5" style="background:rgba(10,10,10,0.2);backdrop-filter:blur(16px)">
+  <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
         <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
@@ -42,13 +42,28 @@ const indieProjects = [
       </div>
 
       <div class="flex items-center gap-4">
+        <!-- Theme Toggle Button -->
+        <button 
+          id="theme-toggle" 
+          onclick="window.toggleTheme()"
+          class="w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
+          aria-label="Toggle theme"
+        >
+          <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+          </svg>
+          <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+        </button>
+
         <a href="#contact" class="magnetic hidden sm:block px-5 py-2.5 bg-white text-black text-xs font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest">Let's Talk</a>
         
         <!-- Mobile Menu Toggle -->
         <button id="mobile-menu-toggle" class="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[100] group">
-          <span class="w-6 h-0.5 bg-white transition-transform duration-300 group-[.active]:rotate-45 group-[.active]:translate-y-2"></span>
-          <span class="w-6 h-0.5 bg-white transition-opacity duration-300 group-[.active]:opacity-0"></span>
-          <span class="w-6 h-0.5 bg-white transition-transform duration-300 group-[.active]:-rotate-45 group-[.active]:-translate-y-2"></span>
+          <span class="w-6 h-0.5 transition-transform duration-300 group-[.active]:rotate-45 group-[.active]:translate-y-2" style="background-color: var(--text-primary);"></span>
+          <span class="w-6 h-0.5 transition-opacity duration-300 group-[.active]:opacity-0" style="background-color: var(--text-primary);"></span>
+          <span class="w-6 h-0.5 transition-transform duration-300 group-[.active]:-rotate-45 group-[.active]:-translate-y-2" style="background-color: var(--text-primary);"></span>
         </button>
       </div>
     </div>
@@ -120,13 +135,13 @@ const indieProjects = [
 
         <!-- CTA Buttons -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-5" style="opacity:0;animation:fadeSlideUp 0.8s 0.9s forwards">
-          <a href="#work" class="magnetic group relative px-8 py-4 bg-white text-black text-sm font-black rounded-full overflow-hidden hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] transition-all duration-500 hover:scale-105">
+          <a href="#work" class="magnetic group relative px-8 py-4 hero-cta-primary text-sm font-black rounded-full overflow-hidden hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] transition-all duration-500 hover:scale-105">
             <span class="relative z-10 uppercase tracking-widest">View Work</span>
             <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <span class="absolute inset-0 z-10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 font-black uppercase tracking-widest transition-opacity duration-500">View Work</span>
             <div class="absolute -inset-1 bg-gradient-to-r from-violet-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-20 blur transition-opacity duration-500"></div>
           </a>
-          <a href="#art" class="magnetic px-8 py-4 border border-white/10 text-sm font-bold rounded-full text-gray-400 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all duration-300 uppercase tracking-widest hover:scale-105">
+          <a href="#art" class="magnetic hero-cta-secondary px-8 py-4 border text-sm font-bold rounded-full transition-all duration-300 uppercase tracking-widest hover:scale-105">
             See Art →
           </a>
         </div>
@@ -185,7 +200,7 @@ const indieProjects = [
       <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
     </div>
     <!-- CONTENT WRAPPER FOR SMOOTH TRANSITIONS -->
-    <div class="relative bg-black/60 backdrop-blur-2xl border-t border-white/5">
+    <div class="relative bg-black/60 backdrop-blur-2xl border-t border-white/5 light-mode:bg-white/80" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
       
       <!-- ABOUT ME -->
       <section id="about" class="py-24 px-6 overflow-hidden">
@@ -501,7 +516,7 @@ const indieProjects = [
             <span class="reveal-word block" style="transition-delay:300ms"><span class="text-white">AMAZING</span><span class="text-violet-500">.</span></span>
           </h2>
           <div data-reveal class="flex flex-col sm:flex-row items-center justify-center gap-5">
-            <a href="mailto:lapl1412.work@gmail.com" class="magnetic group relative px-10 py-5 rounded-full bg-white text-black font-black uppercase tracking-widest overflow-hidden hover:shadow-[0_0_80px_rgba(139,92,246,0.5)] transition-all duration-500">
+            <a href="mailto:lapl1412.work@gmail.com" class="magnetic group relative px-10 py-5 rounded-full hero-cta-primary font-black uppercase tracking-widest overflow-hidden hover:shadow-[0_0_80px_rgba(139,92,246,0.5)] transition-all duration-500">
               <span class="relative z-10">Say Hello</span>
               <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <span class="absolute inset-0 z-10 flex items-center justify-center text-white font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500">Say Hello</span>
@@ -570,6 +585,295 @@ const indieProjects = [
   100%{ transform: rotate(360deg) scale(1); }
 }
 
+/* ── Semantic CTA button classes (theme-aware) ── */
+.hero-cta-primary {
+  background: white;
+  color: black;
+}
+body.light-mode .hero-cta-primary {
+  background: rgb(17, 24, 39);
+  color: white;
+}
+.hero-cta-secondary {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgb(156, 163, 175);
+}
+.hero-cta-secondary:hover {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+}
+body.light-mode .hero-cta-secondary {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgb(107, 114, 128);
+}
+body.light-mode .hero-cta-secondary:hover {
+  color: rgb(17, 24, 39);
+  border-color: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ── Light Mode Overrides ── */
+body.light-mode nav {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Nav links */
+body.light-mode nav a {
+  color: rgb(75, 85, 99);
+}
+body.light-mode nav a:hover {
+  color: rgb(17, 24, 39);
+}
+body.light-mode nav .text-xl {
+  color: rgb(17, 24, 39);
+}
+
+/* Theme toggle button */
+body.light-mode #theme-toggle {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+body.light-mode #theme-toggle svg {
+  color: rgb(107, 114, 128);
+}
+body.light-mode #theme-toggle:hover svg {
+  color: rgb(17, 24, 39);
+}
+
+/* "Let's Talk" button in nav */
+body.light-mode nav .magnetic {
+  background: rgb(17, 24, 39);
+  color: white;
+}
+body.light-mode nav .magnetic:hover {
+  background: #8b5cf6;
+}
+
+/* Hero text */
+body.light-mode .hero-line-top .text-white,
+body.light-mode .hero-line-bottom .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode .hero-line-bottom .text-gray-300 {
+  color: rgb(107, 114, 128) !important;
+}
+
+body.light-mode .hero-badge {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.08);
+}
+body.light-mode .hero-badge-text {
+  color: rgb(75, 85, 99);
+}
+body.light-mode .hero-subtitle {
+  color: rgb(75, 85, 99);
+}
+body.light-mode .hero-stat-pill {
+  color: rgb(107, 114, 128);
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+}
+body.light-mode .hero-stat-pill:hover {
+  color: rgb(17, 24, 39);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+body.light-mode .hero-stat-sep {
+  color: rgba(0, 0, 0, 0.15);
+}
+
+/* CTA buttons in hero */
+body.light-mode .hero-line ~ div a.magnetic:first-child,
+body.light-mode section a[href="#work"].magnetic {
+  background: rgb(17, 24, 39);
+  color: white;
+}
+body.light-mode section a[href="#art"].magnetic {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgb(107, 114, 128);
+}
+body.light-mode section a[href="#art"].magnetic:hover {
+  color: rgb(17, 24, 39);
+  border-color: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* Scroll hint */
+body.light-mode .absolute.bottom-10 span {
+  color: rgb(107, 114, 128);
+}
+
+/* Marquee strip */
+body.light-mode .border-y {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+body.light-mode .animate-marquee .text-gray-400 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode .animate-marquee .text-gray-700 {
+  color: rgb(209, 213, 219) !important;
+}
+
+/* Stats section */
+body.light-mode .border-b {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+body.light-mode .tilt-card {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.07) !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+body.light-mode .tilt-card:hover {
+  border-color: rgba(139, 92, 246, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+}
+/* Stats number gradient */
+body.light-mode .bg-gradient-to-br.from-white.to-gray-500 {
+  background-image: linear-gradient(to bottom right, rgb(17, 24, 39), rgb(107, 114, 128)) !important;
+}
+body.light-mode .tilt-card .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode .tilt-card .text-gray-400 {
+  color: rgb(107, 114, 128) !important;
+}
+
+/* Divider lines */
+body.light-mode .opacity-20 .bg-gradient-to-b {
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.15), transparent) !important;
+}
+
+/* Content wrapper */
+body.light-mode .relative.bg-black\/60 {
+  background-color: rgba(248, 248, 252, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* About section */
+body.light-mode .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+body.light-mode .bg-white\/\[0\.02\] {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+body.light-mode .bg-black\/40 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+body.light-mode .text-gray-400 {
+  color: rgb(75, 85, 99) !important;
+}
+body.light-mode .text-gray-300 {
+  color: rgb(55, 65, 81) !important;
+}
+body.light-mode .text-gray-500 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode .text-gray-600 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+/* Keep accent colors vivid — must come AFTER the text-white override */
+body.light-mode .text-violet-500 { color: #8b5cf6 !important; }
+body.light-mode .text-violet-400 { color: #a78bfa !important; }
+body.light-mode .text-pink-500   { color: #ec4899 !important; }
+body.light-mode .text-blue-500   { color: #3b82f6 !important; }
+body.light-mode .text-emerald-500{ color: #10b981 !important; }
+body.light-mode .text-amber-500  { color: #f59e0b !important; }
+body.light-mode .text-cyan-500   { color: #06b6d4 !important; }
+
+/* Quick facts grid */
+body.light-mode .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+body.light-mode .hover\:bg-white\/\[0\.05\]:hover {
+  background-color: rgba(139, 92, 246, 0.05) !important;
+}
+
+/* Blog cards */
+body.light-mode article.tilt-card h3 {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode .text-gray-700 {
+  color: rgb(156, 163, 175) !important;
+}
+
+/* Experience section dividers */
+body.light-mode .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Skills tag pills */
+body.light-mode .bg-white\/5.border-white\/10 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: rgb(75, 85, 99) !important;
+}
+
+/* Now section list items */
+body.light-mode .text-amber-500 {
+  color: #d97706 !important;
+}
+
+/* CTA section */
+body.light-mode #contact h2 .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode #contact a[href^="mailto"] {
+  background: rgb(17, 24, 39);
+  color: white;
+}
+body.light-mode #contact a[href^="mailto"]:hover {
+  box-shadow: 0 0 80px rgba(139, 92, 246, 0.4);
+}
+
+/* Footer */
+body.light-mode footer {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+body.light-mode footer .text-gray-600 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode footer .text-gray-700 {
+  color: rgb(156, 163, 175) !important;
+}
+body.light-mode footer .text-gray-500 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode footer a:hover {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode footer span.text-xl {
+  color: rgb(17, 24, 39) !important;
+}
+
+/* Timeline active state */
+body.light-mode .timeline-item.active {
+  background: linear-gradient(135deg, rgba(204, 95, 150, 0.12) 0%, rgba(255, 255, 255, 1) 40%, rgba(255, 255, 255, 1) 100%) !important;
+  border-color: rgba(236, 72, 153, 0.4) !important;
+  box-shadow: 0 20px 40px -20px rgba(236, 72, 153, 0.15);
+}
+
+/* Mobile menu */
+body.light-mode #mobile-menu {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(24px);
+}
+body.light-mode .mobile-nav-link {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode .mobile-nav-link:hover {
+  color: #8b5cf6 !important;
+}
+body.light-mode #mobile-menu .h-px {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+body.light-mode #mobile-menu a[href="#contact"] {
+  background: rgb(17, 24, 39) !important;
+  color: white !important;
+}
+
 /* ── Floating orbs ── */
 .hero-orb {
   position: absolute;
@@ -584,11 +888,17 @@ const indieProjects = [
   top: 5%; left: -10%;
   animation: orb-float-1 14s ease-in-out infinite;
 }
+body.light-mode .hero-orb-1 {
+  background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+}
 .hero-orb-2 {
   width: 400px; height: 400px;
   background: radial-gradient(circle, rgba(59,130,246,0.14) 0%, transparent 70%);
   bottom: 10%; right: -8%;
   animation: orb-float-2 18s ease-in-out infinite;
+}
+body.light-mode .hero-orb-2 {
+  background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
 }
 
 /* ── Role Badge ── */
@@ -797,5 +1107,29 @@ const indieProjects = [
       menu?.classList.remove('pointer-events-auto');
       document.body.style.overflow = '';
     });
+  });
+
+  // Theme Toggle Icon Update
+  const updateThemeIcon = () => {
+    const isLight = document.body.classList.contains('light-mode');
+    const darkIcon = document.querySelector('.dark-icon');
+    const lightIcon = document.querySelector('.light-icon');
+    
+    if (isLight) {
+      darkIcon?.classList.add('hidden');
+      lightIcon?.classList.remove('hidden');
+    } else {
+      darkIcon?.classList.remove('hidden');
+      lightIcon?.classList.add('hidden');
+    }
+  };
+
+  // Update icon on page load
+  updateThemeIcon();
+
+  // Listen for theme changes
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  themeToggleBtn?.addEventListener('click', () => {
+    setTimeout(updateThemeIcon, 50);
   });
 </script>
