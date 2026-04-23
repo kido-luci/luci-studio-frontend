@@ -232,16 +232,14 @@ const { title } = Astro.props;
 
 		<script>
 		// ── Platform Detection ──────────────────────────────────────────────────
+		// All Windows browsers (Chrome + Edge) get perf-mode:
+		// backdrop-filter is expensive on Windows regardless of browser.
 		const isWindows = navigator.platform.startsWith('Win') ||
 			((navigator as any).userAgentData?.platform === 'Windows') ||
 			(/Windows/.test(navigator.userAgent));
-		// Edge has Microsoft's D3D12 GPU path and handles all effects fine.
-		// Only throttle on Windows Chrome (Blink without the Edge GPU optimisations).
-		const isEdge = /Edg\//.test(navigator.userAgent);
-		const isWindowsChrome = isWindows && !isEdge;
 
 		// Apply CSS perf-mode class immediately so overrides land before first paint
-		if (isWindowsChrome) document.body.classList.add('win-perf-mode');
+		if (isWindows) document.body.classList.add('win-perf-mode');
 
 		// ── Custom Cursor ───────────────────────────────────────────────────────
 		const dot = document.getElementById('cursor-dot') as HTMLElement;
@@ -253,8 +251,8 @@ const { title } = Astro.props;
 			dot.style.display = 'none';
 			ring.style.display = 'none';
 		} else {
-			// Windows Chrome: remove mix-blend-difference (causes full-page repaints)
-			if (isWindowsChrome) {
+			// Windows: remove mix-blend-difference (causes full-page repaints)
+			if (isWindows) {
 				dot.style.mixBlendMode = 'normal';
 				dot.style.backgroundColor = 'rgba(139,92,246,0.9)';
 				ring.style.mixBlendMode = 'normal';
@@ -267,8 +265,8 @@ const { title } = Astro.props;
 				dot.style.top = mouseY - 4 + 'px';
 			});
 
-			if (isWindowsChrome) {
-				// Windows Chrome: CSS transition instead of infinite rAF loop
+			if (isWindows) {
+				// Windows: CSS transition instead of infinite rAF loop
 				ring.style.transition = 'left 0.12s ease-out, top 0.12s ease-out, transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease';
 				document.addEventListener('mousemove', (e) => {
 					ring.style.left = e.clientX - 20 + 'px';
@@ -295,10 +293,10 @@ const { title } = Astro.props;
 				});
 				el.addEventListener('mouseleave', () => {
 					ring.style.transform = 'scale(1)';
-					ring.style.borderColor = isWindowsChrome ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.4)';
+					ring.style.borderColor = isWindows ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.4)';
 					ring.style.boxShadow = 'none';
 					dot.style.transform = 'scale(1)';
-					dot.style.backgroundColor = isWindowsChrome ? 'rgba(139,92,246,0.9)' : 'white';
+					dot.style.backgroundColor = isWindows ? 'rgba(139,92,246,0.9)' : 'white';
 				});
 			});
 		}
@@ -306,7 +304,7 @@ const { title } = Astro.props;
 		// ── Parallax Mousemove (throttled on Windows) ───────────────────────────
 		let parallaxFrame = false;
 		document.addEventListener('mousemove', (e) => {
-			if (isWindowsChrome) {
+			if (isWindows) {
 				if (parallaxFrame) return;
 				parallaxFrame = true;
 				requestAnimationFrame(() => {
@@ -371,7 +369,7 @@ const { title } = Astro.props;
 		document.querySelectorAll('[data-count]').forEach(el => counterIo.observe(el));
 
 		// ── Card Tilt (disabled on Windows — 3D compositing is costly) ──────────
-		if (!isWindowsChrome) {
+		if (!isWindows) {
 			document.querySelectorAll('.tilt-card').forEach((card) => {
 				const el = card as HTMLElement;
 				el.addEventListener('mousemove', (e) => {
@@ -386,7 +384,7 @@ const { title } = Astro.props;
 				el.addEventListener('mouseleave', () => { el.style.transform = ''; });
 			});
 		} else {
-			// Windows Chrome: simple scale hover instead of 3D tilt
+			// Windows: simple scale hover instead of 3D tilt
 			document.querySelectorAll('.tilt-card').forEach((card) => {
 				const el = card as HTMLElement;
 				el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.02)'; });
@@ -410,9 +408,9 @@ const { title } = Astro.props;
 		const nav = document.querySelector('nav') as HTMLElement;
 		const bgDimmer = document.getElementById('bg-dimmer') as HTMLElement;
 
-		// Windows Chrome: disable dynamic backdrop-filter on bg-dimmer (very expensive).
+		// Windows: disable dynamic backdrop-filter on bg-dimmer (very expensive).
 		// Also clear the nav's initial inline style backdrop-filter.
-		if (isWindowsChrome) {
+		if (isWindows) {
 			bgDimmer.style.backdropFilter = 'none';
 			(bgDimmer.style as any).webkitBackdropFilter = 'none';
 			// Override the nav's inline style blur set in the HTML attribute
@@ -432,12 +430,12 @@ const { title } = Astro.props;
 
 				if (scrollY > 80) {
 					nav.style.background = 'rgba(10,10,10,0.9)';
-					// Windows Chrome: solid bg, no blur — backdrop-filter on a full-width sticky
+					// Windows: solid bg, no blur — backdrop-filter on a full-width sticky
 					// nav triggers a full-viewport GPU layer on every scroll event in Chrome.
-					if (!isWindowsChrome) nav.style.backdropFilter = 'blur(32px)';
+					if (!isWindows) nav.style.backdropFilter = 'blur(32px)';
 				} else {
-					nav.style.background = isWindowsChrome ? 'rgba(10,10,10,0.92)' : 'rgba(10,10,10,0.2)';
-					if (!isWindowsChrome) nav.style.backdropFilter = 'blur(16px)';
+					nav.style.background = isWindows ? 'rgba(10,10,10,0.92)' : 'rgba(10,10,10,0.2)';
+					if (!isWindows) nav.style.backdropFilter = 'blur(16px)';
 				}
 
 				const dimStart = windowHeight * 0.4;
@@ -445,14 +443,14 @@ const { title } = Astro.props;
 				if (scrollY > dimStart) {
 					const progress = Math.min((scrollY - dimStart) / (dimEnd - dimStart), 1);
 					const dimOpacity = progress * 0.85;
-					if (!isWindowsChrome) {
+					if (!isWindows) {
 						bgDimmer.style.opacity = dimOpacity.toString();
 						bgDimmer.style.backdropFilter = `blur(${progress * 30}px)`;
 					} else {
 						bgDimmer.style.backgroundColor = `rgba(0,0,0,${dimOpacity * 0.7})`;
 					}
 				} else {
-					if (!isWindowsChrome) {
+					if (!isWindows) {
 						bgDimmer.style.opacity = '0';
 						bgDimmer.style.backdropFilter = 'blur(0px)';
 					} else {
