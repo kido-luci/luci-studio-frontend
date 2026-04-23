@@ -62,7 +62,7 @@ const { title } = Astro.props;
 	</head>
 	<body class="bg-[#0a0a0a] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden max-w-full transition-colors duration-500">
 		<!-- Vanta.js Background Animation -->
-		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2]"></div>
+		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2]" style="opacity: 1;"></div>
 
 		<!-- Scroll-based Background Dimmer -->
 		<div id="bg-dimmer" class="fixed inset-0 w-full h-full pointer-events-none z-[-1] bg-black/0 transition-all duration-500"></div>
@@ -408,10 +408,19 @@ const { title } = Astro.props;
 			const isLight = document.body.classList.toggle('light-mode');
 			localStorage.setItem('theme', isLight ? 'light' : 'dark');
 			
-			// Update Vanta background color
+			// Update Vanta background color and intensity
 			if ((window as any).vantaEffect) {
 				(window as any).vantaEffect.setOptions({
-					backgroundColor: isLight ? 0xffffff : 0x0a0a0a
+					backgroundColor: isLight ? 0xf8f9fa : 0x0a0a0a,
+					amplitudeFactor: isLight ? 1.20 : 0.50,
+					ringFactor: isLight ? 0.80 : 0.30,
+					rotationFactor: isLight ? 0.40 : 0.20,
+					size: isLight ? 2.00 : 1.20,
+					baseColor: isLight ? 0x6d28d9 : 0x8b5cf6,
+					secondaryColor: isLight ? 0x1d4ed8 : 0x3b82f6,
+					tertiaryColor: isLight ? 0xbe185d : 0xec4899,
+					xOffset: 0.10,
+					yOffset: 0.10
 				});
 			}
 			
@@ -705,14 +714,16 @@ const { title } = Astro.props;
 					gyroControls: false,
 					minHeight: 200.00,
 					minWidth: 200.00,
-					backgroundColor: isLight ? 0xffffff : 0x0a0a0a,
-					amplitudeFactor: 0.50,
-					ringFactor: 0.30,
-					rotationFactor: 0.20,
-					size: 1.20,
-					baseColor: 0x8b5cf6,
-					secondaryColor: 0x3b82f6,
-					tertiaryColor: 0xec4899
+					backgroundColor: isLight ? 0xf8f9fa : 0x0a0a0a,
+					amplitudeFactor: isLight ? 1.20 : 0.50,
+					ringFactor: isLight ? 0.80 : 0.30,
+					rotationFactor: isLight ? 0.40 : 0.20,
+					size: isLight ? 2.00 : 1.20,
+					baseColor: isLight ? 0x6d28d9 : 0x8b5cf6,
+					secondaryColor: isLight ? 0x1d4ed8 : 0x3b82f6,
+					tertiaryColor: isLight ? 0xbe185d : 0xec4899,
+					xOffset: 0.10,
+					yOffset: 0.10
 				});
 			} else if (vantaAttempts++ < 50) {
 				setTimeout(tryVanta, 100);
