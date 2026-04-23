@@ -146,18 +146,56 @@ const { title } = Astro.props;
 
 			/* === WINDOWS PERFORMANCE MODE === */
 			/* Applied via JS when Windows is detected. Disables expensive GPU ops. */
+
+			/* Kill ALL backdrop-filter across the page — the #1 perf killer on Windows Chrome.
+			   This covers: nav, tilt-cards, hero-badge, mobile menu, content wrapper, etc. */
+			body.win-perf-mode * {
+				backdrop-filter: none !important;
+				-webkit-backdrop-filter: none !important;
+			}
+
+			/* Disable 3D compositing on cards */
 			body.win-perf-mode .tilt-card {
 				transform-style: flat;
-				backdrop-filter: none;
-				-webkit-backdrop-filter: none;
+				background-color: rgba(10, 10, 10, 0.85);
 			}
 			body.win-perf-mode .tilt-card-inner {
 				transform: none;
 				transform-style: flat;
 			}
+
+			/* Remove blend mode — causes full-page repaint compositing */
 			body.win-perf-mode #cursor-dot,
 			body.win-perf-mode #cursor-ring {
 				mix-blend-mode: normal;
+			}
+
+			/* Pause heavy continuous animations that Chrome/Windows can't GPU-accelerate.
+			   Shimmer, orb floats, and marquee all run full-time and drain the compositor. */
+			body.win-perf-mode .text-shimmer {
+				animation: none;
+				background: linear-gradient(90deg, #a78bfa, #818cf8);
+				background-size: 100% auto;
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+			body.win-perf-mode .hero-orb {
+				animation: none;
+				filter: blur(80px);
+			}
+			body.win-perf-mode .animate-marquee {
+				animation-play-state: paused;
+			}
+
+			/* Remove expensive drop-shadow filter on headings */
+			body.win-perf-mode h1,
+			body.win-perf-mode h2,
+			body.win-perf-mode h3,
+			body.win-perf-mode h4,
+			body.win-perf-mode h5,
+			body.win-perf-mode h6 {
+				filter: none;
 			}
 
 			/* === MAGNETIC BUTTON === */
@@ -375,9 +413,14 @@ const { title } = Astro.props;
 		const bgDimmer = document.getElementById('bg-dimmer') as HTMLElement;
 
 		// Windows: disable dynamic backdrop-filter on bg-dimmer (very expensive).
+		// Also clear the nav's initial inline style backdrop-filter.
 		if (isWindows) {
 			bgDimmer.style.backdropFilter = 'none';
 			(bgDimmer.style as any).webkitBackdropFilter = 'none';
+			// Override the nav's inline style blur set in the HTML attribute
+			nav.style.backdropFilter = 'none';
+			(nav.style as any).webkitBackdropFilter = 'none';
+			nav.style.background = 'rgba(10,10,10,0.92)';
 		}
 
 		let scrollRaf = false;
@@ -391,10 +434,12 @@ const { title } = Astro.props;
 
 				if (scrollY > 80) {
 					nav.style.background = 'rgba(10,10,10,0.9)';
-					nav.style.backdropFilter = 'blur(32px)';
+					// Windows: solid bg, no blur — backdrop-filter on a full-width sticky
+					// nav triggers a full-viewport GPU layer on every scroll event in Chrome.
+					if (!isWindows) nav.style.backdropFilter = 'blur(32px)';
 				} else {
-					nav.style.background = 'rgba(10,10,10,0.2)';
-					nav.style.backdropFilter = 'blur(16px)';
+					nav.style.background = isWindows ? 'rgba(10,10,10,0.92)' : 'rgba(10,10,10,0.2)';
+					if (!isWindows) nav.style.backdropFilter = 'blur(16px)';
 				}
 
 				const dimStart = windowHeight * 0.4;
