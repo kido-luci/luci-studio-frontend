@@ -16,6 +16,8 @@ const { title } = Astro.props;
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
+		<!-- Anime.js Animation Library -->
+		<script is:inline src="https://cdn.jsdelivr.net/npm/animejs@4.0.0-beta.102/lib/anime.min.js"></script>
 		<!-- Three.js + Vanta: always loaded on all platforms -->
 		<script is:inline>
 			(function() {
@@ -730,6 +732,295 @@ const { title } = Astro.props;
 			}
 		};
 		tryVanta();
+
+		// ── Anime.js Animations ─────────────────────────────────────────────────
+		// Wait for anime to be available
+		const initAnimeAnimations = () => {
+			if (typeof anime === 'undefined') {
+				setTimeout(initAnimeAnimations, 100);
+				return;
+			}
+
+			// Animate navigation items on load
+			anime({
+				targets: 'nav a, nav button',
+				translateY: [-20, 0],
+				opacity: [0, 1],
+				delay: anime.stagger(80, { start: 300 }),
+				duration: 800,
+				easing: 'easeOutExpo'
+			});
+
+			// Animate hero badge
+			anime({
+				targets: '.hero-badge',
+				scale: [0.8, 1],
+				opacity: [0, 1],
+				duration: 1000,
+				easing: 'easeOutElastic(1, .6)',
+				delay: 100
+			});
+
+			// Animate hero subtitle
+			anime({
+				targets: '.hero-subtitle',
+				translateY: [30, 0],
+				opacity: [0, 1],
+				duration: 1000,
+				easing: 'easeOutExpo',
+				delay: 400
+			});
+
+			// Animate stat pills with stagger
+			anime({
+				targets: '.hero-stat-pill',
+				scale: [0.5, 1],
+				opacity: [0, 1],
+				translateY: [30, 0],
+				delay: anime.stagger(100, { start: 600 }),
+				duration: 800,
+				easing: 'easeOutExpo'
+			});
+
+			// Animate CTA buttons
+			anime({
+				targets: '.hero-cta-primary, .hero-cta-secondary',
+				scale: [0.9, 1],
+				opacity: [0, 1],
+				delay: anime.stagger(150, { start: 800 }),
+				duration: 1000,
+				easing: 'easeOutElastic(1, .8)'
+			});
+
+			// Floating animation for hero orbs
+			anime({
+				targets: '.hero-orb',
+				translateY: [
+					{ value: -20, duration: 2000 },
+					{ value: 0, duration: 2000 }
+				],
+				translateX: [
+					{ value: 10, duration: 2500 },
+					{ value: -10, duration: 2500 }
+				],
+				loop: true,
+				easing: 'easeInOutSine',
+				delay: anime.stagger(500)
+			});
+
+			// Pulse animation for project cards on hover
+			document.querySelectorAll('.tilt-card[data-project]').forEach(card => {
+				card.addEventListener('mouseenter', () => {
+					anime({
+						targets: card.querySelector('img'),
+						scale: [1, 1.05],
+						duration: 600,
+						easing: 'easeOutQuad'
+					});
+				});
+				card.addEventListener('mouseleave', () => {
+					anime({
+						targets: card.querySelector('img'),
+						scale: [1.05, 1],
+						duration: 600,
+						easing: 'easeOutQuad'
+					});
+				});
+			});
+
+			// Animate section headings when they come into view
+			const headingObserver = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						anime({
+							targets: entry.target,
+							translateX: [-50, 0],
+							opacity: [0, 1],
+							duration: 1200,
+							easing: 'easeOutExpo'
+						});
+						headingObserver.unobserve(entry.target);
+					}
+				});
+			}, { threshold: 0.3 });
+
+			document.querySelectorAll('section > h2, section > h3').forEach(heading => {
+				headingObserver.observe(heading);
+			});
+
+			// Animate timeline items
+			const timelineObserver = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						anime({
+							targets: entry.target,
+							translateX: [-100, 0],
+							opacity: [0, 1],
+							duration: 1000,
+							easing: 'easeOutExpo'
+						});
+						timelineObserver.unobserve(entry.target);
+					}
+				});
+			}, { threshold: 0.2 });
+
+			document.querySelectorAll('.timeline-item').forEach(item => {
+				timelineObserver.observe(item);
+			});
+
+			// Animate blog cards
+			const blogObserver = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						const cards = entry.target.querySelectorAll('article.tilt-card');
+						if (cards.length > 0) {
+							anime({
+								targets: cards,
+								scale: [0.8, 1],
+								opacity: [0, 1],
+								translateY: [50, 0],
+								delay: anime.stagger(100),
+								duration: 800,
+								easing: 'easeOutExpo'
+							});
+						}
+						blogObserver.unobserve(entry.target);
+					}
+				});
+			}, { threshold: 0.1 });
+
+			document.querySelectorAll('#blog, #art').forEach(section => {
+				blogObserver.observe(section);
+			});
+
+			// Animate contact section
+			const contactObserver = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						anime({
+							targets: '#contact h2',
+							scale: [0.9, 1],
+							opacity: [0, 1],
+							duration: 1000,
+							easing: 'easeOutElastic(1, .6)'
+						});
+						anime({
+							targets: '#contact p',
+							translateY: [30, 0],
+							opacity: [0, 1],
+							delay: 200,
+							duration: 800,
+							easing: 'easeOutExpo'
+						});
+						anime({
+							targets: '#contact a',
+							scale: [0.8, 1],
+							opacity: [0, 1],
+							delay: anime.stagger(100, { start: 400 }),
+							duration: 800,
+							easing: 'easeOutElastic(1, .8)'
+						});
+						contactObserver.unobserve(entry.target);
+					}
+				});
+			}, { threshold: 0.3 });
+
+			const contactSection = document.querySelector('#contact');
+			if (contactSection) contactObserver.observe(contactSection);
+
+			// Add ripple effect on button clicks
+			document.querySelectorAll('button, a.magnetic').forEach(btn => {
+				btn.addEventListener('click', function(e) {
+					const rect = this.getBoundingClientRect();
+					const x = e.clientX - rect.left;
+					const y = e.clientY - rect.top;
+					
+					const ripple = document.createElement('span');
+					ripple.style.cssText = `
+						position: absolute;
+						width: 20px;
+						height: 20px;
+						border-radius: 50%;
+						background: rgba(139, 92, 246, 0.5);
+						left: ${x}px;
+						top: ${y}px;
+						transform: translate(-50%, -50%);
+						pointer-events: none;
+					`;
+					this.style.position = 'relative';
+					this.style.overflow = 'hidden';
+					this.appendChild(ripple);
+
+					anime({
+						targets: ripple,
+						scale: [0, 30],
+						opacity: [1, 0],
+						duration: 800,
+						easing: 'easeOutExpo',
+						complete: () => ripple.remove()
+					});
+				});
+			});
+
+			// Parallax effect on scroll for project cards
+			let scrollTicking = false;
+			window.addEventListener('scroll', () => {
+				if (!scrollTicking) {
+					window.requestAnimationFrame(() => {
+						const scrolled = window.pageYOffset;
+						document.querySelectorAll('.tilt-card[data-project]').forEach((card, index) => {
+							const rect = card.getBoundingClientRect();
+							const cardTop = rect.top + scrolled;
+							const cardCenter = cardTop + rect.height / 2;
+							const windowCenter = scrolled + window.innerHeight / 2;
+							const distance = (windowCenter - cardCenter) / window.innerHeight;
+							const translateY = distance * 30;
+							
+							if (rect.top < window.innerHeight && rect.bottom > 0) {
+								(card as HTMLElement).style.transform = `translateY(${translateY}px)`;
+							}
+						});
+						scrollTicking = false;
+					});
+					scrollTicking = true;
+				}
+			}, { passive: true });
+
+			// Add hover animation for tech tags
+			document.querySelectorAll('.tilt-card span[class*="bg-white"]').forEach(tag => {
+				tag.addEventListener('mouseenter', function() {
+					anime({
+						targets: this,
+						scale: [1, 1.1],
+						duration: 300,
+						easing: 'easeOutQuad'
+					});
+				});
+				tag.addEventListener('mouseleave', function() {
+					anime({
+						targets: this,
+						scale: [1.1, 1],
+						duration: 300,
+						easing: 'easeOutQuad'
+					});
+				});
+			});
+
+			// Animate scroll indicator
+			const scrollIndicator = document.querySelector('.scroll-hint, [class*="scroll"]');
+			if (scrollIndicator) {
+				anime({
+					targets: scrollIndicator,
+					translateY: [0, 10, 0],
+					opacity: [0.3, 0.6, 0.3],
+					duration: 2000,
+					loop: true,
+					easing: 'easeInOutSine'
+				});
+			}
+		};
+
+		initAnimeAnimations();
 		</script>
 	</body>
 </html>
