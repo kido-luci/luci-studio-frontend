@@ -1,0 +1,300 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { postService } from "../../services/posts";
+import { calculateReadTime, formatDate, formatMarkdown } from "../../utils/blog";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+
+if (!id) {
+    return Astro.redirect('/');
+}
+
+const post = await postService.getByID(id);
+
+if (!post) {
+    return Astro.redirect('/');
+}
+
+const readTime = calculateReadTime(post.content);
+const formattedDate = formatDate(post.created_at);
+const htmlContent = formatMarkdown(post.content);
+const tag = (post.topics && post.topics.length > 0) ? post.topics[0] : 'Engineering';
+---
+
+<Layout title={`${post.title} | Luci Studio`}>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" is:inline></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js" is:inline></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" is:inline></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" is:inline></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" is:inline></script>
+
+  <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3 group">
+        <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
+        <span class="text-xl font-black tracking-[0em]">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
+      </a>
+      <a href="/#blog" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em] flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+    </div>
+  </nav>
+
+  <main class="pt-32 pb-24 px-6 min-h-screen bg-[#050505]">
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Hero Header -->
+      <header class="mb-16" data-reveal>
+        <div class="flex items-center gap-4 mb-6">
+          <span class="px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest">{tag}</span>
+          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
+          <span class="text-xs text-gray-500">{formattedDate}</span>
+          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
+          <span class="text-xs text-gray-500">{readTime} read</span>
+        </div>
+        
+        <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-tighter">
+          {post.title}
+        </h1>
+
+        {post.subtitle && (
+          <p class="text-xl text-gray-400 font-medium leading-relaxed mb-8">
+            {post.subtitle}
+          </p>
+        )}
+
+        {post.cover_image_url && (
+          <div class="aspect-video rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+            <img src={post.cover_image_url} alt={post.title} class="w-full h-full object-cover" />
+          </div>
+        )}
+      </header>
+
+      <!-- Content -->
+      <article class="prose-custom markdown-content" set:html={htmlContent}>
+      </article>
+
+      <footer class="mt-24 pt-12 border-t border-white/5">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+           <div class="flex items-center gap-4">
+             <div class="w-12 h-12 rounded-2xl overflow-hidden border border-white/10">
+               <img src="https://i.pinimg.com/736x/af/92/91/af9291e0307a1002e7ed63878f93ae46.jpg" alt="Author" class="w-full h-full object-cover" />
+             </div>
+             <div>
+               <p class="text-sm font-bold text-white">Trung Lập (Luci)</p>
+               <p class="text-xs text-gray-500 uppercase tracking-widest">Software Engineer & Founder</p>
+             </div>
+           </div>
+           <div class="flex items-center gap-6">
+             <button id="share-btn" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Share Post <span>↗</span></button>
+             <a href="https://linkedin.com/in/trung-lập-luci-ba0b6a339/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Connect <span>↗</span></a>
+           </div>
+        </div>
+      </footer>
+    </div>
+  </main>
+</Layout>
+
+<script is:inline>
+  // Handle copy functionality
+  function setupCopyButtons() {
+    const containers = document.querySelectorAll('.code-block-container');
+    
+    containers.forEach(container => {
+      const code = container.querySelector('code');
+      if (!code) return;
+
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        Copy
+      `;
+
+      btn.addEventListener('click', async () => {
+        const text = code.innerText;
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.classList.add('copied');
+          btn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Copied!
+          `;
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy
+            `;
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy:', err);
+        }
+      });
+
+      container.appendChild(btn);
+    });
+  }
+
+  // Handle share functionality
+  function setupShare() {
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', () => {
+        if (navigator.share) {
+          navigator.share({
+            title: document.title,
+            url: window.location.href
+          });
+        } else {
+          navigator.clipboard.writeText(window.location.href);
+          alert('Link copied to clipboard!');
+        }
+      });
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    setupCopyButtons();
+    setupShare();
+  });
+</script>
+
+<style is:global>
+  .markdown-content {
+    font-size: 1.25rem;
+    line-height: 1.8;
+    color: #a1a1aa;
+  }
+
+  .markdown-content h1, 
+  .markdown-content h2, 
+  .markdown-content h3 {
+    color: white;
+    margin: 3.5rem 0 1.5rem 0;
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .markdown-content h1 { font-size: 2.5rem; }
+  .markdown-content h2 { font-size: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem; }
+  .markdown-content h3 { font-size: 1.5rem; }
+
+  .markdown-content p {
+    margin-bottom: 1.75rem;
+  }
+
+  .markdown-content strong {
+    color: white;
+    font-weight: 700;
+  }
+
+  .markdown-content blockquote {
+    border-left: 4px solid #8b5cf6;
+    background: rgba(139, 92, 246, 0.03);
+    padding: 2rem 2.5rem;
+    margin: 3rem 0;
+    font-style: italic;
+    color: #d4d4d8;
+    border-radius: 0 1.5rem 1.5rem 0;
+    font-size: 1.35rem;
+  }
+
+  .markdown-content code {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    color: #a78bfa;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .markdown-content pre {
+    background: #0a0a0a !important;
+    padding: 2rem !important;
+    border-radius: 1.5rem !important;
+    overflow-x: auto;
+    margin: 0 !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    font-size: 1rem !important;
+    box-shadow: 0 20px 50px -20px rgba(0,0,0,0.5);
+  }
+
+  .markdown-content pre code {
+    background: transparent !important;
+    padding: 0 !important;
+    color: inherit !important;
+    border: none !important;
+    font-size: inherit !important;
+  }
+
+  .markdown-content a {
+    color: #8b5cf6;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .markdown-content a:hover {
+    color: #a78bfa;
+  }
+
+  .markdown-content li {
+    margin-bottom: 0.75rem;
+    margin-left: 1.5rem;
+    list-style-type: none;
+    position: relative;
+  }
+
+  .markdown-content li::before {
+    content: "▹";
+    position: absolute;
+    left: -1.5rem;
+    color: #8b5cf6;
+  }
+
+  .code-block-container {
+    position: relative;
+    margin: 3rem 0;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    color: #71717a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(8px);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .copy-btn:hover {
+    background: #8b5cf6;
+    color: white;
+    border-color: #8b5cf6;
+  }
+
+  .copy-btn.copied {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+  }
+</style>

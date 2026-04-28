@@ -27,6 +27,7 @@ const indieProjects = [
 
 const rawPosts = await postService.getAll();
 const blogPosts = rawPosts.map(p => ({
+  id: p.id,
   title: p.title,
   date: formatDate(p.created_at),
   read: calculateReadTime(p.content),
@@ -206,19 +207,21 @@ const blogPosts = rawPosts.map(p => ({
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {blogPosts.map((p, i) => (
-              <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
-                <div class="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
-                  <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                </div>
-                <div class="flex items-center gap-3 mb-4">
-                  <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tag}</span>
-                  <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                  <span class="text-xs text-gray-600">{p.date}</span>
-                  <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                  <span class="text-xs text-gray-600">{p.read} read</span>
-                </div>
-                <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300">{p.title}</h3>
-              </article>
+              <a href={`/blog/${p.id}`} class="block no-underline">
+                <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
+                  <div class="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
+                    <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  </div>
+                  <div class="flex items-center gap-3 mb-4">
+                    <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tag}</span>
+                    <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                    <span class="text-xs text-gray-600">{p.date}</span>
+                    <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                    <span class="text-xs text-gray-600">{p.read} read</span>
+                  </div>
+                  <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300">{p.title}</h3>
+                </article>
+              </a>
             ))}
           </div>
         </div>
