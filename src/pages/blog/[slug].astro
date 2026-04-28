@@ -112,6 +112,12 @@ const tag = (post && post.topics && post.topics.length > 0) ? post.topics[0] : '
 )}
 
 <script is:inline>
+  // Force scroll to top on load
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  window.scrollTo(0, 0);
+
   // Handle copy functionality
   function setupCopyButtons() {
     const containers = document.querySelectorAll('.code-block-container');
