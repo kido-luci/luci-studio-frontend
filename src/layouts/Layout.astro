@@ -406,7 +406,7 @@ const { title } = Astro.props;
 		const initTheme = () => {
 			const savedTheme = localStorage.getItem('theme');
 			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-			const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+			const theme = savedTheme || 'light';
 			
 			if (theme === 'light') {
 				document.body.classList.add('light-mode');
