@@ -282,6 +282,26 @@ const indieProjects = [
         <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
       </div>
 
+      <!-- WORK -->
+      <section id="work" class="py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+          <div data-reveal class="mb-20">
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Selected Work</span>
+            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">PORTFOLIO<span class="text-violet-500">.</span></h2>
+            <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {projects.map((p, i) => (
+              <ProjectCard {...p} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div class="flex flex-col items-center py-8 opacity-20">
+        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+      </div>
+
 <!-- ABOUT ME -->
       <section id="about" class="py-24 px-6 overflow-hidden">
         <div class="max-w-7xl mx-auto">
@@ -331,27 +351,6 @@ const indieProjects = [
                 ))}
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
-
-      <!-- WORK -->
-      <section id="work" class="py-16 px-6">
-        <div class="max-w-7xl mx-auto">
-          <div data-reveal class="mb-20">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Selected Work</span>
-            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">PORTFOLIO<span class="text-violet-500">.</span></h2>
-            <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {projects.map((p, i) => (
-              <ProjectCard {...p} index={i} />
-            ))}
           </div>
         </div>
       </section>
