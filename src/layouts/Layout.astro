@@ -105,7 +105,7 @@ const { title } = Astro.props;
 			}
 
 			body.light-mode {
-				--bg-primary: #ffffff;
+				--bg-primary: rgba(255, 255, 255, 0.85);
 				--bg-secondary: rgba(255, 255, 255, 0.7);
 				--bg-card: rgba(255, 255, 255, 0.9);
 				--bg-card-hover: rgba(139, 92, 246, 0.05);
@@ -699,7 +699,7 @@ const { title } = Astro.props;
 					const dimOpacity = progress * 0.85;
 					if (!isWindows) {
 						bgDimmer.style.opacity = dimOpacity.toString();
-						bgDimmer.style.backdropFilter = `blur(${progress * 30}px)`;
+						bgDimmer.style.backdropFilter = `blur(${isLight ? progress * 4 : progress * 30}px)`;
 					} else {
 						const bgColor = isLight ? `rgba(255,255,255,${dimOpacity * 0.5})` : `rgba(0,0,0,${dimOpacity * 0.7})`;
 						bgDimmer.style.backgroundColor = bgColor;
