@@ -207,7 +207,82 @@ const indieProjects = [
     <!-- CONTENT WRAPPER FOR SMOOTH TRANSITIONS -->
     <div class="relative bg-black/60 backdrop-blur-2xl border-t border-white/5 light-mode:bg-white/80" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
       
-      <!-- ABOUT ME -->
+            <!-- BLOG -->
+      <section id="blog" class="py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+          <div data-reveal class="mb-20 text-center">
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Writing</span>
+            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { title: 'Building an encrypted diary with Flutter BLoC', date: 'Apr 17, 2026', read: '8 min', tag: 'Engineering', img: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800' },
+              { title: 'Generative art with code: where math meets beauty', date: 'Apr 10, 2026', read: '6 min', tag: 'Art & Code', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800' },
+              { title: 'Why I chose Astro for my portfolio in 2026', date: 'Apr 1, 2026', read: '4 min', tag: 'Web Dev', img: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80&w=800' },
+            ].map((p, i) => (
+              <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-6 rounded-[32px] border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
+                <div class="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
+                  <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                </div>
+                <div class="flex items-center gap-3 mb-4">
+                  <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tag}</span>
+                  <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                  <span class="text-xs text-gray-600">{p.date}</span>
+                  <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                  <span class="text-xs text-gray-600">{p.read} read</span>
+                </div>
+                <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300">{p.title}</h3>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div class="flex flex-col items-center py-8 opacity-20">
+        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+      </div>
+
+      <!-- ART GALLERY -->
+      <section id="art" class="py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+          <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div>
+              <span class="text-xs font-black text-blue-500 uppercase tracking-[0.3em] mb-3 block">Creative Works</span>
+              <h2 class="text-6xl md:text-8xl font-black tracking-tighter">THE ART<span class="text-blue-500">.</span></h2>
+            </div>
+            <p class="text-gray-500 max-w-xs text-sm leading-relaxed">Where code meets canvas. Math, color theory, and human emotion rendered in pixels.</p>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-12 grid-rows-2 gap-4" style="min-height:600px">
+            {[
+              { cols: 'md:col-span-7', img: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200', label: 'Neon Currents', year: '2024' },
+              { cols: 'md:col-span-5', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800', label: 'Deep Space', year: '2024' },
+              { cols: 'md:col-span-4', img: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800', label: 'Bloom', year: '2024' },
+              { cols: 'md:col-span-4', img: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800', label: 'Ember', year: '2023' },
+              { cols: 'md:col-span-4', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800', label: 'Circuit', year: '2023' },
+            ].map((a, i) => (
+              <div data-reveal="scale" data-delay={String(i+1)} class={`group relative ${a.cols} rounded-3xl overflow-hidden cursor-pointer`}>
+                <img src={a.img} alt={a.label} class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div class="absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-500"></div>
+                <div class="absolute inset-0 p-6 flex items-end opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div>
+                    <p class="font-bold text-white">{a.label}</p>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest">{a.year} · Digital Art</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+
+      <div class="flex flex-col items-center py-8 opacity-20">
+        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+      </div>
+
+<!-- ABOUT ME -->
       <section id="about" class="py-24 px-6 overflow-hidden">
         <div class="max-w-7xl mx-auto">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -285,41 +360,6 @@ const indieProjects = [
         <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
       </div>
 
-      <!-- BLOG -->
-      <section id="blog" class="py-16 px-6">
-        <div class="max-w-7xl mx-auto">
-          <div data-reveal class="mb-20 text-center">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Writing</span>
-            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h2>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { title: 'Building an encrypted diary with Flutter BLoC', date: 'Apr 17, 2026', read: '8 min', tag: 'Engineering', img: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800' },
-              { title: 'Generative art with code: where math meets beauty', date: 'Apr 10, 2026', read: '6 min', tag: 'Art & Code', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800' },
-              { title: 'Why I chose Astro for my portfolio in 2026', date: 'Apr 1, 2026', read: '4 min', tag: 'Web Dev', img: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80&w=800' },
-            ].map((p, i) => (
-              <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-6 rounded-[32px] border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
-                <div class="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
-                  <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                </div>
-                <div class="flex items-center gap-3 mb-4">
-                  <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tag}</span>
-                  <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                  <span class="text-xs text-gray-600">{p.date}</span>
-                  <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                  <span class="text-xs text-gray-600">{p.read} read</span>
-                </div>
-                <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300">{p.title}</h3>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
       <!-- EXPERIENCE -->
       <section id="experience" class="py-16 px-6">
         <div class="max-w-7xl mx-auto">
@@ -353,46 +393,6 @@ const indieProjects = [
           </div>
         </div>
       </section>
-
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
-      <!-- ART GALLERY -->
-      <section id="art" class="py-16 px-6">
-        <div class="max-w-7xl mx-auto">
-          <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div>
-              <span class="text-xs font-black text-blue-500 uppercase tracking-[0.3em] mb-3 block">Creative Works</span>
-              <h2 class="text-6xl md:text-8xl font-black tracking-tighter">THE ART<span class="text-blue-500">.</span></h2>
-            </div>
-            <p class="text-gray-500 max-w-xs text-sm leading-relaxed">Where code meets canvas. Math, color theory, and human emotion rendered in pixels.</p>
-          </div>
-
-          <div class="grid grid-cols-2 md:grid-cols-12 grid-rows-2 gap-4" style="min-height:600px">
-            {[
-              { cols: 'md:col-span-7', img: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200', label: 'Neon Currents', year: '2024' },
-              { cols: 'md:col-span-5', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800', label: 'Deep Space', year: '2024' },
-              { cols: 'md:col-span-4', img: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800', label: 'Bloom', year: '2024' },
-              { cols: 'md:col-span-4', img: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800', label: 'Ember', year: '2023' },
-              { cols: 'md:col-span-4', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800', label: 'Circuit', year: '2023' },
-            ].map((a, i) => (
-              <div data-reveal="scale" data-delay={String(i+1)} class={`group relative ${a.cols} rounded-3xl overflow-hidden cursor-pointer`}>
-                <img src={a.img} alt={a.label} class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div class="absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-500"></div>
-                <div class="absolute inset-0 p-6 flex items-end opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div>
-                    <p class="font-bold text-white">{a.label}</p>
-                    <p class="text-xs text-gray-400 uppercase tracking-widest">{a.year} · Digital Art</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
 
       <div class="flex flex-col items-center py-8 opacity-20">
         <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
@@ -506,7 +506,8 @@ const indieProjects = [
         <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
       </div>
 
-      <!-- CTA -->
+      
+<!-- CTA -->
       <section id="contact" class="py-40 px-6">
         <div class="max-w-5xl mx-auto text-center">
           <div data-reveal class="mb-6">
