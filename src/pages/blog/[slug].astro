@@ -309,4 +309,100 @@ const tag = (post && post.topics && post.topics.length > 0) ? post.topics[0] : '
     color: white;
     border-color: #10b981;
   }
+
+  /* ── Light Mode Overrides ── */
+  body.light-mode main {
+    background-color: #fafafa !important;
+  }
+
+  body.light-mode .markdown-content {
+    color: #4b5563;
+  }
+
+  body.light-mode .markdown-content h1,
+  body.light-mode .markdown-content h2,
+  body.light-mode .markdown-content h3,
+  body.light-mode .markdown-content strong,
+  body.light-mode h1 {
+    color: #111827 !important;
+  }
+
+  body.light-mode .markdown-content h2 {
+    border-bottom-color: rgba(0,0,0,0.1);
+  }
+
+  body.light-mode .markdown-content blockquote {
+    background: rgba(139, 92, 246, 0.04);
+    color: #374151;
+  }
+
+  body.light-mode .markdown-content code {
+    background: rgba(0, 0, 0, 0.04);
+    color: #6d28d9;
+    border-color: rgba(0, 0, 0, 0.04);
+  }
+
+  body.light-mode .markdown-content pre {
+    background: #f8fafc !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+  }
+
+  body.light-mode .markdown-content pre code {
+    color: #1e293b !important;
+  }
+
+  body.light-mode .copy-btn {
+    background: rgba(255, 255, 255, 0.8);
+    color: #64748b;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  body.light-mode nav {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  body.light-mode nav .text-xl {
+    color: #111827 !important;
+  }
+
+  body.light-mode nav a.text-gray-400 {
+    color: #6b7280 !important;
+  }
+
+  body.light-mode nav a.text-gray-400:hover {
+    color: #111827 !important;
+  }
+
+  body.light-mode header .text-gray-500 {
+    color: #6b7280 !important;
+  }
+
+  body.light-mode footer {
+    border-top-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  body.light-mode footer .text-white {
+    color: #111827 !important;
+  }
+
+  body.light-mode footer .text-gray-500,
+  body.light-mode footer .text-gray-400 {
+    color: #6b7280 !important;
+  }
+
+  body.light-mode footer #share-btn:hover,
+  body.light-mode footer a:hover {
+    color: #111827 !important;
+  }
+
+  body.light-mode main.text-center a.bg-white {
+    background-color: #111827 !important;
+    color: #ffffff !important;
+  }
+
+  body.light-mode main.text-center a.bg-white:hover {
+    background-color: #8b5cf6 !important;
+  }
 </style>
