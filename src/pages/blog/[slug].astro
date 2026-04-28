@@ -15,6 +15,14 @@ if (!slug) {
 const id = slug.split('-').pop();
 const post = (id && !isNaN(Number(id))) ? await postService.getByID(id) : null;
 
+// Validate slug title matches post title, redirect if mismatch (canonical URL)
+if (post) {
+  const expectedSlug = `${slugify(post.title)}-${post.id}`;
+  if (slug !== expectedSlug) {
+    return Astro.redirect(`/blog/${expectedSlug}`, 301);
+  }
+}
+
 const readTime = post ? calculateReadTime(post.content) : '';
 const formattedDate = post ? formatDate(post.created_at) : '';
 const htmlContent = post ? formatMarkdown(post.content) : '';
