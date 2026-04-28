@@ -16,107 +16,103 @@ interface Props {
 const { id, y, role, co, loc, desc, details, tech, links, index, img } = Astro.props;
 ---
 
-<div id={id} data-reveal data-delay={String(index + 1)} class="timeline-item group cursor-pointer p-8 rounded-2xl border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-xl transition-all duration-500 overflow-visible shadow-2xl">
-  <div class="grid grid-cols-1 md:grid-cols-12 gap-8 relative">
-    <!-- Tree Node & Line -->
-    <div class="hidden md:flex absolute left-0 top-1.5 bottom-[-3rem] flex-col items-center w-3 z-10">
-      <div class="w-3 h-3 rounded-full bg-pink-500 shadow-[0_0_10px_rgba(236,72,153,0.8)] shrink-0"></div>
-      <div class="w-px flex-1 bg-gradient-to-b from-pink-500/50 to-transparent mt-2"></div>
-    </div>
-    
-    <!-- Year Column -->
-    <div class="md:col-span-2 flex items-start pt-1 md:pl-8">
-      <span class="text-xs font-black text-pink-500 uppercase tracking-widest flex items-center gap-2">
-        <span class="md:hidden w-2 h-2 rounded-full bg-pink-500"></span>
-        {y}
-      </span>
-    </div>
+<div id={id} data-reveal data-delay={String(index + 1)} class="timeline-item-wrapper">
+  {/* Year badge — sits outside/above the card */}
+  <div class="flex items-center gap-3 mb-3">
+    <div class="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0"></div>
+    <span class="text-xs font-black text-pink-500 uppercase tracking-widest">{y}</span>
+    <div class="flex-1 h-px bg-gradient-to-r from-pink-500/30 to-transparent"></div>
+  </div>
 
-    <!-- Content Column -->
-    <div class="md:col-span-7">
-      <div class="flex items-center justify-between mb-1">
-        <h3 class="text-2xl font-black text-white drop-shadow-xl flex items-baseline gap-2">
-          <span class="text-shimmer">{role}</span>
-          <span class="text-gray-400 font-medium text-lg whitespace-nowrap">— {co}</span>
-        </h3>
-      </div>
-      <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{loc}</p>
-      <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{desc}</p>
-      
-      {/* Faded Preview (Hidden when active) */}
-      <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden" 
-           style="mask-image: linear-gradient(to bottom, black 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);">
-        <div class="grid grid-cols-2 gap-4 opacity-30">
-          <div>
-            <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
-            <ul class="space-y-1">
-              {details.slice(0, 3).map(item => (
-                <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-300">
-                  <span class="text-pink-500/50">▹</span>
-                  <span class="truncate">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Stack</h4>
-            <div class="flex flex-wrap gap-1">
-              {tech.slice(0, 3).map(t => (
-                <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
-              ))}
-            </div>
-          </div>
+  <div class="timeline-item group cursor-pointer p-8 rounded-2xl border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-xl transition-all duration-500 overflow-hidden shadow-2xl">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+
+      {/* Content Column */}
+      <div class="md:col-span-9">
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="text-2xl font-black text-white drop-shadow-xl flex items-baseline gap-2">
+            <span class="text-shimmer">{role}</span>
+            <span class="text-gray-400 font-medium text-lg whitespace-nowrap">— {co}</span>
+          </h3>
         </div>
-      </div>
+        <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{loc}</p>
+        <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{desc}</p>
 
-      {/* Bottom Indicator Arrow (Hidden when active) */}
-      <div class="group-[.active]:hidden flex justify-center mt-3 opacity-50 group-hover:opacity-100 transition-all duration-500">
-        <svg class="w-4 h-4 text-pink-500/80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
-      </div>
-      
-      <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
-        <div class="pt-6 border-t border-white/5">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Faded Preview (hidden when active) */}
+        <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden"
+             style="mask-image: linear-gradient(to bottom, black 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);">
+          <div class="grid grid-cols-2 gap-4 opacity-30">
             <div>
-              <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
-              <ul class="space-y-3">
-                {details.map(item => (
-                  <li class="flex items-start gap-3 text-sm text-gray-300 leading-snug">
-                    <span class="text-pink-500 mt-1">▹</span>
-                    {item}
+              <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
+              <ul class="space-y-1">
+                {details.slice(0, 3).map(item => (
+                  <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-300">
+                    <span class="text-pink-500/50">▹</span>
+                    <span class="truncate">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Stack</h4>
-              <div class="flex flex-wrap gap-2 mb-8">
-                {tech.map(t => (
-                  <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
-                ))}
-              </div>
-              <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Links</h4>
-              <div class="flex flex-wrap gap-3">
-                {links.map(l => (
-                  <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
-                    {l.label} ↗
-                  </a>
+              <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Stack</h4>
+              <div class="flex flex-wrap gap-1">
+                {tech.slice(0, 3).map(t => (
+                  <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
                 ))}
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Persistent Image Column -->
-    <div class="md:col-span-3 flex flex-col items-center md:items-end justify-center order-first md:order-last mb-8 md:mb-0">
-      {img && (
-        <div class="relative group/preview rounded-2xl overflow-hidden border border-white/5 shadow-2xl aspect-video md:aspect-square w-full md:max-w-[180px] bg-white/5 transition-all duration-700 group-hover:border-pink-500/30 group-hover:shadow-pink-500/10">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-40 group-hover/preview:opacity-60 transition-opacity duration-500 z-10"></div>
-          <img src={img} alt={`${co} Preview`} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover/preview:scale-110" />
+        {/* Bottom Indicator Arrow (hidden when active) */}
+        <div class="group-[.active]:hidden flex justify-center mt-3 opacity-50 group-hover:opacity-100 transition-all duration-500">
+          <svg class="w-4 h-4 text-pink-500/80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
         </div>
-      )}
+
+        <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
+          <div class="pt-6 border-t border-white/5">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div>
+                <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
+                <ul class="space-y-3">
+                  {details.map(item => (
+                    <li class="flex items-start gap-3 text-sm text-gray-300 leading-snug">
+                      <span class="text-pink-500 mt-1">▹</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Stack</h4>
+                <div class="flex flex-wrap gap-2 mb-8">
+                  {tech.map(t => (
+                    <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
+                  ))}
+                </div>
+                <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Links</h4>
+                <div class="flex flex-wrap gap-3">
+                  {links.map(l => (
+                    <a href={l.url} target="_blank" class="magnetic px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-full text-[10px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
+                      {l.label} ↗
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Persistent Image Column */}
+      <div class="md:col-span-3 flex flex-col items-center md:items-end justify-center order-first md:order-last mb-8 md:mb-0">
+        {img && (
+          <div class="relative group/preview rounded-2xl overflow-hidden border border-white/5 shadow-2xl aspect-video md:aspect-square w-full md:max-w-[180px] bg-white/5 transition-all duration-700 group-hover:border-pink-500/30 group-hover:shadow-pink-500/10">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-40 group-hover/preview:opacity-60 transition-opacity duration-500 z-10"></div>
+            <img src={img} alt={`${co} Preview`} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover/preview:scale-110" />
+          </div>
+        )}
+      </div>
     </div>
   </div>
 </div>
