@@ -18,17 +18,27 @@ const { title } = Astro.props;
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
 		<!-- Anime.js Animation Library -->
 		<script is:inline src="https://cdn.jsdelivr.net/npm/animejs@4.0.0-beta.102/lib/anime.min.js"></script>
-		<!-- Three.js + Vanta: always loaded on all platforms -->
+		<!-- Three.js, p5.js + Vanta: always loaded on all platforms -->
 		<script is:inline>
 			(function() {
 				var s1 = document.createElement('script');
 				s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
+				var p1 = document.createElement('script');
+				p1.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js';
+
 				s1.onload = function() {
 					var s2 = document.createElement('script');
 					s2.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js';
 					document.head.appendChild(s2);
 				};
+				p1.onload = function() {
+					var p2 = document.createElement('script');
+					p2.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.topology.min.js';
+					document.head.appendChild(p2);
+				};
+
 				document.head.appendChild(s1);
+				document.head.appendChild(p1);
 			})();
 		</script>
 		<script is:inline>
@@ -389,6 +399,7 @@ const { title } = Astro.props;
 		</style>
 
 		<script>
+		declare const anime: any;
 		// ── Theme Management ────────────────────────────────────────────────────
 		// Initialize theme from localStorage or system preference
 		const initTheme = () => {
@@ -410,20 +421,45 @@ const { title } = Astro.props;
 			const isLight = document.body.classList.toggle('light-mode');
 			localStorage.setItem('theme', isLight ? 'light' : 'dark');
 			
-			// Update Vanta background color and intensity
+			// Update Vanta background animation depending on theme
 			if ((window as any).vantaEffect) {
-				(window as any).vantaEffect.setOptions({
-					backgroundColor: isLight ? 0xf8f9fa : 0x0a0a0a,
-					amplitudeFactor: isLight ? 1.20 : 0.50,
-					ringFactor: isLight ? 0.80 : 0.30,
-					rotationFactor: isLight ? 0.40 : 0.20,
-					size: isLight ? 2.00 : 1.20,
-					baseColor: isLight ? 0x6d28d9 : 0x8b5cf6,
-					secondaryColor: isLight ? 0x1d4ed8 : 0x3b82f6,
-					tertiaryColor: isLight ? 0xbe185d : 0xec4899,
-					xOffset: 0.10,
-					yOffset: 0.10
-				});
+				(window as any).vantaEffect.destroy();
+			}
+			
+			if ((window as any).VANTA) {
+				if (isLight && (window as any).VANTA.TOPOLOGY) {
+					(window as any).vantaEffect = (window as any).VANTA.TOPOLOGY({
+						el: "#vanta-bg",
+						mouseControls: true,
+						touchControls: true,
+						gyroControls: false,
+						minHeight: 200.00,
+						minWidth: 200.00,
+						scale: 1.00,
+						scaleMobile: 1.00,
+						color: 0x8b5cf6,
+						backgroundColor: 0xf8f9fa
+					});
+				} else if (!isLight && (window as any).VANTA.HALO) {
+					(window as any).vantaEffect = (window as any).VANTA.HALO({
+						el: "#vanta-bg",
+						mouseControls: true,
+						touchControls: true,
+						gyroControls: false,
+						minHeight: 200.00,
+						minWidth: 200.00,
+						backgroundColor: 0x0a0a0a,
+						amplitudeFactor: 0.50,
+						ringFactor: 0.30,
+						rotationFactor: 0.20,
+						size: 1.20,
+						baseColor: 0x8b5cf6,
+						secondaryColor: 0x3b82f6,
+						tertiaryColor: 0xec4899,
+						xOffset: 0.10,
+						yOffset: 0.10
+					});
+				}
 			}
 			
 			// Update cursor colors for non-Windows
@@ -703,30 +739,45 @@ const { title } = Astro.props;
 			});
 		});
 
-		// ── Vanta.js Halo Background (always on, all platforms) ──────────────────
+		// ── Vanta.js Backgrounds (always on, all platforms) ──────────────────
 		// Vanta is loaded dynamically/async — poll until ready
 		let vantaAttempts = 0;
 		const tryVanta = () => {
-			if ((window as any).VANTA && (window as any).VANTA.HALO) {
+			if ((window as any).VANTA && (window as any).VANTA.HALO && (window as any).VANTA.TOPOLOGY) {
 				const isLight = document.body.classList.contains('light-mode');
-				(window as any).vantaEffect = (window as any).VANTA.HALO({
-					el: "#vanta-bg",
-					mouseControls: true,
-					touchControls: true,
-					gyroControls: false,
-					minHeight: 200.00,
-					minWidth: 200.00,
-					backgroundColor: isLight ? 0xf8f9fa : 0x0a0a0a,
-					amplitudeFactor: isLight ? 1.20 : 0.50,
-					ringFactor: isLight ? 0.80 : 0.30,
-					rotationFactor: isLight ? 0.40 : 0.20,
-					size: isLight ? 2.00 : 1.20,
-					baseColor: isLight ? 0x6d28d9 : 0x8b5cf6,
-					secondaryColor: isLight ? 0x1d4ed8 : 0x3b82f6,
-					tertiaryColor: isLight ? 0xbe185d : 0xec4899,
-					xOffset: 0.10,
-					yOffset: 0.10
-				});
+				if (isLight) {
+					(window as any).vantaEffect = (window as any).VANTA.TOPOLOGY({
+						el: "#vanta-bg",
+						mouseControls: true,
+						touchControls: true,
+						gyroControls: false,
+						minHeight: 200.00,
+						minWidth: 200.00,
+						scale: 1.00,
+						scaleMobile: 1.00,
+						color: 0x8b5cf6,
+						backgroundColor: 0xf8f9fa
+					});
+				} else {
+					(window as any).vantaEffect = (window as any).VANTA.HALO({
+						el: "#vanta-bg",
+						mouseControls: true,
+						touchControls: true,
+						gyroControls: false,
+						minHeight: 200.00,
+						minWidth: 200.00,
+						backgroundColor: 0x0a0a0a,
+						amplitudeFactor: 0.50,
+						ringFactor: 0.30,
+						rotationFactor: 0.20,
+						size: 1.20,
+						baseColor: 0x8b5cf6,
+						secondaryColor: 0x3b82f6,
+						tertiaryColor: 0xec4899,
+						xOffset: 0.10,
+						yOffset: 0.10
+					});
+				}
 			} else if (vantaAttempts++ < 50) {
 				setTimeout(tryVanta, 100);
 			}
@@ -931,9 +982,10 @@ const { title } = Astro.props;
 			// Add ripple effect on button clicks
 			document.querySelectorAll('button, a.magnetic').forEach(btn => {
 				btn.addEventListener('click', function(e) {
+					const mouseEvent = e as MouseEvent;
 					const rect = this.getBoundingClientRect();
-					const x = e.clientX - rect.left;
-					const y = e.clientY - rect.top;
+					const x = mouseEvent.clientX - rect.left;
+					const y = mouseEvent.clientY - rect.top;
 					
 					const ripple = document.createElement('span');
 					ripple.style.cssText = `
