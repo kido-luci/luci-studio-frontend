@@ -74,7 +74,8 @@ const { title } = Astro.props;
 	</head>
 	<body class="bg-[#0a0a0a] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden max-w-full transition-colors duration-500">
 		<!-- Vanta.js Background Animation -->
-		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2]" style="opacity: 1;"></div>
+		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2] transition-opacity duration-500" style="opacity: 1;"></div>
+		<canvas id="canvas-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2] transition-opacity duration-500 opacity-0 bg-[#f8f9fa]"></canvas>
 
 		<!-- Scroll-based Background Dimmer -->
 		<div id="bg-dimmer" class="fixed inset-0 w-full h-full pointer-events-none z-[-1] bg-black/0 transition-all duration-500"></div>
@@ -416,6 +417,115 @@ const { title } = Astro.props;
 		// Apply theme immediately to prevent flash
 		const currentTheme = initTheme();
 
+		// ── Custom Canvas Particles (Light Mode) ────────────────────────────────
+		let particleAnimId: number;
+		let canvas: HTMLCanvasElement;
+		let ctx: CanvasRenderingContext2D | null;
+		
+		const particleState = {
+			max: 100,
+			particles: [] as any[],
+			colors: ['#a78bfa', '#60a5fa', '#38bdf8', '#f472b6']
+		};
+
+		class Particle {
+			x: number;
+			y: number;
+			r: number;
+			vx: number;
+			vy: number;
+			color: string;
+			type: 'bubble' | 'line';
+			angle: number;
+			va: number; // velocity of angle
+			alpha: number;
+
+			constructor(w: number, h: number) {
+				this.x = Math.random() * w;
+				this.y = Math.random() * h;
+				this.r = Math.random() * 4 + 1;
+				this.vx = (Math.random() - 0.5) * 0.5;
+				this.vy = (Math.random() - 0.5) * 0.5;
+				this.color = particleState.colors[Math.floor(Math.random() * particleState.colors.length)];
+				this.type = Math.random() > 0.5 ? 'bubble' : 'line';
+				this.angle = Math.random() * Math.PI * 2;
+				this.va = (Math.random() - 0.5) * 0.05;
+				this.alpha = 0;
+			}
+
+			update(w: number, h: number, context: CanvasRenderingContext2D) {
+				this.x += this.vx;
+				this.y += this.vy;
+				this.angle += this.va;
+				if (this.alpha < 1) this.alpha += 0.02;
+
+				this.draw(context);
+
+				// Return true to keep, false to remove
+				return !(this.x < -20 || this.x > w + 20 || this.y < -20 || this.y > h + 20);
+			}
+
+			draw(context: CanvasRenderingContext2D) {
+				context.save();
+				context.globalAlpha = this.alpha;
+				context.translate(this.x, this.y);
+				context.rotate(this.angle);
+				context.strokeStyle = this.color;
+				context.fillStyle = this.color;
+
+				if (this.type === 'bubble') {
+					context.beginPath();
+					context.arc(0, 0, this.r, 0, Math.PI * 2);
+					context.stroke();
+				} else {
+					context.beginPath();
+					context.moveTo(-this.r * 2, 0);
+					context.lineTo(this.r * 2, 0);
+					context.lineWidth = 1.5;
+					context.stroke();
+				}
+				context.restore();
+			}
+		}
+
+		const initCanvasParticles = () => {
+			canvas = document.getElementById('canvas-bg') as HTMLCanvasElement;
+			if (!canvas) return;
+			ctx = canvas.getContext('2d');
+			if (!ctx) return;
+
+			const resize = () => {
+				canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
+			};
+			window.addEventListener('resize', resize);
+			resize();
+
+			const generate = () => {
+				while (particleState.particles.length < particleState.max) {
+					particleState.particles.push(new Particle(canvas.width, canvas.height));
+				}
+			};
+			generate();
+
+			const loop = () => {
+				if (!ctx) return;
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				particleState.particles = particleState.particles.filter((p: any) => p.update(canvas.width, canvas.height, ctx!));
+				if (particleState.particles.length < particleState.max - 5) generate();
+				particleAnimId = requestAnimationFrame(loop);
+			};
+			loop();
+		};
+
+		const stopCanvasParticles = () => {
+			if (particleAnimId) cancelAnimationFrame(particleAnimId);
+			if (ctx && canvas) {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+			}
+			particleState.particles = [];
+		};
+
 		// Theme toggle function
 		const toggleTheme = () => {
 			const isLight = document.body.classList.toggle('light-mode');
@@ -424,23 +534,19 @@ const { title } = Astro.props;
 			// Update Vanta background animation depending on theme
 			if ((window as any).vantaEffect) {
 				(window as any).vantaEffect.destroy();
+				(window as any).vantaEffect = null;
 			}
 			
-			if ((window as any).VANTA) {
-				if (isLight && (window as any).VANTA.TOPOLOGY) {
-					(window as any).vantaEffect = (window as any).VANTA.TOPOLOGY({
-						el: "#vanta-bg",
-						mouseControls: true,
-						touchControls: true,
-						gyroControls: false,
-						minHeight: 200.00,
-						minWidth: 200.00,
-						scale: 1.00,
-						scaleMobile: 1.00,
-						color: 0x8b5cf6,
-						backgroundColor: 0xf8f9fa
-					});
-				} else if (!isLight && (window as any).VANTA.HALO) {
+			if (isLight) {
+				document.getElementById('vanta-bg')!.style.opacity = '0';
+				document.getElementById('canvas-bg')!.style.opacity = '1';
+				initCanvasParticles();
+			} else {
+				document.getElementById('canvas-bg')!.style.opacity = '0';
+				document.getElementById('vanta-bg')!.style.opacity = '1';
+				stopCanvasParticles();
+
+				if ((window as any).VANTA && (window as any).VANTA.HALO) {
 					(window as any).vantaEffect = (window as any).VANTA.HALO({
 						el: "#vanta-bg",
 						mouseControls: true,
@@ -743,41 +849,32 @@ const { title } = Astro.props;
 		// Vanta is loaded dynamically/async — poll until ready
 		let vantaAttempts = 0;
 		const tryVanta = () => {
-			if ((window as any).VANTA && (window as any).VANTA.HALO && (window as any).VANTA.TOPOLOGY) {
-				const isLight = document.body.classList.contains('light-mode');
-				if (isLight) {
-					(window as any).vantaEffect = (window as any).VANTA.TOPOLOGY({
-						el: "#vanta-bg",
-						mouseControls: true,
-						touchControls: true,
-						gyroControls: false,
-						minHeight: 200.00,
-						minWidth: 200.00,
-						scale: 1.00,
-						scaleMobile: 1.00,
-						color: 0x8b5cf6,
-						backgroundColor: 0xf8f9fa
-					});
-				} else {
-					(window as any).vantaEffect = (window as any).VANTA.HALO({
-						el: "#vanta-bg",
-						mouseControls: true,
-						touchControls: true,
-						gyroControls: false,
-						minHeight: 200.00,
-						minWidth: 200.00,
-						backgroundColor: 0x0a0a0a,
-						amplitudeFactor: 0.50,
-						ringFactor: 0.30,
-						rotationFactor: 0.20,
-						size: 1.20,
-						baseColor: 0x8b5cf6,
-						secondaryColor: 0x3b82f6,
-						tertiaryColor: 0xec4899,
-						xOffset: 0.10,
-						yOffset: 0.10
-					});
-				}
+			const isLight = document.body.classList.contains('light-mode');
+			if (isLight) {
+				document.getElementById('vanta-bg')!.style.opacity = '0';
+				document.getElementById('canvas-bg')!.style.opacity = '1';
+				initCanvasParticles();
+			} else if ((window as any).VANTA && (window as any).VANTA.HALO) {
+				document.getElementById('canvas-bg')!.style.opacity = '0';
+				document.getElementById('vanta-bg')!.style.opacity = '1';
+				(window as any).vantaEffect = (window as any).VANTA.HALO({
+					el: "#vanta-bg",
+					mouseControls: true,
+					touchControls: true,
+					gyroControls: false,
+					minHeight: 200.00,
+					minWidth: 200.00,
+					backgroundColor: 0x0a0a0a,
+					amplitudeFactor: 0.50,
+					ringFactor: 0.30,
+					rotationFactor: 0.20,
+					size: 1.20,
+					baseColor: 0x8b5cf6,
+					secondaryColor: 0x3b82f6,
+					tertiaryColor: 0xec4899,
+					xOffset: 0.10,
+					yOffset: 0.10
+				});
 			} else if (vantaAttempts++ < 50) {
 				setTimeout(tryVanta, 100);
 			}
