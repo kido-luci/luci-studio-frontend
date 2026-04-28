@@ -16,12 +16,25 @@ export function formatDate(dateStr: string): string {
 
 // More robust Markdown-to-HTML formatter (regex-based)
 export function formatMarkdown(text: string) {
+    // 0. Escape HTML to prevent XSS from raw input
+    let processedText = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
     const codeBlocks: string[] = [];
     
     // 1. Extract code blocks and replace with placeholders
-    let processedText = text.replace(/```(.*?)\r?\n([\s\S]*?)```/gim, (_, lang, code) => {
+    // Note: We escape the code content to prevent XSS while preserving it for the code tag
+    processedText = processedText.replace(/```(.*?)\r?\n([\s\S]*?)```/gim, (_, lang, code) => {
         const index = codeBlocks.length;
-        codeBlocks.push(`<div class="code-block-container"><pre><code class="language-${lang.trim()}">${code}</code></pre></div>`);
+        const escapedCode = code
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        codeBlocks.push(`<div class="code-block-container"><pre><code class="language-${lang.trim()}">${escapedCode}</code></pre></div>`);
         return `__CODE_BLOCK_${index}__`;
     });
 
@@ -33,8 +46,14 @@ export function formatMarkdown(text: string) {
         .replace(/\*\*\*(.*)\*\*\*/gim, '<strong><em>$1</em></strong>')
         .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
         .replace(/\*(.*)\*/gim, '<em>$1</em>')
-        .replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />')
-        .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+        .replace(/!\[(.*?)\]\((.*?)\)/gim, (_, alt, url) => {
+            const safeUrl = url.startsWith('javascript:') ? '#' : url;
+            return `<img src="${safeUrl}" alt="${alt}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`;
+        })
+        .replace(/\[(.*?)\]\((.*?)\)/gim, (_, label, url) => {
+            const safeUrl = (url.startsWith('http') || url.startsWith('/') || url.startsWith('#')) ? url : '#';
+            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+        })
         .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
         .replace(/^\* (.*$)/gim, '<li>$1</li>')
         .replace(/^- (.*$)/gim, '<li>$1</li>')

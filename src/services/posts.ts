@@ -1,4 +1,4 @@
-const BASE_URL = typeof window !== 'undefined' ? '/api' : (import.meta.env.PUBLIC_API_URL || 'http://localhost:3000');
+const BASE_URL = typeof window !== 'undefined' ? '/api' : (import.meta.env.PUBLIC_API_URL);
 
 export interface Post {
     id: number;
