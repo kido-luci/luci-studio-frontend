@@ -2,6 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import TimelineItem from "../components/TimelineItem.astro";
+import { postService } from "../services/posts";
+import { calculateReadTime, formatDate } from "../utils/blog";
 
 const projects = [
   { title: 'memoirMe', year: '2024–Now', desc: 'AI diary with RSA/AES E2E encryption, geolocation, IAP subscriptions & resumable uploads. For The Nartus, Australia.', tags: ['Flutter','BLoC','Firebase','Crypto'], img: 'https://lh3.googleusercontent.com/sitesv/AA5AbUDep4gRWxezXz-MBeWd2fnJtuGA4THdCebXHYiLMKIkKNuaT9yQslZ-Y0_udz1L-YF1ZOOq2Z_9CTltU4ztRU7OnWVDizmSJTsVAsg2s2OC3ZQ0I1l47WFLYp7sl9EXTgruaFkudM1HHMhLsHtLySzHnStAxV03ESKnZuRWjajw9TmVa4JxCIbu01WMomUPe236m0JoVGHfhCTOH9uzsUY5IbcUDyKwVYJbhLM=w1280' },
@@ -22,6 +24,15 @@ const indieProjects = [
   { id: 'IU PETSHOP', y: '2021–2022', role: 'Flutter Developer & UI/UX Designer', co: 'IU PETSHOP', loc: 'Captain Project · FPT University', desc: 'Pet care ecosystem with blockchain identification and secure payment processing.', details: ['Implemented blockchain-based microchip identification system for pet tracking.', 'Integrated VNPay payment gateway through WebView for sandbox testing environment.', 'Designed complete mobile interface using Adobe XD and custom Flutter animations.', 'Integrated Firebase OAuth for secure user authentication across the platform.'], tech: ['GetX', 'Hasura GraphQL', 'VNPay', 'Adobe XD', 'Firebase Auth'], img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800', links: [{ label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' }, { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }] },
   { id: 'Survive in Shadow', y: '2018', role: 'Game Developer', co: 'Survive in Shadow', loc: 'Independent Project', desc: 'A minimalist 2D top-down survival game built with Unity.', details: ['Designed core survival mechanics including resource management and procedural enemy spawning.', 'Implemented custom 2D lighting system to enhance atmospheric tension.', 'Developed responsive player controls and inventory management systems.'], tech: ['Unity', 'C#', '2D Art'], img: 'https://scontent.fsgn2-3.fna.fbcdn.net/v/t1.6435-9/81149923_876340826101477_7736307505457790976_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=FK2oKQTNYEgQ7kNvwG0DYTO&_nc_oc=Adpml3GtlYT4uUObgrPWIK0YQ3JmHzpH1wtPZDsMkoRI6AUYhdo1nKYV49Rjqf_4iVM&_nc_zt=23&_nc_ht=scontent.fsgn2-3.fna&_nc_gid=mNqQi3TFDfK4Z2l4iLxKHw&_nc_ss=7a3a8&oh=00_Af0YgzsvZ00r8aLXPpnvxDkmuPxNoQP1ALbSdO69NRErhw&oe=6A0E9479', links: [{ label: 'itch.io', url: 'https://lapl1412.itch.io/survive-in-shadow' }] },
 ];
+
+const rawPosts = await postService.getAll();
+const blogPosts = rawPosts.map(p => ({
+  title: p.title,
+  date: formatDate(p.created_at),
+  read: calculateReadTime(p.content),
+  tag: (p.topics && p.topics.length > 0) ? p.topics[0] : 'Engineering',
+  img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800'
+}));
 ---
 
 <Layout title="Luci Studio | Tech Blog, Digital Art & Innovative Apps">
@@ -194,11 +205,7 @@ const indieProjects = [
             <h2 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h2>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { title: 'Building an encrypted diary with Flutter BLoC', date: 'Apr 17, 2026', read: '8 min', tag: 'Engineering', img: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800' },
-              { title: 'Generative art with code: where math meets beauty', date: 'Apr 10, 2026', read: '6 min', tag: 'Art & Code', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800' },
-              { title: 'Why I chose Astro for my portfolio in 2026', date: 'Apr 1, 2026', read: '4 min', tag: 'Web Dev', img: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80&w=800' },
-            ].map((p, i) => (
+            {blogPosts.map((p, i) => (
               <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
                 <div class="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
                   <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />

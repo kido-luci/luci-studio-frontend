@@ -28,3 +28,7 @@ Thumbs.db
 .vscode/
 !.vscode/extensions.json
 .history/
+
+# Cloudflare Wrangler
+.wrangler/
+
