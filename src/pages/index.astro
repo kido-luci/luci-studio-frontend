@@ -24,14 +24,14 @@ const indieProjects = [
 ];
 ---
 
-<Layout title="Luci | Flutter Developer & Software Engineer">
+<Layout title="Luci Studio | Tech Blog, Digital Art & Innovative Apps">
 
   <!-- NAV -->
   <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
         <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
-        <span class="text-xl font-black tracking-tighter">LUCI-STUDIO<span class="text-violet-500">.</span></span>
+        <span class="text-xl font-black tracking-tighter">LUCI STUDIO<span class="text-violet-500">:</span> <span class="text-gray-400 font-bold text-sm ml-1 uppercase tracking-widest">Blog, Art, Apps</span></span>
       </a>
       <div class="hidden md:flex items-center gap-8">
         {['About','Work','Art','Blog'].map(l => (
@@ -92,21 +92,17 @@ const indieProjects = [
 
       <div class="relative z-10 text-center max-w-6xl mx-auto">
 
-        <!-- Role Badge -->
-        <div class="hero-badge">
-          <span class="hero-badge-dot"></span>
-          <span class="hero-badge-text">Available for opportunities</span>
-        </div>
+
 
         <!-- Main Headline -->
         <h1 class="hero-headline" data-word-reveal>
-          <!-- Line 1: FLUTTER DEVELOPER -->
+          <!-- Line 1: LUCI STUDIO -->
           <span class="hero-line hero-line-top">
             <span class="reveal-word hero-word-main">
-              <span class="text-white">FLUTTER</span>
+              <span class="text-white">LUCI</span>
             </span>
             <span class="reveal-word hero-word-accent">
-              <span class="text-shimmer">DEVELOPER</span>
+              <span class="text-shimmer">STUDIO</span>
             </span>
           </span>
 
@@ -117,20 +113,29 @@ const indieProjects = [
             <span class="hero-divider-line"></span>
           </span>
 
-          <!-- Line 2: SOFTWARE ENGINEER -->
+          <!-- Line 2: BLOG • ART • APPS -->
           <span class="hero-line hero-line-bottom">
             <span class="reveal-word hero-word-sub">
-              <span class="text-gray-300">SOFTWARE</span>
+              <span class="text-gray-400">TECH BLOG</span>
+            </span>
+            <span class="reveal-word hero-word-sub">
+              <span class="text-gray-500 mx-2">•</span>
+            </span>
+            <span class="reveal-word hero-word-sub">
+              <span class="text-white">DIGITAL ART</span>
+            </span>
+            <span class="reveal-word hero-word-sub">
+              <span class="text-gray-500 mx-2">•</span>
             </span>
             <span class="reveal-word hero-word-sub hero-word-last">
-              <span class="text-white">ENGINEER</span>
+              <span class="text-violet-400">APPS</span>
             </span>
           </span>
         </h1>
 
         <!-- Subtitle -->
         <p class="hero-subtitle">
-          Software Engineer | Flutter Developer — building scalable, cross-platform applications. I love tackling complex engineering challenges, from crafting end-to-end encrypted messaging platforms to integrating local LLMs.
+          A creative engineering studio dedicated to exploring the intersection of code, art, and innovation. From technical deep-dives and digital experiments to building high-performance applications.
         </p>
 
         <!-- CTA Buttons -->
@@ -954,10 +959,11 @@ body.light-mode .hero-orb-2 {
   letter-spacing: -0.045em;
 }
 .hero-line-bottom {
-  font-size: clamp(1.6rem, 7.5vw, 6.8rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: rgba(255,255,255,0.55);
+  font-size: clamp(1.2rem, 4.5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
 }
 .hero-word-main,
 .hero-word-accent,
