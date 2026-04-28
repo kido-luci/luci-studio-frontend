@@ -16,7 +16,7 @@ interface Props {
 const { id, y, role, co, loc, desc, details, tech, links, index, img } = Astro.props;
 ---
 
-<div id={id} data-reveal data-delay={String(index + 1)} class="timeline-item group cursor-pointer p-8 rounded-[40px] border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-xl transition-all duration-500 overflow-hidden shadow-2xl">
+<div id={id} data-reveal data-delay={String(index + 1)} class="timeline-item group cursor-pointer p-8 rounded-2xl border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-xl transition-all duration-500 overflow-hidden shadow-2xl">
   <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
     <!-- Year Column -->
     <div class="md:col-span-2 flex items-start pt-1">
@@ -103,7 +103,7 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img } = Astro.p
     <!-- Persistent Image Column -->
     <div class="md:col-span-3 flex flex-col items-center md:items-end justify-center order-first md:order-last mb-8 md:mb-0">
       {img && (
-        <div class="relative group/preview rounded-3xl overflow-hidden border border-white/5 shadow-2xl aspect-video md:aspect-square w-full md:max-w-[180px] bg-white/5 transition-all duration-700 group-hover:border-pink-500/30 group-hover:shadow-pink-500/10">
+        <div class="relative group/preview rounded-2xl overflow-hidden border border-white/5 shadow-2xl aspect-video md:aspect-square w-full md:max-w-[180px] bg-white/5 transition-all duration-700 group-hover:border-pink-500/30 group-hover:shadow-pink-500/10">
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-40 group-hover/preview:opacity-60 transition-opacity duration-500 z-10"></div>
           <img src={img} alt={`${co} Preview`} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover/preview:scale-110" />
         </div>
