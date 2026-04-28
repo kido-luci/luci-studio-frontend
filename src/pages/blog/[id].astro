@@ -60,18 +60,6 @@ const tag = (post.topics && post.topics.length > 0) ? post.topics[0] : 'Engineer
         <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-tighter">
           {post.title}
         </h1>
-
-        {post.subtitle && (
-          <p class="text-xl text-gray-400 font-medium leading-relaxed mb-8">
-            {post.subtitle}
-          </p>
-        )}
-
-        {post.cover_image_url && (
-          <div class="aspect-video rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
-            <img src={post.cover_image_url} alt={post.title} class="w-full h-full object-cover" />
-          </div>
-        )}
       </header>
 
       <!-- Content -->
