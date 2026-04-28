@@ -1,5 +1,6 @@
 // const BASE_URL = typeof window !== 'undefined' ? '/api' : (import.meta.env.PUBLIC_API_URL);
-const BASE_URL = "https://luci-web-blog-backend.fly.dev";
+const BASE_URL = import.meta.env.PUBLIC_API_URL;
+// const BASE_URL = "https://luci-web-blog-backend.fly.dev";
 
 export interface Post {
     id: number;
