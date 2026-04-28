@@ -182,28 +182,7 @@ const indieProjects = [
       </div>
     </div>
 
-    <!-- STATS -->
-    <section class="py-6 px-6 border-b border-white/5">
-      <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-1">
-        {[
-          { n: 5, suffix: '+', label: 'Years', sub: 'Flutter experience' },
-          { n: 10, suffix: '+', label: 'Projects', sub: 'shipped to production' },
-          { n: 5, suffix: '', label: 'Platforms', sub: 'Android · iOS · macOS · Web · Windows' },
-          { n: 50, suffix: '%', label: 'Scholarship', sub: 'FPT University · Full Course' },
-        ].map((s, i) => (
-          <div data-reveal data-delay={String(i+1)} class="tilt-card p-8 border border-white/5 rounded-[32px] text-center hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
-            <div class="text-6xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 mb-2">
-              <span class="count-up" data-count={s.n} data-suffix={s.suffix}>0{s.suffix}</span>
-            </div>
-            <div class="text-white font-bold mb-1">{s.label}</div>
-            <div class="text-xs text-gray-400 uppercase tracking-widest">{s.sub}</div>
-          </div>
-        ))}
-      </div>
-    </section>
-    <div class="flex flex-col items-center py-6 opacity-20">
-      <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-    </div>
+
     <!-- CONTENT WRAPPER FOR SMOOTH TRANSITIONS -->
     <div class="relative bg-black/60 backdrop-blur-2xl border-t border-white/5 light-mode:bg-white/80" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
       
@@ -356,6 +335,29 @@ const indieProjects = [
       </section>
 
       <div class="flex flex-col items-center py-8 opacity-20">
+        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+      </div>
+
+      <!-- STATS -->
+      <section class="py-6 px-6">
+        <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-1">
+          {[
+            { n: 5, suffix: '+', label: 'Years', sub: 'Flutter experience' },
+            { n: 10, suffix: '+', label: 'Projects', sub: 'shipped to production' },
+            { n: 5, suffix: '', label: 'Platforms', sub: 'Android · iOS · macOS · Web · Windows' },
+            { n: 50, suffix: '%', label: 'Scholarship', sub: 'FPT University · Full Course' },
+          ].map((s, i) => (
+            <div data-reveal data-delay={String(i+1)} class="tilt-card p-8 border border-white/5 rounded-[32px] text-center hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
+              <div class="text-6xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 mb-2">
+                <span class="count-up" data-count={s.n} data-suffix={s.suffix}>0{s.suffix}</span>
+              </div>
+              <div class="text-white font-bold mb-1">{s.label}</div>
+              <div class="text-xs text-gray-400 uppercase tracking-widest">{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <div class="flex flex-col items-center py-6 opacity-20">
         <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
       </div>
 
