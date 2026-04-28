@@ -826,12 +826,12 @@ const { title } = Astro.props;
 				const dimEnd = windowHeight * 1.5;
 				if (scrollY > dimStart) {
 					const progress = Math.min((scrollY - dimStart) / (dimEnd - dimStart), 1);
-					const dimOpacity = progress * 0.85;
+					const dimOpacity = progress * 0.45;
 					if (!isWindows) {
 						bgDimmer.style.opacity = dimOpacity.toString();
-						bgDimmer.style.backdropFilter = `blur(${isLight ? progress * 4 : progress * 30}px)`;
+						bgDimmer.style.backdropFilter = `blur(${isLight ? progress * 2 : progress * 12}px)`;
 					} else {
-						const bgColor = isLight ? `rgba(255,255,255,${dimOpacity * 0.5})` : `rgba(0,0,0,${dimOpacity * 0.7})`;
+						const bgColor = isLight ? `rgba(255,255,255,${dimOpacity * 0.3})` : `rgba(0,0,0,${dimOpacity * 0.4})`;
 						bgDimmer.style.backgroundColor = bgColor;
 					}
 				} else {
