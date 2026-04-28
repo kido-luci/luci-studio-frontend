@@ -70,15 +70,29 @@ const { title } = Astro.props;
 				},
 			}
 		</script>
+		<script is:inline>
+			// Initialize theme immediately to prevent flash
+			(function() {
+				const savedTheme = localStorage.getItem('theme');
+				const theme = savedTheme || 'light';
+				if (theme === 'light') {
+					document.documentElement.classList.add('light-mode');
+					// We'll also add it to body once it's available
+					window.addEventListener('DOMContentLoaded', () => {
+						document.body.classList.add('light-mode');
+					});
+				}
+			})();
+		</script>
 		<title>{title}</title>
 	</head>
-	<body class="bg-[#0a0a0a] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden max-w-full transition-colors duration-500">
+	<body class="bg-[#0a0a0a] text-gray-100 min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden max-w-full">
 		<!-- Vanta.js Background Animation -->
-		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2] transition-opacity duration-500" style="opacity: 1;"></div>
-		<canvas id="canvas-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2] transition-opacity duration-500 opacity-0 bg-[#f8f9fa]"></canvas>
+		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2]" style="opacity: 1;"></div>
+		<canvas id="canvas-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2] opacity-0 bg-[#f8f9fa]"></canvas>
 
 		<!-- Scroll-based Background Dimmer -->
-		<div id="bg-dimmer" class="fixed inset-0 w-full h-full pointer-events-none z-[-1] bg-black/0 transition-all duration-500"></div>
+		<div id="bg-dimmer" class="fixed inset-0 w-full h-full pointer-events-none z-[-1] bg-black/0"></div>
 
 		<!-- Custom Cursor -->
 		<div id="cursor-dot" class="fixed w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference transition-transform duration-100" style="top:-10px;left:-10px;"></div>
@@ -579,9 +593,13 @@ const { title } = Astro.props;
 				}
 			}
 		};
-
+		
 		// Expose toggle function globally for button click
-		(window as any).toggleTheme = toggleTheme;
+		(window as any).toggleTheme = () => {
+			toggleTheme();
+			// Re-trigger scroll logic to update nav background immediately
+			window.dispatchEvent(new Event('scroll'));
+		};
 
 		// ── Platform Detection ──────────────────────────────────────────────────
 		// All Windows browsers (Chrome + Edge) get perf-mode:
@@ -789,12 +807,12 @@ const { title } = Astro.props;
 				const isLight = document.body.classList.contains('light-mode');
 
 				if (scrollY > 80) {
-					nav.style.background = isLight ? 'var(--nav-bg-scroll)' : 'rgba(10,10,10,0.9)';
+					nav.style.background = 'var(--nav-bg-scroll)';
 					// Windows: solid bg, no blur — backdrop-filter on a full-width sticky
 					// nav triggers a full-viewport GPU layer on every scroll event in Chrome.
 					if (!isWindows) nav.style.backdropFilter = 'blur(32px)';
 				} else {
-					nav.style.background = isLight ? 'var(--nav-bg)' : (isWindows ? 'rgba(10,10,10,0.92)' : 'rgba(10,10,10,0.2)');
+					nav.style.background = 'var(--nav-bg)';
 					if (!isWindows) nav.style.backdropFilter = 'blur(16px)';
 				}
 
