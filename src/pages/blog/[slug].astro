@@ -343,13 +343,74 @@ const tag = (post && post.topics && post.topics.length > 0) ? post.topics[0] : '
   }
 
   body.light-mode .markdown-content pre {
-    background: #f8fafc !important;
-    border-color: rgba(0, 0, 0, 0.06) !important;
-    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+    background: #f1f5f9 !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   }
 
   body.light-mode .markdown-content pre code {
-    color: #1e293b !important;
+    color: #334155 !important;
+  }
+
+  /* Prism Light Mode Token Overrides */
+  body.light-mode .token.comment,
+  body.light-mode .token.prolog,
+  body.light-mode .token.doctype,
+  body.light-mode .token.cdata {
+    color: #64748b !important;
+    font-style: italic;
+  }
+
+  body.light-mode .token.punctuation {
+    color: #475569 !important;
+  }
+
+  body.light-mode .token.namespace {
+    opacity: .7;
+  }
+
+  body.light-mode .token.property,
+  body.light-mode .token.tag,
+  body.light-mode .token.boolean,
+  body.light-mode .token.number,
+  body.light-mode .token.constant,
+  body.light-mode .token.symbol,
+  body.light-mode .token.deleted {
+    color: #be185d !important;
+  }
+
+  body.light-mode .token.selector,
+  body.light-mode .token.attr-name,
+  body.light-mode .token.string,
+  body.light-mode .token.char,
+  body.light-mode .token.builtin,
+  body.light-mode .token.inserted {
+    color: #0369a1 !important;
+  }
+
+  body.light-mode .token.operator,
+  body.light-mode .token.entity,
+  body.light-mode .token.url,
+  body.light-mode .language-css .token.string,
+  body.light-mode .style .token.string {
+    color: #92400e !important;
+  }
+
+  body.light-mode .token.atrule,
+  body.light-mode .token.attr-value,
+  body.light-mode .token.keyword {
+    color: #6d28d9 !important;
+  }
+
+  body.light-mode .token.function,
+  body.light-mode .token.class-name {
+    color: #c026d3 !important;
+  }
+
+  body.light-mode .token.regex,
+  body.light-mode .token.important,
+  body.light-mode .token.variable {
+    color: #ea580c !important;
   }
 
   body.light-mode .copy-btn {
