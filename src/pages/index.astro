@@ -31,7 +31,7 @@ const indieProjects = [
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
         <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
-        <span class="text-xl font-black tracking-tighter">LUCI STUDIO<span class="text-violet-500">:</span> <span class="text-gray-400 font-bold text-sm ml-1 uppercase tracking-widest">Blog, Art, Apps</span></span>
+        <span class="text-xl font-black tracking-tight">LUCI STUDIO<span class="text-violet-500">.</span></span>
       </a>
       <div class="hidden md:flex items-center gap-8">
         {['About','Work','Art','Blog'].map(l => (
@@ -83,7 +83,7 @@ const indieProjects = [
   <main>
 
     <!-- HERO -->
-    <section class="relative min-h-screen flex flex-col justify-center items-center pt-20 px-6 overflow-x-hidden">
+    <section class="relative min-h-screen flex flex-col justify-center items-center pt-20 px-6">
       <!-- Vanta.js halo is handled in Layout.astro -->
 
       <!-- Floating orbs for depth -->
@@ -951,12 +951,12 @@ body.light-mode .hero-orb-2 {
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.25em;
-  line-height: 1;
+  line-height: 1.2;
 }
 .hero-line-top {
-  font-size: clamp(2.4rem, 11vw, 9.5rem);
+  font-size: clamp(2.4rem, 9vw, 9.5rem);
   font-weight: 900;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.005em;
 }
 .hero-line-bottom {
   font-size: clamp(1.2rem, 4.5vw, 3.2rem);
@@ -970,7 +970,9 @@ body.light-mode .hero-orb-2 {
 .hero-word-sub {
   display: inline-block;
   overflow: hidden;
-  vertical-align: bottom;
+  vertical-align: middle;
+  padding: 0.15em 0.05em; /* Increased vertical and added horizontal padding */
+  margin: -0.15em -0.05em;
 }
 
 /* ── Divider ── */
