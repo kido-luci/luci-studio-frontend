@@ -1,28 +1,43 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { postService } from "../../services/posts";
-import { calculateReadTime, formatDate, formatMarkdown } from "../../utils/blog";
+import { calculateReadTime, formatDate, formatMarkdown, slugify } from "../../utils/blog";
 
 export const prerender = false;
 
-const { id } = Astro.params;
+const { slug } = Astro.params;
 
-if (!id) {
+if (!slug) {
     return Astro.redirect('/');
 }
 
-const post = await postService.getByID(id);
+// Extract ID from the end of the slug (e.g., "my-post-title-123")
+const id = slug.split('-').pop();
+const post = (id && !isNaN(Number(id))) ? await postService.getByID(id) : null;
 
-if (!post) {
-    return Astro.redirect('/');
-}
-
-const readTime = calculateReadTime(post.content);
-const formattedDate = formatDate(post.created_at);
-const htmlContent = formatMarkdown(post.content);
-const tag = (post.topics && post.topics.length > 0) ? post.topics[0] : 'Engineering';
+const readTime = post ? calculateReadTime(post.content) : '';
+const formattedDate = post ? formatDate(post.created_at) : '';
+const htmlContent = post ? formatMarkdown(post.content) : '';
+const tag = (post && post.topics && post.topics.length > 0) ? post.topics[0] : 'Engineering';
 ---
 
+{!post ? (
+  <Layout title="Post Not Found">
+    <nav class="fixed top-0 w-full z-50 transition-all duration-500 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+      <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3 group">
+          <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
+          <span class="text-xl font-black tracking-[0em]">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
+        </a>
+      </div>
+    </nav>
+    <main class="pt-64 pb-24 px-6 min-h-screen bg-[#050505] text-center">
+      <h1 class="text-4xl font-black text-white mb-6">Post Not Found</h1>
+      <p class="text-gray-400 mb-12 max-w-md mx-auto">The article you are looking for might have been moved or deleted.</p>
+      <a href="/#blog" class="px-8 py-4 bg-white text-black font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest">Back to Blog</a>
+    </main>
+  </Layout>
+) : (
 <Layout title={`${post.title} | Luci Studio`}>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" is:inline></script>
@@ -86,6 +101,7 @@ const tag = (post.topics && post.topics.length > 0) ? post.topics[0] : 'Engineer
     </div>
   </main>
 </Layout>
+)}
 
 <script is:inline>
   // Handle copy functionality
