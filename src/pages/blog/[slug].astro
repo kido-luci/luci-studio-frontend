@@ -31,7 +31,7 @@ const tag = (post && post.topics && post.topics.length > 0) ? post.topics[0] : '
 
 {!post ? (
   <Layout title="Post Not Found">
-    <nav class="fixed top-0 w-full z-50 border-b border-white/5 bg-[var(--nav-bg)] backdrop-blur-xl">
+    <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
       <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <a href="/" class="flex items-center gap-3 group">
           <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
@@ -54,7 +54,7 @@ const tag = (post && post.topics && post.topics.length > 0) ? post.topics[0] : '
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" is:inline></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" is:inline></script>
 
-  <nav class="fixed top-0 w-full z-50 border-b border-white/5 bg-[var(--nav-bg)] backdrop-blur-xl">
+  <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
         <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
