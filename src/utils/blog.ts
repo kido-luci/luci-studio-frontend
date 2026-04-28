@@ -16,27 +16,29 @@ export function formatDate(dateStr: string): string {
 
 // More robust Markdown-to-HTML formatter (regex-based)
 export function formatMarkdown(text: string) {
-    // 0. Escape HTML to prevent XSS from raw input
-    let processedText = text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-
     const codeBlocks: string[] = [];
+    let processedText = text;
     
     // 1. Extract code blocks and replace with placeholders
-    // Note: We escape the code content to prevent XSS while preserving it for the code tag
     processedText = processedText.replace(/```(.*?)\r?\n([\s\S]*?)```/gim, (_, lang, code) => {
         const index = codeBlocks.length;
         const escapedCode = code
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
         codeBlocks.push(`<div class="code-block-container"><pre><code class="language-${lang.trim()}">${escapedCode}</code></pre></div>`);
         return `__CODE_BLOCK_${index}__`;
     });
+
+    // 2. Escape the remaining text to prevent XSS
+    processedText = processedText
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 
     // 2. Format other elements
     processedText = processedText
