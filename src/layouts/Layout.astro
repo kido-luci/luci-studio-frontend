@@ -96,7 +96,7 @@ const { title } = Astro.props;
 
 		<!-- Custom Cursor -->
 		<div id="cursor-dot" class="fixed w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference transition-transform duration-100" style="top:-10px;left:-10px;"></div>
-		<div id="cursor-ring" class="fixed w-10 h-10 border border-white/40 rounded-full pointer-events-none z-[9998] mix-blend-difference" style="top:-20px;left:-20px;"></div>
+		<div id="cursor-ring" class="fixed w-10 h-10 border border-white/40 rounded-full pointer-events-none z-[9998] mix-blend-difference" style="top:0;left:0;transform:translate(-20px,-20px);"></div>
 
 		<slot />
 
@@ -215,6 +215,7 @@ const { title } = Astro.props;
 				backdrop-filter: blur(12px);
 				background-color: var(--bg-card);
 				border-color: var(--border-color);
+				will-change: transform;
 			}
 			body.light-mode .tilt-card {
 				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -615,6 +616,7 @@ const { title } = Astro.props;
 		const dot = document.getElementById('cursor-dot') as HTMLElement;
 		const ring = document.getElementById('cursor-ring') as HTMLElement;
 		let ringX = 0, ringY = 0, mouseX = 0, mouseY = 0;
+		let targetRingScale = 1, ringScale = 1;
 		const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 		if (isTouchDevice) {
@@ -644,32 +646,34 @@ const { title } = Astro.props;
 
 			if (isWindows) {
 				// Windows: CSS transition instead of infinite rAF loop
-				ring.style.transition = 'left 0.12s ease-out, top 0.12s ease-out, transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease';
+				ring.style.transition = 'transform 0.12s ease-out, border-color 0.3s ease, box-shadow 0.3s ease';
 				document.addEventListener('mousemove', (e) => {
-					ring.style.left = e.clientX - 20 + 'px';
-					ring.style.top = e.clientY - 20 + 'px';
+					ringX = e.clientX; ringY = e.clientY;
+					ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(${ringScale})`;
 				});
 			} else {
-				// macOS/Edge: smooth rAF ring follow (original)
+				// macOS/Edge: smooth rAF ring follow — uses transform (compositor only, no layout reflow)
 				(function animateRing() {
 					ringX += (mouseX - ringX) * 0.12;
 					ringY += (mouseY - ringY) * 0.12;
-					ring.style.left = ringX - 20 + 'px';
-					ring.style.top = ringY - 20 + 'px';
+					ringScale += (targetRingScale - ringScale) * 0.15;
+					ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(${ringScale.toFixed(3)})`;
 					requestAnimationFrame(animateRing);
 				})();
 			}
 
 			document.querySelectorAll('a, button, .tilt-card, .magnetic').forEach(el => {
 				el.addEventListener('mouseenter', () => {
-					ring.style.transform = 'scale(2)';
+					if (isWindows) ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(2)`;
+					else targetRingScale = 2;
 					ring.style.borderColor = 'rgba(139,92,246,0.8)';
 					ring.style.boxShadow = '0 0 20px rgba(139,92,246,0.3)';
 					dot.style.transform = 'scale(1.5)';
 					dot.style.backgroundColor = '#8b5cf6';
 				});
 				el.addEventListener('mouseleave', () => {
-					ring.style.transform = 'scale(1)';
+					if (isWindows) ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(1)`;
+					else targetRingScale = 1;
 					ring.style.borderColor = isWindows ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.4)';
 					ring.style.boxShadow = 'none';
 					dot.style.transform = 'scale(1)';
@@ -1129,30 +1133,6 @@ const { title } = Astro.props;
 					});
 				});
 			});
-
-			// Parallax effect on scroll for project cards
-			let scrollTicking = false;
-			window.addEventListener('scroll', () => {
-				if (!scrollTicking) {
-					window.requestAnimationFrame(() => {
-						const scrolled = window.pageYOffset;
-						document.querySelectorAll('.tilt-card[data-project]').forEach((card, index) => {
-							const rect = card.getBoundingClientRect();
-							const cardTop = rect.top + scrolled;
-							const cardCenter = cardTop + rect.height / 2;
-							const windowCenter = scrolled + window.innerHeight / 2;
-							const distance = (windowCenter - cardCenter) / window.innerHeight;
-							const translateY = distance * 30;
-							
-							if (rect.top < window.innerHeight && rect.bottom > 0) {
-								(card as HTMLElement).style.transform = `translateY(${translateY}px)`;
-							}
-						});
-						scrollTicking = false;
-					});
-					scrollTicking = true;
-				}
-			}, { passive: true });
 
 			// Add hover animation for tech tags
 			document.querySelectorAll('.tilt-card span[class*="bg-white"]').forEach(tag => {

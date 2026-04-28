@@ -3,24 +3,19 @@ import Layout from "../../layouts/Layout.astro";
 import { postService } from "../../services/posts";
 import { calculateReadTime, formatDate, formatMarkdown, slugify } from "../../utils/blog";
 
-export const prerender = false;
-
-const { slug } = Astro.params;
-
-if (!slug) {
-    return Astro.redirect('/');
+export async function getStaticPaths() {
+  const posts = await postService.getAll();
+  return posts.map((post) => ({
+    params: { slug: `${slugify(post.title)}-${post.id}` },
+    props: { post },
+  }));
 }
 
-// Extract ID from the end of the slug (e.g., "my-post-title-123")
-const id = slug.split('-').pop();
-const post = (id && !isNaN(Number(id))) ? await postService.getByID(id) : null;
+const { post } = Astro.props;
+const { slug } = Astro.params;
 
-// Validate slug title matches post title, redirect if mismatch (canonical URL)
-if (post) {
-  const expectedSlug = `${slugify(post.title)}-${post.id}`;
-  if (slug !== expectedSlug) {
-    return Astro.redirect(`/blog/${expectedSlug}`, 301);
-  }
+if (!post) {
+    return Astro.redirect('/');
 }
 
 const readTime = post ? calculateReadTime(post.content) : '';
