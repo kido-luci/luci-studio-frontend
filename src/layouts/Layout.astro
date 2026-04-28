@@ -193,6 +193,7 @@ const { title } = Astro.props;
 				opacity: 0;
 				transform: translateY(40px);
 				transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+				will-change: opacity, transform;
 			}
 			[data-reveal="left"] { transform: translateX(-40px); opacity: 0; }
 			[data-reveal="right"] { transform: translateX(40px); opacity: 0; }
@@ -200,6 +201,7 @@ const { title } = Astro.props;
 			[data-reveal].is-visible {
 				opacity: 1 !important;
 				transform: translateY(0) translateX(0) scale(1) !important;
+				will-change: auto;
 			}
 			[data-delay="1"] { transition-delay: 0.06s; }
 			[data-delay="2"] { transition-delay: 0.12s; }
@@ -715,7 +717,7 @@ const { title } = Astro.props;
 					io.unobserve(e.target);
 				}
 			});
-		}, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
+		}, { threshold: 0.05, rootMargin: '0px 0px 120px 0px' });
 		document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
 
 		const wordIo = new IntersectionObserver((entries) => {
