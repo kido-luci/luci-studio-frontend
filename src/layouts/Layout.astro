@@ -191,22 +191,22 @@ const { title } = Astro.props;
 			/* === FADE SLIDE === */
 			[data-reveal] {
 				opacity: 0;
-				transform: translateY(50px);
-				transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+				transform: translateY(40px);
+				transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 			}
-			[data-reveal="left"] { transform: translateX(-60px); opacity: 0; }
-			[data-reveal="right"] { transform: translateX(60px); opacity: 0; }
-			[data-reveal="scale"] { transform: scale(0.88); opacity: 0; }
+			[data-reveal="left"] { transform: translateX(-40px); opacity: 0; }
+			[data-reveal="right"] { transform: translateX(40px); opacity: 0; }
+			[data-reveal="scale"] { transform: scale(0.92); opacity: 0; }
 			[data-reveal].is-visible {
 				opacity: 1 !important;
 				transform: translateY(0) translateX(0) scale(1) !important;
 			}
-			[data-delay="1"] { transition-delay: 0.1s; }
-			[data-delay="2"] { transition-delay: 0.2s; }
-			[data-delay="3"] { transition-delay: 0.3s; }
-			[data-delay="4"] { transition-delay: 0.4s; }
-			[data-delay="5"] { transition-delay: 0.5s; }
-			[data-delay="6"] { transition-delay: 0.6s; }
+			[data-delay="1"] { transition-delay: 0.06s; }
+			[data-delay="2"] { transition-delay: 0.12s; }
+			[data-delay="3"] { transition-delay: 0.18s; }
+			[data-delay="4"] { transition-delay: 0.24s; }
+			[data-delay="5"] { transition-delay: 0.30s; }
+			[data-delay="6"] { transition-delay: 0.36s; }
 
 			/* === CARD TILT === */
 			.tilt-card {
@@ -715,7 +715,7 @@ const { title } = Astro.props;
 					io.unobserve(e.target);
 				}
 			});
-		}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+		}, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
 		document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
 
 		const wordIo = new IntersectionObserver((entries) => {
@@ -997,106 +997,6 @@ const { title } = Astro.props;
 					});
 				});
 			});
-
-			// Animate section headings when they come into view
-			const headingObserver = new IntersectionObserver((entries) => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting) {
-						anime({
-							targets: entry.target,
-							translateX: [-50, 0],
-							opacity: [0, 1],
-							duration: 1200,
-							easing: 'easeOutExpo'
-						});
-						headingObserver.unobserve(entry.target);
-					}
-				});
-			}, { threshold: 0.3 });
-
-			document.querySelectorAll('section > h2, section > h3').forEach(heading => {
-				headingObserver.observe(heading);
-			});
-
-			// Animate timeline items
-			const timelineObserver = new IntersectionObserver((entries) => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting) {
-						anime({
-							targets: entry.target,
-							translateX: [-100, 0],
-							opacity: [0, 1],
-							duration: 1000,
-							easing: 'easeOutExpo'
-						});
-						timelineObserver.unobserve(entry.target);
-					}
-				});
-			}, { threshold: 0.2 });
-
-			document.querySelectorAll('.timeline-item').forEach(item => {
-				timelineObserver.observe(item);
-			});
-
-			// Animate blog cards
-			const blogObserver = new IntersectionObserver((entries) => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting) {
-						const cards = entry.target.querySelectorAll('article.tilt-card');
-						if (cards.length > 0) {
-							anime({
-								targets: cards,
-								scale: [0.8, 1],
-								opacity: [0, 1],
-								translateY: [50, 0],
-								delay: anime.stagger(100),
-								duration: 800,
-								easing: 'easeOutExpo'
-							});
-						}
-						blogObserver.unobserve(entry.target);
-					}
-				});
-			}, { threshold: 0.1 });
-
-			document.querySelectorAll('#blog, #art').forEach(section => {
-				blogObserver.observe(section);
-			});
-
-			// Animate contact section
-			const contactObserver = new IntersectionObserver((entries) => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting) {
-						anime({
-							targets: '#contact h2',
-							scale: [0.9, 1],
-							opacity: [0, 1],
-							duration: 1000,
-							easing: 'easeOutElastic(1, .6)'
-						});
-						anime({
-							targets: '#contact p',
-							translateY: [30, 0],
-							opacity: [0, 1],
-							delay: 200,
-							duration: 800,
-							easing: 'easeOutExpo'
-						});
-						anime({
-							targets: '#contact a',
-							scale: [0.8, 1],
-							opacity: [0, 1],
-							delay: anime.stagger(100, { start: 400 }),
-							duration: 800,
-							easing: 'easeOutElastic(1, .8)'
-						});
-						contactObserver.unobserve(entry.target);
-					}
-				});
-			}, { threshold: 0.3 });
-
-			const contactSection = document.querySelector('#contact');
-			if (contactSection) contactObserver.observe(contactSection);
 
 			// Add ripple effect on button clicks
 			document.querySelectorAll('button, a.magnetic').forEach(btn => {
