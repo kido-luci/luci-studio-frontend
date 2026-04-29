@@ -31,6 +31,17 @@ function escapeHtml(text: string): string {
         .replace(/'/g, '&#039;');
 }
 
+const UNSAFE_URL = /^(javascript|data|vbscript|file):/i;
+
+function safeImgSrc(url: string): string {
+    return UNSAFE_URL.test(url) ? '#' : url;
+}
+
+function safeLinkHref(url: string): string {
+    if (UNSAFE_URL.test(url)) return '#';
+    return (url.startsWith('http') || url.startsWith('/') || url.startsWith('#')) ? url : '#';
+}
+
 function applyInlineMarkdown(text: string): string {
     return text
         .replace(/\*\*\*(.*?)\*\*\*/gim, '<strong><em>$1</em></strong>')
@@ -38,12 +49,10 @@ function applyInlineMarkdown(text: string): string {
         .replace(/\*(.*?)\*/gim, '<em>$1</em>')
         .replace(/`(.*?)`/gim, '<code>$1</code>')
         .replace(/!\[(.*?)\]\((.*?)\)/gim, (_, alt, url) => {
-            const safeUrl = url.startsWith('javascript:') ? '#' : url;
-            return `<img src="${safeUrl}" alt="${alt}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`;
+            return `<img src="${safeImgSrc(url)}" alt="${alt}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`;
         })
         .replace(/\[(.*?)\]\((.*?)\)/gim, (_, label, url) => {
-            const safeUrl = (url.startsWith('http') || url.startsWith('/') || url.startsWith('#')) ? url : '#';
-            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+            return `<a href="${safeLinkHref(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
         });
 }
 
@@ -102,12 +111,10 @@ export function formatMarkdown(text: string) {
         .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
         .replace(/\*(.*)\*/gim, '<em>$1</em>')
         .replace(/!\[(.*?)\]\((.*?)\)/gim, (_, alt, url) => {
-            const safeUrl = url.startsWith('javascript:') ? '#' : url;
-            return `<img src="${safeUrl}" alt="${alt}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`;
+            return `<img src="${safeImgSrc(url)}" alt="${alt}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`;
         })
         .replace(/\[(.*?)\]\((.*?)\)/gim, (_, label, url) => {
-            const safeUrl = (url.startsWith('http') || url.startsWith('/') || url.startsWith('#')) ? url : '#';
-            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+            return `<a href="${safeLinkHref(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
         })
         .replace(/^\* (.*$)/gim, '<li>$1</li>')
         .replace(/^- (.*$)/gim, '<li>$1</li>')
