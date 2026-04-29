@@ -18,6 +18,8 @@ if (!post) {
     return Astro.redirect('/');
 }
 
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
+
 const SITE_URL = 'https://luci-studio.com';
 
 const readTime = post ? calculateReadTime(post.content) : '';
@@ -116,17 +118,22 @@ const articleSchema = {
     </div>
   </nav>
 
-  <main class="pt-32 pb-24 px-6 min-h-screen bg-[var(--bg-primary)]">
+  <main class="pt-32 pb-24 px-6 min-h-screen bg-[var(--bg-primary)]" data-post-id={post.id} data-api-url={API_URL}>
     <div class="max-w-4xl mx-auto">
       
       <!-- Hero Header -->
       <header class="mb-16" data-reveal>
-        <div class="flex items-center gap-4 mb-6">
+        <div class="flex items-center gap-4 mb-6 flex-wrap">
           <span class="px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest">{tag}</span>
           <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
           <span class="text-xs text-gray-500">{formattedDate}</span>
           <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
           <span class="text-xs text-gray-500">{readTime} read</span>
+          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
+          <span class="text-xs text-gray-500 flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span id="view-count">{post.views}</span>
+          </span>
         </div>
         
         <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-tighter">
@@ -150,6 +157,12 @@ const articleSchema = {
              </div>
            </div>
            <div class="flex items-center gap-6">
+             <button id="like-btn" class="flex items-center gap-2 group transition-all duration-300" aria-label="Like this post">
+               <svg id="like-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-all duration-300 text-gray-400 group-hover:text-rose-400">
+                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+               </svg>
+               <span id="like-count" class="text-xs font-bold text-gray-400 group-hover:text-rose-400 transition-colors">{post.likes}</span>
+             </button>
              <button id="share-btn" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Share Post <span>↗</span></button>
              <a href="https://linkedin.com/in/trung-lập-luci-ba0b6a339/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Connect <span>↗</span></a>
            </div>
@@ -239,10 +252,68 @@ const articleSchema = {
     }
   }
 
+  // View & like tracking
+  function setupEngagement() {
+    const main = document.querySelector('main[data-post-id]');
+    if (!main) return;
+    const postId = main.dataset.postId;
+    const apiUrl = main.dataset.apiUrl;
+
+    // Increment view (once per session)
+    const sessionKey = `viewed_${postId}`;
+    if (!sessionStorage.getItem(sessionKey)) {
+      fetch(`${apiUrl}/posts/${postId}/view`, { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+          const el = document.getElementById('view-count');
+          if (el && d.views != null) el.textContent = d.views;
+        })
+        .catch(() => {});
+      sessionStorage.setItem(sessionKey, '1');
+    }
+
+    // Like button
+    const likeBtn = document.getElementById('like-btn');
+    const likeIcon = document.getElementById('like-icon');
+    const likeCount = document.getElementById('like-count');
+    if (!likeBtn) return;
+
+    const likedKey = `liked_${postId}`;
+    let liked = localStorage.getItem(likedKey) === '1';
+
+    function setLiked(state) {
+      liked = state;
+      localStorage.setItem(likedKey, state ? '1' : '0');
+      if (state) {
+        likeIcon.setAttribute('fill', '#f43f5e');
+        likeIcon.setAttribute('stroke', '#f43f5e');
+        likeIcon.classList.add('scale-110');
+      } else {
+        likeIcon.setAttribute('fill', 'none');
+        likeIcon.setAttribute('stroke', 'currentColor');
+        likeIcon.classList.remove('scale-110');
+      }
+    }
+
+    setLiked(liked);
+
+    likeBtn.addEventListener('click', () => {
+      const endpoint = liked ? 'unlike' : 'like';
+      fetch(`${apiUrl}/posts/${postId}/${endpoint}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+          if (d.likes != null && likeCount) likeCount.textContent = d.likes;
+          setLiked(!liked);
+        })
+        .catch(() => {});
+    });
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     setupCopyButtons();
     setupShare();
     updateThemeIcon();
+    setupEngagement();
     document.querySelector('[aria-label="Toggle theme"]')?.addEventListener('click', () => {
       setTimeout(updateThemeIcon, 50);
     });
@@ -529,6 +600,14 @@ const articleSchema = {
   body.light-mode footer #share-btn:hover,
   body.light-mode footer a:hover {
     color: #111827 !important;
+  }
+
+  body.light-mode #like-btn .text-gray-400 {
+    color: #6b7280 !important;
+  }
+
+  #like-icon {
+    transition: transform 0.2s;
   }
 
   body.light-mode main.text-center a.bg-white {

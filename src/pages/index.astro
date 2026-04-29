@@ -33,8 +33,10 @@ const blogPosts = rawPosts.map(p => ({
   date: formatDate(p.created_at),
   read: calculateReadTime(p.content),
   tag: (p.topics && p.topics.length > 0) ? p.topics[0] : 'Engineering',
-  img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800'
+  img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
+  likes: p.likes ?? 0,
 }));
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
 ---
 
 <Layout title="Luci Studio | Tech Blog, Digital Art & Innovative Apps">
@@ -93,7 +95,7 @@ const blogPosts = rawPosts.map(p => ({
     </div>
   </nav>
 
-  <main>
+  <main data-api-url={API_URL}>
 
     <!-- HERO -->
     <section class="relative min-h-screen flex flex-col justify-center items-center pt-20 px-6">
@@ -208,22 +210,33 @@ const blogPosts = rawPosts.map(p => ({
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {blogPosts.map((p, i) => (
-              <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block no-underline">
-                <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
-                  <div class="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
-                    <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  </div>
-                  <div class="flex items-center gap-3 mb-4">
-                    <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tag}</span>
-                    <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                    <span class="text-xs text-gray-600">{p.date}</span>
-                    <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                    <span class="text-xs text-gray-600">{p.read} read</span>
-                  </div>
-                  <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
-                  {p.subtitle && <p class="text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
-                </article>
-              </a>
+              <div class="relative" data-post-id={p.id} data-post-likes={p.likes}>
+                <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block no-underline">
+                  <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
+                    <div class="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
+                      <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    </div>
+                    <div class="flex items-center gap-3 mb-4">
+                      <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tag}</span>
+                      <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                      <span class="text-xs text-gray-600">{p.date}</span>
+                      <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                      <span class="text-xs text-gray-600">{p.read} read</span>
+                    </div>
+                    <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
+                    {p.subtitle && <p class="text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
+                    <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                      <span class="text-xs text-gray-600">Read more →</span>
+                      <span class="tile-like-area flex items-center gap-1.5 cursor-pointer group/like" data-id={p.id}>
+                        <svg class="tile-like-icon w-4 h-4 text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                        <span class="tile-like-count text-xs text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200">{p.likes}</span>
+                      </span>
+                    </div>
+                  </article>
+                </a>
+              </div>
             ))}
           </div>
         </div>
@@ -816,6 +829,9 @@ body.light-mode .hover\:bg-white\/\[0\.05\]:hover {
 body.light-mode article.tilt-card h3 {
   color: rgb(17, 24, 39) !important;
 }
+body.light-mode .tile-like-count {
+  color: rgb(107, 114, 128) !important;
+}
 body.light-mode .text-gray-700 {
   color: rgb(156, 163, 175) !important;
 }
@@ -1132,6 +1148,51 @@ body.light-mode .hero-orb-2 {
       document.body.style.overflow = '';
     });
   });
+
+  // Blog tile like buttons
+  (function() {
+    const API_URL = document.querySelector('main[data-api-url]')?.dataset.apiUrl || '';
+    document.querySelectorAll('.tile-like-area').forEach(btn => {
+      const postId = btn.dataset.id;
+      const icon = btn.querySelector('.tile-like-icon');
+      const countEl = btn.querySelector('.tile-like-count');
+      const likedKey = `liked_${postId}`;
+      let liked = localStorage.getItem(likedKey) === '1';
+
+      function applyLikedState(state) {
+        liked = state;
+        if (state) {
+          icon.setAttribute('fill', '#f43f5e');
+          icon.setAttribute('stroke', '#f43f5e');
+          icon.classList.add('scale-110');
+          countEl.classList.add('text-rose-400');
+          countEl.classList.remove('text-gray-500');
+        } else {
+          icon.setAttribute('fill', 'none');
+          icon.setAttribute('stroke', 'currentColor');
+          icon.classList.remove('scale-110');
+          countEl.classList.remove('text-rose-400');
+          countEl.classList.add('text-gray-500');
+        }
+      }
+
+      applyLikedState(liked);
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const endpoint = liked ? 'unlike' : 'like';
+        fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST' })
+          .then(r => r.json())
+          .then(d => {
+            if (d.likes != null && countEl) countEl.textContent = d.likes;
+            applyLikedState(!liked);
+            localStorage.setItem(likedKey, liked ? '1' : '0');
+          })
+          .catch(() => {});
+      });
+    });
+  })();
 
   // Theme Toggle Icon Update
   const updateThemeIcon = () => {

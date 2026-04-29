@@ -8,6 +8,8 @@ export interface Post {
     content: string;
     topics?: string[];
     cover_image_url?: string;
+    views: number;
+    likes: number;
     created_at: string;
     updated_at: string;
 }
