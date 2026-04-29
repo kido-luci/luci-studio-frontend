@@ -591,6 +591,7 @@ const canonicalURL = canonical ?? SITE_URL;
 		// Theme toggle function
 		const toggleTheme = () => {
 			const isLight = document.body.classList.toggle('light-mode');
+			document.documentElement.classList.toggle('light-mode', isLight);
 			localStorage.setItem('theme', isLight ? 'light' : 'dark');
 			
 			// Update Vanta background animation depending on theme
