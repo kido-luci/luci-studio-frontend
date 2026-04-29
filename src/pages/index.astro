@@ -198,11 +198,15 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
     </div>
 
 
-    <!-- CONTENT WRAPPER FOR SMOOTH TRANSITIONS -->
-    <div class="relative bg-black/60 backdrop-blur-2xl border-t border-white/5 light-mode:bg-white/80" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-      
-            <!-- BLOG -->
-      <section id="blog" class="py-16 px-6">
+    <!-- STACKING CARDS -->
+    <div id="stack-progress" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 opacity-0 transition-opacity duration-500 pointer-events-none" aria-hidden="true">
+    </div>
+
+    <div class="stack-container">
+
+      <div class="stack-scene">
+      <!-- BLOG -->
+      <section id="blog" class="stack-card py-16 px-6" data-accent="violet" data-stack-index="0">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20 text-center">
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Writing</span>
@@ -241,13 +245,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           </div>
         </div>
       </section>
+      </div><!-- end stack-scene -->
 
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
+      <div class="stack-scene">
       <!-- ART GALLERY -->
-      <section id="art" class="py-16 px-6">
+      <section id="art" class="stack-card py-16 px-6" data-accent="blue" data-stack-index="1">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
@@ -279,15 +281,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           </div>
         </div>
       </section>
+      </div><!-- end stack-scene -->
 
-
-
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
+      <div class="stack-scene">
       <!-- WORK -->
-      <section id="work" class="py-16 px-6">
+      <section id="work" class="stack-card py-16 px-6" data-accent="emerald" data-stack-index="2">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Selected Work</span>
@@ -301,13 +299,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           </div>
         </div>
       </section>
+      </div><!-- end stack-scene -->
 
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
-<!-- ABOUT ME -->
-      <section id="about" class="py-24 px-6 overflow-hidden">
+      <div class="stack-scene">
+      <!-- ABOUT ME -->
+      <section id="about" class="stack-card py-24 px-6" data-accent="pink" data-stack-index="3">
         <div class="max-w-7xl mx-auto">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <!-- Left: Artistic Image / Visual -->
@@ -358,13 +354,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           </div>
         </div>
       </section>
+      </div><!-- end stack-scene -->
 
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
+      <div class="stack-scene">
       <!-- STATS -->
-      <section class="py-6 px-6">
+      <section class="stack-card py-6 px-6" data-accent="amber" data-stack-index="4">
         <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-1">
           {[
             { n: 5, suffix: '+', label: 'Years', sub: 'Flutter experience' },
@@ -382,12 +376,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           ))}
         </div>
       </section>
-      <div class="flex flex-col items-center py-6 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
+      </div><!-- end stack-scene -->
 
+      <div class="stack-scene">
       <!-- EXPERIENCE -->
-      <section id="experience" class="py-16 px-6">
+      <section id="experience" class="stack-card py-16 px-6" data-accent="pink" data-stack-index="5">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">Journey</span>
@@ -419,13 +412,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           </div>
         </div>
       </section>
+      </div><!-- end stack-scene -->
 
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
+      <div class="stack-scene">
       <!-- SKILLS -->
-      <section id="skills" class="py-16 px-6">
+      <section id="skills" class="stack-card py-16 px-6" data-accent="emerald" data-stack-index="6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] mb-3 block">Expertise</span>
@@ -491,13 +482,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           </div>
         </div>
       </section>
+      </div><!-- end stack-scene -->
 
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
+      <div class="stack-scene">
       <!-- NOW -->
-      <section id="now" class="py-16 px-6">
+      <section id="now" class="stack-card py-16 px-6" data-accent="amber" data-stack-index="7">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-16">
             <span class="text-xs font-black text-amber-500 uppercase tracking-[0.3em] mb-3 block">Live Status</span>
@@ -527,14 +516,11 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           </div>
         </div>
       </section>
+      </div><!-- end stack-scene -->
 
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
-      
-<!-- CTA -->
-      <section id="contact" class="py-40 px-6">
+      <div class="stack-scene">
+      <!-- CTA -->
+      <section id="contact" class="stack-card py-40 px-6" data-accent="violet" data-stack-index="8">
         <div class="max-w-5xl mx-auto text-center">
           <div data-reveal class="mb-6">
             <span class="text-xs font-black text-gray-600 uppercase tracking-[0.3em]">Ready to collaborate?</span>
@@ -557,6 +543,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           </div>
         </div>
       </section>
+      </div><!-- end stack-scene -->
 
       <!-- FOOTER -->
       <footer class="py-16 border-t border-white/5 px-6">
@@ -579,7 +566,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           </div>
         </div>
       </footer>
-    </div>
+    </div><!-- end stack-container -->
   </main>
 
 </Layout>
@@ -1074,6 +1061,78 @@ body.light-mode .hero-orb-2 {
   box-shadow: 0 20px 40px -20px rgba(236, 72, 153, 0.2);
 }
 
+/* ── Stacking Cards ── */
+.stack-container {
+  position: relative;
+}
+
+.stack-scene {
+  position: relative;
+}
+
+.stack-card {
+  position: sticky;
+  top: 80px; /* nav height */
+  background-color: var(--bg-primary, #030303);
+  border-radius: 20px 20px 0 0;
+  transform-origin: top center;
+  will-change: transform, opacity;
+  box-shadow: 0 -6px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  border-top: 1px solid var(--card-accent-color, rgba(255,255,255,0.06));
+  z-index: 10;
+  overflow: clip; /* clips border-radius without breaking sticky */
+}
+
+/* Accent line colour per card */
+.stack-card[data-accent="violet"]  { --card-accent-color: rgba(139,92,246,0.45); }
+.stack-card[data-accent="blue"]    { --card-accent-color: rgba(59,130,246,0.45); }
+.stack-card[data-accent="emerald"] { --card-accent-color: rgba(16,185,129,0.45); }
+.stack-card[data-accent="pink"]    { --card-accent-color: rgba(236,72,153,0.45); }
+.stack-card[data-accent="amber"]   { --card-accent-color: rgba(245,158,11,0.45); }
+
+/* Drag-handle pill at top of each card */
+.stack-card::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+
+/* Progress dots */
+#stack-progress .sdot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: width 0.3s, background 0.3s, border-radius 0.3s;
+}
+#stack-progress .sdot.active {
+  width: 18px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.75);
+}
+
+/* Light mode overrides */
+body.light-mode .stack-card {
+  background-color: var(--bg-primary, #fafafa);
+  box-shadow: 0 -6px 30px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.06);
+}
+body.light-mode .stack-card::before {
+  background: rgba(0,0,0,0.07);
+}
+body.light-mode #stack-progress .sdot {
+  background: rgba(0,0,0,0.15);
+}
+body.light-mode #stack-progress .sdot.active {
+  background: rgba(0,0,0,0.55);
+}
+
 /* ── Mobile overrides (< 480px) ── */
 @media (max-width: 480px) {
   .hero-badge {
@@ -1235,6 +1294,87 @@ body.light-mode .hero-orb-2 {
           .catch(() => {});
       });
     });
+  })();
+
+  // ── Stacking card scroll effect ──
+  (function initStackCards() {
+    const scenes = Array.from(document.querySelectorAll('.stack-scene'));
+    const cards  = scenes.map(s => s.querySelector('.stack-card'));
+    const NAV    = 80;
+    const SCALE_MIN  = 0.88;
+    const OPACITY_MIN = 0.55;
+    const totalCards = cards.length;
+
+    // Build progress dots
+    const progress = document.getElementById('stack-progress');
+    if (progress) {
+      cards.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'sdot' + (i === 0 ? ' active' : '');
+        dot.dataset.i = i;
+        progress.appendChild(dot);
+      });
+    }
+
+    // Assign stacking z-index (last card on top)
+    cards.forEach((card, i) => {
+      if (card) card.style.zIndex = 10 + i;
+    });
+
+    let activeIndex = 0;
+
+    function update() {
+      const vh = window.innerHeight;
+      let newActive = 0;
+
+      cards.forEach((card, i) => {
+        if (!card) return;
+        const nextCard = cards[i + 1];
+
+        if (!nextCard) {
+          // Last card — always full scale
+          card.style.transform = '';
+          card.style.opacity = '';
+          return;
+        }
+
+        const nextTop = nextCard.getBoundingClientRect().top;
+
+        // t = 0 when next card is at viewport bottom
+        // t = 1 when next card is fully at NAV (stuck on top of this card)
+        const t = Math.max(0, Math.min(1, (vh - nextTop) / (vh - NAV)));
+
+        const scale   = 1 - (1 - SCALE_MIN)  * t;
+        const opacity = 1 - (1 - OPACITY_MIN) * t;
+
+        card.style.transform = `scale(${scale.toFixed(4)})`;
+        card.style.opacity   = opacity.toFixed(4);
+
+        // Determine active card: the topmost fully-visible one
+        const cardTop = card.getBoundingClientRect().top;
+        if (cardTop <= NAV + 2) newActive = i;
+      });
+
+      // Show progress dots only after leaving the hero
+      if (progress) {
+        const containerTop = document.querySelector('.stack-container')?.getBoundingClientRect().top ?? 999;
+        const show = containerTop < NAV + 10;
+        progress.style.opacity = show ? '1' : '0';
+        progress.style.pointerEvents = show ? 'none' : 'none';
+      }
+
+      // Update active dot
+      if (newActive !== activeIndex) {
+        activeIndex = newActive;
+        progress?.querySelectorAll('.sdot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === activeIndex);
+        });
+      }
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    update();
   })();
 
   // Theme Toggle Icon Update
