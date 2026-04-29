@@ -118,6 +118,17 @@ const articleSchema = {
     </div>
   </nav>
 
+  <!-- Floating like pill -->
+  <div id="floating-like" class="fixed bottom-8 right-8 z-40 opacity-0 pointer-events-none transition-all duration-500 translate-y-4">
+    <button id="floating-like-btn" aria-label="Like this post" class="relative flex items-center gap-3 pl-4 pr-5 py-3 rounded-full border border-white/10 bg-black/70 backdrop-blur-2xl shadow-2xl hover:border-rose-500/50 transition-all duration-300 group">
+      <div id="floating-glow" class="absolute inset-0 rounded-full opacity-0 transition-opacity duration-500 pointer-events-none" style="background:radial-gradient(ellipse at center,rgba(244,63,94,0.25) 0%,transparent 70%);"></div>
+      <svg id="floating-like-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 group-hover:text-rose-400 transition-colors duration-300 relative z-10">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+      <span id="floating-like-count" class="text-sm font-black text-gray-400 tabular-nums relative z-10">{post.likes}</span>
+    </button>
+  </div>
+
   <main class="pt-32 pb-24 px-6 min-h-screen bg-[var(--bg-primary)]" data-post-id={post.id} data-api-url={API_URL}>
     <div class="max-w-4xl mx-auto">
       
@@ -134,6 +145,11 @@ const articleSchema = {
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             <span id="view-count">{post.views}</span>
           </span>
+          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
+          <span class="text-xs text-gray-500 flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span id="like-count-header">{post.likes}</span>
+          </span>
         </div>
         
         <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-tighter">
@@ -145,7 +161,25 @@ const articleSchema = {
       <article class="prose-custom markdown-content" set:html={htmlContent}>
       </article>
 
-      <footer class="mt-24 pt-12 border-t border-white/5">
+      <!-- Like CTA -->
+      <div class="mt-24 flex flex-col items-center text-center gap-5">
+        <p class="text-[10px] font-black text-gray-600 uppercase tracking-[0.35em]">Enjoyed this read?</p>
+        <button id="like-btn" aria-label="Like this post" class="relative group outline-none">
+          <div id="like-ring" class="absolute -inset-3 rounded-full opacity-0 transition-all duration-700 pointer-events-none" style="background:radial-gradient(circle,rgba(244,63,94,0.18) 0%,transparent 70%);"></div>
+          <div id="like-ring-border" class="absolute -inset-3 rounded-full border border-rose-500/0 transition-all duration-500 pointer-events-none"></div>
+          <div class="w-20 h-20 rounded-full border border-white/10 bg-white/[0.03] flex items-center justify-center transition-all duration-300 group-hover:border-rose-500/40 group-hover:bg-rose-500/5 relative z-10">
+            <svg id="like-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 group-hover:text-rose-400 transition-colors duration-300">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+        </button>
+        <div>
+          <span id="like-count" class="text-2xl font-black text-white tabular-nums">{post.likes}</span>
+          <span class="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] ml-2">likes</span>
+        </div>
+      </div>
+
+      <footer class="mt-20 pt-12 border-t border-white/5">
         <div class="flex flex-col md:flex-row items-center justify-between gap-8">
            <div class="flex items-center gap-4">
              <div class="w-12 h-12 rounded-2xl overflow-hidden border border-white/10">
@@ -157,12 +191,6 @@ const articleSchema = {
              </div>
            </div>
            <div class="flex items-center gap-6">
-             <button id="like-btn" class="flex items-center gap-2 group transition-all duration-300" aria-label="Like this post">
-               <svg id="like-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-all duration-300 text-gray-400 group-hover:text-rose-400">
-                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-               </svg>
-               <span id="like-count" class="text-xs font-bold text-gray-400 group-hover:text-rose-400 transition-colors">{post.likes}</span>
-             </button>
              <button id="share-btn" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Share Post <span>↗</span></button>
              <a href="https://linkedin.com/in/trung-lập-luci-ba0b6a339/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Connect <span>↗</span></a>
            </div>
@@ -272,14 +300,38 @@ const articleSchema = {
       sessionStorage.setItem(sessionKey, '1');
     }
 
-    // Like button
+    // Like button — footer + floating share the same state
     const likeBtn = document.getElementById('like-btn');
     const likeIcon = document.getElementById('like-icon');
     const likeCount = document.getElementById('like-count');
+    const floatingBtn = document.getElementById('floating-like-btn');
+    const floatingIcon = document.getElementById('floating-like-icon');
+    const floatingCount = document.getElementById('floating-like-count');
+    const floatingEl = document.getElementById('floating-like');
     if (!likeBtn) return;
 
     const likedKey = `liked_${postId}`;
     let liked = localStorage.getItem(likedKey) === '1';
+
+    // Show/hide floating button based on scroll position
+    const header = document.querySelector('header[data-reveal]');
+    function onScroll() {
+      if (!floatingEl || !header) return;
+      const past = window.scrollY > header.getBoundingClientRect().bottom + window.scrollY + 40;
+      if (past) {
+        floatingEl.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      } else {
+        floatingEl.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    function updateAllCounts(n) {
+      if (likeCount) likeCount.textContent = n;
+      if (floatingCount) floatingCount.textContent = n;
+      const headerCount = document.getElementById('like-count-header');
+      if (headerCount) headerCount.textContent = n;
+    }
 
     function burstHearts(anchor) {
       const count = 6;
@@ -312,46 +364,58 @@ const articleSchema = {
       }
     }
 
-    function pulseLikeIcon() {
-      likeIcon.style.transform = 'scale(1.5)';
-      likeIcon.style.transition = 'transform 0.15s ease-out';
-      setTimeout(() => {
-        likeIcon.style.transform = 'scale(1)';
-        likeIcon.style.transition = 'transform 0.2s ease-in';
-      }, 150);
+    function pulseIcon(icon) {
+      icon.classList.remove('liked-pulse');
+      void icon.offsetWidth; // reflow to restart animation
+      icon.classList.add('liked-pulse');
+      setTimeout(() => icon.classList.remove('liked-pulse'), 1200);
     }
 
     function setLiked(state) {
       liked = state;
       localStorage.setItem(likedKey, state ? '1' : '0');
-      if (state) {
-        likeIcon.setAttribute('fill', '#f43f5e');
-        likeIcon.setAttribute('stroke', '#f43f5e');
-        likeIcon.classList.add('scale-110');
-      } else {
-        likeIcon.setAttribute('fill', 'none');
-        likeIcon.setAttribute('stroke', 'currentColor');
-        likeIcon.classList.remove('scale-110');
+      const fill = state ? '#f43f5e' : 'none';
+      const stroke = state ? '#f43f5e' : 'currentColor';
+      for (const icon of [likeIcon, floatingIcon]) {
+        if (!icon) continue;
+        icon.setAttribute('fill', fill);
+        icon.setAttribute('stroke', stroke);
+        state ? icon.classList.add('scale-110') : icon.classList.remove('scale-110');
       }
+      // Ring + glow on main CTA
+      const ring = document.getElementById('like-ring');
+      const ringBorder = document.getElementById('like-ring-border');
+      if (ring) ring.style.opacity = state ? '1' : '0';
+      if (ringBorder) ringBorder.style.borderColor = state ? 'rgba(244,63,94,0.35)' : 'rgba(244,63,94,0)';
+      // Glow on floating pill
+      const floatingGlow = document.getElementById('floating-glow');
+      if (floatingGlow) floatingGlow.style.opacity = state ? '1' : '0';
+      // Count color
+      if (likeCount) likeCount.style.color = state ? '#f43f5e' : '';
+      const countLabel = likeCount?.nextElementSibling;
+      if (countLabel) countLabel.style.color = state ? 'rgba(244,63,94,0.5)' : '';
     }
 
     setLiked(liked);
 
-    likeBtn.addEventListener('click', () => {
+    function handleLikeClick(btn, icon) {
       const isLiking = !liked;
       if (isLiking) {
-        burstHearts(likeBtn);
-        pulseLikeIcon();
+        burstHearts(btn);
+        pulseIcon(icon);
       }
       const endpoint = liked ? 'unlike' : 'like';
       fetch(`${apiUrl}/posts/${postId}/${endpoint}`, { method: 'POST' })
         .then(r => r.json())
         .then(d => {
-          if (d.likes != null && likeCount) likeCount.textContent = d.likes;
+          if (d.likes != null) updateAllCounts(d.likes);
           setLiked(!liked);
         })
         .catch(() => {});
-    });
+    }
+
+    likeBtn.addEventListener('click', () => handleLikeClick(likeBtn, likeIcon));
+    floatingBtn?.addEventListener('click', () => handleLikeClick(floatingBtn, floatingIcon));
   }
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -651,8 +715,37 @@ const articleSchema = {
     color: #6b7280 !important;
   }
 
-  #like-icon {
+  #like-icon, #floating-like-icon {
     transition: transform 0.2s;
+  }
+
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    14% { transform: scale(1.15); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.08); }
+    56% { transform: scale(1); }
+  }
+
+  #like-icon.liked-pulse {
+    animation: heartbeat 1.2s ease-in-out;
+  }
+
+  body.light-mode #floating-like-btn {
+    background: rgba(255,255,255,0.85);
+    border-color: rgba(0,0,0,0.1);
+  }
+
+  body.light-mode #floating-like-count {
+    color: #6b7280;
+  }
+
+  body.light-mode #like-btn .border-white\/10 {
+    border-color: rgba(0,0,0,0.08);
+  }
+
+  body.light-mode #like-count {
+    color: #111827;
   }
 
   body.light-mode main.text-center a.bg-white {
