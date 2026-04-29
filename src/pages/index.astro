@@ -29,6 +29,7 @@ const rawPosts = await postService.getAll();
 const blogPosts = rawPosts.map(p => ({
   id: p.id,
   title: p.title,
+  subtitle: p.subtitle || '',
   date: formatDate(p.created_at),
   read: calculateReadTime(p.content),
   tag: (p.topics && p.topics.length > 0) ? p.topics[0] : 'Engineering',
@@ -219,7 +220,8 @@ const blogPosts = rawPosts.map(p => ({
                     <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
                     <span class="text-xs text-gray-600">{p.read} read</span>
                   </div>
-                  <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300">{p.title}</h3>
+                  <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
+                  {p.subtitle && <p class="text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
                 </article>
               </a>
             ))}
