@@ -67,15 +67,18 @@ export function formatMarkdown(text: string) {
         const lines = match.split('\n').filter(l => /^>/.test(l));
         const contents = lines.map(l => l.replace(/^>\s?/, ''));
 
-        const calloutType = contents[0]?.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]$/i)?.[1]?.toUpperCase();
+        const firstLineMatch = contents[0]?.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*)?$/i);
+        const calloutType = firstLineMatch?.[1]?.toUpperCase();
         const index = blockquotes.length;
 
         if (calloutType && CALLOUT_STYLES[calloutType]) {
-            const { color, bg, label } = CALLOUT_STYLES[calloutType];
-            const body = applyInlineMarkdown(escapeHtml(contents.slice(1).join('\n').trim()));
+            const { color, bg } = CALLOUT_STYLES[calloutType];
+            const inlineRest = firstLineMatch?.[2]?.trim() ?? '';
+            const remainingLines = contents.slice(1).join('\n').trim();
+            const rawBody = [inlineRest, remainingLines].filter(Boolean).join('\n');
+            const body = applyInlineMarkdown(escapeHtml(rawBody));
             blockquotes.push(
                 `<div style="border-left:4px solid ${color};background:${bg};padding:0.875rem 1.25rem;border-radius:0 0.5rem 0.5rem 0;margin:1.5rem 0;">` +
-                `<div style="font-weight:700;font-size:0.8rem;color:${color};margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em;">${label}</div>` +
                 `<div style="font-size:0.95rem;">${body}</div>` +
                 `</div>`
             );
