@@ -27,8 +27,10 @@ const tag = (post && post.topics && post.topics.length > 0) ? post.topics[0] : '
 
 // SEO
 const canonicalURL = `${SITE_URL}/blog/${slug}`;
-const seoDescription = post.subtitle ||
-    post.content.replace(/```[\s\S]*?```/g, '').replace(/[#*`>\[\]!_~]/g, '').replace(/\s+/g, ' ').trim().slice(0, 160) + '…';
+const _subtitle = post.subtitle?.trim();
+const seoDescription = _subtitle
+    ? _subtitle
+    : (post.content.replace(/```[\s\S]*?```/g, '').replace(/[#*`>\[\]!_~]/g, '').replace(/\s+/g, ' ').trim().slice(0, 160) + '…');
 const ogImage = post.cover_image_url || `${SITE_URL}/images/og-default.png`;
 
 const articleSchema = {
