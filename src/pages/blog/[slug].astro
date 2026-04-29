@@ -18,10 +18,41 @@ if (!post) {
     return Astro.redirect('/');
 }
 
+const SITE_URL = 'https://luci-studio.com';
+
 const readTime = post ? calculateReadTime(post.content) : '';
 const formattedDate = post ? formatDate(post.created_at) : '';
 const htmlContent = post ? formatMarkdown(post.content) : '';
 const tag = (post && post.topics && post.topics.length > 0) ? post.topics[0] : 'Engineering';
+
+// SEO
+const canonicalURL = `${SITE_URL}/blog/${slug}`;
+const seoDescription = post.subtitle ||
+    post.content.replace(/```[\s\S]*?```/g, '').replace(/[#*`>\[\]!_~]/g, '').replace(/\s+/g, ' ').trim().slice(0, 160) + '…';
+const ogImage = post.cover_image_url || `${SITE_URL}/images/og-default.png`;
+
+const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: seoDescription,
+    image: ogImage,
+    datePublished: post.created_at,
+    dateModified: post.updated_at,
+    author: {
+        '@type': 'Person',
+        name: 'Trung Lập (Luci)',
+        url: SITE_URL,
+    },
+    publisher: {
+        '@type': 'Organization',
+        name: 'Luci Studio',
+        url: SITE_URL,
+        logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/logo_icon.png` },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalURL },
+    ...(post.topics?.length ? { keywords: post.topics.join(', ') } : {}),
+};
 ---
 
 {!post ? (
@@ -41,7 +72,14 @@ const tag = (post && post.topics && post.topics.length > 0) ? post.topics[0] : '
     </main>
   </Layout>
 ) : (
-<Layout title={`${post.title} | Luci Studio`}>
+<Layout
+  title={`${post.title} | Luci Studio`}
+  description={seoDescription}
+  ogImage={ogImage}
+  ogType="article"
+  canonical={canonicalURL}
+  structuredData={articleSchema}
+>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" is:inline></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js" is:inline></script>

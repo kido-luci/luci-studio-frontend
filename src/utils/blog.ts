@@ -14,33 +14,83 @@ export function formatDate(dateStr: string): string {
     });
 }
 
-// More robust Markdown-to-HTML formatter (regex-based)
-export function formatMarkdown(text: string) {
-    const codeBlocks: string[] = [];
-    let processedText = text;
-    
-    // 1. Extract code blocks and replace with placeholders
-    processedText = processedText.replace(/```(.*?)\r?\n([\s\S]*?)```/gim, (_, lang, code) => {
-        const index = codeBlocks.length;
-        const escapedCode = code
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-        codeBlocks.push(`<div class="code-block-container"><pre><code class="language-${lang.trim()}">${escapedCode}</code></pre></div>`);
-        return `__CODE_BLOCK_${index}__`;
-    });
+const CALLOUT_STYLES: Record<string, { color: string; bg: string; label: string }> = {
+    NOTE:      { color: '#3b82f6', bg: 'rgba(59,130,246,0.08)',  label: 'ℹ Note' },
+    TIP:       { color: '#10b981', bg: 'rgba(16,185,129,0.08)',  label: '💡 Tip' },
+    IMPORTANT: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.08)', label: '⚡ Important' },
+    WARNING:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', label: '⚠️ Warning' },
+    CAUTION:   { color: '#ef4444', bg: 'rgba(239,68,68,0.08)',  label: '🚫 Caution' },
+};
 
-    // 2. Escape the remaining text to prevent XSS
-    processedText = processedText
+function escapeHtml(text: string): string {
+    return text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
 
-    // 2. Format other elements
+function applyInlineMarkdown(text: string): string {
+    return text
+        .replace(/\*\*\*(.*?)\*\*\*/gim, '<strong><em>$1</em></strong>')
+        .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+        .replace(/`(.*?)`/gim, '<code>$1</code>')
+        .replace(/!\[(.*?)\]\((.*?)\)/gim, (_, alt, url) => {
+            const safeUrl = url.startsWith('javascript:') ? '#' : url;
+            return `<img src="${safeUrl}" alt="${alt}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`;
+        })
+        .replace(/\[(.*?)\]\((.*?)\)/gim, (_, label, url) => {
+            const safeUrl = (url.startsWith('http') || url.startsWith('/') || url.startsWith('#')) ? url : '#';
+            return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+        });
+}
+
+export function formatMarkdown(text: string) {
+    const codeBlocks: string[] = [];
+    const blockquotes: string[] = [];
+    let processedText = text;
+
+    // 1. Extract fenced code blocks → placeholders (escape content inside)
+    processedText = processedText.replace(/```(.*?)\r?\n([\s\S]*?)```/gim, (_, lang, code) => {
+        const index = codeBlocks.length;
+        codeBlocks.push(
+            `<div class="code-block-container"><pre><code class="language-${lang.trim()}">${escapeHtml(code)}</code></pre></div>`
+        );
+        return `__CODE_BLOCK_${index}__`;
+    });
+
+    // 2. Extract blockquotes/callouts BEFORE HTML escaping so `>` is still raw.
+    //    Matches one or more consecutive `> ...` lines (including blank `>` lines).
+    processedText = processedText.replace(/^((?:>[^\n]*\n?)+)/gim, (match) => {
+        const lines = match.split('\n').filter(l => /^>/.test(l));
+        const contents = lines.map(l => l.replace(/^>\s?/, ''));
+
+        const calloutType = contents[0]?.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]$/i)?.[1]?.toUpperCase();
+        const index = blockquotes.length;
+
+        if (calloutType && CALLOUT_STYLES[calloutType]) {
+            const { color, bg, label } = CALLOUT_STYLES[calloutType];
+            const body = applyInlineMarkdown(escapeHtml(contents.slice(1).join('\n').trim()));
+            blockquotes.push(
+                `<div style="border-left:4px solid ${color};background:${bg};padding:0.875rem 1.25rem;border-radius:0 0.5rem 0.5rem 0;margin:1.5rem 0;">` +
+                `<div style="font-weight:700;font-size:0.8rem;color:${color};margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em;">${label}</div>` +
+                `<div style="font-size:0.95rem;">${body}</div>` +
+                `</div>`
+            );
+        } else {
+            const body = applyInlineMarkdown(escapeHtml(contents.join('\n').trim()));
+            blockquotes.push(`<blockquote>${body}</blockquote>`);
+        }
+
+        return `__BLOCKQUOTE_${index}__`;
+    });
+
+    // 3. Escape HTML in the remaining text
+    processedText = escapeHtml(processedText);
+
+    // 4. Apply block + inline markdown
     processedText = processedText
         .replace(/^# (.*$)/gim, '<h1>$1</h1>')
         .replace(/^## (.*$)/gim, '<h2>$1</h2>')
@@ -56,27 +106,23 @@ export function formatMarkdown(text: string) {
             const safeUrl = (url.startsWith('http') || url.startsWith('/') || url.startsWith('#')) ? url : '#';
             return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
         })
-        .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
         .replace(/^\* (.*$)/gim, '<li>$1</li>')
         .replace(/^- (.*$)/gim, '<li>$1</li>')
         .replace(/`(.*?)`/gim, '<code>$1</code>');
 
-    // 3. Handle paragraphs and re-insert code blocks
+    // 5. Wrap paragraphs and re-insert extracted blocks
     return processedText
         .split(/\r?\n\s*\r?\n/g)
         .map(p => p.trim())
         .filter(p => p.length > 0)
         .map(p => {
-            // If it's a code block placeholder, return the stored block
             if (p.startsWith('__CODE_BLOCK_')) {
-                const index = parseInt(p.match(/\d+/)![0]);
-                return codeBlocks[index];
+                return codeBlocks[parseInt(p.match(/\d+/)![0])];
             }
-            
-            // If it's another block element, return as is
-            if (p.startsWith('<h') || p.startsWith('<blockquote') || p.startsWith('<li')) return p;
-            
-            // Otherwise, wrap in <p> and handle single newlines
+            if (p.startsWith('__BLOCKQUOTE_')) {
+                return blockquotes[parseInt(p.match(/\d+/)![0])];
+            }
+            if (p.startsWith('<h') || p.startsWith('<li')) return p;
             return `<p>${p.replace(/\n/g, '<br />')}</p>`;
         })
         .join('\n');
@@ -87,9 +133,9 @@ export function slugify(text: string): string {
         .toString()
         .toLowerCase()
         .trim()
-        .replace(/\s+/g, '-')     // Replace spaces with -
-        .replace(/[^\w-]+/g, '')  // Remove all non-word chars
-        .replace(/--+/g, '-')     // Replace multiple - with single -
-        .replace(/^-+/, '')       // Trim - from start of text
-        .replace(/-+$/, '');      // Trim - from end of text
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-')
+        .replace(/^-+/, '')
+        .replace(/-+$/, '');
 }
