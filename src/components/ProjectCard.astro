@@ -47,9 +47,14 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
         const isApple = lowerLabel.includes('apple') || lowerLabel.includes('app store');
         const isGoogle = lowerLabel.includes('play store') || lowerLabel.includes('google') || lowerLabel.includes('android');
         const isItch = lowerLabel.includes('itch.io');
+
+        let colorClasses = "bg-violet-500/10 border-violet-500/20 text-violet-500 hover:bg-violet-500 hover:border-violet-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)]";
+        if (isApple) colorClasses = "bg-blue-500/10 border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:border-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]";
+        else if (isGoogle) colorClasses = "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:border-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]";
+        else if (isItch) colorClasses = "bg-rose-500/10 border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:border-rose-500 hover:shadow-[0_0_20px_rgba(244,63,94,0.3)]";
         
         return (
-          <a href={l.url} target="_blank" class="magnetic flex items-center gap-2 px-5 py-2.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest hover:bg-violet-500 hover:text-white hover:border-violet-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300">
+          <a href={l.url} target="_blank" class={`magnetic flex items-center gap-2 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:text-white transition-all duration-300 ${colorClasses}`}>
             {isApple && (
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.05 20.28c-.98.95-2.05 1.61-3.21 1.61-1.18 0-1.58-.72-2.95-.72-1.35 0-1.85.7-2.94.72-1.12.02-2.14-.65-3.13-1.61-2-1.95-3.52-5.49-1.5-8.99.98-1.74 2.78-2.85 4.73-2.88 1.48-.02 2.87 1.01 3.78 1.01.91 0 2.58-1.22 4.38-1.04 1.25.04 2.21.46 2.97 1.15-2.47 1.46-2.07 4.67.43 5.75-1.21 1.83-2.8 3.53-3.16 3.99zM12.03 7.25c-.02-2.23 1.84-4.14 4.07-4.17.02 2.24-1.84 4.14-4.07 4.17z"/>
