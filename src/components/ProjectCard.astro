@@ -3,12 +3,12 @@ interface Props {
   title: string;
   year: string;
   desc: string;
-  tags: string[];
+  links: { label: string; url: string }[];
   img: string;
   index: number;
 }
 
-const { title, year, desc, tags, img, index } = Astro.props;
+const { title, year, desc, links, img, index } = Astro.props;
 ---
 
 <div data-project={title} data-reveal="scale" data-delay={String((index % 2) + 1)} class="tilt-card group relative flex flex-col p-5 sm:p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-700 cursor-pointer overflow-hidden h-full">
@@ -38,12 +38,12 @@ const { title, year, desc, tags, img, index } = Astro.props;
       {desc}
     </p>
 
-    <!-- Tags -->
-    <div class="mt-auto flex flex-wrap gap-2">
-      {tags.map(t => (
-        <span class="text-[10px] font-black px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/5 text-gray-500 uppercase tracking-widest group-hover:text-violet-300 group-hover:border-violet-500/20 group-hover:bg-violet-500/5 transition-all duration-500">
-          {t}
-        </span>
+    <!-- Links -->
+    <div class="mt-auto flex flex-wrap gap-3">
+      {links.map(l => (
+        <a href={l.url} target="_blank" class="magnetic px-5 py-2.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest hover:bg-violet-500 hover:text-white hover:border-violet-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300">
+          {l.label} ↗
+        </a>
       ))}
     </div>
   </div>
