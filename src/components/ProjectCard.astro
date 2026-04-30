@@ -50,8 +50,8 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
         const isGitHub = lowerLabel.includes('github');
 
         let colorClasses = "bg-violet-500 border-violet-500 text-white hover:bg-violet-500/10 hover:border-violet-500/20 hover:text-violet-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.2)]";
-        if (isApple) colorClasses = "bg-blue-500 border-blue-500 text-white hover:bg-blue-500/10 hover:border-blue-500/20 hover:text-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]";
-        else if (isGoogle) colorClasses = "bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]";
+        if (isApple) colorClasses = "bg-blue-500/10 border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:border-blue-500 hover:text-white hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]";
+        else if (isGoogle) colorClasses = "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]";
         else if (isItch) colorClasses = "bg-rose-500 border-rose-500 text-white hover:bg-rose-500/10 hover:border-rose-500/20 hover:text-rose-500 hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]";
         else if (isGitHub) colorClasses = "bg-white border-white text-black hover:bg-zinc-500/10 hover:border-zinc-500/20 hover:text-zinc-400 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]";
         
