@@ -38,7 +38,7 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img } = Astro.p
     </div>
 
     {/* ── Card ── */}
-    <div class="timeline-item group cursor-pointer p-8 rounded-2xl border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-xl transition-all duration-500 overflow-hidden shadow-2xl">
+    <div class="timeline-item group cursor-pointer p-8 rounded-2xl border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-md transition-all duration-500 overflow-hidden shadow-2xl">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
 
         {/* Content */}
@@ -52,10 +52,9 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img } = Astro.p
           <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{loc}</p>
           <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{desc}</p>
 
-          {/* Faded preview (collapsed) */}
-          <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden"
-               style="mask-image: linear-gradient(to bottom, black 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);">
-            <div class="grid grid-cols-2 gap-4 opacity-30">
+          {/* Preview (collapsed) */}
+          <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden">
+            <div class="grid grid-cols-2 gap-4 opacity-50">
               <div>
                 <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
                 <ul class="space-y-1">

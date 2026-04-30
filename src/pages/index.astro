@@ -6,7 +6,7 @@ import { postService } from "../services/posts";
 import { calculateReadTime, formatDate, slugify } from "../utils/blog";
 
 const projects = [
-  { title: 'memoirMe', year: '2024–Now', desc: 'AI diary with RSA/AES E2E encryption, geolocation, IAP subscriptions & resumable uploads. For The Nartus, Australia.', tags: ['Flutter','BLoC','Firebase','Crypto'], img: 'https://lh3.googleusercontent.com/sitesv/AA5AbUDep4gRWxezXz-MBeWd2fnJtuGA4THdCebXHYiLMKIkKNuaT9yQslZ-Y0_udz1L-YF1ZOOq2Z_9CTltU4ztRU7OnWVDizmSJTsVAsg2s2OC3ZQ0I1l47WFLYp7sl9EXTgruaFkudM1HHMhLsHtLySzHnStAxV03ESKnZuRWjajw9TmVa4JxCIbu01WMomUPe236m0JoVGHfhCTOH9uzsUY5IbcUDyKwVYJbhLM=w1280' },
+  { title: 'memoirMe', year: '2024–Now', desc: 'AI diary with RSA/AES E2E encryption, geolocation, IAP subscriptions & resumable uploads. For The Nartus, Australia.', tags: ['Flutter','BLoC','Firebase','Crypto'], img: 'https://media.luci-studio.com/MEMOIRME.png' },
   { title: 'TBchat', year: '2024–Now', desc: 'Blockchain messaging platform with crypto wallet, miner staking, real-time location & audio waveforms. For Nexsoft, Vietnam/HK.', tags: ['Flutter','BLoC','ObjectBox','WebSocket'], img: 'https://pbs.twimg.com/media/HEaRJfHbcAA-Oh7?format=jpg&name=large' },
   { title: 'QuanhTa', year: '2022–2024', desc: 'Real estate marketplace with polygon Maps search, gRPC chat, Flutter Web & Jenkins/Docker CD pipeline. For Vidieu, Vietnam.', tags: ['Flutter','Riverpod','gRPC','Docker'], img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=900' },
   { title: 'Survive in Shadow', year: '2018', desc: 'Minimalist 2D top-down survival game built with Unity. Features procedural enemy spawning and custom lighting.', tags: ['Unity','C#','2D Game'], img: 'https://scontent.fsgn2-3.fna.fbcdn.net/v/t1.6435-9/81149923_876340826101477_7736307505457790976_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=FK2oKQTNYEgQ7kNvwG0DYTO&_nc_oc=Adpml3GtlYT4uUObgrPWIK0YQ3JmHzpH1wtPZDsMkoRI6AUYhdo1nKYV49Rjqf_4iVM&_nc_zt=23&_nc_ht=scontent.fsgn2-3.fna&_nc_gid=mNqQi3TFDfK4Z2l4iLxKHw&_nc_ss=7a3a8&oh=00_Af0YgzsvZ00r8aLXPpnvxDkmuPxNoQP1ALbSdO69NRErhw&oe=6A0E9479' },
@@ -14,7 +14,7 @@ const projects = [
 
 const experience = [
   { id: 'TBchat', y: '2024–Now', role: 'Frontend Flutter Developer', co: 'TBchat · Nexsoft', loc: 'Vietnam & Hong Kong', desc: 'Building a blockchain messaging platform across Android, iOS, macOS, and Windows.', details: ['Engineered foundational deep-linking architecture for cross-module content sharing.', 'Implemented real-time location sharing using WebSockets, Isolates, and background tracking.', 'Developed audio chat with custom waveforms and secure on-device speech-to-text transcription.', 'Built crypto wallet functionality with gas fee monitoring and offline L1 transaction signing.', 'Architected multi-environment configurations using Flutter Flavors (Dev, Staging, Prod).'], tech: ['Bloc', 'ObjectBox', 'WebSocket', 'Retrofit', 'Go Router', 'Freezed'], img: 'https://pbs.twimg.com/media/HEaRJfHbcAA-Oh7?format=jpg&name=large', links: [{ label: 'App Store', url: 'https://apps.apple.com/us/app/tbchat-web3/id6739870518' }, { label: 'Web', url: 'https://www.chainviews.net/' }] },
-  { id: 'memoirMe', y: '2024–Now', role: 'Full Stack Flutter Developer', co: 'memoirMe · The Nartus', loc: 'Australia (Freelance)', desc: 'Architected an interactive E2E encrypted diary application with enterprise-grade security.', details: ['Architected zero-knowledge E2E encryption using RSA and AES cryptographic algorithms.', 'Engineered subscription management with In-App Purchases (IAP) to drive monetization.', 'Built resilient media management with resumable background upload/download capabilities.', 'Integrated Firebase Analytics & Crashlytics for robust production health monitoring.', 'Developed local auto-save and offline-first data synchronization logic.'], tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch'], img: 'https://lh3.googleusercontent.com/sitesv/AA5AbUDep4gRWxezXz-MBeWd2fnJtuGA4THdCebXHYiLMKIkKNuaT9yQslZ-Y0_udz1L-YF1ZOOq2Z_9CTltU4ztRU7OnWVDizmSJTsVAsg2s2OC3ZQ0I1l47WFLYp7sl9EXTgruaFkudM1HHMhLsHtLySzHnStAxV03ESKnZuRWjajw9TmVa4JxCIbu01WMomUPe236m0JoVGHfhCTOH9uzsUY5IbcUDyKwVYJbhLM=w1280', links: [{ label: 'The Nartus', url: 'https://www.thenartus.com/' }] },
+  { id: 'memoirMe', y: '2024–Now', role: 'Full Stack Flutter Developer', co: 'memoirMe · The Nartus', loc: 'Australia (Freelance)', desc: 'Architected an interactive E2E encrypted diary application with enterprise-grade security.', details: ['Architected zero-knowledge E2E encryption using RSA and AES cryptographic algorithms.', 'Engineered subscription management with In-App Purchases (IAP) to drive monetization.', 'Built resilient media management with resumable background upload/download capabilities.', 'Integrated Firebase Analytics & Crashlytics for robust production health monitoring.', 'Developed local auto-save and offline-first data synchronization logic.'], tech: ['Firebase Cloud Functions', 'RSA/AES', 'IAP', 'Background Fetch'], img: 'https://media.luci-studio.com/MEMOIRME.png', links: [{ label: 'The Nartus', url: 'https://www.thenartus.com/' }] },
   { id: 'QuanhTa', y: '2022–2024', role: 'Full Stack Flutter Developer', co: 'QuanhTa · Vidieu', loc: 'Vietnam', desc: 'Real estate marketplace with advanced map-based search and automated data processing.', details: ['Engineered custom Google Maps integration with polygon-based area selection and filters.', 'Implemented real-time chat facilitating buyer-seller communication using gRPC.', 'Optimized Flutter Web performance and resolved Safari-specific CanvasKit renderer issues.', 'Built automated web scraping pipeline using Python, Selenium, and Scrapy.', 'Established complete CD pipeline for Flutter apps using Jenkins and Docker.'], tech: ['Riverpod', 'Isar', 'gRPC', 'Python/Selenium', 'Jenkins', 'Docker'], img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=900', links: [{ label: 'Web App', url: 'https://quanhta.vn/map/land' }, { label: 'App Store', url: 'https://apps.apple.com/vn/app/quanh-ta/id6453535963' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=vn.quanhta.superapp&hl=en' }] },
 ];
 
@@ -246,6 +246,26 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
         <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
       </div>
 
+      <!-- WORK -->
+      <section id="work" class="py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+          <div data-reveal class="mb-20">
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Selected Work</span>
+            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">PORTFOLIO<span class="text-violet-500">.</span></h2>
+            <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {projects.map((p, i) => (
+              <ProjectCard {...p} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div class="flex flex-col items-center py-8 opacity-20">
+        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+      </div>
+
       <!-- ART GALLERY -->
       <section id="art" class="py-16 px-6">
         <div class="max-w-7xl mx-auto">
@@ -275,28 +295,6 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-
-      <div class="flex flex-col items-center py-8 opacity-20">
-        <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
-      </div>
-
-      <!-- WORK -->
-      <section id="work" class="py-16 px-6">
-        <div class="max-w-7xl mx-auto">
-          <div data-reveal class="mb-20">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Selected Work</span>
-            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">PORTFOLIO<span class="text-violet-500">.</span></h2>
-            <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {projects.map((p, i) => (
-              <ProjectCard {...p} index={i} />
             ))}
           </div>
         </div>
@@ -1151,9 +1149,9 @@ body.light-mode .hero-orb-2 {
 
   // Blog tile like buttons
   (function() {
-    const API_URL = document.querySelector('main[data-api-url]')?.dataset.apiUrl || '';
+    const API_URL = (document.querySelector('main[data-api-url]') as HTMLElement | null)?.dataset.apiUrl || '';
 
-    function burstHearts(anchor) {
+    function burstHearts(anchor: HTMLElement) {
       const count = 6;
       const rect = anchor.getBoundingClientRect();
       for (let i = 0; i < count; i++) {
@@ -1184,7 +1182,7 @@ body.light-mode .hero-orb-2 {
       }
     }
 
-    function pulseIcon(icon) {
+    function pulseIcon(icon: HTMLElement) {
       icon.style.transform = 'scale(1.6)';
       icon.style.transition = 'transform 0.15s ease-out';
       setTimeout(() => {
@@ -1193,25 +1191,26 @@ body.light-mode .hero-orb-2 {
       }, 150);
     }
 
-    document.querySelectorAll('.tile-like-area').forEach(btn => {
+    document.querySelectorAll('.tile-like-area').forEach(el => {
+      const btn = el as HTMLElement;
       const postId = btn.dataset.id;
-      const icon = btn.querySelector('.tile-like-icon');
-      const countEl = btn.querySelector('.tile-like-count');
+      const icon = btn.querySelector('.tile-like-icon') as HTMLElement | null;
+      const countEl = btn.querySelector('.tile-like-count') as HTMLElement | null;
       const likedKey = `liked_${postId}`;
       let liked = localStorage.getItem(likedKey) === '1';
 
-      function applyLikedState(state) {
+      function applyLikedState(state: boolean) {
         liked = state;
         if (state) {
-          icon.setAttribute('fill', '#f43f5e');
-          icon.setAttribute('stroke', '#f43f5e');
-          countEl.classList.add('text-rose-400');
-          countEl.classList.remove('text-gray-500');
+          icon?.setAttribute('fill', '#f43f5e');
+          icon?.setAttribute('stroke', '#f43f5e');
+          countEl?.classList.add('text-rose-400');
+          countEl?.classList.remove('text-gray-500');
         } else {
-          icon.setAttribute('fill', 'none');
-          icon.setAttribute('stroke', 'currentColor');
-          countEl.classList.remove('text-rose-400');
-          countEl.classList.add('text-gray-500');
+          icon?.setAttribute('fill', 'none');
+          icon?.setAttribute('stroke', 'currentColor');
+          countEl?.classList.remove('text-rose-400');
+          countEl?.classList.add('text-gray-500');
         }
       }
 
@@ -1223,7 +1222,7 @@ body.light-mode .hero-orb-2 {
         const isLiking = !liked;
         if (isLiking) {
           burstHearts(btn);
-          pulseIcon(icon);
+          if (icon) pulseIcon(icon);
         }
         const endpoint = liked ? 'unlike' : 'like';
         fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST' })
