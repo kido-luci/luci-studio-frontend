@@ -40,11 +40,38 @@ const { title, year, desc, links, img, index } = Astro.props;
 
     <!-- Links -->
     <div class="mt-auto flex flex-wrap gap-3">
-      {links.map(l => (
-        <a href={l.url} target="_blank" class="magnetic px-5 py-2.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest hover:bg-violet-500 hover:text-white hover:border-violet-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300">
-          {l.label} ↗
-        </a>
-      ))}
+      {links.map(l => {
+        const lowerLabel = l.label.toLowerCase();
+        const isApple = lowerLabel.includes('apple') || lowerLabel.includes('app store');
+        const isGoogle = lowerLabel.includes('play store') || lowerLabel.includes('google') || lowerLabel.includes('android');
+        const isItch = lowerLabel.includes('itch.io');
+        
+        return (
+          <a href={l.url} target="_blank" class="magnetic flex items-center gap-2 px-5 py-2.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest hover:bg-violet-500 hover:text-white hover:border-violet-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300">
+            {isApple && (
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.05 20.28c-.98.95-2.05 1.61-3.21 1.61-1.18 0-1.58-.72-2.95-.72-1.35 0-1.85.7-2.94.72-1.12.02-2.14-.65-3.13-1.61-2-1.95-3.52-5.49-1.5-8.99.98-1.74 2.78-2.85 4.73-2.88 1.48-.02 2.87 1.01 3.78 1.01.91 0 2.58-1.22 4.38-1.04 1.25.04 2.21.46 2.97 1.15-2.47 1.46-2.07 4.67.43 5.75-1.21 1.83-2.8 3.53-3.16 3.99zM12.03 7.25c-.02-2.23 1.84-4.14 4.07-4.17.02 2.24-1.84 4.14-4.07 4.17z"/>
+              </svg>
+            )}
+            {isGoogle && (
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L18.66,16.97L4.44,21.14L16.81,15.12M4.44,2.86L18.66,7.03L16.81,8.88L4.44,2.86M14.5,12.81L18.66,8.65C19.46,8.21 20,7.37 20,6.4V17.6C20,16.63 19.46,15.79 18.66,15.35L14.5,11.19V12.81Z"/>
+              </svg>
+            )}
+            {isItch && (
+               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.141 3.5c-2.492.203-5.289.816-7.141.816-1.852 0-4.648-.613-7.141-.816C2.266 3.352 2 4.648 2 5.867v10.973c0 .875.586 2.051 1.637 2.5 1.543.66 4.418.66 6.137.66h.176c1.07 0 2.074.195 3 .531l.051.016c.926-.336 1.93-.531 3-.531h.176c1.719 0 4.594 0 6.137-.66C23.414 18.891 24 17.715 24 16.84V5.867c0-1.219-.266-2.515-2.859-2.367zm-14.711 7.18c-.801 0-1.449-.641-1.449-1.43 0-.789.648-1.43 1.449-1.43.801 0 1.449.641 1.449 1.43s-.648 1.43-1.449 1.43zm15.141 0c-.801 0-1.449-.641-1.449-1.43 0-.789.648-1.43 1.449-1.43.801 0 1.449.641 1.449 1.43s-.648 1.43-1.449 1.43zM12 11.5c-2.201 0-4 1.799-4 4h8c0-2.201-1.799-4-4-4z"/>
+              </svg>
+            )}
+            {!isApple && !isGoogle && !isItch && (
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+            )}
+            {l.label}
+          </a>
+        );
+      })}
     </div>
   </div>
 </div>
