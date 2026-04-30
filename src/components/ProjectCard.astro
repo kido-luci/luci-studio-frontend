@@ -6,9 +6,10 @@ interface Props {
   links: { label: string; url: string }[];
   img: string;
   index: number;
+  logo?: string;
 }
 
-const { title, year, desc, links, img, index } = Astro.props;
+const { title, year, desc, links, img, index, logo } = Astro.props;
 ---
 
 <div data-project={title} data-reveal="scale" data-delay={String((index % 2) + 1)} class="tilt-card group relative flex flex-col p-5 sm:p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-700 cursor-pointer overflow-hidden h-full">
@@ -26,8 +27,9 @@ const { title, year, desc, links, img, index } = Astro.props;
   <!-- Content -->
   <div class="px-2 flex flex-col flex-1">
     <div class="flex items-start justify-between mb-4">
-      <h3 class="text-4xl font-black tracking-tighter text-white drop-shadow-sm group-hover:text-shimmer transition-all duration-500 leading-none">
-        {title}<span class="text-violet-500">.</span>
+      <h3 class="text-4xl font-black tracking-tighter text-white drop-shadow-sm group-hover:text-shimmer transition-all duration-500 leading-none flex items-center gap-2">
+        {logo && <img src={logo} alt={title} class="w-14 h-14 rounded-xl object-contain bg-white/5 p-1.5 border border-white/10 shrink-0 group-hover:scale-110 transition-transform duration-500" />}
+        <span>{title}<span class="text-violet-500">.</span></span>
       </h3>
       <div class="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center text-white/20 group-hover:text-white group-hover:border-violet-500/40 group-hover:bg-violet-500/5 transition-all duration-500 shrink-0">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 7l-10 10M17 7H7M17 7v10"/></svg>
