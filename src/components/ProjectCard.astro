@@ -28,7 +28,7 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
   <div class="px-2 flex flex-col flex-1">
     <div class="flex items-start justify-between mb-4">
       <h3 class="text-4xl font-black tracking-tighter text-white drop-shadow-sm group-hover:text-shimmer transition-all duration-500 leading-none flex items-center gap-2">
-        {logo && <img src={logo} alt={title} class="w-14 h-14 rounded-xl object-contain bg-white/5 p-1.5 border border-white/10 shrink-0 group-hover:scale-110 transition-transform duration-500" />}
+        {logo && <img src={logo} alt={title} class="w-14 h-14 rounded-xl object-contain bg-white/5 p-1.5 border border-white/10 shadow-2xl shrink-0 group-hover:scale-110 group-hover:border-white/20 transition-all duration-500" />}
         <span>{title}<span class="text-violet-500">.</span></span>
       </h3>
       <div class="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center text-white/20 group-hover:text-white group-hover:border-violet-500/40 group-hover:bg-violet-500/5 transition-all duration-500 shrink-0">
@@ -47,14 +47,16 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
         const isApple = lowerLabel.includes('apple') || lowerLabel.includes('app store');
         const isGoogle = lowerLabel.includes('play store') || lowerLabel.includes('google') || lowerLabel.includes('android');
         const isItch = lowerLabel.includes('itch.io');
+        const isGitHub = lowerLabel.includes('github');
 
-        let colorClasses = "bg-violet-500/10 border-violet-500/20 text-violet-500 hover:bg-violet-500 hover:border-violet-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.3)]";
-        if (isApple) colorClasses = "bg-blue-500/10 border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:border-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]";
-        else if (isGoogle) colorClasses = "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:border-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]";
-        else if (isItch) colorClasses = "bg-rose-500/10 border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:border-rose-500 hover:shadow-[0_0_20px_rgba(244,63,94,0.3)]";
+        let colorClasses = "bg-violet-500 border-violet-500 text-white hover:bg-violet-500/10 hover:border-violet-500/20 hover:text-violet-500 hover:shadow-[0_0_20px_rgba(139,92,246,0.2)]";
+        if (isApple) colorClasses = "bg-blue-500 border-blue-500 text-white hover:bg-blue-500/10 hover:border-blue-500/20 hover:text-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]";
+        else if (isGoogle) colorClasses = "bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]";
+        else if (isItch) colorClasses = "bg-rose-500 border-rose-500 text-white hover:bg-rose-500/10 hover:border-rose-500/20 hover:text-rose-500 hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]";
+        else if (isGitHub) colorClasses = "bg-white border-white text-black hover:bg-zinc-500/10 hover:border-zinc-500/20 hover:text-zinc-400 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]";
         
         return (
-          <a href={l.url} target="_blank" class={`magnetic flex items-center gap-2 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:text-white transition-all duration-300 ${colorClasses}`}>
+          <a href={l.url} target="_blank" class={`magnetic flex items-center gap-2 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${colorClasses}`}>
             {isApple && (
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.05 20.28c-.98.95-2.05 1.61-3.21 1.61-1.18 0-1.58-.72-2.95-.72-1.35 0-1.85.7-2.94.72-1.12.02-2.14-.65-3.13-1.61-2-1.95-3.52-5.49-1.5-8.99.98-1.74 2.78-2.85 4.73-2.88 1.48-.02 2.87 1.01 3.78 1.01.91 0 2.58-1.22 4.38-1.04 1.25.04 2.21.46 2.97 1.15-2.47 1.46-2.07 4.67.43 5.75-1.21 1.83-2.8 3.53-3.16 3.99zM12.03 7.25c-.02-2.23 1.84-4.14 4.07-4.17.02 2.24-1.84 4.14-4.07 4.17z"/>
@@ -70,7 +72,12 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
                 <path d="M19.141 3.5c-2.492.203-5.289.816-7.141.816-1.852 0-4.648-.613-7.141-.816C2.266 3.352 2 4.648 2 5.867v10.973c0 .875.586 2.051 1.637 2.5 1.543.66 4.418.66 6.137.66h.176c1.07 0 2.074.195 3 .531l.051.016c.926-.336 1.93-.531 3-.531h.176c1.719 0 4.594 0 6.137-.66C23.414 18.891 24 17.715 24 16.84V5.867c0-1.219-.266-2.515-2.859-2.367zm-14.711 7.18c-.801 0-1.449-.641-1.449-1.43 0-.789.648-1.43 1.449-1.43.801 0 1.449.641 1.449 1.43s-.648 1.43-1.449 1.43zm15.141 0c-.801 0-1.449-.641-1.449-1.43 0-.789.648-1.43 1.449-1.43.801 0 1.449.641 1.449 1.43s-.648 1.43-1.449 1.43zM12 11.5c-2.201 0-4 1.799-4 4h8c0-2.201-1.799-4-4-4z"/>
               </svg>
             )}
-            {!isApple && !isGoogle && !isItch && (
+            {isGitHub && (
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.042-1.416-4.042-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            )}
+            {!isApple && !isGoogle && !isItch && !isGitHub && (
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
