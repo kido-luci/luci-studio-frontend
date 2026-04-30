@@ -11,9 +11,9 @@ interface Props {
 const { title, year, desc, tags, img, index } = Astro.props;
 ---
 
-<div data-project={title} data-reveal="scale" data-delay={String((index % 2) + 1)} class="tilt-card group relative flex flex-col p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-700 cursor-pointer overflow-hidden h-full">
+<div data-project={title} data-reveal="scale" data-delay={String((index % 2) + 1)} class="tilt-card group relative flex flex-col p-5 sm:p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-700 cursor-pointer overflow-hidden h-full">
   <!-- Image Container -->
-  <div class="relative aspect-[16/10] rounded-2xl overflow-hidden mb-8 border border-white/5 shadow-2xl">
+  <div class="relative aspect-[16/10] rounded-2xl overflow-hidden mb-5 sm:mb-8 border border-white/5 shadow-2xl">
     <div class="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10"></div>
     <img src={img} alt={title} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110" />
     

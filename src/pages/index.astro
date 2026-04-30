@@ -212,7 +212,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
             {blogPosts.map((p, i) => (
               <div class="relative" data-post-id={p.id} data-post-likes={p.likes}>
                 <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block no-underline">
-                  <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
+                  <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-5 sm:p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
                     <div class="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
                       <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     </div>
@@ -370,7 +370,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
             { n: 5, suffix: '', label: 'Platforms', sub: 'Android · iOS · macOS · Web · Windows' },
             { n: 50, suffix: '%', label: 'Scholarship', sub: 'FPT University · Full Course' },
           ].map((s, i) => (
-            <div data-reveal data-delay={String(i+1)} class="tilt-card p-8 border border-white/5 rounded-2xl text-center hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
+            <div data-reveal data-delay={String(i+1)} class="tilt-card p-5 sm:p-8 border border-white/5 rounded-2xl text-center hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
               <div class="text-6xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 mb-2">
                 <span class="count-up" data-count={s.n} data-suffix={s.suffix}>0{s.suffix}</span>
               </div>
@@ -432,7 +432,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Mobile Card -->
-            <div data-reveal class="group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-500 relative overflow-hidden">
+            <div data-reveal class="group p-5 sm:p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-500 relative overflow-hidden">
                <div class="absolute -right-4 -top-4 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all"></div>
                <h3 class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
                  <span class="w-2 h-2 rounded-full bg-violet-500"></span>
@@ -507,7 +507,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
               { label: 'Learning', icon: '📖', items: ['Local LLM integration on mobile (llama.cpp)', 'Swift & SwiftUI fundamentals', 'Astro & Cloudflare edge patterns'] },
               { label: 'Reading', icon: '📚', items: ['Designing Data-Intensive Applications', 'Clean Code — Robert C. Martin', 'The Pragmatic Programmer'] },
             ].map((col, i) => (
-              <div data-reveal data-delay={String(i+1)} class="p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-amber-500/20 transition-all duration-500">
+              <div data-reveal data-delay={String(i+1)} class="p-5 sm:p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-amber-500/20 transition-all duration-500">
                 <div class="flex items-center gap-3 mb-6">
                   <span class="text-2xl">{col.icon}</span>
                   <h3 class="text-xs font-black text-amber-500 uppercase tracking-[0.3em]">{col.label}</h3>
