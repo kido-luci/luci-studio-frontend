@@ -909,7 +909,8 @@ const canonicalURL = canonical ?? SITE_URL;
 					target.scrollIntoView({ behavior: 'smooth', block: 'center' });
 					setTimeout(() => {
 						document.querySelectorAll('.timeline-item').forEach(other => other.classList.remove('active'));
-						target.classList.add('active');
+						const card = target.querySelector('.timeline-item');
+						if (card) card.classList.add('active');
 					}, 800);
 				}
 			});
