@@ -463,11 +463,22 @@ const canonicalURL = canonical ?? SITE_URL;
 
 		<script>
 		declare const anime: any;
+
+		// ── Platform Detection ──────────────────────────────────────────────────
+		const isWindows = navigator.platform.startsWith('Win') ||
+			((navigator as any).userAgentData?.platform === 'Windows') ||
+			(/Windows/.test(navigator.userAgent));
+
+		if (isWindows) document.body.classList.add('win-perf-mode');
+
+		// ── Global Elements ─────────────────────────────────────────────────────
+		const dot = document.getElementById('cursor-dot') as HTMLElement;
+		const ring = document.getElementById('cursor-ring') as HTMLElement;
+
 		// ── Theme Management ────────────────────────────────────────────────────
 		// Initialize theme from localStorage or system preference
 		const initTheme = () => {
 			const savedTheme = localStorage.getItem('theme');
-			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 			const theme = savedTheme || 'light';
 			
 			if (theme === 'light') {
@@ -487,7 +498,8 @@ const canonicalURL = canonical ?? SITE_URL;
 		const particleState = {
 			max: 100,
 			particles: [] as any[],
-			colors: ['#a78bfa', '#60a5fa', '#38bdf8', '#f472b6']
+			colors: ['#a78bfa', '#60a5fa', '#38bdf8', '#f472b6'],
+			isPaused: false
 		};
 
 		class Particle {
@@ -571,13 +583,26 @@ const canonicalURL = canonical ?? SITE_URL;
 			generate();
 
 			const loop = () => {
-				if (!ctx) return;
+				if (!ctx || particleState.isPaused) return;
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				particleState.particles = particleState.particles.filter((p: any) => p.update(canvas.width, canvas.height, ctx!));
 				if (particleState.particles.length < particleState.max - 5) generate();
 				particleAnimId = requestAnimationFrame(loop);
 			};
+			particleState.isPaused = false;
 			loop();
+		};
+
+		const resumeCanvasParticles = () => {
+			if (particleState.isPaused) {
+				particleState.isPaused = false;
+				initCanvasParticles();
+			}
+		};
+
+		const pauseCanvasParticles = () => {
+			particleState.isPaused = true;
+			if (particleAnimId) cancelAnimationFrame(particleAnimId);
 		};
 
 		const stopCanvasParticles = () => {
@@ -594,45 +619,20 @@ const canonicalURL = canonical ?? SITE_URL;
 			document.documentElement.classList.toggle('light-mode', isLight);
 			localStorage.setItem('theme', isLight ? 'light' : 'dark');
 			
-			// Update Vanta background animation depending on theme
-			if ((window as any).vantaEffect) {
-				(window as any).vantaEffect.destroy();
-				(window as any).vantaEffect = null;
-			}
-			
 			if (isLight) {
 				document.getElementById('vanta-bg')!.style.opacity = '0';
 				document.getElementById('canvas-bg')!.style.opacity = '1';
+				stopVanta();
 				initCanvasParticles();
 			} else {
 				document.getElementById('canvas-bg')!.style.opacity = '0';
 				document.getElementById('vanta-bg')!.style.opacity = '1';
 				stopCanvasParticles();
-
-				if ((window as any).VANTA && (window as any).VANTA.HALO) {
-					(window as any).vantaEffect = (window as any).VANTA.HALO({
-						el: "#vanta-bg",
-						mouseControls: true,
-						touchControls: true,
-						gyroControls: false,
-						minHeight: 200.00,
-						minWidth: 200.00,
-						backgroundColor: 0x0a0a0a,
-						amplitudeFactor: 0.50,
-						ringFactor: 0.30,
-						rotationFactor: 0.20,
-						size: 1.20,
-						baseColor: 0x8b5cf6,
-						secondaryColor: 0x3b82f6,
-						tertiaryColor: 0xec4899,
-						xOffset: 0.10,
-						yOffset: 0.10
-					});
-				}
+				initVanta();
 			}
-			
+
 			// Update cursor colors for non-Windows
-			if (!isWindows) {
+			if (!isWindows && dot && ring) {
 				if (isLight) {
 					dot.style.backgroundColor = '#8b5cf6';
 					ring.style.borderColor = 'rgba(139,92,246,0.5)';
@@ -640,6 +640,39 @@ const canonicalURL = canonical ?? SITE_URL;
 					dot.style.backgroundColor = 'white';
 					ring.style.borderColor = 'rgba(255,255,255,0.4)';
 				}
+			}
+		};
+
+		const initVanta = () => {
+			const isLight = document.body.classList.contains('light-mode');
+			if (isLight || (window as any).vantaEffect) return;
+
+			if ((window as any).VANTA && (window as any).VANTA.HALO) {
+				(window as any).vantaEffect = (window as any).VANTA.HALO({
+					el: "#vanta-bg",
+					mouseControls: true,
+					touchControls: true,
+					gyroControls: false,
+					minHeight: 200.00,
+					minWidth: 200.00,
+					backgroundColor: 0x0a0a0a,
+					amplitudeFactor: 0.50,
+					ringFactor: 0.30,
+					rotationFactor: 0.20,
+					size: 1.20,
+					baseColor: 0x8b5cf6,
+					secondaryColor: 0x3b82f6,
+					tertiaryColor: 0xec4899,
+					xOffset: 0.10,
+					yOffset: 0.10
+				});
+			}
+		};
+
+		const stopVanta = () => {
+			if ((window as any).vantaEffect) {
+				(window as any).vantaEffect.destroy();
+				(window as any).vantaEffect = null;
 			}
 		};
 		
@@ -650,19 +683,7 @@ const canonicalURL = canonical ?? SITE_URL;
 			window.dispatchEvent(new Event('scroll'));
 		};
 
-		// ── Platform Detection ──────────────────────────────────────────────────
-		// All Windows browsers (Chrome + Edge) get perf-mode:
-		// backdrop-filter is expensive on Windows regardless of browser.
-		const isWindows = navigator.platform.startsWith('Win') ||
-			((navigator as any).userAgentData?.platform === 'Windows') ||
-			(/Windows/.test(navigator.userAgent));
-
-		// Apply CSS perf-mode class immediately so overrides land before first paint
-		if (isWindows) document.body.classList.add('win-perf-mode');
-
 		// ── Custom Cursor ───────────────────────────────────────────────────────
-		const dot = document.getElementById('cursor-dot') as HTMLElement;
-		const ring = document.getElementById('cursor-ring') as HTMLElement;
 		let ringX = 0, ringY = 0, mouseX = 0, mouseY = 0;
 		let targetRingScale = 1, ringScale = 1;
 		const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -888,6 +909,17 @@ const canonicalURL = canonical ?? SITE_URL;
 						bgDimmer.style.backgroundColor = isLight ? 'rgba(255,255,255,0)' : 'rgba(0,0,0,0)';
 					}
 				}
+
+				// Performance Optimization: Pause background animations when deep in content
+				// We pause when we've scrolled past the hero section (roughly 1 window height)
+				const animationPauseThreshold = windowHeight * 1.1;
+				if (scrollY > animationPauseThreshold) {
+					if (isLight) pauseCanvasParticles();
+					else stopVanta();
+				} else {
+					if (isLight) resumeCanvasParticles();
+					else initVanta();
+				}
 			});
 		}, { passive: true });
 
@@ -928,24 +960,7 @@ const canonicalURL = canonical ?? SITE_URL;
 			} else if ((window as any).VANTA && (window as any).VANTA.HALO) {
 				document.getElementById('canvas-bg')!.style.opacity = '0';
 				document.getElementById('vanta-bg')!.style.opacity = '1';
-				(window as any).vantaEffect = (window as any).VANTA.HALO({
-					el: "#vanta-bg",
-					mouseControls: true,
-					touchControls: true,
-					gyroControls: false,
-					minHeight: 200.00,
-					minWidth: 200.00,
-					backgroundColor: 0x0a0a0a,
-					amplitudeFactor: 0.50,
-					ringFactor: 0.30,
-					rotationFactor: 0.20,
-					size: 1.20,
-					baseColor: 0x8b5cf6,
-					secondaryColor: 0x3b82f6,
-					tertiaryColor: 0xec4899,
-					xOffset: 0.10,
-					yOffset: 0.10
-				});
+				initVanta();
 			} else if (vantaAttempts++ < 50) {
 				setTimeout(tryVanta, 100);
 			}
