@@ -258,11 +258,11 @@ const canonicalURL = canonical ?? SITE_URL;
 			/* === CARD TILT === */
 			.tilt-card {
 				transform-style: preserve-3d;
-				transition: transform 0.15s ease;
+				transition: transform 0.15s ease, opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 				backdrop-filter: blur(12px);
 				background-color: var(--bg-card);
 				border-color: var(--border-color);
-				will-change: transform;
+				transform: translateZ(0);
 			}
 			body.light-mode .tilt-card {
 				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -790,6 +790,13 @@ const canonicalURL = canonical ?? SITE_URL;
 			});
 		}, { threshold: 0.05, rootMargin: '0px 0px 120px 0px' });
 		document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+
+		// Fallback: reveal any elements still hidden after 1.5s (missed by observer or already in viewport)
+		setTimeout(() => {
+			document.querySelectorAll('[data-reveal]:not(.is-visible)').forEach(el => {
+				el.classList.add('is-visible');
+			});
+		}, 1500);
 
 		const wordIo = new IntersectionObserver((entries) => {
 			entries.forEach(e => {
