@@ -915,9 +915,13 @@ const canonicalURL = canonical ?? SITE_URL;
 				}
 
 				// Performance Optimization: Pause background animations when deep in content
-				// We pause when we've scrolled past the hero section (roughly 1 window height)
+				// We pause when we've scrolled past the hero section, but re-enable for the CTA at the bottom
 				const animationPauseThreshold = windowHeight * 1.1;
-				if (scrollY > animationPauseThreshold) {
+				const ctaThreshold = document.documentElement.scrollHeight - windowHeight * 1.5;
+				
+				const shouldPause = scrollY > animationPauseThreshold && scrollY < ctaThreshold;
+
+				if (shouldPause) {
 					if (isLight) pauseCanvasParticles();
 					else stopVanta();
 				} else {
