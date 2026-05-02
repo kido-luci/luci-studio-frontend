@@ -325,14 +325,14 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
               );
               return a.url ? (
                 <a href={a.url} class="masonry-art-item group block">
-                  <div class="rounded-2xl overflow-hidden border border-white/5 hover:border-blue-500/30 transition-all duration-500">
+                  <div class="art-img-frame rounded-2xl overflow-hidden border hover:border-pink-500/50 transition-all duration-500">
                     <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                   </div>
                   {infoBar}
                 </a>
               ) : (
                 <div class="masonry-art-item group">
-                  <div class="rounded-2xl overflow-hidden border border-white/5">
+                  <div class="art-img-frame rounded-2xl overflow-hidden border">
                     <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                   </div>
                   {infoBar}
@@ -1177,12 +1177,12 @@ body.light-mode .hero-orb-2 {
     margin-bottom: 1rem;
   }
 }
-/* Light mode border override for masonry items */
-body.light-mode .masonry-art-item .border-white\/5 {
-  border-color: rgba(0, 0, 0, 0.07) !important;
+/* Art image frame border */
+.art-img-frame {
+  border-color: rgba(236, 72, 153, 0.35);
 }
-body.light-mode .masonry-art-item:hover .border-white\/5 {
-  border-color: rgba(59, 130, 246, 0.3) !important;
+body.light-mode .art-img-frame {
+  border-color: rgba(236, 72, 153, 0.25);
 }
 
 /* ── Blog card CSS-only reveal (no JS dependency) ── */
