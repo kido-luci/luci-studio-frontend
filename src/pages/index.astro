@@ -357,23 +357,26 @@ const artItems: { img: string; label: string; year: string; url?: string }[] =
               
               <div class="space-y-6 text-gray-400 text-lg leading-relaxed">
                 <p>
-                  I am <span class="text-white font-bold">Trung Lập (Luci)</span>, a Software Engineer dedicated to crafting seamless digital experiences. My journey in technology is driven by a fascination with how code can transform complex ideas into elegant, high-performance applications.
+                  I'm <span class="text-white font-bold">Trung Lập (Luci)</span> — a software engineer from Ho Chi Minh City who first fell in love with code while building a top-down survival game at 18. That instinct to <span class="text-white">build things that feel alive</span> has shaped everything since.
                 </p>
                 <p>
-                  With over <span class="text-white font-bold">5 years of experience</span> in the Flutter ecosystem, I specialize in building scalable, secure, and production-ready applications. My expertise spans from architecting zero-knowledge encrypted platforms to integrating cutting-edge AI like local LLMs.
+                  Five years deep in Flutter, I ship apps that run on <span class="text-white font-bold">Android, iOS, macOS, and Windows</span> — from a zero-knowledge encrypted diary to a live Web3 messaging platform with on-chain wallet integration. Go handles the backend; Python covers the automation and scraping layers when needed.
                 </p>
                 <p>
-                  I believe in the power of <span class="text-shimmer font-bold uppercase tracking-wider">Clean Architecture</span> and robust state management to create maintainable systems that stand the test of time. For me, every pixel and every line of code is an opportunity to innovate and provide value.
+                  Long before I wrote a line of code, I was drawing. Pencil portraits, ballpoint pen sketches, anime characters, watercolor figures — art has been a constant since childhood. That eye for <span class="text-white">proportion, light, and composition</span> now shapes how I think about UI and visual systems. For me, drawing and coding are the same impulse: impose order on a blank canvas until something feels right.
+                </p>
+                <p>
+                  I believe the best software is <span class="text-shimmer font-bold">invisible</span> — it just works. Clean architecture over clever hacks, deliberate state management, an obsession with edge cases. The same standard I hold my code to, I hold my sketches to.
                 </p>
               </div>
 
               <!-- Quick Facts Grid -->
               <div class="grid grid-cols-2 gap-4 mt-12">
                 {[
-                  { label: 'Philosophy', val: 'Code is Art' },
-                  { label: 'Tools', val: 'Flutter · Go · Python' },
-                  { label: 'Interests', val: 'Web3 · AI · Art' },
-                  { label: 'Motto', val: 'Build for Humans' }
+                  { label: 'Origin story', val: 'Drawing · then Game dev · 2018' },
+                  { label: 'Stack', val: 'Flutter · Go · PostgreSQL' },
+                  { label: 'Art mediums', val: 'Pencil · Ballpoint · Watercolor · Digital' },
+                  { label: 'Motto', val: 'Ship. Refine. Repeat.' }
                 ].map(f => (
                   <div class="p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
                     <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">{f.label}</p>
@@ -513,6 +516,25 @@ const artItems: { img: string; label: string; year: string; url?: string }[] =
                  {['RSA/AES','Web3','Blockchain','Local LLM','llama.cpp','On-device AI','Security'].map(s => (
                    <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-pink-500/40 hover:bg-pink-500/10 transition-all cursor-default">{s}</span>
                  ))}
+               </div>
+            </div>
+
+            <!-- Art & Creative Card (full-width) -->
+            <div data-reveal data-delay="4" class="group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-amber-500/20 transition-all duration-500 relative overflow-hidden md:col-span-2 lg:col-span-4">
+               <div class="absolute -right-8 -top-8 w-48 h-48 bg-amber-500/8 rounded-full blur-3xl group-hover:bg-amber-500/15 transition-all"></div>
+               <div class="flex flex-col md:flex-row md:items-start gap-8">
+                 <div class="flex-shrink-0 md:w-56">
+                   <h3 class="text-xs font-black text-amber-500 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                     Art & Creative
+                   </h3>
+                   <p class="text-gray-600 text-sm leading-relaxed">Traditional and digital — portraits, character illustration, watercolor, and pixel art. A creative practice running parallel to the engineering work since 2016.</p>
+                 </div>
+                 <div class="flex flex-wrap gap-2 content-start">
+                   {['Pencil Portrait','Ballpoint Pen','Anime · Manga','Watercolor','Digital Illustration','Pixel Art','Character Design','Ink & Sketch','Figure Drawing','Eye Studies'].map(s => (
+                     <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-amber-500/40 hover:bg-amber-500/10 transition-all cursor-default">{s}</span>
+                   ))}
+                 </div>
                </div>
             </div>
           </div>
