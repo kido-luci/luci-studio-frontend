@@ -1359,19 +1359,25 @@ body.light-mode .blog-img-container {
   })();
 
   // ML6 "Beautiful Questions" one-shot letter animation
-  // Uses inline styles only — bypasses Astro's scoped CSS limitation on dynamic elements
+  // Word-level wrappers (white-space:nowrap) keep line-breaks between words, not mid-word
   (function() {
     const el = document.querySelector('.hero-subtitle') as HTMLElement | null;
     if (!el) return;
     const text = el.textContent?.trim() ?? '';
-    const transition = 'opacity 0.75s cubic-bezier(0.19,1,0.22,1),transform 0.75s cubic-bezier(0.19,1,0.22,1)';
-    el.innerHTML = text.replace(/\S/g, (ch: string) =>
-      `<span style="display:inline-block;opacity:0;transform:translateY(1.2em);transition:${transition}">${ch}</span>`
-    );
-    const letters = el.querySelectorAll<HTMLElement>('span');
-    letters.forEach((s, i) => { s.style.transitionDelay = `${300 + i * 12}ms`; });
+    const trans = 'opacity 0.75s cubic-bezier(0.19,1,0.22,1),transform 0.75s cubic-bezier(0.19,1,0.22,1)';
+    let idx = 0;
+    el.innerHTML = text.split(' ').map(word =>
+      `<span style="white-space:nowrap;display:inline">${
+        [...word].map(ch =>
+          `<span style="display:inline-block;opacity:0;transform:translateY(1.2em);transition:${trans};transition-delay:${300 + idx++ * 12}ms">${ch}</span>`
+        ).join('')
+      }</span>`
+    ).join(' ');
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      letters.forEach(s => { s.style.opacity = '1'; s.style.transform = 'translateY(0)'; });
+      el.querySelectorAll<HTMLElement>('span span').forEach(s => {
+        s.style.opacity = '1';
+        s.style.transform = 'translateY(0)';
+      });
     }));
   })();
 
