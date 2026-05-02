@@ -566,18 +566,26 @@ const canonicalURL = canonical ?? SITE_URL;
 			}
 		}
 
+		let canvasResizeRegistered = false;
+		const onCanvasResize = () => {
+			if (canvas) {
+				canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
+			}
+		};
+
 		const initCanvasParticles = () => {
+			if (particleAnimId) cancelAnimationFrame(particleAnimId);
 			canvas = document.getElementById('canvas-bg') as HTMLCanvasElement;
 			if (!canvas) return;
 			ctx = canvas.getContext('2d');
 			if (!ctx) return;
 
-			const resize = () => {
-				canvas.width = window.innerWidth;
-				canvas.height = window.innerHeight;
-			};
-			window.addEventListener('resize', resize);
-			resize();
+			if (!canvasResizeRegistered) {
+				window.addEventListener('resize', onCanvasResize, { passive: true });
+				canvasResizeRegistered = true;
+			}
+			onCanvasResize();
 
 			const generate = () => {
 				while (particleState.particles.length < particleState.max) {
@@ -727,10 +735,13 @@ const canonicalURL = canonical ?? SITE_URL;
 			} else {
 				// macOS/Edge: smooth rAF ring follow — uses transform (compositor only, no layout reflow)
 				(function animateRing() {
+					const prevX = ringX, prevY = ringY, prevScale = ringScale;
 					ringX += (mouseX - ringX) * 0.12;
 					ringY += (mouseY - ringY) * 0.12;
 					ringScale += (targetRingScale - ringScale) * 0.15;
-					ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(${ringScale.toFixed(3)})`;
+					if (Math.abs(ringX - prevX) > 0.05 || Math.abs(ringY - prevY) > 0.05 || Math.abs(ringScale - prevScale) > 0.001) {
+						ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(${ringScale.toFixed(3)})`;
+					}
 					requestAnimationFrame(animateRing);
 				})();
 			}
@@ -881,6 +892,9 @@ const canonicalURL = canonical ?? SITE_URL;
 		}
 
 		let scrollRaf = false;
+		let isBgPaused = false;
+		let cachedScrollHeight = document.documentElement.scrollHeight;
+		window.addEventListener('resize', () => { cachedScrollHeight = document.documentElement.scrollHeight; }, { passive: true });
 		window.addEventListener('scroll', () => {
 			if (scrollRaf) return;
 			scrollRaf = true;
@@ -921,19 +935,23 @@ const canonicalURL = canonical ?? SITE_URL;
 					}
 				}
 
-				// Performance Optimization: Pause background animations when deep in content
-				// We pause when we've scrolled past the hero section, but re-enable for the CTA at the bottom
 				const animationPauseThreshold = windowHeight * 1.1;
-				const ctaThreshold = document.documentElement.scrollHeight - windowHeight * 1.5;
-				
-				const shouldPause = scrollY > animationPauseThreshold && scrollY < ctaThreshold;
+				const ctaThreshold = cachedScrollHeight - windowHeight * 1.5;
+				const HYSTERESIS = 80;
 
-				if (shouldPause) {
-					if (isLight) pauseCanvasParticles();
-					else stopVanta();
-				} else {
-					if (isLight) resumeCanvasParticles();
-					else initVanta();
+				const shouldPause = isBgPaused
+					? scrollY > animationPauseThreshold - HYSTERESIS && scrollY < ctaThreshold + HYSTERESIS
+					: scrollY > animationPauseThreshold + HYSTERESIS && scrollY < ctaThreshold - HYSTERESIS;
+
+				if (shouldPause !== isBgPaused) {
+					isBgPaused = shouldPause;
+					if (shouldPause) {
+						if (isLight) pauseCanvasParticles();
+						else stopVanta();
+					} else {
+						if (isLight) resumeCanvasParticles();
+						else initVanta();
+					}
 				}
 			});
 		}, { passive: true });
@@ -981,6 +999,18 @@ const canonicalURL = canonical ?? SITE_URL;
 			}
 		};
 		tryVanta();
+
+		// ── Page Visibility: pause all animations when tab is hidden ─────────
+		document.addEventListener('visibilitychange', () => {
+			if (document.hidden) {
+				if (particleAnimId) cancelAnimationFrame(particleAnimId);
+				stopVanta();
+			} else if (!isBgPaused) {
+				const isLight = document.body.classList.contains('light-mode');
+				if (isLight) initCanvasParticles();
+				else initVanta();
+			}
+		});
 
 		// ── Anime.js Animations ─────────────────────────────────────────────────
 		// Wait for anime to be available
