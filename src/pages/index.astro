@@ -519,45 +519,6 @@ const artItems: { img: string; label: string; year: string; url?: string }[] =
         </div>
       </section>
 
-      <div class="flex flex-col items-center py-8 opacity-40">
-        <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
-      </div>
-
-      <!-- NOW -->
-      <section id="now" class="py-16 px-6">
-        <div class="max-w-7xl mx-auto">
-          <div data-reveal class="mb-16">
-            <span class="text-xs font-black text-amber-500 uppercase tracking-[0.3em] mb-3 block">Live Status</span>
-            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">NOW<span class="text-amber-500">.</span></h2>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { label: 'Building', icon: '⚙️', items: ['TBchat — Web3 messaging (audio, crypto wallet, staking)', 'memoirMe — E2E encrypted diary (IAP, offline-first sync)'] },
-              { label: 'Learning', icon: '📖', items: ['Local LLM integration on mobile (llama.cpp)', 'Swift & SwiftUI fundamentals', 'Astro & Cloudflare edge patterns'] },
-              { label: 'Reading', icon: '📚', items: ['Designing Data-Intensive Applications', 'Clean Code — Robert C. Martin', 'The Pragmatic Programmer'] },
-            ].map((col, i) => (
-              <div data-reveal data-delay={String(i+1)} class="p-5 sm:p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-amber-500/20 transition-all duration-500">
-                <div class="flex items-center gap-3 mb-6">
-                  <span class="text-2xl">{col.icon}</span>
-                  <h3 class="text-xs font-black text-amber-500 uppercase tracking-[0.3em]">{col.label}</h3>
-                </div>
-                <ul class="space-y-3">
-                  {col.items.map(item => (
-                    <li class="flex items-start gap-2 text-sm text-gray-400 leading-relaxed">
-                      <span class="text-amber-500 mt-0.5 flex-shrink-0">›</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div class="max-w-7xl mx-auto px-6 opacity-40">
-        <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
-      </div>
     </div>
 
       
