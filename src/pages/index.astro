@@ -230,7 +230,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20 text-center">
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Writing</span>
-            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h2>
+            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h2>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {blogPosts.map((p, i) => (
@@ -275,7 +275,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Selected Work</span>
-            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">PORTFOLIO<span class="text-violet-500">.</span></h2>
+            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">PORTFOLIO<span class="text-violet-500">.</span></h2>
             <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -296,7 +296,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
           <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
               <span class="text-xs font-black text-blue-500 uppercase tracking-[0.3em] mb-3 block">Creative Works</span>
-              <h2 class="text-6xl md:text-8xl font-black tracking-tighter">THE ART<span class="text-blue-500">.</span></h2>
+              <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">THE ART<span class="text-blue-500">.</span></h2>
             </div>
             <p class="text-gray-500 max-w-xs text-sm leading-relaxed">Where code meets canvas. Math, color theory, and human emotion rendered in pixels.</p>
           </div>
@@ -367,7 +367,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
             <!-- Right: Content -->
             <div data-reveal="right">
               <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4 block">The Person</span>
-              <h2 class="text-5xl md:text-7xl font-black tracking-tighter mb-8">MY STORY<span class="text-violet-500">.</span></h2>
+              <h2 data-ml9 class="text-5xl md:text-7xl font-black tracking-tighter mb-8">MY STORY<span class="text-violet-500">.</span></h2>
               
               <div class="space-y-6 text-gray-400 text-lg leading-relaxed">
                 <p>
@@ -435,7 +435,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">Journey</span>
-            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">EXPERIENCE<span class="text-pink-500">.</span></h2>
+            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">EXPERIENCE<span class="text-pink-500">.</span></h2>
           </div>
 
           <div class="mb-12">
@@ -473,7 +473,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] mb-3 block">Expertise</span>
-            <h2 class="text-6xl md:text-8xl font-black tracking-tighter">SKILLS<span class="text-emerald-500">.</span></h2>
+            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">SKILLS<span class="text-emerald-500">.</span></h2>
           </div>
           
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1405,5 +1405,65 @@ body.light-mode .blog-img-container {
   themeToggleBtn?.addEventListener('click', () => {
     setTimeout(updateThemeIcon, 50);
   });
+</script>
+
+<script>
+  // ML9 "Coffee Mornings" — scale from 0→1 with spring bounce, triggered on scroll into view
+  // All styles inline to bypass Astro scoped CSS (dynamic spans have no scope attribute)
+  (function () {
+    // CSS equivalent of anime.js elasticity:600 — cubic-bezier with overshoot
+    const TRANS = 'transform 0.8s cubic-bezier(0.34,1.56,0.64,1)';
+    const INIT  = `display:inline-block;transform:scale(0);transform-origin:50% 100%;transition:${TRANS}`;
+
+    function initLetters(h2: HTMLElement): HTMLElement[] {
+      const letters: HTMLElement[] = [];
+      const nodes = Array.from(h2.childNodes);
+      h2.innerHTML = '';
+
+      for (const node of nodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          for (const ch of node.textContent ?? '') {
+            if (ch === ' ') { h2.appendChild(document.createTextNode(' ')); continue; }
+            const s = document.createElement('span');
+            s.setAttribute('style', INIT);
+            s.textContent = ch;
+            h2.appendChild(s);
+            letters.push(s);
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const orig = node as HTMLElement;
+          const wrap = orig.cloneNode(false) as HTMLElement;
+          for (const ch of orig.textContent ?? '') {
+            const s = document.createElement('span');
+            s.setAttribute('style', INIT);
+            s.textContent = ch;
+            wrap.appendChild(s);
+            letters.push(s);
+          }
+          h2.appendChild(wrap);
+        }
+      }
+      return letters;
+    }
+
+    const letterMap = new Map<Element, HTMLElement[]>();
+    document.querySelectorAll<HTMLElement>('[data-ml9]').forEach(h2 => {
+      letterMap.set(h2, initLetters(h2));
+    });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        const letters = letterMap.get(entry.target) ?? [];
+        letters.forEach((s, i) => {
+          s.style.transitionDelay = `${(i + 1) * 45}ms`;
+          s.style.transform = 'scale(1)';
+        });
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll('[data-ml9]').forEach(el => observer.observe(el));
+  })();
 </script>
 
