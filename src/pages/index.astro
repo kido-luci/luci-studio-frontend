@@ -26,7 +26,9 @@ const indieProjects = [
 ];
 
 const rawPosts = await postService.getAll();
-const blogPosts = rawPosts.map(p => ({
+const blogPosts = rawPosts
+  .filter(p => !p.topics?.some(t => t.toLowerCase().includes('art')))
+  .map(p => ({
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
