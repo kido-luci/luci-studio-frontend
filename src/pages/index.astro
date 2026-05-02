@@ -325,7 +325,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
               );
               return a.url ? (
                 <a href={a.url} class="masonry-art-item group block">
-                  <div class="art-img-frame rounded-2xl overflow-hidden border hover:border-pink-500/50 transition-all duration-500">
+                  <div class="art-img-frame rounded-2xl overflow-hidden border hover:border-purple-500/50 transition-all duration-500">
                     <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                   </div>
                   {infoBar}
@@ -355,7 +355,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
             <div data-reveal="left" class="relative group">
               <div class="absolute -inset-4 bg-gradient-to-tr from-violet-600/20 to-blue-600/20 rounded-2xl blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
               <div class="relative aspect-square md:aspect-auto md:h-[600px] rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]">
-                <img src="https://i.pinimg.com/736x/af/92/91/af9291e0307a1002e7ed63878f93ae46.jpg" alt="Trung Lập" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
+                <img src="https://media.luci-studio.com/My%20Story.png" alt="Trung Lập" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
                 <!-- Overlay details -->
                 <div class="absolute bottom-8 left-8 right-8 p-6 backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl">
                   <p class="text-xs font-black text-violet-400 uppercase tracking-[0.2em] mb-1">Based in</p>
@@ -1179,10 +1179,10 @@ body.light-mode .hero-orb-2 {
 }
 /* Art image frame border */
 .art-img-frame {
-  border-color: rgba(236, 72, 153, 0.35);
+  border-color: rgba(168, 85, 247, 0.35);
 }
 body.light-mode .art-img-frame {
-  border-color: rgba(236, 72, 153, 0.25);
+  border-color: rgba(168, 85, 247, 0.25);
 }
 
 /* ── Blog card CSS-only reveal (no JS dependency) ── */
