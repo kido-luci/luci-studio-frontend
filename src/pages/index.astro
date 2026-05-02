@@ -1060,6 +1060,7 @@ body.light-mode .hero-orb-2 {
   margin: 0 auto 2rem;
   line-height: 1.75;
   padding: 0 0.5rem;
+  min-height: 6.5em;
 }
 
 /* ── Stat pills ── */
@@ -1357,6 +1358,24 @@ body.light-mode .blog-img-container {
     });
   })();
 
+  // ML6 "Beautiful Questions" one-shot letter animation
+  // Uses inline styles only — bypasses Astro's scoped CSS limitation on dynamic elements
+  (function() {
+    const el = document.querySelector('.hero-subtitle') as HTMLElement | null;
+    if (!el) return;
+    const text = el.textContent?.trim() ?? '';
+    const transition = 'opacity 0.75s cubic-bezier(0.19,1,0.22,1),transform 0.75s cubic-bezier(0.19,1,0.22,1)';
+    el.innerHTML = text.replace(/\S/g, (ch: string) =>
+      `<span style="display:inline-block;opacity:0;transform:translateY(1.2em);transition:${transition}">${ch}</span>`
+    );
+    const letters = el.querySelectorAll<HTMLElement>('span');
+    letters.forEach((s, i) => { s.style.transitionDelay = `${300 + i * 12}ms`; });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      letters.forEach(s => { s.style.opacity = '1'; s.style.transform = 'translateY(0)'; });
+    }));
+  })();
+
+
   // Theme Toggle Icon Update
   const updateThemeIcon = () => {
     const isLight = document.body.classList.contains('light-mode');
@@ -1381,3 +1400,4 @@ body.light-mode .blog-img-container {
     setTimeout(updateThemeIcon, 50);
   });
 </script>
+

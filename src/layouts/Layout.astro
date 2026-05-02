@@ -1039,17 +1039,7 @@ const canonicalURL = canonical ?? SITE_URL;
 				easing: 'easeOutElastic(1, .6)',
 				delay: 100
 			});
-
-			// Animate hero subtitle
-			anime({
-				targets: '.hero-subtitle',
-				translateY: [30, 0],
-				opacity: [0, 1],
-				duration: 1000,
-				easing: 'easeOutExpo',
-				delay: 400
-			});
-
+			// Hero subtitle animation is handled in index.astro using Moving Letters
 			// Animate stat pills with stagger
 			anime({
 				targets: '.hero-stat-pill',
