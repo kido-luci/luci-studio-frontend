@@ -500,7 +500,7 @@ const canonicalURL = canonical ?? SITE_URL;
 		let ctx: CanvasRenderingContext2D | null;
 		
 		const particleState = {
-			max: 100,
+			max: 50,
 			particles: [] as any[],
 			colors: ['#a78bfa', '#60a5fa', '#38bdf8', '#f472b6'],
 			isPaused: false
@@ -594,15 +594,20 @@ const canonicalURL = canonical ?? SITE_URL;
 			};
 			generate();
 
-			const loop = () => {
+			let lastParticleFrame = 0;
+			const PARTICLE_FPS_INTERVAL = 1000 / 20; // cap at 20fps
+			const loop = (now: number) => {
 				if (!ctx || particleState.isPaused) return;
+				particleAnimId = requestAnimationFrame(loop);
+				if (now - lastParticleFrame < PARTICLE_FPS_INTERVAL) return;
+				lastParticleFrame = now;
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				particleState.particles = particleState.particles.filter((p: any) => p.update(canvas.width, canvas.height, ctx!));
 				if (particleState.particles.length < particleState.max - 5) generate();
-				particleAnimId = requestAnimationFrame(loop);
 			};
 			particleState.isPaused = false;
-			loop();
+			lastParticleFrame = 0;
+			requestAnimationFrame(loop);
 		};
 
 		const resumeCanvasParticles = () => {

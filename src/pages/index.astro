@@ -951,7 +951,7 @@ body.light-mode #mobile-menu a[href="#contact"] {
   width: 520px; height: 520px;
   background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
   top: 5%; left: -10%;
-  animation: orb-float-1 14s ease-in-out infinite;
+  /* animation handled by anime.js */
 }
 body.light-mode .hero-orb-1 {
   background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
@@ -960,7 +960,7 @@ body.light-mode .hero-orb-1 {
   width: 400px; height: 400px;
   background: radial-gradient(circle, rgba(59,130,246,0.14) 0%, transparent 70%);
   bottom: 10%; right: -8%;
-  animation: orb-float-2 18s ease-in-out infinite;
+  /* animation handled by anime.js */
 }
 body.light-mode .hero-orb-2 {
   background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
@@ -1467,6 +1467,31 @@ body.light-mode .blog-img-container {
     }, { threshold: 0.3 });
 
     document.querySelectorAll('[data-ml9]').forEach(el => observer.observe(el));
+  })();
+
+  // Pause infinite CSS animations when their host element is off-screen
+  (() => {
+    const pauseWhenHidden = (selector: string, root: Element | null = null) => {
+      const els = document.querySelectorAll<HTMLElement>(selector);
+      if (!els.length) return;
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          (e.target as HTMLElement).style.animationPlayState = e.isIntersecting ? 'running' : 'paused';
+        });
+      }, { rootMargin: '100px', threshold: 0 });
+      els.forEach(el => { el.style.animationPlayState = 'paused'; io.observe(el); });
+    };
+
+    pauseWhenHidden('.hero-badge-dot');
+    pauseWhenHidden('.hero-divider-diamond');
+    pauseWhenHidden('.animate-marquee');
+    // Scroll-hint float line
+    document.querySelectorAll<HTMLElement>('[style*="animation:float"]').forEach(el => {
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { (e.target as HTMLElement).style.animationPlayState = e.isIntersecting ? 'running' : 'paused'; });
+      }, { threshold: 0 });
+      io.observe(el);
+    });
   })();
 </script>
 
