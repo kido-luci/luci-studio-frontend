@@ -305,7 +305,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
           <div class="masonry-art-grid">
             {artItems.map((a) => {
               const infoBar = (
-                <div class="px-3 py-2 mt-1 flex items-start justify-between gap-2 rounded-xl" style="background:rgba(10,10,20,0.72);backdrop-filter:blur(8px)">
+                <div class="px-3 py-2 flex items-start justify-between gap-2 rounded-xl" style="background:rgba(10,10,20,0.72);backdrop-filter:blur(8px)">
                   <div class="flex-1 min-w-0">
                     <p class="font-bold text-sm leading-snug line-clamp-2" style="color:#fff">{a.label}</p>
                     <p class="text-[10px] uppercase tracking-widest mt-0.5 truncate" style="color:#93c5fd">{a.topic} · {a.date}</p>
