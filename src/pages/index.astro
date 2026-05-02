@@ -40,7 +40,7 @@ const blogPosts = rawPosts
 }));
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 
-const artItems: { img: string; label: string; year: string; url?: string }[] =
+const artItems: { img: string; label: string; year: string; date: string; topic: string; url?: string; id?: number; likes?: number }[] =
   rawPosts.some(p => p.topics?.some(t => t.toLowerCase().includes('art')))
     ? rawPosts
         .filter(p => p.topics?.some(t => t.toLowerCase().includes('art')))
@@ -48,14 +48,18 @@ const artItems: { img: string; label: string; year: string; url?: string }[] =
           img: p.cover_image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800',
           label: p.title,
           year: new Date(p.created_at).getFullYear().toString(),
+          date: formatDate(p.created_at),
+          topic: (p.topics || ['Art']).join(' · '),
           url: `/blog/${slugify(p.title)}-${p.id}`,
+          id: p.id,
+          likes: p.likes ?? 0,
         }))
     : [
-        { img: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200', label: 'Neon Currents', year: '2024' },
-        { img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800', label: 'Deep Space', year: '2024' },
-        { img: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800', label: 'Bloom', year: '2024' },
-        { img: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800', label: 'Ember', year: '2023' },
-        { img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800', label: 'Circuit', year: '2023' },
+        { img: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200', label: 'Neon Currents', year: '2024', date: 'Jan 2024', topic: 'Digital Art' },
+        { img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800', label: 'Deep Space', year: '2024', date: 'Mar 2024', topic: 'Digital Art' },
+        { img: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800', label: 'Bloom', year: '2024', date: 'Jun 2024', topic: 'Illustration' },
+        { img: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800', label: 'Ember', year: '2023', date: 'Nov 2023', topic: 'Digital Art' },
+        { img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800', label: 'Circuit', year: '2023', date: 'Aug 2023', topic: 'Digital Art' },
       ];
 ---
 
@@ -298,33 +302,43 @@ const artItems: { img: string; label: string; year: string; url?: string }[] =
           </div>
 
           <div class="masonry-art-grid">
-            {artItems.map((a) => (
-              a.url ? (
-                <a href={a.url} class="masonry-art-item group block">
-                  <div class="relative rounded-2xl overflow-hidden border border-white/5 hover:border-blue-500/30 transition-all duration-500">
-                    <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
-                      <div>
-                        <p class="font-bold text-white text-sm leading-snug">{a.label}</p>
-                        <p class="text-xs text-blue-400 uppercase tracking-widest mt-1">{a.year} · Digital Art</p>
-                      </div>
-                    </div>
+            {artItems.map((a) => {
+              const infoBar = (
+                <div class="px-1 pt-2 pb-1 flex items-start justify-between gap-2">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-bold text-sm leading-snug line-clamp-2" style="color:var(--text-primary)">{a.label}</p>
+                    <p class="text-[10px] text-blue-400 uppercase tracking-widest mt-0.5 truncate">{a.topic} · {a.date}</p>
                   </div>
+                  {a.id != null && (
+                    <span
+                      class="art-like-area flex items-center gap-1 cursor-pointer flex-shrink-0 group/like mt-0.5"
+                      data-id={String(a.id)}
+                      data-likes={String(a.likes ?? 0)}
+                    >
+                      <svg class="art-like-icon w-3.5 h-3.5 text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                      </svg>
+                      <span class="art-like-count text-[10px] text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200">{a.likes ?? 0}</span>
+                    </span>
+                  )}
+                </div>
+              );
+              return a.url ? (
+                <a href={a.url} class="masonry-art-item group block">
+                  <div class="rounded-2xl overflow-hidden border border-white/5 hover:border-blue-500/30 transition-all duration-500">
+                    <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                  </div>
+                  {infoBar}
                 </a>
               ) : (
                 <div class="masonry-art-item group">
-                  <div class="relative rounded-2xl overflow-hidden border border-white/5">
+                  <div class="rounded-2xl overflow-hidden border border-white/5">
                     <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
-                      <div>
-                        <p class="font-bold text-white text-sm leading-snug">{a.label}</p>
-                        <p class="text-xs text-blue-400 uppercase tracking-widest mt-1">{a.year} · Digital Art</p>
-                      </div>
-                    </div>
                   </div>
+                  {infoBar}
                 </div>
-              )
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1291,6 +1305,52 @@ body.light-mode .blog-img-container {
           .then(d => {
             if (d.likes != null && countEl) countEl.textContent = d.likes;
             applyLikedState(!liked);
+          })
+          .catch(() => {});
+      });
+    });
+  })();
+
+  // Art tile like buttons
+  (function() {
+    const API_URL = (document.querySelector('main[data-api-url]') as HTMLElement | null)?.dataset.apiUrl || '';
+
+    document.querySelectorAll('.art-like-area').forEach(el => {
+      const btn = el as HTMLElement;
+      const postId = btn.dataset.id;
+      const icon = btn.querySelector('.art-like-icon') as HTMLElement | null;
+      const countEl = btn.querySelector('.art-like-count') as HTMLElement | null;
+      const likedKey = `liked_${postId}`;
+      let liked = localStorage.getItem(likedKey) === '1';
+
+      function apply(state: boolean) {
+        liked = state;
+        if (state) {
+          icon?.setAttribute('fill', '#f43f5e');
+          icon?.setAttribute('stroke', '#f43f5e');
+          countEl?.classList.add('text-rose-400');
+          countEl?.classList.remove('text-white/60');
+        } else {
+          icon?.setAttribute('fill', 'none');
+          icon?.setAttribute('stroke', 'currentColor');
+          countEl?.classList.remove('text-rose-400');
+          countEl?.classList.add('text-gray-500');
+        }
+      }
+
+      apply(liked);
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const endpoint = liked ? 'unlike' : 'like';
+        icon && (icon.style.transform = 'scale(1.5)');
+        setTimeout(() => { if (icon) icon.style.transform = 'scale(1)'; }, 150);
+        fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST' })
+          .then(r => r.json())
+          .then(d => {
+            if (d.likes != null && countEl) countEl.textContent = d.likes;
+            apply(!liked);
           })
           .catch(() => {});
       });
