@@ -232,7 +232,7 @@ const artItems: { img: string; label: string; year: string; url?: string }[] =
             {blogPosts.map((p, i) => (
               <div class="relative" data-post-id={p.id} data-post-likes={p.likes}>
                 <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block no-underline">
-                  <article data-reveal data-delay={String(i+1)} class="tilt-card group cursor-pointer p-5 sm:p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
+                  <article class="tilt-card blog-card-anim group cursor-pointer p-5 sm:p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]" style={`animation-delay:${i * 0.1}s`}>
                     <div class="blog-img-container aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
                       <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />
                     </div>
@@ -1147,6 +1147,11 @@ body.light-mode .masonry-art-item .border-white\/5 {
 }
 body.light-mode .masonry-art-item:hover .border-white\/5 {
   border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* ── Blog card CSS-only reveal (no JS dependency) ── */
+.blog-card-anim {
+  animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* ── Blog card image placeholder (shown while loading or on error) ── */
