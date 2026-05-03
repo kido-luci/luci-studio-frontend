@@ -123,7 +123,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
 
     <!-- HERO -->
     <section class="relative min-h-screen flex flex-col justify-center items-center pt-20 px-4 md:px-6">
-      <div class="hero-bg-img absolute inset-0 pointer-events-none z-[0]" style="background-image:url('https://i1-c.pinimg.com/736x/58/df/4b/58df4b137ab3844249ec8241269baf14.jpg');background-size:cover;background-position:center;background-repeat:no-repeat; -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 100%);"></div>
+      <div class="hero-bg-img absolute inset-0 pointer-events-none z-[0]" style="background-size:cover;background-position:center;background-repeat:no-repeat; -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 100%);"></div>
       <!-- Vanta.js halo is handled in Layout.astro -->
 
       <!-- Floating orbs for depth -->
@@ -1211,7 +1211,13 @@ body.light-mode .blog-img-container {
 }
 
 .hero-bg-img {
+  background-image: url('https://media.luci-studio.com/58df4b137ab3844249ec8241269baf14.jpg');
   mix-blend-mode: screen;
+}
+@media (orientation: landscape) {
+  .hero-bg-img {
+    background-image: url('https://media.luci-studio.com/ChatGPT%20Image%20May%203%2C%202026%2C%2010_55_42%20AM.jpg');
+  }
 }
 body.light-mode .hero-bg-img {
   mix-blend-mode: multiply;
