@@ -131,7 +131,7 @@ const canonicalURL = canonical ?? SITE_URL;
 		</script>
 		<title>{title}</title>
 	</head>
-	<body class="bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-hidden max-w-full">
+	<body class="bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-clip max-w-full">
 		<!-- Vanta.js Background Animation -->
 		<div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2]" style="opacity: 1;"></div>
 		<canvas id="canvas-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2] opacity-0 bg-[#f8f9fa]"></canvas>
@@ -183,7 +183,7 @@ const canonicalURL = canonical ?? SITE_URL;
 			}
 
 			html {
-				overflow-x: hidden;
+				overflow-x: clip;
 			}
 			body {
 				background-color: var(--bg-primary);
