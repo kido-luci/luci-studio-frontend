@@ -1238,6 +1238,18 @@ body.light-mode .blog-img-container {
     });
   });
 
+  // Auto-close menu on landscape or larger screens
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768 || window.matchMedia("(orientation: landscape)").matches) {
+      if (toggle?.classList.contains('active')) {
+        toggle.classList.remove('active');
+        menu?.classList.remove('opacity-100', 'pointer-events-auto');
+        document.body.style.overflow = '';
+      }
+    }
+  });
+
+
   // Blog tile like buttons
   (function() {
     const API_URL = (document.querySelector('main[data-api-url]') as HTMLElement | null)?.dataset.apiUrl || '';
