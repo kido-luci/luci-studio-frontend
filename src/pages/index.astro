@@ -67,7 +67,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
 
   <!-- NAV -->
   <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
-    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
         <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
         <span class="text-xl font-black tracking-[0em]">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
@@ -122,7 +122,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
   <main data-api-url={API_URL}>
 
     <!-- HERO -->
-    <section class="relative min-h-screen flex flex-col justify-center items-center pt-20 px-6">
+    <section class="relative min-h-screen flex flex-col justify-center items-center pt-20 px-4 md:px-6">
       <!-- Vanta.js halo is handled in Layout.astro -->
 
       <!-- Floating orbs for depth -->
@@ -226,7 +226,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
     <div class="relative bg-black/60 backdrop-blur-2xl border-t border-white/5 light-mode:bg-white/80" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
       
             <!-- BLOG -->
-      <section id="blog" class="py-16 px-6">
+      <section id="blog" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20 text-center">
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Writing</span>
@@ -271,7 +271,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       </div>
 
       <!-- WORK -->
-      <section id="work" class="py-16 px-6">
+      <section id="work" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Selected Work</span>
@@ -291,7 +291,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       </div>
 
       <!-- ART GALLERY -->
-      <section id="art" class="py-16 px-6 relative">
+      <section id="art" class="py-16 px-4 md:px-6 relative">
         <div class="absolute inset-0 pointer-events-none" style="clip-path: inset(0);">
           <div id="art-bg" class="sticky top-0 w-full h-screen" style="background-image:url('https://media.luci-studio.com/ChatGPT%20Image%20May%203%2C%202026%2C%2009_10_36%20AM.png');background-attachment:fixed;background-size:cover;background-position:center;background-repeat:no-repeat"></div>
         </div>
@@ -353,7 +353,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       </div>
 
 <!-- ABOUT ME -->
-      <section id="about" class="py-24 px-6 overflow-hidden">
+      <section id="about" class="py-24 px-4 md:px-6 overflow-hidden">
         <div class="max-w-7xl mx-auto">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <!-- Left: Artistic Image / Visual -->
@@ -413,7 +413,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       </div>
 
       <!-- STATS -->
-      <section class="py-6 px-6">
+      <section class="py-6 px-4 md:px-6">
         <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-1">
           {[
             { n: 5, suffix: '+', label: 'Years', sub: 'Flutter experience' },
@@ -436,7 +436,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       </div>
 
       <!-- EXPERIENCE -->
-      <section id="experience" class="py-16 px-6">
+      <section id="experience" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">Journey</span>
@@ -474,7 +474,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       </div>
 
       <!-- SKILLS -->
-      <section id="skills" class="py-16 px-6">
+      <section id="skills" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] mb-3 block">Expertise</span>
@@ -564,7 +564,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
 
       
 <!-- CTA -->
-      <section id="contact" class="py-40 px-6">
+      <section id="contact" class="py-40 px-4 md:px-6">
         <div class="max-w-5xl mx-auto text-center">
           <div data-reveal class="mb-6">
             <span class="text-xs font-black text-gray-600 uppercase tracking-[0.3em]">Ready to collaborate?</span>
@@ -589,7 +589,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       </section>
 
       <!-- FOOTER -->
-      <footer class="py-16 border-t border-white/5 px-6">
+      <footer class="py-16 border-t border-white/5 px-4 md:px-6">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           <a href="/" class="flex items-center gap-3 opacity-80 hover:opacity-100 transition-opacity">
             <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-8 w-8 rounded-lg" />
