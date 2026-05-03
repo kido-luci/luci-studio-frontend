@@ -66,7 +66,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
 <Layout title="Luci Studio | Tech Blog, Digital Art & Innovative Apps">
 
   <!-- NAV -->
-  <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
+  <nav class="fixed top-0 w-full z-[100] border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
     <div class="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 group">
         <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
@@ -106,18 +106,18 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
         </button>
       </div>
     </div>
-
-    <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-all duration-500">
-      {['About','Work','Art','Blog'].map(l => (
-        <a href={`#${l.toLowerCase()}`} class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">{l}</a>
-      ))}
-      <div class="h-px w-12 bg-white/10 my-4"></div>
-      <a href="https://medium.com/@lapl1412.work" target="_blank" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">Medium</a>
-      <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">LinkedIn</a>
-      <a href="#contact" class="mobile-nav-link mt-8 px-8 py-4 bg-white text-black font-black rounded-full uppercase tracking-widest">Let's Talk</a>
-    </div>
   </nav>
+
+  <!-- Mobile Menu Overlay -->
+  <div id="mobile-menu" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-all duration-500">
+    {['About','Work','Art','Blog'].map(l => (
+      <a href={`#${l.toLowerCase()}`} class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">{l}</a>
+    ))}
+    <div class="h-px w-12 bg-white/10 my-4"></div>
+    <a href="https://medium.com/@lapl1412.work" target="_blank" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">Medium</a>
+    <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">LinkedIn</a>
+    <a href="#contact" class="mobile-nav-link mt-8 px-8 py-4 bg-white text-black font-black rounded-full uppercase tracking-widest">Let's Talk</a>
+  </div>
 
   <main data-api-url={API_URL}>
 
