@@ -42,7 +42,7 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img, logo } = A
       <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
 
         {/* Content */}
-        <div class="md:col-span-9">
+        <div class="md:col-span-8">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-4">
             <div class="flex items-center gap-4">
               {logo && (
@@ -127,9 +127,9 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img, logo } = A
           </div>
         </div>
 
-        <div class="md:col-span-3 flex flex-col items-center md:items-end justify-center order-first md:order-last mb-8 md:mb-0">
+        <div class="md:col-span-4 flex flex-col items-center md:items-end justify-center order-first md:order-last mb-8 md:mb-0">
           {img && (
-            <div class="relative group/preview rounded-2xl overflow-hidden border border-white/5 shadow-2xl w-full md:max-w-[240px] bg-white/5 transition-all duration-700 group-hover:border-pink-500/30 group-hover:shadow-pink-500/10">
+            <div class="relative group/preview rounded-2xl overflow-hidden border border-white/5 shadow-2xl w-full bg-white/5 transition-all duration-700 group-hover:border-pink-500/30 group-hover:shadow-pink-500/10">
               <img src={img} alt={`${co} Preview`} class="w-full h-auto block transition-all duration-700 group-hover/preview:scale-110" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/preview:opacity-100 transition-opacity duration-500"></div>
             </div>
