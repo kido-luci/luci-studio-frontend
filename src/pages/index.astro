@@ -291,8 +291,8 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       </div>
 
       <!-- ART GALLERY -->
-      <section id="art" class="py-16 px-6 relative overflow-hidden">
-        <div id="art-bg" class="absolute inset-x-0 pointer-events-none" style="top:0;height:100vh;will-change:transform;background-image:url('https://media.luci-studio.com/21fbb1c5bbe94b0c7c481b42bb8cc16d.jpg');background-size:cover;background-position:center;background-repeat:no-repeat"></div>
+      <section id="art" class="py-16 px-6 relative">
+        <div id="art-bg" class="absolute inset-0 pointer-events-none" style="background-image:url('https://media.luci-studio.com/21fbb1c5bbe94b0c7c481b42bb8cc16d.jpg');background-attachment:fixed;background-size:cover;background-position:center;background-repeat:no-repeat"></div>
         <div class="relative max-w-7xl mx-auto">
           <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
@@ -1206,6 +1206,11 @@ body.light-mode .blog-img-container {
     background-image: url('https://media.luci-studio.com/3eb02680c97c669614d62ea4142473ce.jpg') !important;
   }
 }
+@supports (-webkit-touch-callout: none) {
+  #art-bg {
+    background-attachment: scroll !important;
+  }
+}
 </style>
 
 <script>
@@ -1474,24 +1479,7 @@ body.light-mode .blog-img-container {
     document.querySelectorAll('[data-ml9]').forEach(el => observer.observe(el));
   })();
 
-  // Fixed-background simulation (works on iOS Safari unlike background-attachment:fixed)
-  (() => {
-    const section = document.getElementById('art') as HTMLElement | null;
-    const bg = document.getElementById('art-bg') as HTMLElement | null;
-    if (!section || !bg) return;
-    let ticking = false;
-    const update = () => {
-      bg.style.transform = `translateY(${-section.getBoundingClientRect().top}px)`;
-      ticking = false;
-    };
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        requestAnimationFrame(update);
-        ticking = true;
-      }
-    }, { passive: true });
-    update();
-  })();
+
 
   // Pause infinite CSS animations when their host element is off-screen
   (() => {
