@@ -236,7 +236,6 @@ const canonicalURL = canonical ?? SITE_URL;
 			.tilt-card {
 				transform-style: preserve-3d;
 				transition: transform 0.15s ease, opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-				backdrop-filter: blur(12px);
 				background-color: var(--bg-card);
 				border-color: var(--border-color);
 				transform: translateZ(0);
@@ -665,10 +664,14 @@ const canonicalURL = canonical ?? SITE_URL;
 				}
 			}
 
+			// kickRingAnim: assigned in the else branch; no-op on Windows / touch
+			let kickRingAnim: () => void = () => {};
+
 			document.addEventListener('mousemove', (e) => {
 				mouseX = e.clientX; mouseY = e.clientY;
 				dot.style.left = mouseX - 4 + 'px';
 				dot.style.top = mouseY - 4 + 'px';
+				kickRingAnim();
 			});
 
 			if (isWindows) {
@@ -679,23 +682,28 @@ const canonicalURL = canonical ?? SITE_URL;
 					ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(${ringScale})`;
 				});
 			} else {
-				// macOS/Edge: smooth rAF ring follow — uses transform (compositor only, no layout reflow)
-				(function animateRing() {
+				// macOS/Edge: smooth rAF ring — stops when settled to avoid idle 60fps drain
+				let ringRafId: number | null = null;
+				const doRingAnim = () => {
 					const prevX = ringX, prevY = ringY, prevScale = ringScale;
 					ringX += (mouseX - ringX) * 0.12;
 					ringY += (mouseY - ringY) * 0.12;
 					ringScale += (targetRingScale - ringScale) * 0.15;
-					if (Math.abs(ringX - prevX) > 0.05 || Math.abs(ringY - prevY) > 0.05 || Math.abs(ringScale - prevScale) > 0.001) {
+					const dx = Math.abs(ringX - prevX);
+					const dy = Math.abs(ringY - prevY);
+					const ds = Math.abs(ringScale - prevScale);
+					if (dx > 0.05 || dy > 0.05 || ds > 0.001) {
 						ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(${ringScale.toFixed(3)})`;
 					}
-					requestAnimationFrame(animateRing);
-				})();
+					ringRafId = (dx > 0.01 || dy > 0.01 || ds > 0.0005) ? requestAnimationFrame(doRingAnim) : null;
+				};
+				kickRingAnim = () => { if (!ringRafId) ringRafId = requestAnimationFrame(doRingAnim); };
 			}
 
 			document.querySelectorAll('a, button, .tilt-card, .magnetic').forEach(el => {
 				el.addEventListener('mouseenter', () => {
 					if (isWindows) ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(2)`;
-					else targetRingScale = 2;
+					else { targetRingScale = 2; kickRingAnim(); }
 					ring.style.borderColor = 'rgba(139,92,246,0.8)';
 					ring.style.boxShadow = '0 0 20px rgba(139,92,246,0.3)';
 					dot.style.transform = 'scale(1.5)';
@@ -703,7 +711,7 @@ const canonicalURL = canonical ?? SITE_URL;
 				});
 				el.addEventListener('mouseleave', () => {
 					if (isWindows) ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(1)`;
-					else targetRingScale = 1;
+					else { targetRingScale = 1; kickRingAnim(); }
 					ring.style.borderColor = isWindows ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.4)';
 					ring.style.boxShadow = 'none';
 					dot.style.transform = 'scale(1)';
@@ -867,7 +875,6 @@ const canonicalURL = canonical ?? SITE_URL;
 					const dimOpacity = progress * 0.45;
 					if (!isWindows) {
 						bgDimmer.style.opacity = dimOpacity.toString();
-						bgDimmer.style.backdropFilter = `blur(${isLight ? progress * 2 : progress * 12}px)`;
 					} else {
 						const bgColor = isLight ? `rgba(255,255,255,${dimOpacity * 0.3})` : `rgba(0,0,0,${dimOpacity * 0.4})`;
 						bgDimmer.style.backgroundColor = bgColor;
@@ -875,7 +882,6 @@ const canonicalURL = canonical ?? SITE_URL;
 				} else {
 					if (!isWindows) {
 						bgDimmer.style.opacity = '0';
-						bgDimmer.style.backdropFilter = 'blur(0px)';
 					} else {
 						bgDimmer.style.backgroundColor = isLight ? 'rgba(255,255,255,0)' : 'rgba(0,0,0,0)';
 					}
@@ -987,8 +993,8 @@ const canonicalURL = canonical ?? SITE_URL;
 				easing: 'easeOutElastic(1, .8)'
 			});
 
-			// Floating animation for hero orbs
-			anime({
+			// Floating animation for hero orbs — paused when hero is off-screen
+			const orbAnim = anime({
 				targets: '.hero-orb',
 				translateY: [
 					{ value: -20, duration: 2000 },
@@ -1002,6 +1008,13 @@ const canonicalURL = canonical ?? SITE_URL;
 				easing: 'easeInOutSine',
 				delay: anime.stagger(500)
 			});
+			const heroEl = document.querySelector('section.relative.min-h-screen');
+			if (heroEl && orbAnim) {
+				new IntersectionObserver((entries) => {
+					if (entries[0].isIntersecting) orbAnim.play?.();
+					else orbAnim.pause?.();
+				}, { threshold: 0 }).observe(heroEl);
+			}
 
 			// Pulse animation for project cards on hover
 			document.querySelectorAll('.tilt-card[data-project]').forEach(card => {

@@ -224,7 +224,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
 
 
     <!-- CONTENT WRAPPER FOR SMOOTH TRANSITIONS -->
-    <div class="relative bg-black/60 backdrop-blur-2xl border-t border-white/5 light-mode:bg-white/80" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+    <div class="relative bg-black/60 border-t border-white/5 light-mode:bg-white/80" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
       
             <!-- BLOG -->
       <section id="blog" class="py-16 px-4 md:px-6">
@@ -294,7 +294,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       <!-- ART GALLERY -->
       <section id="art" class="py-16 px-4 md:px-6 relative">
         <div class="absolute inset-0 pointer-events-none" style="clip-path: inset(0);">
-          <div id="art-bg" class="sticky top-0 w-full h-screen" style="background-image:url('https://media.luci-studio.com/ChatGPT%20Image%20May%203%2C%202026%2C%2009_10_36%20AM.png');background-attachment:fixed;background-size:cover;background-position:center;background-repeat:no-repeat"></div>
+          <div id="art-bg" class="sticky top-0 w-full h-screen" style="background-image:url('https://media.luci-studio.com/ChatGPT%20Image%20May%203%2C%202026%2C%2009_10_36%20AM.png');background-size:cover;background-position:center;background-repeat:no-repeat"></div>
         </div>
         <div class="relative max-w-7xl mx-auto">
           <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -308,7 +308,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
           <div class="masonry-art-grid">
             {artItems.map((a) => {
               const infoBar = (
-                <div class="px-3 py-2 flex items-start justify-between gap-2 rounded-xl" style="background:rgba(10,10,20,0.72);backdrop-filter:blur(8px)">
+                <div class="px-3 py-2 flex items-start justify-between gap-2 rounded-xl" style="background:rgba(10,10,20,0.85)">
                   <div class="flex-1 min-w-0">
                     <p class="font-bold text-sm leading-snug line-clamp-2" style="color:#fff">{a.label}</p>
                     <p class="text-[10px] uppercase tracking-widest mt-0.5 truncate" style="color:#93c5fd">{a.topic} · {a.date}</p>
@@ -810,8 +810,6 @@ body.light-mode .opacity-20 .bg-gradient-to-b {
 body.light-mode .relative.bg-black\/60 {
   background-color: rgba(248, 248, 252, 0.15) !important;
   border-color: rgba(0, 0, 0, 0.06) !important;
-  backdrop-filter: blur(2px) !important;
-  -webkit-backdrop-filter: blur(2px) !important;
 }
 
 /* About section */
@@ -1221,11 +1219,6 @@ body.light-mode .blog-img-container {
 }
 body.light-mode .hero-bg-img {
   mix-blend-mode: multiply;
-}
-@supports (-webkit-touch-callout: none) {
-  #art-bg {
-    background-attachment: scroll !important;
-  }
 }
 </style>
 
