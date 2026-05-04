@@ -6,10 +6,10 @@ import { postService } from "../services/posts";
 import { calculateReadTime, formatDate, slugify } from "../utils/blog";
 
 const projects = [
-  { title: 'memoirMe', year: '2024–Now', desc: 'A secure AI-powered digital sanctuary featuring zero-knowledge RSA/AES encryption, interactive geolocation mapping, and high-performance media synchronization. Engineered for absolute privacy and seamless cross-platform continuity.', links: [{ label: 'App Store', url: 'https://apps.apple.com/au/app/memoirme/id1640973202' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=com.nartus.interactiveDiary&pcampaignid=web_share' }, { label: 'The Nartus', url: 'https://www.thenartus.com/' }], img: 'https://media.luci-studio.com/MEMOIRME.png', logo: 'https://media.luci-studio.com/MEMOIRME-LOGO.webp' },
-  { title: 'TBchat', year: '2024–Now', desc: 'Next-generation Web3 messaging ecosystem integrating decentralized crypto wallets, proof-of-stake miner orchestration, and immersive real-time audio visualization. Bridging blockchain security with high-fidelity social interaction.', links: [{ label: 'App Store', url: 'https://apps.apple.com/us/app/tbchat-web3/id6739870518' }, { label: 'Chain-Views', url: 'https://www.chainviews.net/' }], img: 'https://media.luci-studio.com/TBCHAT.png', logo: 'https://media.luci-studio.com/TBCHAT-LOGO.webp' },
-  { title: 'IU PETSHOP', year: '2021–2022', desc: 'A comprehensive pet care infrastructure leveraging blockchain for immutable identity tracking and secure, low-latency payment gateways. Orchestrated as a capstone innovation combining fintech and pet-tech ecosystems.', links: [{ label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' }, { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }], img: 'https://media.luci-studio.com/IUPET-shop.png', logo: 'https://media.luci-studio.com/IU-PET-LOGO.png' },
-  { title: 'Survive in Shadow', year: '2018', desc: 'An atmospheric top-down survival experience crafted with Unity. Showcasing procedural generation algorithms, dynamic shadow-casting systems, and optimized resource management mechanics for immersive gameplay.', links: [{ label: 'itch.io', url: 'https://lapl1412.itch.io/survive-in-shadow' }], img: 'https://media.luci-studio.com/SURVIVE-GAME.png' },
+  { title: 'memoirMe', year: '2024–Now', desc: 'Zero-knowledge RSA/AES encrypted diary with geolocation mapping, AI features, and cross-platform sync. Privacy-first, no server-side compromise.', links: [{ label: 'App Store', url: 'https://apps.apple.com/au/app/memoirme/id1640973202' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=com.nartus.interactiveDiary&pcampaignid=web_share' }, { label: 'The Nartus', url: 'https://www.thenartus.com/' }], img: 'https://media.luci-studio.com/MEMOIRME.png', logo: 'https://media.luci-studio.com/MEMOIRME-LOGO.webp' },
+  { title: 'TBchat', year: '2024–Now', desc: 'Web3 messenger with on-chain wallets, PoS miner orchestration, and audio chat with real-time waveforms. Cross-platform. No shortcuts.', links: [{ label: 'App Store', url: 'https://apps.apple.com/us/app/tbchat-web3/id6739870518' }, { label: 'Chain-Views', url: 'https://www.chainviews.net/' }], img: 'https://media.luci-studio.com/TBCHAT.png', logo: 'https://media.luci-studio.com/TBCHAT-LOGO.webp' },
+  { title: 'IU PETSHOP', year: '2021–2022', desc: 'Blockchain-based pet microchip identification with VNPay payment integration. University capstone — designed the UI, built the app, shipped the demo.', links: [{ label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' }, { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }], img: 'https://media.luci-studio.com/IUPET-shop.png', logo: 'https://media.luci-studio.com/IU-PET-LOGO.png' },
+  { title: 'Survive in Shadow', year: '2018', desc: 'Top-down 2D survival game built in Unity — procedural spawning, custom shadow system, resource management.', links: [{ label: 'itch.io', url: 'https://lapl1412.itch.io/survive-in-shadow' }], img: 'https://media.luci-studio.com/SURVIVE-GAME.png' },
 ];
 
 const experience = [
@@ -230,7 +230,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       <section id="blog" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20 text-center">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Writing</span>
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Raw Output</span>
             <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h2>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -251,7 +251,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
                     <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
                     {p.subtitle && <p class="text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
                     <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                      <span class="text-xs text-gray-600">Read more →</span>
+                      <span class="text-xs text-gray-600">Read →</span>
                       <span class="tile-like-area flex items-center gap-1.5 cursor-pointer group/like" data-id={p.id}>
                         <svg class="tile-like-icon w-4 h-4 text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -275,7 +275,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       <section id="work" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Selected Work</span>
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">What I Built</span>
             <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">PORTFOLIO<span class="text-violet-500">.</span></h2>
             <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
           </div>
@@ -299,7 +299,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
         <div class="relative max-w-7xl mx-auto">
           <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
-              <span class="text-xs font-black uppercase tracking-[0.3em] mb-3 block" style="background:linear-gradient(90deg,#f472b6,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Creative Works</span>
+              <span class="text-xs font-black uppercase tracking-[0.3em] mb-3 block" style="background:linear-gradient(90deg,#f472b6,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Off-Clock</span>
               <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter" style="color:white">THE ART<span style="color:#60a5fa">.</span></h2>
             </div>
             <p class="text-white/50 max-w-xs text-sm leading-relaxed">Where code meets canvas. Math, color theory, and human emotion rendered in pixels.</p>
@@ -417,10 +417,10 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       <section class="py-6 px-4 md:px-6">
         <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-1">
           {[
-            { n: 5, suffix: '+', label: 'Years', sub: 'Flutter experience' },
-            { n: 10, suffix: '+', label: 'Projects', sub: 'shipped to production' },
+            { n: 5, suffix: '+', label: 'Years', sub: 'Deep in Flutter' },
+            { n: 10, suffix: '+', label: 'Projects', sub: 'In production. For real.' },
             { n: 5, suffix: '', label: 'Platforms', sub: 'Android · iOS · macOS · Web · Windows' },
-            { n: 50, suffix: '%', label: 'Scholarship', sub: 'FPT University · Full Course' },
+            { n: 50, suffix: '%', label: 'Scholarship', sub: 'FPT University · Merit' },
           ].map((s, i) => (
             <div data-reveal data-delay={String(i+1)} class="tilt-card p-5 sm:p-8 border border-white/5 rounded-2xl text-center hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
               <div class="text-6xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 mb-2">
@@ -440,13 +440,13 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       <section id="experience" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
-            <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">Journey</span>
+            <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">The Record</span>
             <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">EXPERIENCE<span class="text-pink-500">.</span></h2>
           </div>
 
           <div class="mb-12">
             <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
-              Professional Experience
+              Paid Work
               <div class="h-px flex-1 bg-white/5"></div>
             </h3>
             <div class="space-y-4 timeline-container">
@@ -458,7 +458,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
 
           <div>
             <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
-              Independent & University Projects
+              Own Bets
               <div class="h-px flex-1 bg-white/5"></div>
             </h3>
             <div class="space-y-4 timeline-container">
@@ -478,7 +478,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       <section id="skills" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
-            <span class="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] mb-3 block">Expertise</span>
+            <span class="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] mb-3 block">The Stack</span>
             <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">SKILLS<span class="text-emerald-500">.</span></h2>
           </div>
           
