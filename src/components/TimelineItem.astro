@@ -21,24 +21,24 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img, logo } = A
   Layout:  [dot + line] | [year label + card]
   The line extends -1rem below each wrapper to bridge the space-y-4 gap.
 -->
-<div id={id} data-reveal data-delay={String(index + 1)} class="timeline-item-wrapper flex flex-col md:flex-row gap-5">
+<div id={id} data-timeline-item={String(index)} class="timeline-item-wrapper flex flex-col md:flex-row gap-5">
 
   {/* ── Rail: horizontal (dot + line) on mobile, vertical on desktop ── */}
   <div class="flex items-center md:flex-none md:flex-col md:pt-[3px]">
-    <div class="w-3 h-3 rounded-full bg-gray-300"></div>
-    <div class="flex-1 h-px md:w-px md:h-auto md:mt-2 bg-gradient-to-r md:bg-gradient-to-b from-gray-400/70 via-gray-500/30 to-transparent md:-mb-4"></div>
+    <div class="tl-dot w-3 h-3 rounded-full bg-gray-300"></div>
+    <div class="tl-line flex-1 h-px md:w-px md:h-auto md:mt-2 bg-gradient-to-r md:bg-gradient-to-b from-gray-400/70 via-gray-500/30 to-transparent md:-mb-4"></div>
   </div>
 
   {/* ── Right side: year label + card ── */}
   <div class="flex-1 min-w-0 pb-4">
 
     {/* Year label row */}
-    <div class="flex items-center gap-3 mb-3 h-[18px]">
+    <div class="tl-year flex items-center gap-3 mb-3 h-[18px]">
       <span class="text-xs font-black text-gray-400 uppercase tracking-widest leading-none">{y}</span>
     </div>
 
     {/* ── Card ── */}
-    <div class="timeline-item group cursor-pointer p-5 sm:p-8 rounded-2xl border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-md transition-all duration-500 overflow-hidden shadow-2xl">
+    <div class="tl-card timeline-item group cursor-pointer p-5 sm:p-8 rounded-2xl border border-white/10 hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-md transition-all duration-500 overflow-hidden shadow-2xl">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
 
         {/* Content */}
@@ -141,3 +141,48 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img, logo } = A
 
   </div>
 </div>
+
+<style>
+  @keyframes tlDotPop {
+    from { opacity: 0; transform: scale(0); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes tlLineFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes tlYearSlide {
+    from { opacity: 0; transform: translateX(14px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes tlCardIn {
+    from { opacity: 0; transform: translateX(36px) translateY(10px); }
+    to   { opacity: 1; transform: translateX(0)    translateY(0); }
+  }
+
+  /* ── Initial hidden states ── */
+  .tl-dot  { opacity: 0; transform: scale(0); }
+  .tl-line { opacity: 0; }
+  .tl-year { opacity: 0; transform: translateX(14px); }
+  .tl-card { opacity: 0; transform: translateX(36px) translateY(10px); }
+
+  /* ── Triggered by .tl-visible on the wrapper ── */
+  .tl-visible .tl-dot {
+    animation: tlDotPop  0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0s    both;
+  }
+  .tl-visible .tl-line {
+    animation: tlLineFade 0.5s  cubic-bezier(0.16, 1, 0.3, 1)    0.22s  both;
+  }
+  .tl-visible .tl-year {
+    animation: tlYearSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1)    0.12s  both;
+  }
+  .tl-visible .tl-card {
+    animation: tlCardIn  0.65s cubic-bezier(0.16, 1, 0.3, 1)     0.18s  both;
+  }
+
+  /* ── Card hover glow ── */
+  .tl-card:hover {
+    box-shadow: 0 16px 48px rgba(236, 72, 153, 0.12),
+                0 0 0 1px rgba(236, 72, 153, 0.1);
+  }
+</style>

@@ -1331,6 +1331,20 @@ body.light-mode .hero-bg-img {
   });
 
 
+  // EXPERIENCE timeline items — each animates as it scrolls into view
+  (function () {
+    const items = document.querySelectorAll<HTMLElement>('[data-timeline-item]');
+    if (!items.length) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('tl-visible');
+        obs.unobserve(e.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -20px 0px' });
+    items.forEach(el => obs.observe(el));
+  })();
+
   // MY STORY section — photo + right-column stagger
   (function () {
     const photo  = document.querySelector<HTMLElement>('[data-story-photo]');
