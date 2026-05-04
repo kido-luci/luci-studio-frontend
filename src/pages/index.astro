@@ -358,12 +358,12 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
         <div class="max-w-7xl mx-auto">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <!-- Left: Artistic Image / Visual -->
-            <div data-reveal="left" class="relative group">
+            <div data-story-photo class="relative group">
               <div class="absolute -inset-4 bg-gradient-to-tr from-violet-600/20 to-blue-600/20 rounded-2xl blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
               <div class="relative aspect-square md:aspect-auto md:h-[600px] rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]">
                 <img src="https://media.luci-studio.com/My%20Story.webp" alt="Trung Lập" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
                 <!-- Overlay details -->
-                <div class="absolute bottom-8 left-8 right-8 p-6 backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl">
+                <div data-story-badge class="absolute bottom-8 left-8 right-8 p-6 backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl">
                   <p class="text-xs font-black text-violet-400 uppercase tracking-[0.2em] mb-1">Based in</p>
                   <p class="text-xl font-bold">Ho Chi Minh City, VN</p>
                 </div>
@@ -371,21 +371,21 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
             </div>
 
             <!-- Right: Content -->
-            <div data-reveal="right">
-              <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4 block">The Person</span>
+            <div>
+              <span data-story-label class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4 block">The Person</span>
               <h2 data-ml9 class="text-5xl md:text-7xl font-black tracking-tighter mb-8">MY STORY<span class="text-violet-500">.</span></h2>
-              
+
               <div class="space-y-6 text-gray-400 text-lg leading-relaxed">
-                <p>
+                <p data-story-para="0">
                   I'm <span class="text-white font-bold">Trung Lập (Luci)</span>. I engineer high-performance systems. Over five years specializing in Flutter, I've shipped production applications across <span class="text-white font-bold">Android, iOS, macOS, Windows, and Web</span>, backed by robust Go microservices and automated Python pipelines.
                 </p>
-                <p>
+                <p data-story-para="1">
                   I operate across the entire product lifecycle. Architecture. State management. Real-time infrastructure. CI/CD. I build systems that scale, from a <span class="text-white">zero-knowledge encrypted diary</span> to a live Web3 messaging platform with integrated on-chain wallets.
                 </p>
-                <p>
+                <p data-story-para="2">
                   I am also a visual artist. That discipline strictly dictates how I approach <span class="text-white">visual hierarchy, proportion, and interface logic</span>. My design decisions are deliberate. Nothing is accidental.
                 </p>
-                <p>
+                <p data-story-para="3">
                   My baseline standard is production-grade stability. No fragility. No deferred technical debt. I execute with <span class="text-shimmer font-bold">clean architecture</span>, rigid state management, and an absolute obsession with edge cases. Ship. Refine. Repeat.
                 </p>
               </div>
@@ -1246,6 +1246,54 @@ body.light-mode .blog-img-container {
 body.light-mode .hero-bg-img {
   mix-blend-mode: multiply;
 }
+
+/* ── MY STORY section animations ─────────────────────────────────── */
+@keyframes storyPhotoIn {
+  from { opacity: 0; transform: translateX(-48px) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0)     scale(1); }
+}
+@keyframes storyLabelIn {
+  from { opacity: 0; transform: translateY(14px); letter-spacing: 0.6em; }
+  to   { opacity: 1; transform: translateY(0);    letter-spacing: 0.3em; }
+}
+@keyframes storyParaIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes storyBadgeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+[data-story-photo] {
+  opacity: 0;
+  transform: translateX(-48px) scale(0.97);
+}
+[data-story-photo].story-visible {
+  animation: storyPhotoIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-story-badge] {
+  opacity: 0;
+  transform: translateY(20px);
+}
+[data-story-badge].story-visible {
+  animation: storyBadgeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.45s;
+}
+[data-story-label] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+[data-story-label].story-visible {
+  animation: storyLabelIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-story-para] {
+  opacity: 0;
+  transform: translateY(22px);
+}
+[data-story-para].story-visible {
+  animation: storyParaIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 </style>
 
 <script>
@@ -1282,6 +1330,43 @@ body.light-mode .hero-bg-img {
     }
   });
 
+
+  // MY STORY section — photo + right-column stagger
+  (function () {
+    const photo  = document.querySelector<HTMLElement>('[data-story-photo]');
+    const badge  = document.querySelector<HTMLElement>('[data-story-badge]');
+    const label  = document.querySelector<HTMLElement>('[data-story-label]');
+    const paras  = Array.from(document.querySelectorAll<HTMLElement>('[data-story-para]'));
+
+    // Photo slides in from left
+    if (photo) {
+      const obsPhoto = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          photo.classList.add('story-visible');
+          badge?.classList.add('story-visible');
+          obsPhoto.disconnect();
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -20px 0px' });
+      obsPhoto.observe(photo);
+    }
+
+    // Label + paragraphs stagger in from right column
+    if (paras.length) {
+      const obsPara = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          label?.classList.add('story-visible');
+          paras.forEach((p, i) => {
+            p.style.animationDelay = `${0.08 + i * 0.13}s`;
+            p.classList.add('story-visible');
+          });
+          obsPara.disconnect();
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+      obsPara.observe(paras[0]);
+    }
+  })();
 
   // Blog card scroll-triggered stagger reveal
   // Negative rootMargin ensures cards animate only when entering visible viewport, not while off-screen
