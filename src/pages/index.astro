@@ -237,8 +237,8 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
             {blogPosts.map((p, i) => (
               <div class="relative" data-post-id={p.id} data-post-likes={p.likes}>
                 <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block no-underline">
-                  <article class="tilt-card blog-card group cursor-pointer p-5 sm:p-6 rounded-2xl border border-white/5 transition-all duration-500 bg-white/[0.02]" data-blog-card={String(i)}>
-                    <div class="blog-img-container aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
+                  <article class="tilt-card blog-card group cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]" data-blog-card={String(i)}>
+                    <div class="blog-img-container aspect-video overflow-hidden mb-6 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
                       <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />
                     </div>
                     <div class="flex items-center gap-3 mb-4">
@@ -1198,11 +1198,11 @@ body.light-mode .art-img-frame {
 .blog-card.card-visible {
   animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-/* Glow on hover — violet shadow lift */
+/* Highlighted border + glow on hover */
 .blog-card:hover {
-  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.18),
-              0 0 0 1px rgba(139, 92, 246, 0.15);
-  border-color: rgba(139, 92, 246, 0.3) !important;
+  border-color: rgba(139, 92, 246, 0.75) !important;
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25),
+              0 12px 48px rgba(139, 92, 246, 0.18);
 }
 
 /* ── Art item scroll-triggered reveal ── */
