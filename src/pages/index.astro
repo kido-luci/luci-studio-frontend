@@ -1302,6 +1302,23 @@ body.light-mode .hero-bg-img {
     cards.forEach(c => obs.observe(c));
   })();
 
+  // Portfolio card scroll-triggered stagger reveal (left col first, right col 0.15s later)
+  (function () {
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-project-card]'));
+    if (!cards.length) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        const idx = parseInt(el.dataset.projectCard ?? '0', 10);
+        el.style.animationDelay = `${(idx % 2) * 0.15}s`;
+        el.classList.add('card-visible');
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+    cards.forEach(c => obs.observe(c));
+  })();
+
   // Art item scroll-triggered stagger reveal
   (function () {
     const items = Array.from(document.querySelectorAll<HTMLElement>('[data-art-card]'));

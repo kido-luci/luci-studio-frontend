@@ -12,7 +12,7 @@ interface Props {
 const { title, year, desc, links, img, index, logo } = Astro.props;
 ---
 
-<div data-project={title} data-reveal="scale" data-delay={String((index % 2) + 1)} class="tilt-card group relative flex flex-col p-5 sm:p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-700 cursor-pointer overflow-hidden h-full">
+<div data-project={title} data-project-card={String(index)} class="tilt-card group relative flex flex-col p-5 sm:p-6 rounded-2xl border border-white/5 bg-white/[0.02] transition-all duration-700 cursor-pointer overflow-hidden h-full">
   <!-- Image Container -->
   <div class="relative aspect-[16/10] rounded-2xl overflow-hidden mb-5 sm:mb-8 border border-white/5 shadow-2xl">
     <div class="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10"></div>
@@ -89,3 +89,49 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
     </div>
   </div>
 </div>
+
+<style>
+  @keyframes projectCardIn {
+    from { opacity: 0; transform: translateY(44px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+
+  /* Hidden until scroll-triggered */
+  div[data-project-card] {
+    opacity: 0;
+    transform: translateY(44px) scale(0.96);
+  }
+
+  div[data-project-card].card-visible {
+    animation: projectCardIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Shimmer sweep across card on hover */
+  div[data-project-card]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      108deg,
+      transparent 25%,
+      rgba(139, 92, 246, 0.08) 50%,
+      transparent 75%
+    );
+    background-size: 200% 100%;
+    background-position: 200% center;
+    transition: background-position 0.7s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  div[data-project-card]:hover::before {
+    background-position: -200% center;
+  }
+
+  /* Glow border on hover */
+  div[data-project-card]:hover {
+    border-color: rgba(139, 92, 246, 0.45) !important;
+    box-shadow: 0 20px 60px rgba(139, 92, 246, 0.16),
+                0 0 0 1px rgba(139, 92, 246, 0.12);
+  }
+</style>
