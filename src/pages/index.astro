@@ -237,7 +237,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
             {blogPosts.map((p, i) => (
               <div class="relative" data-post-id={p.id} data-post-likes={p.likes}>
                 <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block no-underline">
-                  <article class="tilt-card blog-card-anim group cursor-pointer p-5 sm:p-6 rounded-2xl border border-white/5 hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]" style={`animation-delay:${i * 0.1}s`}>
+                  <article class="tilt-card blog-card group cursor-pointer p-5 sm:p-6 rounded-2xl border border-white/5 transition-all duration-500 bg-white/[0.02]" data-blog-card={String(i)}>
                     <div class="blog-img-container aspect-video rounded-2xl overflow-hidden mb-6 border border-white/5 group-hover:border-violet-500/20 transition-all duration-500">
                       <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />
                     </div>
@@ -328,7 +328,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
                 </div>
               );
               return a.url ? (
-                <a href={a.url} class="masonry-art-item group block">
+                <a href={a.url} class="masonry-art-item group block" data-art-card>
                   <div class="art-img-frame relative rounded-2xl overflow-hidden border-4 border-white/40 hover:border-purple-400/80 transition-all duration-500">
                     <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                     <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
@@ -336,7 +336,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
                   {infoBar}
                 </a>
               ) : (
-                <div class="masonry-art-item group">
+                <div class="masonry-art-item group" data-art-card>
                   <div class="art-img-frame relative rounded-2xl overflow-hidden border-4 border-white/40 hover:border-purple-400/80 transition-all duration-500">
                     <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                     <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
@@ -397,8 +397,8 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
                   { label: 'Stack', val: 'Flutter · Go · PostgreSQL' },
                   { label: 'Art mediums', val: 'Pencil · Ballpoint · Watercolor · Digital' },
                   { label: 'Motto', val: 'Ship. Refine. Repeat.' }
-                ].map(f => (
-                  <div class="p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
+                ].map((f, fi) => (
+                  <div data-reveal="scale" data-delay={String(fi + 1)} class="p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
                     <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">{f.label}</p>
                     <p class="text-sm font-bold text-gray-300">{f.val}</p>
                   </div>
@@ -1190,9 +1190,35 @@ body.light-mode .art-img-frame {
   border-color: rgba(168, 85, 247, 0.25);
 }
 
-/* ── Blog card CSS-only reveal (no JS dependency) ── */
-.blog-card-anim {
-  animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+/* ── Blog card scroll-triggered reveal ── */
+.blog-card {
+  opacity: 0;
+  transform: translateY(28px);
+}
+.blog-card.card-visible {
+  animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* Glow on hover — violet shadow lift */
+.blog-card:hover {
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.18),
+              0 0 0 1px rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+/* ── Art item scroll-triggered reveal ── */
+@keyframes artFadeIn {
+  from { opacity: 0; transform: scale(0.88) translateY(24px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+[data-art-card] {
+  opacity: 0;
+}
+[data-art-card].card-visible {
+  animation: artFadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* Art item glow on hover */
+[data-art-card]:hover .art-img-frame {
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.25);
 }
 
 /* ── Blog card image placeholder (shown while loading or on error) ── */
@@ -1256,6 +1282,42 @@ body.light-mode .hero-bg-img {
     }
   });
 
+
+  // Blog card scroll-triggered stagger reveal
+  // Negative rootMargin ensures cards animate only when entering visible viewport, not while off-screen
+  (function () {
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-blog-card]'));
+    if (!cards.length) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        const idx = parseInt(el.dataset.blogCard ?? '0', 10);
+        // Stagger within each row of 3 columns; cap at 0.24s max
+        el.style.animationDelay = `${(idx % 3) * 0.12}s`;
+        el.classList.add('card-visible');
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -20px 0px' });
+    cards.forEach(c => obs.observe(c));
+  })();
+
+  // Art item scroll-triggered stagger reveal
+  (function () {
+    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-art-card]'));
+    if (!items.length) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        const idx = items.indexOf(el);
+        el.style.animationDelay = `${(idx % 4) * 0.09}s`;
+        el.classList.add('card-visible');
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+    items.forEach(i => obs.observe(i));
+  })();
 
   // Blog tile like buttons
   (function() {
