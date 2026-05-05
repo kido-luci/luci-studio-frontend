@@ -1,0 +1,479 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { postService } from "../../services/posts";
+import { calculateReadTime, formatDate, slugify } from "../../utils/blog";
+
+const rawPosts = await postService.getAll();
+const allPosts = rawPosts
+  .filter(p => !p.topics?.some(t => t.toLowerCase().includes('art')))
+  .map(p => ({
+    id: p.id,
+    title: p.title,
+    subtitle: p.subtitle || '',
+    slug: `${slugify(p.title)}-${p.id}`,
+    tag: (p.topics && p.topics.length > 0) ? p.topics[0] : 'Engineering',
+    topics: p.topics || [],
+    date: formatDate(p.created_at),
+    read: calculateReadTime(p.content),
+    likes: p.likes ?? 0,
+    img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
+  }));
+
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
+const SITE_URL = 'https://luci-studio.com';
+const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] as string[];
+---
+
+<Layout
+  title="Blog | Luci Studio"
+  description={`${allPosts.length} articles on engineering, architecture, and the craft of building software by Trung Lập (Luci).`}
+  canonical={`${SITE_URL}/blog`}
+  keywords="Flutter, Go, technical blog, mobile development, engineering, clean architecture, Luci Studio"
+>
+
+  <!-- NAV -->
+  <nav class="fixed top-0 w-full z-[100] border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3 group">
+        <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
+        <span class="text-xl font-black tracking-[0em]">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
+      </a>
+      <div class="flex items-center gap-4">
+        <button
+          onclick="window.toggleTheme()"
+          class="w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
+          aria-label="Toggle theme"
+        >
+          <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+          <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </button>
+        <a href="/" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em] flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Home
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-36 pb-24 px-4 md:px-6 min-h-screen bg-[var(--bg-primary)]" data-api-url={API_URL}>
+    <div class="max-w-7xl mx-auto">
+
+      <!-- Header -->
+      <div data-reveal class="mb-16">
+        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Raw Output</span>
+        <h1 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h1>
+        <p class="text-gray-500 max-w-lg text-sm leading-relaxed mt-4">
+          {allPosts.length} {allPosts.length === 1 ? 'article' : 'articles'} on engineering, architecture, and the craft of building software.
+        </p>
+        <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
+      </div>
+
+      <!-- Topic Filters -->
+      {allTopics.length > 0 && (
+        <div data-reveal class="mb-10 flex flex-wrap gap-2" id="topic-filters">
+          <button class="topic-btn active-filter" data-topic="all">All</button>
+          {allTopics.map(topic => (
+            <button class="topic-btn" data-topic={topic}>{topic}</button>
+          ))}
+        </div>
+      )}
+
+      <!-- Empty state -->
+      <div id="empty-state" class="hidden text-center py-24">
+        <p class="text-gray-500 text-sm uppercase tracking-widest">No posts found</p>
+      </div>
+
+      <!-- Posts Grid -->
+      <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {allPosts.map((p) => (
+          <div class="post-item" data-id={p.id} data-topics={JSON.stringify(p.topics)} style="display:none">
+            <a href={`/blog/${p.slug}`} class="block no-underline">
+              <article class="tilt-card blog-card group cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]">
+                <div class="blog-img-container aspect-video overflow-hidden mb-6 -mx-2 -mt-2 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
+                  <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" onerror="this.style.opacity='0'" />
+                </div>
+                <div class="flex items-center gap-3 mb-4">
+                  <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tag}</span>
+                  <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                  <span class="text-xs text-gray-600">{p.date}</span>
+                  <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                  <span class="text-xs text-gray-600">{p.read} read</span>
+                </div>
+                <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
+                {p.subtitle && <p class="text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
+                <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                  <span class="text-xs text-gray-600">Read →</span>
+                  <span class="tile-like-area flex items-center gap-1.5 cursor-pointer group/like" data-id={String(p.id)}>
+                    <svg class="tile-like-icon w-4 h-4 text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    <span class="tile-like-count text-xs text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200">{p.likes}</span>
+                  </span>
+                </div>
+              </article>
+            </a>
+          </div>
+        ))}
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination" class="mt-16 hidden flex-col items-center gap-4">
+        <div class="flex items-center gap-3">
+          <button id="prev-btn" class="pag-arrow" aria-label="Previous page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div id="page-numbers" class="flex items-center gap-2"></div>
+          <button id="next-btn" class="pag-arrow" aria-label="Next page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <p id="posts-count" class="text-xs text-gray-600 uppercase tracking-widest"></p>
+      </div>
+
+    </div>
+  </main>
+
+</Layout>
+
+<style>
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Blog card reveal */
+  .blog-card {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  .blog-card.card-visible {
+    animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .blog-card:hover {
+    border-color: rgba(139, 92, 246, 0.75) !important;
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25),
+                0 12px 48px rgba(139, 92, 246, 0.18);
+  }
+  .blog-img-container {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
+  }
+
+  /* Light mode */
+  body.light-mode .blog-img-container {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
+  }
+  body.light-mode .tilt-card {
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(0, 0, 0, 0.07) !important;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  }
+  body.light-mode .blog-card {
+    border-color: rgba(0, 0, 0, 0.3) !important;
+  }
+  body.light-mode .tilt-card:hover {
+    border-color: rgba(139, 92, 246, 0.25) !important;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+  }
+  body.light-mode article.tilt-card h3 {
+    color: rgb(17, 24, 39) !important;
+  }
+  body.light-mode .tile-like-count {
+    color: rgb(107, 114, 128) !important;
+  }
+
+  /* Topic filter buttons */
+  .topic-btn {
+    padding: 0.375rem 1rem;
+    font-size: 0.65rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgb(107, 114, 128);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .topic-btn:hover {
+    border-color: rgba(139, 92, 246, 0.4);
+    color: rgb(139, 92, 246);
+  }
+  .topic-btn.active-filter {
+    border-color: rgba(139, 92, 246, 0.6);
+    background: rgba(139, 92, 246, 0.1);
+    color: rgb(167, 139, 250);
+  }
+  body.light-mode .topic-btn {
+    border-color: rgba(0, 0, 0, 0.1);
+    color: rgb(107, 114, 128);
+  }
+  body.light-mode .topic-btn:hover {
+    border-color: rgba(139, 92, 246, 0.4);
+    color: rgb(109, 40, 217);
+  }
+  body.light-mode .topic-btn.active-filter {
+    border-color: rgba(139, 92, 246, 0.4);
+    background: rgba(139, 92, 246, 0.08);
+    color: rgb(109, 40, 217);
+  }
+
+  /* Pagination arrow buttons */
+  .pag-arrow {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgb(107, 114, 128);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pag-arrow:hover:not(:disabled) {
+    border-color: rgba(139, 92, 246, 0.5);
+    color: white;
+  }
+  .pag-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  body.light-mode .pag-arrow {
+    border-color: rgba(0, 0, 0, 0.1);
+    color: rgb(107, 114, 128);
+  }
+  body.light-mode .pag-arrow:hover:not(:disabled) {
+    border-color: rgba(139, 92, 246, 0.4);
+    color: rgb(109, 40, 217);
+  }
+</style>
+
+<script>
+  const POSTS_PER_PAGE = 9;
+  let currentPage = 1;
+  let currentTopic = 'all';
+
+  const grid = document.getElementById('posts-grid')!;
+  const allItems = Array.from(grid.querySelectorAll<HTMLElement>('.post-item'));
+  const paginationEl = document.getElementById('pagination')!;
+  const pageNumbers = document.getElementById('page-numbers')!;
+  const prevBtn = document.getElementById('prev-btn') as HTMLButtonElement;
+  const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
+  const postsCount = document.getElementById('posts-count')!;
+  const emptyState = document.getElementById('empty-state')!;
+
+  function getFiltered(): HTMLElement[] {
+    if (currentTopic === 'all') return allItems;
+    return allItems.filter(item => {
+      const topics = JSON.parse(item.dataset.topics || '[]') as string[];
+      return topics.some(t => t.toLowerCase() === currentTopic.toLowerCase());
+    });
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / POSTS_PER_PAGE));
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    const start = (currentPage - 1) * POSTS_PER_PAGE;
+    const end = start + POSTS_PER_PAGE;
+    const pageItems = filtered.slice(start, end);
+
+    allItems.forEach(item => { item.style.display = 'none'; });
+
+    if (pageItems.length === 0) {
+      emptyState.classList.remove('hidden');
+      paginationEl.style.display = 'none';
+      postsCount.textContent = '';
+      return;
+    }
+
+    emptyState.classList.add('hidden');
+    pageItems.forEach((item, i) => {
+      item.style.display = '';
+      const card = item.querySelector<HTMLElement>('.blog-card');
+      if (card) {
+        card.classList.remove('card-visible');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(28px)';
+        setTimeout(() => {
+          card.style.animationDelay = `${(i % 3) * 0.1}s`;
+          card.classList.add('card-visible');
+        }, 16);
+      }
+    });
+
+    if (totalPages <= 1) {
+      paginationEl.style.display = 'none';
+    } else {
+      paginationEl.style.display = 'flex';
+    }
+
+    prevBtn.disabled = currentPage <= 1;
+    nextBtn.disabled = currentPage >= totalPages;
+
+    buildPageNumbers(totalPages);
+
+    const shownEnd = Math.min(end, filtered.length);
+    postsCount.textContent = `Showing ${start + 1}–${shownEnd} of ${filtered.length} posts`;
+  }
+
+  function buildPageNumbers(totalPages: number) {
+    pageNumbers.innerHTML = '';
+    const MAX = 5;
+    let s = Math.max(1, currentPage - Math.floor(MAX / 2));
+    let e = Math.min(totalPages, s + MAX - 1);
+    if (e - s < MAX - 1) s = Math.max(1, e - MAX + 1);
+
+    if (s > 1) {
+      pageNumbers.appendChild(makePageBtn(1));
+      if (s > 2) pageNumbers.appendChild(makeEllipsis());
+    }
+    for (let i = s; i <= e; i++) pageNumbers.appendChild(makePageBtn(i));
+    if (e < totalPages) {
+      if (e < totalPages - 1) pageNumbers.appendChild(makeEllipsis());
+      pageNumbers.appendChild(makePageBtn(totalPages));
+    }
+  }
+
+  function makePageBtn(n: number): HTMLButtonElement {
+    const active = n === currentPage;
+    const btn = document.createElement('button');
+    btn.textContent = String(n);
+    btn.setAttribute('style', [
+      'width:2.25rem',
+      'height:2.25rem',
+      'border-radius:9999px',
+      `border:1px solid ${active ? 'rgba(139,92,246,0.8)' : 'rgba(255,255,255,0.1)'}`,
+      `background:${active ? 'rgba(139,92,246,0.15)' : 'transparent'}`,
+      `color:${active ? 'rgb(167,139,250)' : 'rgb(107,114,128)'}`,
+      'font-size:0.7rem',
+      'font-weight:800',
+      'cursor:pointer',
+      'display:flex',
+      'align-items:center',
+      'justify-content:center',
+      'transition:all 0.2s',
+    ].join(';'));
+    if (!active) {
+      btn.addEventListener('mouseenter', () => {
+        btn.style.borderColor = 'rgba(139,92,246,0.5)';
+        btn.style.color = 'white';
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.borderColor = 'rgba(255,255,255,0.1)';
+        btn.style.color = 'rgb(107,114,128)';
+      });
+    }
+    btn.addEventListener('click', () => {
+      currentPage = n;
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    return btn;
+  }
+
+  function makeEllipsis(): HTMLSpanElement {
+    const s = document.createElement('span');
+    s.textContent = '…';
+    s.setAttribute('style', 'color:rgb(107,114,128);font-size:0.75rem;padding:0 2px;');
+    return s;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    if (currentPage > 1) { currentPage--; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  });
+  nextBtn.addEventListener('click', () => {
+    const total = Math.ceil(getFiltered().length / POSTS_PER_PAGE);
+    if (currentPage < total) { currentPage++; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  });
+
+  document.querySelectorAll<HTMLElement>('.topic-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active-filter'));
+      btn.classList.add('active-filter');
+      currentTopic = btn.dataset.topic || 'all';
+      currentPage = 1;
+      render();
+    });
+  });
+
+  // Like buttons
+  function burstHearts(anchor: HTMLElement) {
+    const rect = anchor.getBoundingClientRect();
+    for (let i = 0; i < 6; i++) {
+      const h = document.createElement('span');
+      h.textContent = '♥';
+      const angle = (i / 6) * 360;
+      const dist = 28 + Math.random() * 20;
+      const dx = Math.cos((angle * Math.PI) / 180) * dist;
+      const dy = Math.sin((angle * Math.PI) / 180) * dist - 18;
+      h.setAttribute('style', `position:fixed;left:${rect.left + rect.width / 2}px;top:${rect.top + rect.height / 2}px;font-size:${9 + Math.random() * 7}px;color:#f43f5e;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.6s ease-out,opacity 0.6s ease-out;will-change:transform,opacity;`);
+      document.body.appendChild(h);
+      requestAnimationFrame(() => {
+        h.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0)`;
+        h.style.opacity = '0';
+      });
+      setTimeout(() => h.remove(), 650);
+    }
+  }
+
+  function pulseIcon(icon: HTMLElement) {
+    icon.style.transform = 'scale(1.6)';
+    icon.style.transition = 'transform 0.15s ease-out';
+    setTimeout(() => {
+      icon.style.transform = 'scale(1)';
+      icon.style.transition = 'transform 0.2s ease-in';
+    }, 150);
+  }
+
+  const API_URL = (document.querySelector<HTMLElement>('main[data-api-url]'))?.dataset.apiUrl || '';
+
+  document.querySelectorAll<HTMLElement>('.tile-like-area').forEach(el => {
+    const postId = el.dataset.id;
+    const icon = el.querySelector<HTMLElement>('.tile-like-icon');
+    const countEl = el.querySelector<HTMLElement>('.tile-like-count');
+    const likedKey = `liked_${postId}`;
+    let liked = localStorage.getItem(likedKey) === '1';
+
+    function applyLiked(state: boolean) {
+      liked = state;
+      if (state) {
+        icon?.setAttribute('fill', '#f43f5e');
+        icon?.setAttribute('stroke', '#f43f5e');
+        countEl?.classList.add('text-rose-400');
+        countEl?.classList.remove('text-gray-500');
+      } else {
+        icon?.setAttribute('fill', 'none');
+        icon?.setAttribute('stroke', 'currentColor');
+        countEl?.classList.remove('text-rose-400');
+        countEl?.classList.add('text-gray-500');
+      }
+    }
+
+    applyLiked(liked);
+
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!liked) { burstHearts(el); if (icon) pulseIcon(icon); }
+      const endpoint = liked ? 'unlike' : 'like';
+      fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+          if (d.likes != null && countEl) countEl.textContent = String(d.likes);
+          applyLiked(!liked);
+          localStorage.setItem(likedKey, liked ? '1' : '0');
+        })
+        .catch(() => {});
+    });
+  });
+
+  render();
+</script>

@@ -103,9 +103,10 @@ const homepageSchema = [
         <span class="text-xl font-black tracking-[0em]">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
       </a>
       <div class="hidden md:flex items-center gap-8">
-        {['About','Work','Art','Blog'].map(l => (
+        {['About','Work','Art'].map(l => (
           <a href={`#${l.toLowerCase()}`} class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">{l}</a>
         ))}
+        <a href="/blog" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">Blog</a>
         <a href="https://medium.com/@lapl1412.work" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">Medium</a>
         <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">LinkedIn</a>
       </div>
@@ -140,9 +141,10 @@ const homepageSchema = [
 
   <!-- Mobile Menu Overlay -->
   <div id="mobile-menu" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-all duration-500">
-    {['About','Work','Art','Blog'].map(l => (
+    {['About','Work','Art'].map(l => (
       <a href={`#${l.toLowerCase()}`} class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">{l}</a>
     ))}
+    <a href="/blog" class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">Blog</a>
     <div class="h-px w-12 bg-white/10 my-4"></div>
     <a href="https://medium.com/@lapl1412.work" target="_blank" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">Medium</a>
     <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">LinkedIn</a>
@@ -263,8 +265,8 @@ const homepageSchema = [
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Raw Output</span>
             <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h2>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {blogPosts.map((p, i) => (
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="home-blog-grid">
+            {blogPosts.slice(0, 6).map((p, i) => (
               <div class="relative" data-post-id={p.id} data-post-likes={p.likes}>
                 <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block no-underline">
                   <article class="tilt-card blog-card group cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]" data-blog-card={String(i)}>
@@ -294,6 +296,14 @@ const homepageSchema = [
               </div>
             ))}
           </div>
+          {blogPosts.length > 6 && (
+            <div data-reveal class="mt-12 text-center">
+              <a href="/blog" class="magnetic inline-flex items-center gap-2 px-7 py-3 border border-violet-500/30 text-xs font-black uppercase tracking-widest text-violet-400 rounded-full hover:border-violet-500/70 hover:bg-violet-500/10 hover:text-violet-300 transition-all duration-300">
+                View all {blogPosts.length} posts
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          )}
         </div>
       </section>
 
