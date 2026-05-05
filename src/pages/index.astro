@@ -238,7 +238,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
               <div class="relative" data-post-id={p.id} data-post-likes={p.likes}>
                 <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block no-underline">
                   <article class="tilt-card blog-card group cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]" data-blog-card={String(i)}>
-                    <div class="blog-img-container aspect-video overflow-hidden mb-6 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
+                    <div class="blog-img-container aspect-video overflow-hidden mb-6 -mx-2 -mt-2 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
                       <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />
                     </div>
                     <div class="flex items-center gap-3 mb-4">
