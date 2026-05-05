@@ -294,7 +294,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       <!-- ART GALLERY -->
       <section id="art" class="py-16 px-4 md:px-6 relative">
         <div class="absolute inset-0 pointer-events-none" style="clip-path: inset(0);">
-          <div id="art-bg" class="sticky top-0 w-full h-screen" style="background-image:url('https://media.luci-studio.com/ChatGPT%20Image%20May%203%2C%202026%2C%2009_10_36%20AM.png');background-size:cover;background-position:center;background-repeat:no-repeat"></div>
+          <div id="art-bg" class="sticky top-0 w-full h-screen" style="background-size:cover;background-position:center;background-repeat:no-repeat"></div>
         </div>
         <div class="relative max-w-7xl mx-auto">
           <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -1228,9 +1228,12 @@ body.light-mode .art-img-frame {
 body.light-mode .blog-img-container {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
 }
+#art-bg {
+  background-image: url('https://media.luci-studio.com/ChatGPT%20Image%20May%205%2C%202026%2C%2011_03_29%20AM.jpg');
+}
 @media (max-width: 767px) {
   #art-bg {
-    background-image: url('https://media.luci-studio.com/ChatGPT%20Image%20May%203%2C%202026%2C%2009_10_36%20AM.png') !important;
+    background-image: url('https://media.luci-studio.com/ef8036c5a8709482e3e4ecc1090cb8ae.jpg') !important;
   }
 }
 
