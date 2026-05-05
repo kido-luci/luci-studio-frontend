@@ -36,18 +36,27 @@ const seoDescription = _subtitle
     : (post.content.replace(/```[\s\S]*?```/g, '').replace(/[#*`>\[\]!_~]/g, '').replace(/\s+/g, ' ').trim().slice(0, 160) + '…');
 const ogImage = post.cover_image_url || `${SITE_URL}/images/og-default.png`;
 
+const wordCount = post.content.trim().split(/\s+/).length;
+
 const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
     description: seoDescription,
     image: ogImage,
+    url: canonicalURL,
     datePublished: post.created_at,
     dateModified: post.updated_at,
+    wordCount,
+    articleSection: post.topics?.[0] ?? 'Engineering',
     author: {
         '@type': 'Person',
         name: 'Trung Lập (Luci)',
         url: SITE_URL,
+        sameAs: [
+            'https://medium.com/@lapl1412.work',
+            'https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/',
+        ],
     },
     publisher: {
         '@type': 'Organization',
@@ -81,9 +90,16 @@ const articleSchema = {
   title={`${post.title} | Luci Studio`}
   description={seoDescription}
   ogImage={ogImage}
+  ogImageAlt={post.title}
   ogType="article"
   canonical={canonicalURL}
+  keywords={post.topics?.join(', ')}
   structuredData={articleSchema}
+  articleMeta={{
+    publishedTime: post.created_at,
+    modifiedTime: post.updated_at,
+    tags: post.topics,
+  }}
 >
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" is:inline></script>

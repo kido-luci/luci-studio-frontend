@@ -61,9 +61,39 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
         { img: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800', label: 'Ember', year: '2023', date: 'Nov 2023', topic: 'Digital Art' },
         { img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800', label: 'Circuit', year: '2023', date: 'Aug 2023', topic: 'Digital Art' },
       ];
+
+const SITE_URL = 'https://luci-studio.com';
+const homepageSchema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Luci Studio',
+    url: SITE_URL,
+    description: 'Tech blog, digital art, and high-performance cross-platform apps by Trung Lập (Luci).',
+    author: { '@type': 'Person', name: 'Trung Lập (Luci)', url: SITE_URL },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Trung Lập (Luci)',
+    url: SITE_URL,
+    jobTitle: 'Full Stack Flutter & Go Developer',
+    knowsAbout: ['Flutter', 'Dart', 'Go', 'Mobile Development', 'Clean Architecture', 'Digital Art'],
+    sameAs: [
+      'https://medium.com/@lapl1412.work',
+      'https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/',
+    ],
+  },
+];
 ---
 
-<Layout title="Luci Studio | Tech Blog, Digital Art & Innovative Apps">
+<Layout
+  title="Luci Studio | Tech Blog, Digital Art & Cross-Platform Apps"
+  description="Trung Lập (Luci) — Flutter & Go engineer. Technical blog, digital art, and high-performance cross-platform applications built with rigorous architecture."
+  canonical={SITE_URL}
+  keywords="Flutter, Dart, Go, mobile development, tech blog, digital art, cross-platform, clean architecture, Luci Studio"
+  structuredData={homepageSchema}
+>
 
   <!-- NAV -->
   <nav class="fixed top-0 w-full z-[100] border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">

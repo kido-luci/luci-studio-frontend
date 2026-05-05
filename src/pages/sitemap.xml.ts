@@ -8,7 +8,7 @@ export const GET: APIRoute = async () => {
     const posts = await postService.getAll();
 
     const staticPages = [
-        { loc: `${SITE_URL}/`, priority: '1.0', changefreq: 'weekly' },
+        { loc: `${SITE_URL}/`, lastmod: new Date().toISOString().split('T')[0], priority: '1.0', changefreq: 'weekly' },
     ];
 
     const postPages = posts.map(post => ({
