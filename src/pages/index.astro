@@ -27,23 +27,23 @@ const indieProjects = [
 
 const rawPosts = await postService.getAll();
 const blogPosts = rawPosts
-  .filter(p => !p.topics?.some(t => t.toLowerCase().includes('art')))
+  .filter(p => !p.topics?.some(t => t.toLowerCase().startsWith('art')))
   .map(p => ({
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
   date: formatDate(p.created_at),
   read: calculateReadTime(p.content),
-  tag: (p.topics && p.topics.length > 0) ? p.topics[0] : 'Engineering',
+  tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
   likes: p.likes ?? 0,
 }));
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 
 const artItems: { img: string; label: string; year: string; date: string; topic: string; url?: string; id?: number; likes?: number }[] =
-  rawPosts.some(p => p.topics?.some(t => t.toLowerCase().includes('art')))
+  rawPosts.some(p => p.topics?.some(t => t.toLowerCase().startsWith('art')))
     ? rawPosts
-        .filter(p => p.topics?.some(t => t.toLowerCase().includes('art')))
+        .filter(p => p.topics?.some(t => t.toLowerCase().startsWith('art')))
         .map(p => ({
           img: p.cover_image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800',
           label: p.title,
@@ -274,7 +274,7 @@ const homepageSchema = [
                       <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />
                     </div>
                     <div class="flex items-center gap-3 mb-4">
-                      <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tag}</span>
+                      <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tags.join(' · ')}</span>
                       <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
                       <span class="text-xs text-gray-600">{p.date}</span>
                       <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
