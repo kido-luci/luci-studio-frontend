@@ -255,6 +255,19 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
 </style>
 
 <script>
+  // Home links: use history.back() if we came from / (preserves scroll)
+  document.querySelectorAll<HTMLAnchorElement>('a[href="/"]').forEach(link => {
+    link.addEventListener('click', e => {
+      try {
+        const ref = document.referrer;
+        if (ref && new URL(ref).pathname === '/') {
+          e.preventDefault();
+          history.back();
+        }
+      } catch (_) {}
+    });
+  });
+
   const POSTS_PER_PAGE = 9;
   let currentPage = 1;
   let currentTopic = 'all';
