@@ -277,7 +277,8 @@ const articleSchema = {
           <!-- Logged in state -->
           <div id="logged-in-area" class="hidden">
             <div style="display:flex;align-items:center;gap:0.625rem;padding:0.875rem 1.25rem 0;">
-              <img id="user-avatar" src="" alt="" style="width:2rem;height:2rem;border-radius:50%;object-fit:cover;flex-shrink:0;" />
+              <img id="user-avatar" src="" alt="" style="width:2rem;height:2rem;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none';document.getElementById('user-avatar-fallback').style.display='flex';" />
+              <div id="user-avatar-fallback" style="display:none;width:2rem;height:2rem;border-radius:50%;background:rgba(99,102,241,0.2);align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;font-weight:900;color:#818cf8;" id="user-avatar-fallback"></div>
               <span id="user-name" style="font-size:0.85rem;font-weight:600;color:var(--text-primary);"></span>
             </div>
             <form id="comment-form">
@@ -711,7 +712,18 @@ const articleSchema = {
         loggedInArea.classList.remove('hidden');
         const avatarEl = document.getElementById('user-avatar');
         const nameEl = document.getElementById('user-name');
-        if (avatarEl) { avatarEl.src = payload.avatar || ''; avatarEl.alt = payload.name || ''; }
+        const avatarFallback = document.getElementById('user-avatar-fallback');
+        const initial = (payload.name || '?')[0].toUpperCase();
+        if (avatarEl) {
+          avatarEl.style.display = '';
+          avatarEl.src = payload.avatar || '';
+          avatarEl.alt = payload.name || '';
+          avatarEl.onerror = () => {
+            avatarEl.style.display = 'none';
+            if (avatarFallback) { avatarFallback.textContent = initial; avatarFallback.style.display = 'flex'; }
+          };
+        }
+        if (avatarFallback) { avatarFallback.textContent = initial; avatarFallback.style.display = 'none'; }
         if (nameEl) nameEl.textContent = payload.name || '';
       } else {
         clearToken();
@@ -836,9 +848,23 @@ const articleSchema = {
 
       const avatarSize = isReply ? '2rem' : '2.5rem';
       const initial = (c.user.name || '?')[0].toUpperCase();
-      const avatarHTML = c.user.avatar
-        ? `<img src="${escapeHtml(c.user.avatar)}" alt="${escapeHtml(c.user.name)}" style="width:${avatarSize};height:${avatarSize};border-radius:50%;object-fit:cover;flex-shrink:0;" />`
-        : `<div style="width:${avatarSize};height:${avatarSize};border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;font-weight:900;color:#818cf8;">${initial}</div>`;
+      const makeCommentAvatarFallback = () => {
+        const d = document.createElement('div');
+        d.style.cssText = `width:${avatarSize};height:${avatarSize};border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;font-weight:900;color:#818cf8;`;
+        d.textContent = initial;
+        return d;
+      };
+      const avatarNode = (() => {
+        if (!c.user.avatar) return makeCommentAvatarFallback();
+        const img = document.createElement('img');
+        img.src = c.user.avatar;
+        img.alt = c.user.name || '';
+        img.style.cssText = `width:${avatarSize};height:${avatarSize};border-radius:50%;object-fit:cover;flex-shrink:0;`;
+        img.onerror = () => img.replaceWith(makeCommentAvatarFallback());
+        return img;
+      })();
+      // Placeholder used in innerHTML; replaced with avatarNode after parsing.
+      const avatarHTML = `<span class="avatar-slot"></span>`;
 
       const token = getToken();
       const payload = token ? parseJWT(token) : null;
@@ -890,7 +916,8 @@ const articleSchema = {
           </div>
         </div>
       `;
-      // Move children out of the temp wrapper into wrap (preserves the arm as first child)
+      // Replace the avatar placeholder with the real DOM node, then move children into wrap.
+      contentWrap.querySelector('.avatar-slot')?.replaceWith(avatarNode);
       while (contentWrap.firstChild) wrap.appendChild(contentWrap.firstChild);
 
       wrap.querySelector('.recall-btn')?.addEventListener('click', async () => {
@@ -1016,13 +1043,26 @@ const articleSchema = {
         return;
       }
 
-      const avatarHTML = payload.avatar
-        ? `<img src="${payload.avatar}" alt="" style="width:1.75rem;height:1.75rem;border-radius:50%;object-fit:cover;flex-shrink:0;" />`
-        : `<div style="width:1.75rem;height:1.75rem;border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;font-weight:900;color:#818cf8;">${(payload.name || '?')[0].toUpperCase()}</div>`;
+      // Build avatar as a real DOM element so onerror is a JS function, not an HTML attribute.
+      const _rInitial = (payload.name || '?')[0].toUpperCase();
+      const makeAvatarFallback = (size, fontSize) => {
+        const d = document.createElement('div');
+        d.style.cssText = `width:${size};height:${size};border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:${fontSize};font-weight:900;color:#818cf8;`;
+        d.textContent = _rInitial;
+        return d;
+      };
+      const avatarNode = (() => {
+        if (!payload.avatar) return makeAvatarFallback('1.75rem', '0.75rem');
+        const img = document.createElement('img');
+        img.src = payload.avatar;
+        img.alt = '';
+        img.style.cssText = 'width:1.75rem;height:1.75rem;border-radius:50%;object-fit:cover;flex-shrink:0;';
+        img.onerror = () => img.replaceWith(makeAvatarFallback('1.75rem', '0.75rem'));
+        return img;
+      })();
 
       formWrap.innerHTML = `
-        <div style="display:flex;gap:0.5rem;align-items:flex-start;">
-          ${avatarHTML}
+        <div class="reply-form-inner" style="display:flex;gap:0.5rem;align-items:flex-start;">
           <div style="flex:1;min-width:0;">
             <div style="font-size:0.7rem;color:var(--text-tertiary);margin-bottom:0.375rem;">Replying to <span style="color:#818cf8;font-weight:600;">@${escapeHtml(parentUserName)}</span></div>
             <textarea class="reply-input" placeholder="Write a reply…" rows="2" maxlength="500"
@@ -1040,6 +1080,7 @@ const articleSchema = {
           </div>
         </div>
       `;
+      formWrap.querySelector('.reply-form-inner').prepend(avatarNode);
 
       parentWrap.querySelector('.comment-actions').after(formWrap);
       const replyInput = formWrap.querySelector('.reply-input');
