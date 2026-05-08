@@ -808,7 +808,7 @@ const articleSchema = {
           connector.style.cssText = `position:absolute;left:1.25rem;top:3.5rem;bottom:0;width:1.5px;background:${THREAD_LINE};pointer-events:none;`;
           wrap.appendChild(connector);
         } else {
-          wrap.style.cssText = 'display:flex;gap:0.75rem;padding:1rem 0;border-bottom:1px solid var(--comment-divider,rgba(255,255,255,0.06));';
+          wrap.style.cssText = 'display:flex;gap:0.75rem;padding:1rem 0;';
         }
       }
 
@@ -833,12 +833,10 @@ const articleSchema = {
             </button>`
         : '';
 
-      const replyBtnHTML = !isReply
-        ? `<button class="reply-btn" type="button" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='var(--text-secondary)'" onmouseout="this.style.color='var(--text-tertiary)'">
+      const replyBtnHTML = `<button class="reply-btn" type="button" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='var(--text-secondary)'" onmouseout="this.style.color='var(--text-tertiary)'">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Reply
-            </button>`
-        : '';
+            </button>`;
 
       // For reply items, content is appended to the already-positioned wrap (arm is first child)
       const contentWrap = document.createElement('div');
@@ -876,7 +874,14 @@ const articleSchema = {
       });
 
       wrap.querySelector('.reply-btn')?.addEventListener('click', () => {
-        toggleReplyForm(wrap, c.id, c.user.name);
+        if (isReply) {
+          // Replies can't nest — post to the same parent thread.
+          // The root comment wrap is the sibling before our replies-wrap container.
+          const rootWrap = wrap.parentElement?.previousElementSibling;
+          if (rootWrap) toggleReplyForm(rootWrap, c.parent_id, c.user.name);
+        } else {
+          toggleReplyForm(wrap, c.id, c.user.name);
+        }
       });
 
       return wrap;
