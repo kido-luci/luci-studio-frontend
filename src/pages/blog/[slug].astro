@@ -430,16 +430,26 @@ const articleSchema = {
     const postId = main.dataset.postId;
     const apiUrl = main.dataset.apiUrl;
 
-    // Increment view (once per session)
+    // Always fetch fresh counts on load
+    fetch(`${apiUrl}/posts/${postId}`)
+      .then(r => r.json())
+      .then(d => {
+        document.querySelectorAll('#view-count').forEach(el => { if (d.views != null) el.textContent = d.views; });
+        if (d.likes != null) {
+          const likeEl = document.getElementById('like-count');
+          const floatingEl = document.getElementById('floating-like-count');
+          const headerEl = document.getElementById('like-count-header');
+          if (likeEl) likeEl.textContent = d.likes;
+          if (floatingEl) floatingEl.textContent = d.likes;
+          if (headerEl) headerEl.textContent = d.likes;
+        }
+      })
+      .catch(() => {});
+
+    // Increment view once per session
     const sessionKey = `viewed_${postId}`;
     if (!sessionStorage.getItem(sessionKey)) {
-      fetch(`${apiUrl}/posts/${postId}/view`, { method: 'POST' })
-        .then(r => r.json())
-        .then(d => {
-          const el = document.getElementById('view-count');
-          if (el && d.views != null) el.textContent = d.views;
-        })
-        .catch(() => {});
+      fetch(`${apiUrl}/posts/${postId}/view`, { method: 'POST' }).catch(() => {});
       sessionStorage.setItem(sessionKey, '1');
     }
 
