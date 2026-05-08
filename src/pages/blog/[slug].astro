@@ -792,6 +792,9 @@ const articleSchema = {
     // Thread line color shared by the ╰ arm and parent connector
     const THREAD_LINE = '#7c3aed';
 
+    // Tracks the current user's reactions for this page session: commentID → 'like'|'dislike'|''
+    const reactionState = new Map();
+
     // --- Render a single comment node ---
     function buildCommentEl(c, isReply, hasReplies) {
       const wrap = document.createElement('div');
@@ -851,6 +854,19 @@ const articleSchema = {
               Reply
             </button>`;
 
+      const curReaction = reactionState.get(String(c.id)) || '';
+      const likeActive = curReaction === 'like';
+      const dislikeActive = curReaction === 'dislike';
+      const reactBtns = `
+        <button class="react-btn" data-rtype="like" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:${likeActive ? '#7c3aed' : 'var(--text-tertiary)'};background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;font-weight:${likeActive ? '700' : '400'};">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="${likeActive ? '#7c3aed' : 'none'}" stroke="${likeActive ? '#7c3aed' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          <span class="like-count">${c.likes || 0}</span>
+        </button>
+        <button class="react-btn" data-rtype="dislike" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:${dislikeActive ? '#f87171' : 'var(--text-tertiary)'};background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;font-weight:${dislikeActive ? '700' : '400'};">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="${dislikeActive ? '#f87171' : 'none'}" stroke="${dislikeActive ? '#f87171' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+          <span class="dislike-count">${c.dislikes || 0}</span>
+        </button>`;
+
       // For reply items, content is appended to the already-positioned wrap (arm is first child)
       const contentWrap = document.createElement('div');
       contentWrap.innerHTML = `
@@ -863,6 +879,7 @@ const articleSchema = {
           ${contentHTML}
           <div class="comment-actions" style="display:flex;align-items:center;gap:1rem;">
             ${replyBtnHTML}
+            ${reactBtns}
             ${recallBtn}
           </div>
         </div>
@@ -895,6 +912,75 @@ const articleSchema = {
         } else {
           toggleReplyForm(wrap, c.id, c.user.name);
         }
+      });
+
+      function applyReactionUI(userReaction, likes, dislikes) {
+        wrap.querySelectorAll('.react-btn').forEach(b => {
+          const bt = b.dataset.rtype;
+          const active = userReaction === bt;
+          const activeColor = bt === 'like' ? '#7c3aed' : '#f87171';
+          b.style.color = active ? activeColor : 'var(--text-tertiary)';
+          b.style.fontWeight = active ? '700' : '400';
+          const svg = b.querySelector('svg');
+          if (svg) {
+            svg.setAttribute('fill', active ? activeColor : 'none');
+            svg.setAttribute('stroke', active ? activeColor : 'currentColor');
+          }
+          const countEl = b.querySelector(bt === 'like' ? '.like-count' : '.dislike-count');
+          if (countEl) countEl.textContent = bt === 'like' ? likes : dislikes;
+        });
+      }
+
+      wrap.querySelectorAll('.react-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const t = getToken();
+          if (!isTokenValid(t)) {
+            const returnTo = encodeURIComponent(window.location.href);
+            window.location.href = `${API_URL}/auth/google?return_to=${returnTo}`;
+            return;
+          }
+          const rtype = btn.dataset.rtype;
+          if (btn.disabled) return;
+          btn.disabled = true;
+
+          // Optimistic update
+          const prevReaction = reactionState.get(String(c.id)) || '';
+          const newReaction = prevReaction === rtype ? '' : rtype;
+          const likeEl = wrap.querySelector('.like-count');
+          const dislikeEl = wrap.querySelector('.dislike-count');
+          const prevLikes = parseInt(likeEl?.textContent || '0');
+          const prevDislikes = parseInt(dislikeEl?.textContent || '0');
+          let optLikes = prevLikes, optDislikes = prevDislikes;
+          if (rtype === 'like') {
+            optLikes += newReaction === 'like' ? 1 : -1;
+            if (prevReaction === 'dislike') optDislikes -= 1;
+          } else {
+            optDislikes += newReaction === 'dislike' ? 1 : -1;
+            if (prevReaction === 'like') optLikes -= 1;
+          }
+          reactionState.set(String(c.id), newReaction);
+          applyReactionUI(newReaction, optLikes, optDislikes);
+
+          try {
+            const res = await fetch(`${API_URL}/posts/${postID}/comments/${c.id}/react`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
+              body: JSON.stringify({ type: rtype }),
+            });
+            if (res.status === 401 || res.status === 403) { clearToken(); renderAuthUI(); return; }
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            // Reconcile with server truth
+            reactionState.set(String(c.id), data.user_reaction);
+            applyReactionUI(data.user_reaction, data.likes, data.dislikes);
+          } catch {
+            // Revert on failure
+            reactionState.set(String(c.id), prevReaction);
+            applyReactionUI(prevReaction, prevLikes, prevDislikes);
+          } finally {
+            btn.disabled = false;
+          }
+        });
       });
 
       return wrap;
