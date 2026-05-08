@@ -332,11 +332,21 @@ const articleSchema = {
 <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 
 <script is:inline>
-  // Force scroll to top on load
-  if ('scrollRestoration' in history) {
-    history.scrollRestoration = 'manual';
+  // Preserve scroll position across reloads (F5 / Ctrl+R).
+  // Use the pathname as key so each post has its own saved position.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  var _scrollKey = 'scrollPos:' + location.pathname;
+  var _savedScroll = sessionStorage.getItem(_scrollKey);
+  if (_savedScroll) {
+    // Restore after the DOM is ready so layout is stable.
+    window.scrollTo(0, parseInt(_savedScroll, 10));
+    sessionStorage.removeItem(_scrollKey);
+  } else {
+    window.scrollTo(0, 0);
   }
-  window.scrollTo(0, 0);
+  window.addEventListener('beforeunload', function() {
+    sessionStorage.setItem(_scrollKey, window.scrollY);
+  });
 
   // Back to Blog: use history.back() if we came from /blog (preserves scroll)
   document.querySelectorAll('a[href="/blog"]').forEach(function(link) {
