@@ -458,16 +458,19 @@ const articleSchema = {
 
     // Show/hide floating button based on scroll position
     const header = document.querySelector('header[data-reveal]');
+    function isSmallScreen() { return window.innerWidth < 768; }
     function onScroll() {
       if (!floatingEl || !header) return;
       const past = window.scrollY > header.getBoundingClientRect().bottom + window.scrollY + 40;
-      if (past) {
-        floatingEl.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
-      } else {
+      const hide = !past || (isSmallScreen() && liked);
+      if (hide) {
         floatingEl.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      } else {
+        floatingEl.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
       }
     }
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
 
     function updateAllCounts(n) {
       if (likeCount) likeCount.textContent = n;
@@ -537,6 +540,8 @@ const articleSchema = {
       if (likeCount) likeCount.style.color = state ? '#f43f5e' : '';
       const countLabel = likeCount?.nextElementSibling;
       if (countLabel) countLabel.style.color = state ? 'rgba(244,63,94,0.5)' : '';
+      // Re-evaluate floating button visibility on small screens
+      onScroll();
     }
 
     setLiked(liked);
