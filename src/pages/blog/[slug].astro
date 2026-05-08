@@ -768,11 +768,17 @@ const articleSchema = {
     }
 
     // --- Render comment text with simple markdown ---
-    function renderCommentText(text) {
-      return text
+    function escapeHtml(str) {
+      return String(str ?? '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function renderCommentText(text) {
+      return escapeHtml(text)
         .replace(/\*\*(.+?)\*\*/gs, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/gs, '<em>$1</em>')
         .replace(/__(.+?)__/gs, '<u>$1</u>');
@@ -831,7 +837,7 @@ const articleSchema = {
       const avatarSize = isReply ? '2rem' : '2.5rem';
       const initial = (c.user.name || '?')[0].toUpperCase();
       const avatarHTML = c.user.avatar
-        ? `<img src="${c.user.avatar}" alt="${c.user.name}" style="width:${avatarSize};height:${avatarSize};border-radius:50%;object-fit:cover;flex-shrink:0;" />`
+        ? `<img src="${escapeHtml(c.user.avatar)}" alt="${escapeHtml(c.user.name)}" style="width:${avatarSize};height:${avatarSize};border-radius:50%;object-fit:cover;flex-shrink:0;" />`
         : `<div style="width:${avatarSize};height:${avatarSize};border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;font-weight:900;color:#818cf8;">${initial}</div>`;
 
       const token = getToken();
@@ -873,7 +879,7 @@ const articleSchema = {
         ${avatarHTML}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.3rem;">
-            <span style="font-size:${isReply ? '0.875rem' : '0.9rem'};font-weight:700;color:var(--text-primary);">${c.user.name}</span>
+            <span style="font-size:${isReply ? '0.875rem' : '0.9rem'};font-weight:700;color:var(--text-primary);">${escapeHtml(c.user.name)}</span>
             <span style="font-size:0.72rem;color:var(--text-tertiary);">${timeAgo(c.created_at)}</span>
           </div>
           ${contentHTML}
@@ -1018,7 +1024,7 @@ const articleSchema = {
         <div style="display:flex;gap:0.5rem;align-items:flex-start;">
           ${avatarHTML}
           <div style="flex:1;min-width:0;">
-            <div style="font-size:0.7rem;color:var(--text-tertiary);margin-bottom:0.375rem;">Replying to <span style="color:#818cf8;font-weight:600;">@${parentUserName}</span></div>
+            <div style="font-size:0.7rem;color:var(--text-tertiary);margin-bottom:0.375rem;">Replying to <span style="color:#818cf8;font-weight:600;">@${escapeHtml(parentUserName)}</span></div>
             <textarea class="reply-input" placeholder="Write a reply…" rows="2" maxlength="500"
               style="width:100%;padding:0.5rem 0.75rem;font-size:0.875rem;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.08));border-radius:0.5rem;outline:none;resize:none;color:var(--text-primary);box-sizing:border-box;transition:border-color 0.15s;"
               onfocus="this.style.borderColor='rgba(124,58,237,0.4)'" onblur="this.style.borderColor='var(--comment-divider,rgba(255,255,255,0.08))'"></textarea>
