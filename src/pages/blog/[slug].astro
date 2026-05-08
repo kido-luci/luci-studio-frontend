@@ -282,13 +282,15 @@ const articleSchema = {
               <span id="user-name" style="font-size:0.85rem;font-weight:600;color:var(--text-primary);"></span>
             </div>
             <form id="comment-form">
-              <textarea
+              <div
                 id="comment-input"
-                placeholder="Add comment…"
-                rows="3"
-                maxlength="500"
-                style="width:100%;padding:0.75rem 1.25rem 1rem;font-size:0.9rem;background:transparent;border:none;outline:none;resize:none;color:var(--text-primary);box-sizing:border-box;"
-              ></textarea>
+                contenteditable="true"
+                role="textbox"
+                aria-multiline="true"
+                aria-label="Add comment"
+                data-empty="true"
+                style="width:100%;padding:0.75rem 1.25rem 1rem;font-size:0.9rem;background:transparent;border:none;outline:none;color:var(--text-primary);box-sizing:border-box;min-height:4.8rem;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;cursor:text;line-height:1.6;"
+              ></div>
               <div style="border-top:1px solid var(--comment-divider,rgba(255,255,255,0.08));display:flex;align-items:center;gap:0.5rem;padding:0.625rem 1rem;">
                 <button id="fmt-bold" type="button" title="Bold" style="padding:0.25rem 0.4rem;border-radius:0.375rem;font-size:0.75rem;font-weight:700;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);transition:background 0.15s;" onmouseover="this.style.background='rgba(99,102,241,0.1)'" onmouseout="this.style.background='transparent'"><b>B</b></button>
                 <button id="fmt-italic" type="button" title="Italic" style="padding:0.25rem 0.4rem;border-radius:0.375rem;font-size:0.75rem;font-weight:700;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);font-style:italic;transition:background 0.15s;" onmouseover="this.style.background='rgba(99,102,241,0.1)'" onmouseout="this.style.background='transparent'">I</button>
@@ -695,10 +697,23 @@ const articleSchema = {
     const countBadge = document.getElementById('comment-count-badge');
     const charCount = document.getElementById('char-count');
 
-    // Char counter
+    // Serialize contenteditable div → plain text (text nodes + emoji data-emoji attrs)
+    function getCommentText(el) {
+      let text = '';
+      (function walk(node) {
+        if (node.nodeType === 3) { text += node.textContent; return; }
+        if (node.nodeName === 'IMG') { text += node.dataset.emoji || ''; return; }
+        if (node.nodeName === 'BR') { text += '\n'; return; }
+        node.childNodes.forEach(walk);
+      })(el);
+      return text.replace(/\n$/, '');
+    }
+
+    // Char counter + placeholder visibility
     if (charCount) charCount.textContent = '0/500';
     document.getElementById('comment-input')?.addEventListener('input', function() {
-      const len = this.value.length;
+      const len = getCommentText(this).length;
+      this.dataset.empty = len === 0 ? 'true' : 'false';
       if (!charCount) return;
       charCount.textContent = `${len}/500`;
       charCount.style.color = len >= 500 ? '#f87171' : len > 460 ? '#fb923c' : 'var(--text-tertiary)';
@@ -739,27 +754,81 @@ const articleSchema = {
     });
 
     // --- Format buttons ---
+    // Prevent B/I/U buttons from stealing focus away from the contenteditable div
+    ['fmt-bold', 'fmt-italic', 'fmt-underline'].forEach(id => {
+      document.getElementById(id)?.addEventListener('mousedown', e => e.preventDefault());
+    });
+
     function applyFormat(marker) {
-      const ta = document.getElementById('comment-input');
-      if (!ta) return;
-      const start = ta.selectionStart;
-      const end = ta.selectionEnd;
-      const selected = ta.value.substring(start, end);
-      const before = ta.value.substring(0, start);
-      const after = ta.value.substring(end);
-      if (selected) {
-        ta.value = before + marker + selected + marker + after;
-        ta.selectionStart = start + marker.length;
-        ta.selectionEnd = end + marker.length;
+      const el = document.getElementById('comment-input');
+      if (!el) return;
+      el.focus();
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      if (!range.collapsed) {
+        const selectedText = range.toString();
+        range.deleteContents();
+        const node = document.createTextNode(marker + selectedText + marker);
+        range.insertNode(node);
+        range.setStartAfter(node);
+        range.setEndAfter(node);
       } else {
-        ta.value = before + marker + marker + after;
-        ta.selectionStart = ta.selectionEnd = start + marker.length;
+        const node = document.createTextNode(marker + marker);
+        range.insertNode(node);
+        range.setStart(node, marker.length);
+        range.setEnd(node, marker.length);
       }
-      ta.focus();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      el.dispatchEvent(new Event('input'));
     }
     document.getElementById('fmt-bold')?.addEventListener('click', () => applyFormat('**'));
     document.getElementById('fmt-italic')?.addEventListener('click', () => applyFormat('*'));
     document.getElementById('fmt-underline')?.addEventListener('click', () => applyFormat('__'));
+
+    // --- Contenteditable: paste as plain text + convert emojis to Twemoji ---
+    document.getElementById('comment-input')?.addEventListener('paste', function(e) {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      if (window.twemoji) {
+        const tmp = document.createElement('div');
+        tmp.textContent = text;
+        twemoji.parse(tmp, { folder: 'svg', ext: '.svg', base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/', className: 'twemoji-inline' });
+        tmp.querySelectorAll('img.twemoji-inline').forEach(img => { img.dataset.emoji = img.alt; img.style.pointerEvents = 'none'; });
+        const frag = document.createDocumentFragment();
+        while (tmp.firstChild) frag.appendChild(tmp.firstChild);
+        range.insertNode(frag);
+      } else {
+        range.insertNode(document.createTextNode(text));
+      }
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      this.dispatchEvent(new Event('input'));
+    });
+
+    // --- Contenteditable: normalize Enter to <br> for consistent serialization ---
+    document.getElementById('comment-input')?.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        const br = document.createElement('br');
+        range.insertNode(br);
+        range.setStartAfter(br);
+        range.setEndAfter(br);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        this.dispatchEvent(new Event('input'));
+      }
+    });
 
     // --- Sign out ---
     document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
@@ -1225,7 +1294,7 @@ const articleSchema = {
       if (!isTokenValid(token)) { renderAuthUI(); return; }
 
       const input = document.getElementById('comment-input');
-      const content = input.value.trim();
+      const content = getCommentText(input).trim();
       if (!content) return;
 
       const submitBtn = commentForm.querySelector('button[type="submit"]');
@@ -1250,8 +1319,9 @@ const articleSchema = {
         const newEl = buildCommentEl(comment);
         applyTwemoji(newEl);
         commentList.prepend(newEl);
-        input.value = '';
-        if (charCount) charCount.textContent = '';
+        input.innerHTML = '';
+        input.dataset.empty = 'true';
+        if (charCount) charCount.textContent = '0/500';
         const current = parseInt(countBadge?.textContent) || 0;
         updateCountBadge(current + 1);
       } finally {
@@ -1387,14 +1457,46 @@ const articleSchema = {
   // Re-render on theme toggle
   document.querySelector('[aria-label="Toggle theme"]')?.addEventListener('click', () => setTimeout(buildPicker, 60));
 
+  // Save caret position before the emoji button steals focus
+  let savedRange = null;
+  document.getElementById('fmt-emoji')?.addEventListener('mousedown', () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount) {
+      const range = sel.getRangeAt(0);
+      const el = document.getElementById('comment-input');
+      if (el && (el === range.commonAncestorContainer || el.contains(range.commonAncestorContainer))) {
+        savedRange = range.cloneRange();
+      }
+    }
+  });
+
   function insertEmoji(em) {
-    const ta = document.getElementById('comment-input');
-    if (!ta) return;
-    const s = ta.selectionStart, e = ta.selectionEnd;
-    ta.value = ta.value.substring(0, s) + em + ta.value.substring(e);
-    ta.selectionStart = ta.selectionEnd = s + em.length;
-    ta.focus();
-    ta.dispatchEvent(new Event('input'));
+    const el = document.getElementById('comment-input');
+    if (!el) return;
+
+    const img = document.createElement('img');
+    img.src = twUrl(em);
+    img.width = 18; img.height = 18;
+    img.className = 'twemoji-inline';
+    img.dataset.emoji = em;
+    img.alt = em;
+    img.style.cssText = 'pointer-events:none;';
+
+    el.focus();
+    const rangeToUse = savedRange || (window.getSelection()?.rangeCount ? window.getSelection().getRangeAt(0) : null);
+    if (rangeToUse) {
+      rangeToUse.deleteContents();
+      rangeToUse.insertNode(img);
+      rangeToUse.setStartAfter(img);
+      rangeToUse.setEndAfter(img);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(rangeToUse);
+    } else {
+      el.appendChild(img);
+    }
+    savedRange = null;
+    el.dispatchEvent(new Event('input'));
     closePicker();
   }
 
@@ -1780,15 +1882,16 @@ const articleSchema = {
     background-color: #8b5cf6 !important;
   }
 
-  body.light-mode {
-    --comment-box-bg: rgba(0,0,0,0.03);
-    --comment-divider: rgba(0,0,0,0.09);
-  }
-
-  #comment-input::placeholder,
   #comments-section textarea::placeholder {
     color: var(--text-tertiary);
     opacity: 1;
+  }
+
+  /* Placeholder for contenteditable comment input — shown when div has no real content */
+  #comment-input[data-empty="true"]::before {
+    content: 'Add comment…';
+    color: var(--text-tertiary);
+    pointer-events: none;
   }
 
   /* ── Comment box light-mode overrides ── */
