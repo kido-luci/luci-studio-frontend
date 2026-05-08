@@ -311,10 +311,10 @@ const articleSchema = {
             <span style="font-size:1rem;font-weight:700;color:var(--text-primary);">Comments</span>
             <span id="comment-count-badge" style="display:none;padding:0.1rem 0.5rem;border-radius:9999px;font-size:0.7rem;font-weight:700;background:rgba(99,102,241,0.15);color:#818cf8;"></span>
           </div>
-          <div style="display:flex;align-items:center;gap:0.375rem;font-size:0.75rem;color:var(--text-tertiary);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l4-4 4 4"/><path d="M7 5v14"/><path d="M21 15l-4 4-4-4"/><path d="M17 19V5"/></svg>
-            Most recent
-          </div>
+          <button id="sort-toggle" type="button" style="display:flex;align-items:center;gap:0.375rem;font-size:0.75rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0.25rem 0.5rem;border-radius:0.375rem;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+            <svg id="sort-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l4-4 4 4"/><path d="M7 5v14"/><path d="M21 15l-4 4-4-4"/><path d="M17 19V5"/></svg>
+            <span id="sort-label">Newest first</span>
+          </button>
         </div>
 
         <!-- Comment list -->
@@ -1005,42 +1005,58 @@ const articleSchema = {
     }
 
     // --- Fetch and render comments ---
+    let cachedComments = null;
+    let sortOrder = 'newest'; // 'newest' | 'oldest'
+
+    function renderComments(all) {
+      if (!all.length) {
+        commentList.innerHTML = '<p id="comments-empty" style="padding:2.5rem 0;text-align:center;font-size:0.75rem;color:var(--text-tertiary);">No comments yet. Be the first!</p>';
+        return;
+      }
+      commentList.innerHTML = '';
+      const repliesMap = {};
+      all.filter(c => c.parent_id).forEach(c => {
+        if (!repliesMap[c.parent_id]) repliesMap[c.parent_id] = [];
+        repliesMap[c.parent_id].push(c);
+      });
+      const toplevel = all.filter(c => !c.parent_id).sort((a, b) =>
+        sortOrder === 'newest'
+          ? new Date(b.created_at) - new Date(a.created_at)
+          : new Date(a.created_at) - new Date(b.created_at)
+      );
+      toplevel.forEach(c => {
+        const replies = repliesMap[c.id];
+        commentList.appendChild(buildCommentEl(c, false, replies && replies.length > 0));
+        if (replies && replies.length) {
+          const repliesWrap = document.createElement('div');
+          repliesWrap.className = 'replies-wrap';
+          repliesWrap.style.cssText = 'margin-left:1.25rem;position:relative;overflow:hidden;margin-bottom:0.25rem;';
+          replies.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+          replies.forEach(r => repliesWrap.appendChild(buildCommentEl(r, true)));
+          commentList.appendChild(repliesWrap);
+        }
+      });
+      applyTwemoji(commentList);
+    }
+
     async function loadComments() {
       try {
         const res = await fetch(`${API_URL}/posts/${postID}/comments`);
         if (!res.ok) throw new Error();
-        const all = await res.json();
+        cachedComments = await res.json();
         loadingEl?.remove();
-        updateCountBadge(all.length);
-        if (!all.length) {
-          commentList.innerHTML = '<p id="comments-empty" style="padding:2.5rem 0;text-align:center;font-size:0.75rem;color:var(--text-tertiary);">No comments yet. Be the first!</p>';
-          return;
-        }
-        commentList.innerHTML = '';
-        // Build tree: top-level sorted newest-first, replies sorted oldest-first
-        const toplevel = all.filter(c => !c.parent_id).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        const repliesMap = {};
-        all.filter(c => c.parent_id).forEach(c => {
-          if (!repliesMap[c.parent_id]) repliesMap[c.parent_id] = [];
-          repliesMap[c.parent_id].push(c);
-        });
-        toplevel.forEach(c => {
-          const replies = repliesMap[c.id];
-          commentList.appendChild(buildCommentEl(c, false, replies && replies.length > 0));
-          if (replies && replies.length) {
-            const repliesWrap = document.createElement('div');
-            repliesWrap.className = 'replies-wrap';
-            repliesWrap.style.cssText = 'margin-left:1.25rem;position:relative;overflow:hidden;margin-bottom:0.25rem;';
-            replies.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-            replies.forEach(r => repliesWrap.appendChild(buildCommentEl(r, true)));
-            commentList.appendChild(repliesWrap);
-          }
-        });
-        applyTwemoji(commentList);
+        updateCountBadge(cachedComments.length);
+        renderComments(cachedComments);
       } catch {
         if (loadingEl) loadingEl.querySelector('p').textContent = 'Failed to load comments.';
       }
     }
+
+    document.getElementById('sort-toggle')?.addEventListener('click', () => {
+      sortOrder = sortOrder === 'newest' ? 'oldest' : 'newest';
+      document.getElementById('sort-label').textContent = sortOrder === 'newest' ? 'Newest first' : 'Oldest first';
+      if (cachedComments) renderComments(cachedComments);
+    });
 
     // --- Submit comment ---
     commentForm?.addEventListener('submit', async (e) => {
