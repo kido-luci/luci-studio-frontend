@@ -776,13 +776,27 @@ const articleSchema = {
       });
     }
 
+    // Thread line color shared by the ╰ arm and parent connector
+    const THREAD_LINE = 'rgba(124,58,237,0.28)';
+
     // --- Render a single comment node ---
     function buildCommentEl(c, isReply) {
       const wrap = document.createElement('div');
       wrap.dataset.commentId = c.id;
 
       if (isReply) {
-        wrap.style.cssText = 'display:flex;gap:0.625rem;padding:0.75rem 0;border-bottom:1px solid var(--comment-divider,rgba(255,255,255,0.04));';
+        // position:relative so the arm can be absolutely placed
+        wrap.style.cssText = 'position:relative;display:flex;gap:0.75rem;padding:0.75rem 0 0.75rem 1.5rem;';
+
+        // ╰ curved arm:
+        //   top:-9999px makes it extend far above this item.
+        //   overflow:hidden on .replies-wrap clips it at the container top.
+        //   Every reply's arm overlaps in the vertical section → one continuous line.
+        //   The border-bottom-left-radius creates the smooth curve at avatar level.
+        //   height = 9999px above + padding-top (0.75rem) + half avatar (1rem) = avatar center.
+        const arm = document.createElement('div');
+        arm.style.cssText = `position:absolute;left:0;top:-9999px;width:1.375rem;height:calc(9999px + 1.75rem);border-left:1.5px solid ${THREAD_LINE};border-bottom:1.5px solid ${THREAD_LINE};border-bottom-left-radius:12px;box-sizing:border-box;pointer-events:none;`;
+        wrap.appendChild(arm);
       } else {
         wrap.style.cssText = 'display:flex;gap:0.75rem;padding:1rem 0;border-bottom:1px solid var(--comment-divider,rgba(255,255,255,0.06));';
       }
@@ -799,28 +813,30 @@ const articleSchema = {
 
       const contentHTML = c.recalled
         ? `<p style="font-size:0.875rem;font-style:italic;color:var(--text-tertiary);margin:0 0 0.625rem 0;">Message recalled</p>`
-        : `<p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.65;white-space:pre-wrap;word-break:break-word;margin:0 0 0.625rem 0;">${renderCommentText(c.content)}</p>`;
+        : `<p style="font-size:${isReply ? '0.875rem' : '0.9rem'};color:var(--text-secondary);line-height:1.65;white-space:pre-wrap;word-break:break-word;margin:0 0 0.625rem 0;">${renderCommentText(c.content)}</p>`;
 
       const recallBtn = isOwner && !c.recalled
-        ? `<button class="recall-btn" type="button" data-id="${c.id}" style="display:flex;align-items:center;gap:0.3rem;font-size:0.78rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--text-tertiary)'">
+        ? `<button class="recall-btn" type="button" data-id="${c.id}" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--text-tertiary)'">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
               Recall
             </button>`
         : '';
 
       const replyBtnHTML = !isReply
-        ? `<button class="reply-btn" type="button" style="display:flex;align-items:center;gap:0.3rem;font-size:0.78rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='var(--text-secondary)'" onmouseout="this.style.color='var(--text-tertiary)'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        ? `<button class="reply-btn" type="button" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='var(--text-secondary)'" onmouseout="this.style.color='var(--text-tertiary)'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Reply
             </button>`
         : '';
 
-      wrap.innerHTML = `
+      // For reply items, content is appended to the already-positioned wrap (arm is first child)
+      const contentWrap = document.createElement('div');
+      contentWrap.innerHTML = `
         ${avatarHTML}
         <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.4rem;">
-            <span style="font-size:${isReply ? '0.85rem' : '0.9rem'};font-weight:700;color:var(--text-primary);">${c.user.name}</span>
-            <span style="font-size:0.75rem;color:var(--text-tertiary);">${timeAgo(c.created_at)}</span>
+          <div style="display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.3rem;">
+            <span style="font-size:${isReply ? '0.875rem' : '0.9rem'};font-weight:700;color:var(--text-primary);">${c.user.name}</span>
+            <span style="font-size:0.72rem;color:var(--text-tertiary);">${timeAgo(c.created_at)}</span>
           </div>
           ${contentHTML}
           <div class="comment-actions" style="display:flex;align-items:center;gap:1rem;">
@@ -829,6 +845,8 @@ const articleSchema = {
           </div>
         </div>
       `;
+      // Move children out of the temp wrapper into wrap (preserves the arm as first child)
+      while (contentWrap.firstChild) wrap.appendChild(contentWrap.firstChild);
 
       wrap.querySelector('.recall-btn')?.addEventListener('click', async () => {
         const ok = await showConfirm({ message: 'Recall this comment? It cannot be undone.', confirmText: 'Recall', cancelText: 'Cancel', danger: true });
@@ -936,7 +954,7 @@ const articleSchema = {
           if (!repliesWrap || !repliesWrap.classList.contains('replies-wrap')) {
             repliesWrap = document.createElement('div');
             repliesWrap.className = 'replies-wrap';
-            repliesWrap.style.cssText = 'margin-left:3.25rem;padding-left:1rem;border-left:2px solid var(--comment-divider,rgba(255,255,255,0.06));';
+            repliesWrap.style.cssText = 'margin-left:1.25rem;position:relative;overflow:hidden;margin-bottom:0.25rem;';
             parentWrap.after(repliesWrap);
           }
           const replyEl = buildCommentEl(reply, true);
@@ -989,7 +1007,7 @@ const articleSchema = {
           if (replies && replies.length) {
             const repliesWrap = document.createElement('div');
             repliesWrap.className = 'replies-wrap';
-            repliesWrap.style.cssText = 'margin-left:3.25rem;padding-left:1rem;border-left:2px solid var(--comment-divider,rgba(255,255,255,0.06));';
+            repliesWrap.style.cssText = 'margin-left:1.25rem;position:relative;overflow:hidden;margin-bottom:0.25rem;';
             replies.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
             replies.forEach(r => repliesWrap.appendChild(buildCommentEl(r, true)));
             commentList.appendChild(repliesWrap);
