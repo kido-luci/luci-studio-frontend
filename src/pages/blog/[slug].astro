@@ -1148,9 +1148,15 @@ const articleSchema = {
 
     async function loadComments() {
       try {
-        const res = await fetch(`${API_URL}/posts/${postID}/comments`);
+        const t = getToken();
+        const headers = isTokenValid(t) ? { 'Authorization': `Bearer ${t}` } : {};
+        const res = await fetch(`${API_URL}/posts/${postID}/comments`, { headers });
         if (!res.ok) throw new Error();
         cachedComments = await res.json();
+        // Seed reaction state from server so highlights survive reload
+        cachedComments.forEach(c => {
+          if (c.user_reaction) reactionState.set(String(c.id), c.user_reaction);
+        });
         loadingEl?.remove();
         updateCountBadge(cachedComments.length);
         renderComments(cachedComments);
