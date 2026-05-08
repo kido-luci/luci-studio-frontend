@@ -777,7 +777,7 @@ const articleSchema = {
     }
 
     // Thread line color shared by the ╰ arm and parent connector
-    const THREAD_LINE = 'rgba(124,58,237,0.28)';
+    const THREAD_LINE = '#7c3aed';
 
     // --- Render a single comment node ---
     function buildCommentEl(c, isReply, hasReplies) {
@@ -805,7 +805,7 @@ const articleSchema = {
           // left:1.25rem matches the replies-wrap margin-left so the line aligns with reply arms.
           // top: padding-top(1rem) + half avatar(1.25rem) = avatar vertical center.
           const connector = document.createElement('div');
-          connector.style.cssText = `position:absolute;left:1.25rem;top:2.25rem;bottom:0;width:1.5px;background:${THREAD_LINE};pointer-events:none;`;
+          connector.style.cssText = `position:absolute;left:1.25rem;top:3.5rem;bottom:0;width:1.5px;background:${THREAD_LINE};pointer-events:none;`;
           wrap.appendChild(connector);
         } else {
           wrap.style.cssText = 'display:flex;gap:0.75rem;padding:1rem 0;border-bottom:1px solid var(--comment-divider,rgba(255,255,255,0.06));';
@@ -972,7 +972,7 @@ const articleSchema = {
             parentWrap.style.paddingBottom = '0';
             parentWrap.style.position = 'relative';
             const connector = document.createElement('div');
-            connector.style.cssText = `position:absolute;left:1.25rem;top:2.25rem;bottom:0;width:1.5px;background:${THREAD_LINE};pointer-events:none;`;
+            connector.style.cssText = `position:absolute;left:1.25rem;top:3.5rem;bottom:0;width:1.5px;background:${THREAD_LINE};pointer-events:none;`;
             parentWrap.appendChild(connector);
           }
           const replyEl = buildCommentEl(reply, true);
@@ -1494,7 +1494,7 @@ const articleSchema = {
   body.light-mode .token.atrule,
   body.light-mode .token.attr-value,
   body.light-mode .token.keyword {
-    color: #6d28d9 !important;
+    color: #a48fc5 !important;
   }
 
   body.light-mode .token.function,
