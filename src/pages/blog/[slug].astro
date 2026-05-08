@@ -908,7 +908,7 @@ const articleSchema = {
           // left:1.25rem matches the replies-wrap margin-left so the line aligns with reply arms.
           // top: padding-top(1rem) + half avatar(1.25rem) = avatar vertical center.
           const connector = document.createElement('div');
-          connector.style.cssText = `position:absolute;left:1.25rem;top:3.5rem;bottom:0;width:1.5px;background:${THREAD_LINE};pointer-events:none;`;
+          connector.style.cssText = `position:absolute;left:1.25rem;top:3.5rem;bottom:0;width:0;border-left:1.5px solid ${THREAD_LINE};pointer-events:none;`;
           wrap.appendChild(connector);
         } else {
           wrap.style.cssText = 'display:flex;gap:0.75rem;padding:1rem 0;';
@@ -1257,7 +1257,7 @@ const articleSchema = {
             parentWrap.style.paddingBottom = '0';
             parentWrap.style.position = 'relative';
             const connector = document.createElement('div');
-            connector.style.cssText = `position:absolute;left:1.25rem;top:3.5rem;bottom:0;width:1.5px;background:${THREAD_LINE};pointer-events:none;`;
+            connector.style.cssText = `position:absolute;left:1.25rem;top:3.5rem;bottom:0;width:0;border-left:1.5px solid ${THREAD_LINE};pointer-events:none;`;
             parentWrap.appendChild(connector);
           }
           const replyEl = buildCommentEl(reply, true);
