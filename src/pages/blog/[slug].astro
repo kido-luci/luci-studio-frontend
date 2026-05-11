@@ -596,7 +596,7 @@ const articleSchema = {
     floatingBtn?.addEventListener('click', () => handleLikeClick(floatingBtn, floatingIcon));
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
+  function bootEngagement() {
     setupCopyButtons();
     setupShare();
     updateThemeIcon();
@@ -604,7 +604,13 @@ const articleSchema = {
     document.querySelector('[aria-label="Toggle theme"]')?.addEventListener('click', () => {
       setTimeout(updateThemeIcon, 50);
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', bootEngagement);
+  } else {
+    bootEngagement();
+  }
 
   // ── Custom confirm dialog ───────────────────────────────────────────────
   function showConfirm({ message, confirmText = 'Confirm', cancelText = 'Cancel', danger = false }) {
