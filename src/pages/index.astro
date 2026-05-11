@@ -37,6 +37,7 @@ const blogPosts = rawPosts
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
   likes: p.likes ?? 0,
+  views: p.views ?? 0,
 }));
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 
@@ -284,12 +285,20 @@ const homepageSchema = [
                     {p.subtitle && <p class="text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
                     <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
                       <span class="text-xs text-gray-600">Read →</span>
-                      <span class="tile-like-area flex items-center gap-1.5 cursor-pointer group/like" data-id={p.id}>
-                        <svg class="tile-like-icon w-4 h-4 text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                        <span class="tile-like-count text-xs text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200">{p.likes}</span>
-                      </span>
+                      <div class="flex items-center gap-3">
+                        <span class="tile-view-area flex items-center gap-1.5" data-id={p.id}>
+                          <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                          </svg>
+                          <span class="tile-view-count text-xs text-gray-500">{p.views}</span>
+                        </span>
+                        <span class="tile-like-area flex items-center gap-1.5 cursor-pointer group/like" data-id={p.id}>
+                          <svg class="tile-like-icon w-4 h-4 text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                          </svg>
+                          <span class="tile-like-count text-xs text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200">{p.likes}</span>
+                        </span>
+                      </div>
                     </div>
                   </article>
                 </a>

@@ -142,7 +142,7 @@ const articleSchema = {
       <svg id="floating-like-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 group-hover:text-rose-400 transition-colors duration-300 relative z-10">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
-      <span id="floating-like-count" class="text-sm font-black text-gray-400 tabular-nums relative z-10">{post.likes}</span>
+      <span id="floating-like-count" class="text-sm font-black text-gray-400 tabular-nums relative z-10">—</span>
     </button>
   </div>
 
@@ -163,12 +163,12 @@ const articleSchema = {
               <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
               <span class="text-xs text-gray-400 flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                <span id="view-count">{post.views}</span>
+                <span id="view-count">—</span>
               </span>
               <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
               <span class="text-xs text-gray-400 flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                <span id="like-count-header">{post.likes}</span>
+                <span id="like-count-header">—</span>
               </span>
             </div>
             <h1 class="text-3xl md:text-5xl font-black text-white tracking-tighter leading-tight">{post.title}</h1>
@@ -197,12 +197,12 @@ const articleSchema = {
             <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
             <span class="text-xs text-gray-500 flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <span id="view-count">{post.views}</span>
+              <span id="view-count">—</span>
             </span>
             <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
             <span class="text-xs text-gray-500 flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              <span id="like-count-header">{post.likes}</span>
+              <span id="like-count-header">—</span>
             </span>
           </div>
           <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-tighter">
@@ -228,7 +228,7 @@ const articleSchema = {
           </div>
         </button>
         <div>
-          <span id="like-count" class="text-2xl font-black text-white tabular-nums">{post.likes}</span>
+          <span id="like-count" class="text-2xl font-black text-white tabular-nums">—</span>
           <span class="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] ml-2">likes</span>
         </div>
       </div>
@@ -462,7 +462,14 @@ const articleSchema = {
     // Increment view once per session
     const sessionKey = `viewed_${postId}`;
     if (!sessionStorage.getItem(sessionKey)) {
-      fetch(`${apiUrl}/posts/${postId}/view`, { method: 'POST' }).catch(() => {});
+      fetch(`${apiUrl}/posts/${postId}/view`, { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+          if (d && d.views != null) {
+            document.querySelectorAll('#view-count').forEach(el => { el.textContent = d.views; });
+          }
+        })
+        .catch(() => {});
       sessionStorage.setItem(sessionKey, '1');
     }
 
