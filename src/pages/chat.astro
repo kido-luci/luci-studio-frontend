@@ -99,96 +99,105 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 				" onmouseover="this.style.color='var(--text-primary)';this.style.borderColor='rgba(139,92,246,0.4)'" onmouseout="this.style.color='var(--text-secondary)';this.style.borderColor='var(--border-color)'">Reset</button>
 			</div>
 
-			<div style="padding:1rem 1.1rem;display:flex;flex-direction:column;gap:1.4rem;flex:1;overflow-y:auto;overflow-x:visible;">
+			<div style="padding:1rem 1.1rem;display:flex;flex-direction:column;gap:0.75rem;flex:1;overflow-y:auto;overflow-x:visible;">
 
-				<!-- Model -->
-				<div class="cfg-group">
-					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-model">
-							Model
-							<span class="cfg-info" data-tip="The language model used to generate responses. Larger models are more capable; smaller ones are faster.">
-								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-							</span>
-						</label>
+				<!-- Model section -->
+				<div class="cfg-section">
+					<span class="cfg-section-label">Model</span>
+					<div class="cfg-group">
+						<div class="cfg-label-row">
+							<label class="cfg-label" for="cfg-model">
+								Model
+								<span class="cfg-info" data-tip="The language model used to generate responses. Larger models are more capable; smaller ones are faster.">
+									<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+								</span>
+							</label>
+						</div>
+						<select id="cfg-model" class="cfg-select">
+							<option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+							<option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
+							<option value="meta-llama/llama-4-scout-17b-16e-instruct">Llama 4 Scout 17B (preview)</option>
+							<option value="qwen/qwen3-32b">Qwen3 32B (preview)</option>
+							<option value="openai/gpt-oss-safeguard-20b">GPT OSS Safeguard 20B (preview)</option>
+							<option value="groq/compound">Groq Compound</option>
+						</select>
 					</div>
-					<select id="cfg-model" class="cfg-select">
-						<option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-						<option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
-						<option value="meta-llama/llama-4-scout-17b-16e-instruct">Llama 4 Scout 17B (preview)</option>
-						<option value="qwen/qwen3-32b">Qwen3 32B (preview)</option>
-						<option value="openai/gpt-oss-safeguard-20b">GPT OSS Safeguard 20B (preview)</option>
-						<option value="groq/compound">Groq Compound</option>
-					</select>
 				</div>
 
-				<!-- Temperature -->
-				<div class="cfg-group">
-					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-temperature">
-							Temperature
-							<span class="cfg-info" data-tip="Controls randomness. 0 = deterministic and focused. 2 = highly creative and unpredictable. Keep between 0.5–1.0 for most tasks.">
-								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-							</span>
-						</label>
-						<span id="cfg-temperature-val" class="cfg-val">0.7</span>
-					</div>
-					<input id="cfg-temperature" type="range" min="0" max="2" step="0.05" value="0.7" class="cfg-range" />
-				</div>
+				<!-- Generation section -->
+				<div class="cfg-section">
+					<span class="cfg-section-label">Generation</span>
 
-				<!-- Max Tokens -->
-				<div class="cfg-group">
-					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-max-tokens">
-							Max Tokens
-							<span class="cfg-info" data-tip="Maximum number of tokens the model can generate in a single response. One token ≈ 0.75 words.">
-								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-							</span>
-						</label>
-						<span id="cfg-max-tokens-val" class="cfg-val">1024</span>
+					<!-- Temperature -->
+					<div class="cfg-group">
+						<div class="cfg-label-row">
+							<label class="cfg-label" for="cfg-temperature">
+								Temperature
+								<span class="cfg-info" data-tip="Controls randomness. 0 = deterministic and focused. 2 = highly creative and unpredictable. Keep between 0.5–1.0 for most tasks.">
+									<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+								</span>
+							</label>
+							<span id="cfg-temperature-val" class="cfg-val">0.7</span>
+						</div>
+						<input id="cfg-temperature" type="range" min="0" max="2" step="0.05" value="0.7" class="cfg-range" />
 					</div>
-					<input id="cfg-max-tokens" type="range" min="64" max="4096" step="64" value="1024" class="cfg-range" />
-				</div>
 
-				<!-- Top P -->
-				<div class="cfg-group">
-					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-top-p">
-							Top P
-							<span class="cfg-info" data-tip="Nucleus sampling. The model considers only the top P% most likely tokens. Lower values make output more focused. Recommended: keep at 1.0 when tuning Temperature.">
-								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-							</span>
-						</label>
-						<span id="cfg-top-p-val" class="cfg-val">1.0</span>
+					<!-- Max Tokens -->
+					<div class="cfg-group">
+						<div class="cfg-label-row">
+							<label class="cfg-label" for="cfg-max-tokens">
+								Max Tokens
+								<span class="cfg-info" data-tip="Maximum number of tokens the model can generate in a single response. One token ≈ 0.75 words.">
+									<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+								</span>
+							</label>
+							<span id="cfg-max-tokens-val" class="cfg-val">1024</span>
+						</div>
+						<input id="cfg-max-tokens" type="range" min="64" max="4096" step="64" value="1024" class="cfg-range" />
 					</div>
-					<input id="cfg-top-p" type="range" min="0" max="1" step="0.05" value="1.0" class="cfg-range" />
-				</div>
 
-				<!-- Frequency Penalty -->
-				<div class="cfg-group">
-					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-freq-pen">
-							Freq. Penalty
-							<span class="cfg-info" data-tip="Penalises tokens that have already appeared often in the output. Positive values reduce repetition. Range: -2 to 2.">
-								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-							</span>
-						</label>
-						<span id="cfg-freq-pen-val" class="cfg-val">0</span>
+					<!-- Top P -->
+					<div class="cfg-group">
+						<div class="cfg-label-row">
+							<label class="cfg-label" for="cfg-top-p">
+								Top P
+								<span class="cfg-info" data-tip="Nucleus sampling. The model considers only the top P% most likely tokens. Lower values make output more focused. Recommended: keep at 1.0 when tuning Temperature.">
+									<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+								</span>
+							</label>
+							<span id="cfg-top-p-val" class="cfg-val">1.0</span>
+						</div>
+						<input id="cfg-top-p" type="range" min="0" max="1" step="0.05" value="1.0" class="cfg-range" />
 					</div>
-					<input id="cfg-freq-pen" type="range" min="-2" max="2" step="0.1" value="0" class="cfg-range" />
-				</div>
 
-				<!-- Presence Penalty -->
-				<div class="cfg-group">
-					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-pres-pen">
-							Pres. Penalty
-							<span class="cfg-info" data-tip="Penalises tokens that have appeared at all so far, encouraging the model to explore new topics. Range: -2 to 2.">
-								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-							</span>
-						</label>
-						<span id="cfg-pres-pen-val" class="cfg-val">0</span>
+					<!-- Frequency Penalty -->
+					<div class="cfg-group">
+						<div class="cfg-label-row">
+							<label class="cfg-label" for="cfg-freq-pen">
+								Freq. Penalty
+								<span class="cfg-info" data-tip="Penalises tokens that have already appeared often in the output. Positive values reduce repetition. Range: -2 to 2.">
+									<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+								</span>
+							</label>
+							<span id="cfg-freq-pen-val" class="cfg-val">0</span>
+						</div>
+						<input id="cfg-freq-pen" type="range" min="-2" max="2" step="0.1" value="0" class="cfg-range" />
 					</div>
-					<input id="cfg-pres-pen" type="range" min="-2" max="2" step="0.1" value="0" class="cfg-range" />
+
+					<!-- Presence Penalty -->
+					<div class="cfg-group">
+						<div class="cfg-label-row">
+							<label class="cfg-label" for="cfg-pres-pen">
+								Pres. Penalty
+								<span class="cfg-info" data-tip="Penalises tokens that have appeared at all so far, encouraging the model to explore new topics. Range: -2 to 2.">
+									<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+								</span>
+							</label>
+							<span id="cfg-pres-pen-val" class="cfg-val">0</span>
+						</div>
+						<input id="cfg-pres-pen" type="range" min="-2" max="2" step="0.1" value="0" class="cfg-range" />
+					</div>
+
 				</div>
 
 			</div>
@@ -445,6 +454,20 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 	}
 
 	/* Config panel */
+	.cfg-section {
+		display:flex;flex-direction:column;gap:0.85rem;
+		background:rgba(12, 12, 12, 0.796);
+		border:1px solid var(--border-color);
+		border-radius:10px;
+		padding:0.85rem 0.9rem;
+	}
+	.cfg-section-label {
+		font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+		color:var(--text-tertiary);
+	}
+	body.light-mode .cfg-section {
+		background:rgba(255, 255, 255, 0.8);
+	}
 	.cfg-group { display:flex;flex-direction:column;gap:0.4rem; }
 	.cfg-label-row { display:flex;align-items:center;justify-content:space-between; }
 	.cfg-label {
