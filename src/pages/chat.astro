@@ -78,13 +78,102 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			</div>
 		</header>
 
+		<!-- Config panel -->
+		<aside id="config-panel" aria-label="AI configuration" style="
+			position:fixed;top:0;left:0;height:100vh;width:272px;
+			background:var(--bg-card);
+			backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+			border-right:1px solid var(--border-color);
+			z-index:95;
+			display:flex;flex-direction:column;
+			overflow-y:auto;
+		">
+			<div style="padding:1.25rem 1.1rem 0.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;">
+				<span style="font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);">Config</span>
+				<button id="config-reset" style="
+					font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:6px;
+					border:1px solid var(--border-color);background:transparent;
+					color:var(--text-secondary);cursor:pointer;font-family:inherit;
+					transition:color 150ms,border-color 150ms;
+				" onmouseover="this.style.color='var(--text-primary)';this.style.borderColor='rgba(139,92,246,0.4)'" onmouseout="this.style.color='var(--text-secondary)';this.style.borderColor='var(--border-color)'">Reset</button>
+			</div>
+
+			<div style="padding:1rem 1.1rem;display:flex;flex-direction:column;gap:1.4rem;flex:1;">
+
+				<!-- Model -->
+				<div class="cfg-group">
+					<label class="cfg-label" for="cfg-model">Model</label>
+					<select id="cfg-model" class="cfg-select">
+						<option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+						<option value="llama-3.1-70b-versatile">Llama 3.1 70B</option>
+						<option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
+						<option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+						<option value="gemma2-9b-it">Gemma 2 9B</option>
+					</select>
+				</div>
+
+				<!-- Temperature -->
+				<div class="cfg-group">
+					<div class="cfg-label-row">
+						<label class="cfg-label" for="cfg-temperature">Temperature</label>
+						<span id="cfg-temperature-val" class="cfg-val">0.7</span>
+					</div>
+					<input id="cfg-temperature" type="range" min="0" max="2" step="0.05" value="0.7" class="cfg-range" />
+					<div class="cfg-hint">Randomness — lower = focused, higher = creative</div>
+				</div>
+
+				<!-- Max Tokens -->
+				<div class="cfg-group">
+					<div class="cfg-label-row">
+						<label class="cfg-label" for="cfg-max-tokens">Max Tokens</label>
+						<span id="cfg-max-tokens-val" class="cfg-val">1024</span>
+					</div>
+					<input id="cfg-max-tokens" type="range" min="64" max="4096" step="64" value="1024" class="cfg-range" />
+					<div class="cfg-hint">Maximum response length</div>
+				</div>
+
+				<!-- Top P -->
+				<div class="cfg-group">
+					<div class="cfg-label-row">
+						<label class="cfg-label" for="cfg-top-p">Top P</label>
+						<span id="cfg-top-p-val" class="cfg-val">1.0</span>
+					</div>
+					<input id="cfg-top-p" type="range" min="0" max="1" step="0.05" value="1.0" class="cfg-range" />
+					<div class="cfg-hint">Nucleus sampling threshold</div>
+				</div>
+
+				<!-- Frequency Penalty -->
+				<div class="cfg-group">
+					<div class="cfg-label-row">
+						<label class="cfg-label" for="cfg-freq-pen">Frequency Penalty</label>
+						<span id="cfg-freq-pen-val" class="cfg-val">0</span>
+					</div>
+					<input id="cfg-freq-pen" type="range" min="-2" max="2" step="0.1" value="0" class="cfg-range" />
+					<div class="cfg-hint">Reduce repetition of frequent tokens</div>
+				</div>
+
+				<!-- Presence Penalty -->
+				<div class="cfg-group">
+					<div class="cfg-label-row">
+						<label class="cfg-label" for="cfg-pres-pen">Presence Penalty</label>
+						<span id="cfg-pres-pen-val" class="cfg-val">0</span>
+					</div>
+					<input id="cfg-pres-pen" type="range" min="-2" max="2" step="0.1" value="0" class="cfg-range" />
+					<div class="cfg-hint">Encourage new topics</div>
+				</div>
+
+			</div>
+		</aside>
+
 		<!-- Messages -->
 		<div id="chat-messages" role="log" aria-live="polite" style="
 			flex:1 1 auto;
 			overflow-y:auto;
-			padding:1.5rem clamp(1rem, 4vw, 2.5rem) 12rem;
+			padding:1.5rem clamp(1rem, 3vw, 2rem) 12rem;
 			display:flex;flex-direction:column;gap:0.85rem;
-			max-width:760px;width:100%;margin:0 auto;
+			max-width:760px;
+			margin-left:calc(272px + max(1rem, (100vw - 272px - 760px) / 2));
+			margin-right:auto;
 			box-sizing:border-box;
 		">
 			<div class="msg msg-assistant">
@@ -96,8 +185,9 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 
 		<!-- Floating input -->
 		<form id="chat-form" autocomplete="off" style="
-			position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
-			width:min(680px, calc(100vw - 2rem));
+			position:fixed;bottom:2rem;
+			left:272px;right:0;margin:0 auto;
+			width:min(680px, calc(100vw - 272px - 2rem));
 			background:var(--bg-card);
 			backdrop-filter:blur(16px);
 			-webkit-backdrop-filter:blur(16px);
@@ -236,6 +326,59 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		border-color:rgba(139,92,246,0.7);
 		box-shadow:0 8px 40px rgba(0,0,0,0.12),0 0 0 3px rgba(139,92,246,0.15),0 1px 0 rgba(255,255,255,0.8) inset;
 	}
+
+	/* Config panel */
+	.cfg-group { display:flex;flex-direction:column;gap:0.4rem; }
+	.cfg-label-row { display:flex;align-items:center;justify-content:space-between; }
+	.cfg-label { font-size:0.78rem;font-weight:600;color:var(--text-primary); }
+	.cfg-val {
+		font-size:0.72rem;font-weight:600;
+		color:rgba(139,92,246,0.9);
+		background:rgba(139,92,246,0.1);
+		border-radius:4px;padding:0.1em 0.4em;
+		min-width:2.5rem;text-align:center;
+	}
+	.cfg-hint { font-size:0.7rem;color:var(--text-tertiary);line-height:1.3; }
+
+	.cfg-select {
+		width:100%;padding:0.45rem 0.65rem;
+		border-radius:8px;
+		border:1px solid var(--border-color);
+		background:rgba(255,255,255,0.03);
+		color:var(--text-primary);
+		font-family:inherit;font-size:0.82rem;
+		outline:none;cursor:pointer;
+		transition:border-color 150ms ease;
+	}
+	.cfg-select:focus { border-color:rgba(139,92,246,0.5); }
+
+	.cfg-range {
+		width:100%;height:4px;
+		-webkit-appearance:none;appearance:none;
+		background:rgba(255,255,255,0.1);
+		border-radius:9999px;outline:none;cursor:pointer;
+		accent-color:rgba(139,92,246,0.9);
+	}
+	.cfg-range::-webkit-slider-thumb {
+		-webkit-appearance:none;appearance:none;
+		width:14px;height:14px;border-radius:9999px;
+		background:rgba(139,92,246,0.95);
+		border:2px solid rgba(139,92,246,0.4);
+		cursor:pointer;
+	}
+	.cfg-range::-moz-range-thumb {
+		width:14px;height:14px;border-radius:9999px;
+		background:rgba(139,92,246,0.95);
+		border:2px solid rgba(139,92,246,0.4);
+		cursor:pointer;
+	}
+
+	body.light-mode .cfg-select {
+		background:rgba(0,0,0,0.03);
+	}
+	body.light-mode .cfg-range {
+		background:rgba(0,0,0,0.12);
+	}
 </style>
 
 <script is:inline>
@@ -259,6 +402,47 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		const input = document.getElementById('chat-input');
 		const sendBtn = document.getElementById('chat-send');
 		const clearBtn = document.getElementById('chat-clear');
+
+		// ── Config panel ──────────────────────────────────────────────────────────
+		const configReset = document.getElementById('config-reset');
+
+		// Live value display for each range input
+		const sliders = [
+			{ id: 'cfg-temperature', valId: 'cfg-temperature-val', decimals: 2 },
+			{ id: 'cfg-max-tokens',  valId: 'cfg-max-tokens-val',  decimals: 0 },
+			{ id: 'cfg-top-p',       valId: 'cfg-top-p-val',       decimals: 2 },
+			{ id: 'cfg-freq-pen',    valId: 'cfg-freq-pen-val',    decimals: 1 },
+			{ id: 'cfg-pres-pen',    valId: 'cfg-pres-pen-val',    decimals: 1 },
+		];
+		sliders.forEach(({ id, valId, decimals }) => {
+			const el = document.getElementById(id);
+			const display = document.getElementById(valId);
+			el.addEventListener('input', () => { display.textContent = parseFloat(el.value).toFixed(decimals); });
+		});
+
+		const DEFAULTS = { temperature:'0.7', maxTokens:'1024', topP:'1.0', freqPen:'0', presPen:'0', model:'llama-3.3-70b-versatile' };
+		configReset.addEventListener('click', () => {
+			document.getElementById('cfg-temperature').value = DEFAULTS.temperature;
+			document.getElementById('cfg-temperature-val').textContent = DEFAULTS.temperature;
+			document.getElementById('cfg-max-tokens').value = DEFAULTS.maxTokens;
+			document.getElementById('cfg-max-tokens-val').textContent = DEFAULTS.maxTokens;
+			document.getElementById('cfg-top-p').value = DEFAULTS.topP;
+			document.getElementById('cfg-top-p-val').textContent = DEFAULTS.topP;
+			document.getElementById('cfg-freq-pen').value = DEFAULTS.freqPen;
+			document.getElementById('cfg-freq-pen-val').textContent = DEFAULTS.freqPen;
+			document.getElementById('cfg-pres-pen').value = DEFAULTS.presPen;
+			document.getElementById('cfg-pres-pen-val').textContent = DEFAULTS.presPen;
+			document.getElementById('cfg-model').value = DEFAULTS.model;
+		});
+
+		const getConfig = () => ({
+			model:             document.getElementById('cfg-model').value,
+			temperature:       parseFloat(document.getElementById('cfg-temperature').value),
+			max_tokens:        parseInt(document.getElementById('cfg-max-tokens').value, 10),
+			top_p:             parseFloat(document.getElementById('cfg-top-p').value),
+			frequency_penalty: parseFloat(document.getElementById('cfg-freq-pen').value),
+			presence_penalty:  parseFloat(document.getElementById('cfg-pres-pen').value),
+		});
 
 		const STORAGE_KEY = 'luci-chat-history-v1';
 		let history = [];
@@ -353,7 +537,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 				const res = await fetch(ENDPOINT, {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ messages: history }),
+					body: JSON.stringify({ messages: history, ...getConfig() }),
 				});
 
 				if (!res.ok || !res.body) {
