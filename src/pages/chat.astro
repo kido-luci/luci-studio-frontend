@@ -321,6 +321,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 
 	.msg-bubble {
 		max-width:min(78%, 580px);
+		min-width:160px;
 		padding:0.65rem 0.95rem;
 		border-radius:16px;
 		font-size:0.92rem;
@@ -363,6 +364,38 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		text-underline-offset:2px;
 	}
 	.msg-bubble strong { color:inherit; }
+
+	.msg-copy {
+		display:inline-flex;align-items:center;gap:0.3rem;
+		font-size:0.68rem;font-weight:500;font-family:inherit;
+		color:var(--text-tertiary);
+		background:transparent;border:none;cursor:pointer;
+		padding:0.2rem 0.45rem;border-radius:5px;
+		transition:color 150ms,background 150ms;
+		line-height:1;
+	}
+	.msg-copy:hover { color:var(--text-secondary);background:rgba(255,255,255,0.07); }
+	body.light-mode .msg-copy:hover { background:rgba(0,0,0,0.06); }
+	.msg-copy.copied { color:rgba(74,222,128,0.9); }
+
+	.msg-tokens {
+		font-size:0.65rem;
+		color:var(--text-tertiary);
+		opacity:0.7;
+		user-select:none;
+	}
+
+	.msg-footer {
+		display:flex;align-items:center;gap:0.5rem;
+		margin-top:0.5rem;
+		padding-top:0.45rem;
+		border-top:1px solid rgba(255,255,255,0.08);
+	}
+	body.light-mode .msg-footer {
+		border-top-color:rgba(0,0,0,0.08);
+	}
+	body.light-mode .msg-tokens { color:var(--text-tertiary); opacity:1; }
+	body.light-mode .msg-copy { color:var(--text-tertiary); }
 
 	/* Syntax highlighting — purple theme (dark mode) */
 	.msg-bubble .token.keyword,
@@ -735,16 +768,50 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			messagesEl.scrollTop = messagesEl.scrollHeight;
 		});
 
+		const makeCopyBtn = (getBubble) => {
+			const btn = document.createElement('button');
+			btn.className = 'msg-copy';
+			btn.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy';
+			btn.addEventListener('click', () => {
+				const txt = getBubble().textContent || '';
+				navigator.clipboard.writeText(txt).then(() => {
+					btn.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Copied';
+					btn.classList.add('copied');
+					setTimeout(() => {
+						btn.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy';
+						btn.classList.remove('copied');
+					}, 2000);
+				});
+			});
+			return btn;
+		};
+
+		const estimateTokens = (t) => Math.max(1, Math.ceil(t.length / 4));
+
 		const appendMsg = (role, text) => {
 			const wrap = document.createElement('div');
 			wrap.className = `msg msg-${role}`;
+			const inner = document.createElement('div');
+			inner.style.cssText = `display:flex;flex-direction:column;gap:0.3rem;align-items:${role === 'user' ? 'flex-end' : 'flex-start'};`;
 			const bubble = document.createElement('div');
 			bubble.className = 'msg-bubble';
 			bubble.innerHTML = role === 'assistant' ? md(text) : esc(text);
-			wrap.appendChild(bubble);
+
+			const footer = document.createElement('div');
+			footer.className = 'msg-footer';
+			const tokenEl = document.createElement('span');
+			tokenEl.className = 'msg-tokens';
+			tokenEl.textContent = text ? `~${estimateTokens(text)} tokens` : '';
+			footer.appendChild(makeCopyBtn(() => bubble));
+			footer.appendChild(tokenEl);
+
+			bubble.appendChild(footer);
+			inner.appendChild(bubble);
+			wrap.appendChild(inner);
 			messagesEl.appendChild(wrap);
 			if (role === 'assistant') highlight(bubble);
 			scrollBottom();
+			bubble._setTokens = (t) => { tokenEl.textContent = `~${estimateTokens(t)} tokens`; };
 			return bubble;
 		};
 
@@ -834,7 +901,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 				}
 
 				if (!bubble) { typingEl.remove(); appendMsg('assistant', 'No response received. The selected model may be unavailable — try switching to a different model.'); }
-				else if (acc.trim()) { highlight(bubble); history.push({ role: 'assistant', content: acc }); saveHistory(); }
+				else if (acc.trim()) { highlight(bubble); if (bubble._setTokens) bubble._setTokens(acc); history.push({ role: 'assistant', content: acc }); saveHistory(); }
 			} catch (err) {
 				typingEl.remove();
 				appendMsg('assistant', `Network error: ${err?.message || 'unknown'}`);
