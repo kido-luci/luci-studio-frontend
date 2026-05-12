@@ -116,6 +116,8 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 						<option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
 						<option value="meta-llama/llama-4-scout-17b-16e-instruct">Llama 4 Scout 17B (preview)</option>
 						<option value="qwen/qwen3-32b">Qwen3 32B (preview)</option>
+						<option value="openai/gpt-oss-safeguard-20b">GPT OSS Safeguard 20B (preview)</option>
+						<option value="groq/compound">Groq Compound</option>
 					</select>
 				</div>
 
@@ -399,6 +401,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 	}
 	#cfg-model-bar option { background:var(--bg-card); color:var(--text-primary); }
 
+
 	body.light-mode #chat-form:focus-within {
 		border-color:rgba(139,92,246,0.7);
 		box-shadow:0 8px 40px rgba(0,0,0,0.12),0 0 0 3px rgba(139,92,246,0.15),0 1px 0 rgba(255,255,255,0.8) inset;
@@ -581,6 +584,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		const modelBar   = document.getElementById('cfg-model-bar');
 		modelPanel.addEventListener('change', () => { modelBar.value = modelPanel.value; });
 		modelBar.addEventListener('change',   () => { modelPanel.value = modelBar.value; });
+
 
 		const DEFAULTS = { temperature:'0.7', maxTokens:'1024', topP:'1.0', freqPen:'0', presPen:'0', model:'llama-3.3-70b-versatile' };
 		configReset.addEventListener('click', () => {
