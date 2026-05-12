@@ -455,11 +455,15 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 
 	/* Config panel */
 	.cfg-section {
-		display:flex;flex-direction:column;gap:0.85rem;
+		display:flex;flex-direction:column;gap:1rem;
 		background:rgba(12, 12, 12, 0.796);
 		border:1px solid var(--border-color);
 		border-radius:10px;
 		padding:0.85rem 0.9rem;
+	}
+	.cfg-section .cfg-group + .cfg-group {
+		padding-top:0.85rem;
+		border-top:1px solid var(--border-color);
 	}
 	.cfg-section-label {
 		font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
@@ -468,7 +472,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 	body.light-mode .cfg-section {
 		background:rgba(255, 255, 255, 0.8);
 	}
-	.cfg-group { display:flex;flex-direction:column;gap:0.4rem; }
+	.cfg-group { display:flex;flex-direction:column;gap:0.65rem; }
 	.cfg-label-row { display:flex;align-items:center;justify-content:space-between; }
 	.cfg-label {
 		font-size:0.78rem;font-weight:600;color:var(--text-primary);
