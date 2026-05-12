@@ -32,14 +32,13 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					LUCI <span class="text-shimmer">STUDIO</span><span style="color:#8b5cf6;">.</span>
 				</span>
 			</a>
-			<div style="display:flex;align-items:center;gap:0.6rem;">
+			<div style="display:flex;align-items:center;gap:0.55rem;">
 				<span style="
 					width:9px;height:9px;border-radius:9999px;
 					background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.6);
 					flex-shrink:0;
 				"></span>
-				<span style="font-weight:600;font-size:0.95rem;">Kido</span>
-				<span style="font-size:0.72rem;color:var(--text-secondary);">· Llama 3.3 via Groq</span>
+				<span style="font-weight:700;font-size:0.92rem;letter-spacing:0.04em;text-transform:uppercase;">Kido Chat Assistant</span>
 			</div>
 			<div style="display:flex;align-items:center;gap:0.5rem;">
 				<button
@@ -226,14 +225,14 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		">
 			<textarea
 				id="chat-input"
-				rows="3"
+				rows="2"
 				placeholder="Ask me anything…"
 				maxlength="4000"
 				aria-label="Message"
 				style="
 					display:block;width:100%;resize:none;max-height:240px;
-					padding:0.95rem 3.5rem 0.95rem 1.1rem;
-					border-radius:16px;
+					padding:0.95rem 1.1rem 0.5rem 1.1rem;
+					border-radius:16px 16px 0 0;
 					border:none;
 					background:transparent;
 					color:var(--text-primary);
@@ -241,19 +240,46 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					outline:none;box-sizing:border-box;
 				"
 			></textarea>
-			<button type="submit" id="chat-send" aria-label="Send" style="
-				position:absolute;right:0.6rem;bottom:0.6rem;
-				width:36px;height:36px;
-				border-radius:10px;
-				border:1px solid rgba(139,92,246,0.4);
-				background:linear-gradient(135deg,rgba(139,92,246,0.95),rgba(99,102,241,0.95));
-				color:#fff;display:flex;align-items:center;justify-content:center;
-				cursor:pointer;transition:opacity 150ms ease,transform 150ms ease;
+			<div style="
+				display:flex;align-items:center;justify-content:space-between;
+				padding:0.4rem 0.6rem 0.5rem 0.75rem;
+				border-top:1px solid rgba(139,92,246,0.12);
 			">
-				<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-					<path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6c-.6-.3-1.4.3-1.2 1L4 11l11 1-11 1-1.8 6.4c-.2.7.6 1.3 1.2 1Z"/>
-				</svg>
-			</button>
+				<div style="position:relative;display:inline-flex;align-items:center;">
+				<svg style="position:absolute;left:0;pointer-events:none;color:var(--text-secondary);" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+				<select id="cfg-model-bar" aria-label="Model" style="
+					-webkit-appearance:none;-moz-appearance:none;appearance:none;
+					background:transparent;
+					border:none;outline:none;
+					color:var(--text-secondary);
+					font-family:inherit;font-size:0.75rem;
+					cursor:pointer;
+					padding:0.15rem 0.1rem 0.15rem 1.1rem;
+					border-radius:6px;
+					transition:color 150ms ease;
+					width:auto;
+				">
+					<option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+					<option value="llama-3.1-70b-versatile">Llama 3.1 70B</option>
+					<option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
+					<option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+					<option value="gemma2-9b-it">Gemma 2 9B</option>
+				</select>
+			</div>
+				<button type="submit" id="chat-send" aria-label="Send" style="
+					width:36px;height:36px;
+					border-radius:10px;
+					border:1px solid rgba(139,92,246,0.4);
+					background:linear-gradient(135deg,rgba(139,92,246,0.95),rgba(99,102,241,0.95));
+					color:#fff;display:flex;align-items:center;justify-content:center;
+					cursor:pointer;transition:opacity 150ms ease,transform 150ms ease;
+					flex-shrink:0;
+				">
+					<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+						<path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6c-.6-.3-1.4.3-1.2 1L4 11l11 1-11 1-1.8 6.4c-.2.7.6 1.3 1.2 1Z"/>
+					</svg>
+				</button>
+			</div>
 		</form>
 	</div>
 	<div id="cfg-tooltip" role="tooltip"></div>
@@ -350,6 +376,8 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		border-color:rgba(139,92,246,0.4);
 		box-shadow:0 8px 40px rgba(0,0,0,0.12),0 0 0 1px rgba(139,92,246,0.1),0 1px 0 rgba(255,255,255,0.8) inset;
 	}
+	#cfg-model-bar option { background:var(--bg-card); color:var(--text-primary); }
+
 	body.light-mode #chat-form:focus-within {
 		border-color:rgba(139,92,246,0.7);
 		box-shadow:0 8px 40px rgba(0,0,0,0.12),0 0 0 3px rgba(139,92,246,0.15),0 1px 0 rgba(255,255,255,0.8) inset;
@@ -501,6 +529,12 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			el.addEventListener('input', () => { display.textContent = parseFloat(el.value).toFixed(decimals); });
 		});
 
+		// Keep panel model select and bar model select in sync
+		const modelPanel = document.getElementById('cfg-model');
+		const modelBar   = document.getElementById('cfg-model-bar');
+		modelPanel.addEventListener('change', () => { modelBar.value = modelPanel.value; });
+		modelBar.addEventListener('change',   () => { modelPanel.value = modelBar.value; });
+
 		const DEFAULTS = { temperature:'0.7', maxTokens:'1024', topP:'1.0', freqPen:'0', presPen:'0', model:'llama-3.3-70b-versatile' };
 		configReset.addEventListener('click', () => {
 			document.getElementById('cfg-temperature').value = DEFAULTS.temperature;
@@ -513,11 +547,12 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			document.getElementById('cfg-freq-pen-val').textContent = DEFAULTS.freqPen;
 			document.getElementById('cfg-pres-pen').value = DEFAULTS.presPen;
 			document.getElementById('cfg-pres-pen-val').textContent = DEFAULTS.presPen;
-			document.getElementById('cfg-model').value = DEFAULTS.model;
+			modelPanel.value = DEFAULTS.model;
+			modelBar.value   = DEFAULTS.model;
 		});
 
 		const getConfig = () => ({
-			model:             document.getElementById('cfg-model').value,
+			model:             modelBar.value,
 			temperature:       parseFloat(document.getElementById('cfg-temperature').value),
 			max_tokens:        parseInt(document.getElementById('cfg-max-tokens').value, 10),
 			top_p:             parseFloat(document.getElementById('cfg-top-p').value),
