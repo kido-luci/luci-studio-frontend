@@ -1,0 +1,358 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const rawBaseUrl = (import.meta.env.PUBLIC_API_URL as string | undefined) || '';
+const API_BASE = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+const CHAT_ENDPOINT = `${API_BASE}/chat`;
+---
+
+<Layout
+	title="Chat · Luci Studio"
+	description="Chat with Luci — ask about projects, blog posts, or anything technical."
+	hideChatFab={true}
+>
+	<div id="chat-page" data-endpoint={CHAT_ENDPOINT} style="display:flex;flex-direction:column;min-height:100vh;padding-top:0;position:relative;z-index:0;">
+
+		<!-- Header -->
+		<header style="
+			display:flex;align-items:center;justify-content:space-between;
+			padding:1rem 1.5rem;
+			border-bottom:1px solid var(--border-color);
+			background:var(--nav-bg-scroll);
+			backdrop-filter:blur(12px);
+			-webkit-backdrop-filter:blur(12px);
+			position:sticky;top:0;z-index:100;
+		">
+			<a href="/" style="
+				display:flex;align-items:center;gap:0.5rem;
+				color:var(--text-secondary);font-size:0.85rem;text-decoration:none;
+				transition:color 150ms ease;
+			" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">
+				<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="flex-shrink:0">
+					<path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+				</svg>
+				Back
+			</a>
+			<div style="display:flex;align-items:center;gap:0.6rem;">
+				<span style="
+					width:9px;height:9px;border-radius:9999px;
+					background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.6);
+					flex-shrink:0;
+				"></span>
+				<span style="font-weight:600;font-size:0.95rem;">Luci</span>
+				<span style="font-size:0.72rem;color:var(--text-secondary);">· Llama 3.3 via Groq</span>
+			</div>
+			<button id="chat-clear" style="
+				font-size:0.72rem;padding:0.3rem 0.65rem;
+				border-radius:8px;border:1px solid var(--border-color);
+				background:transparent;color:var(--text-secondary);
+				cursor:pointer;transition:color 150ms ease,border-color 150ms ease;
+				font-family:inherit;
+			" onmouseover="this.style.color='var(--text-primary)';this.style.borderColor='rgba(139,92,246,0.4)'" onmouseout="this.style.color='var(--text-secondary)';this.style.borderColor='var(--border-color)'">
+				Clear
+			</button>
+		</header>
+
+		<!-- Messages -->
+		<div id="chat-messages" role="log" aria-live="polite" style="
+			flex:1 1 auto;
+			overflow-y:auto;
+			padding:1.5rem clamp(1rem, 4vw, 2.5rem);
+			display:flex;flex-direction:column;gap:0.85rem;
+			max-width:760px;width:100%;margin:0 auto;
+			box-sizing:border-box;
+		">
+			<div class="msg msg-assistant">
+				<div class="msg-bubble">
+					Hi! I'm Luci. Ask me about the projects, blog posts, or anything technical.
+				</div>
+			</div>
+		</div>
+
+		<!-- Input bar -->
+		<div style="
+			position:sticky;bottom:0;
+			background:var(--nav-bg-scroll);
+			backdrop-filter:blur(12px);
+			-webkit-backdrop-filter:blur(12px);
+			border-top:1px solid var(--border-color);
+			padding:0.85rem clamp(1rem, 4vw, 2.5rem);
+		">
+			<form id="chat-form" autocomplete="off" style="
+				position:relative;max-width:760px;margin:0 auto;
+			">
+				<textarea
+					id="chat-input"
+					rows="3"
+					placeholder="Ask me anything…"
+					maxlength="4000"
+					aria-label="Message"
+					style="
+						display:block;width:100%;resize:none;max-height:240px;
+						padding:0.75rem 3.5rem 0.75rem 0.95rem;
+						border-radius:12px;
+						border:1px solid var(--border-color);
+						background:rgba(255,255,255,0.04);
+						color:var(--text-primary);
+						font-family:inherit;font-size:0.93rem;line-height:1.45;
+						outline:none;box-sizing:border-box;
+						transition:border-color 150ms ease,background 150ms ease;
+					"
+				></textarea>
+				<button type="submit" id="chat-send" aria-label="Send" style="
+					position:absolute;right:0.55rem;bottom:0.55rem;
+					width:36px;height:36px;
+					border-radius:9px;
+					border:1px solid rgba(139,92,246,0.4);
+					background:linear-gradient(135deg,rgba(139,92,246,0.95),rgba(99,102,241,0.95));
+					color:#fff;display:flex;align-items:center;justify-content:center;
+					cursor:pointer;transition:opacity 150ms ease,transform 150ms ease;
+				">
+					<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+						<path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6c-.6-.3-1.4.3-1.2 1L4 11l11 1-11 1-1.8 6.4c-.2.7.6 1.3 1.2 1Z"/>
+					</svg>
+				</button>
+			</form>
+		</div>
+	</div>
+</Layout>
+
+<style is:global>
+	.msg { display:flex; }
+	.msg-user { justify-content:flex-end; }
+	.msg-assistant { justify-content:flex-start; }
+
+	.msg-bubble {
+		max-width:min(78%, 580px);
+		padding:0.65rem 0.95rem;
+		border-radius:16px;
+		font-size:0.92rem;
+		line-height:1.55;
+		white-space:pre-wrap;
+		word-wrap:break-word;
+	}
+	.msg-assistant .msg-bubble {
+		background: var(--bg-card);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid var(--border-color);
+		border-bottom-left-radius: 4px;
+	}
+	.msg-user .msg-bubble {
+		background: linear-gradient(135deg, rgba(139,92,246,0.92), rgba(99,102,241,0.92));
+		color: #fff;
+		border-bottom-right-radius: 4px;
+	}
+	.msg-bubble code {
+		background:rgba(0,0,0,0.35);
+		padding:0.1em 0.35em;
+		border-radius:4px;
+		font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+		font-size:0.84em;
+	}
+	.msg-bubble pre {
+		background:rgba(0,0,0,0.4);
+		border:1px solid rgba(255,255,255,0.06);
+		border-radius:8px;
+		padding:0.75rem 1rem;
+		overflow-x:auto;
+		font-size:0.84em;
+		margin:0.4em 0;
+	}
+	.msg-bubble pre code { background:none;padding:0; }
+	.msg-bubble a {
+		color:rgba(167,139,250,1);
+		text-decoration:underline;
+		text-underline-offset:2px;
+	}
+	.msg-bubble strong { color:inherit; }
+
+	body.light-mode .msg-assistant .msg-bubble {
+		background: rgba(255,255,255,0.88);
+	}
+	body.light-mode .msg-bubble pre {
+		background: rgba(0,0,0,0.06);
+		border-color: rgba(0,0,0,0.1);
+	}
+
+	.luci-typing {
+		display:inline-flex;gap:5px;align-items:center;padding:2px 0;
+	}
+	.luci-typing span {
+		width:7px;height:7px;border-radius:9999px;
+		background:var(--text-secondary);opacity:0.4;
+		animation:luci-dot 1.2s infinite ease-in-out;
+	}
+	.luci-typing span:nth-child(2){animation-delay:0.15s;}
+	.luci-typing span:nth-child(3){animation-delay:0.3s;}
+	@keyframes luci-dot {
+		0%,80%,100%{transform:translateY(0);opacity:0.4;}
+		40%{transform:translateY(-5px);opacity:1;}
+	}
+
+	#chat-input:focus {
+		border-color:rgba(139,92,246,0.55) !important;
+		background:rgba(255,255,255,0.06) !important;
+	}
+	#chat-send:hover { transform:scale(1.06); }
+	#chat-send:disabled { opacity:0.45;cursor:not-allowed;transform:none !important; }
+
+	body.light-mode #chat-input {
+		background:rgba(0,0,0,0.03) !important;
+		color:rgb(17,24,39) !important;
+	}
+</style>
+
+<script is:inline>
+	(() => {
+		const page = document.getElementById('chat-page');
+		if (!page) return;
+		const ENDPOINT = page.dataset.endpoint || '/chat';
+
+		const messagesEl = document.getElementById('chat-messages');
+		const form = document.getElementById('chat-form');
+		const input = document.getElementById('chat-input');
+		const sendBtn = document.getElementById('chat-send');
+		const clearBtn = document.getElementById('chat-clear');
+
+		const STORAGE_KEY = 'luci-chat-history-v1';
+		let history = [];
+		let streaming = false;
+
+		const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+		const md = (text) => {
+			const e = esc(text);
+			return e
+				.replace(/```([\s\S]*?)```/g, (_,c) => `<pre><code>${c.trim()}</code></pre>`)
+				.replace(/`([^`]+)`/g, '<code>$1</code>')
+				.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+				.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+				.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+		};
+
+		const scrollBottom = () => requestAnimationFrame(() => {
+			messagesEl.scrollTop = messagesEl.scrollHeight;
+		});
+
+		const appendMsg = (role, text) => {
+			const wrap = document.createElement('div');
+			wrap.className = `msg msg-${role}`;
+			const bubble = document.createElement('div');
+			bubble.className = 'msg-bubble';
+			bubble.innerHTML = role === 'assistant' ? md(text) : esc(text);
+			wrap.appendChild(bubble);
+			messagesEl.appendChild(wrap);
+			scrollBottom();
+			return bubble;
+		};
+
+		const showTyping = () => {
+			const wrap = document.createElement('div');
+			wrap.className = 'msg msg-assistant';
+			wrap.dataset.typing = '1';
+			const bubble = document.createElement('div');
+			bubble.className = 'msg-bubble';
+			bubble.innerHTML = '<span class="luci-typing"><span></span><span></span><span></span></span>';
+			wrap.appendChild(bubble);
+			messagesEl.appendChild(wrap);
+			scrollBottom();
+			return wrap;
+		};
+
+		const loadHistory = () => {
+			try {
+				const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+				if (!Array.isArray(parsed)) return;
+				history = parsed.filter(m => m && (m.role==='user'||m.role==='assistant') && typeof m.content==='string');
+				history.forEach(m => appendMsg(m.role, m.content));
+			} catch {}
+		};
+
+		const saveHistory = () => {
+			try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20))); } catch {}
+		};
+
+		const autosize = () => {
+			input.style.height = 'auto';
+			input.style.height = Math.min(input.scrollHeight, 240) + 'px';
+		};
+
+		input.addEventListener('input', autosize);
+		input.addEventListener('keydown', e => {
+			if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+		});
+
+		clearBtn.addEventListener('click', () => {
+			if (streaming) return;
+			history = [];
+			messagesEl.innerHTML = '';
+			appendMsg('assistant', "Cleared! What would you like to know?");
+			saveHistory();
+		});
+
+		const send = async (text) => {
+			if (streaming) return;
+			streaming = true;
+			sendBtn.disabled = true;
+
+			history.push({ role: 'user', content: text });
+			saveHistory();
+			appendMsg('user', text);
+
+			const typingEl = showTyping();
+			let bubble = null;
+			let acc = '';
+
+			try {
+				const res = await fetch(ENDPOINT, {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ messages: history }),
+				});
+
+				if (!res.ok || !res.body) {
+					let msg = 'Something went wrong. Try again.';
+					try { const d = await res.json(); if (d?.error) msg = d.error; } catch {}
+					typingEl.remove();
+					appendMsg('assistant', msg);
+					return;
+				}
+
+				const reader = res.body.getReader();
+				const dec = new TextDecoder();
+				while (true) {
+					const { value, done } = await reader.read();
+					if (done) break;
+					const chunk = dec.decode(value, { stream: true });
+					if (!chunk) continue;
+					if (!bubble) { typingEl.remove(); bubble = appendMsg('assistant', ''); }
+					acc += chunk;
+					bubble.innerHTML = md(acc);
+					scrollBottom();
+				}
+
+				if (!bubble) { typingEl.remove(); appendMsg('assistant', '(no response)'); }
+				else if (acc.trim()) { history.push({ role: 'assistant', content: acc }); saveHistory(); }
+			} catch (err) {
+				typingEl.remove();
+				appendMsg('assistant', `Network error: ${err?.message || 'unknown'}`);
+			} finally {
+				streaming = false;
+				sendBtn.disabled = false;
+				input.focus();
+			}
+		};
+
+		form.addEventListener('submit', e => {
+			e.preventDefault();
+			const text = input.value.trim();
+			if (!text || streaming) return;
+			input.value = '';
+			autosize();
+			send(text);
+		});
+
+		loadHistory();
+	})();
+</script>
