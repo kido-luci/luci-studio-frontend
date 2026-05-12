@@ -624,7 +624,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			if (streaming) return;
 			history = [];
 			messagesEl.innerHTML = '';
-			appendMsg('assistant', "Cleared! What would you like to know?");
+			appendMsg('assistant', "Conversation cleared! Fresh start — what would you like to talk about? I'm ready to help with code, writing, questions, or anything else on your mind.");
 			saveHistory();
 		});
 
