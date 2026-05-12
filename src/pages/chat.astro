@@ -59,13 +59,18 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 				</button>
 
 				<button id="chat-clear" style="
-					font-size:0.72rem;padding:0.3rem 0.65rem;
-					border-radius:8px;border:1px solid var(--border-color);
-					background:transparent;color:var(--text-secondary);
-					cursor:pointer;transition:color 150ms ease,border-color 150ms ease;
-					font-family:inherit;
-				" onmouseover="this.style.color='var(--text-primary)';this.style.borderColor='rgba(139,92,246,0.4)'" onmouseout="this.style.color='var(--text-secondary)';this.style.borderColor='var(--border-color)'">
-					Clear
+					width:auto;height:34px;padding:0 0.75rem;box-sizing:border-box;
+					display:inline-flex;align-items:center;justify-content:center;
+					border-radius:8px;
+					border:1px solid rgba(239,68,68,0.35);
+					background:rgba(239,68,68,0.08);
+					color:rgba(239,68,68,0.8);
+					cursor:pointer;transition:color 150ms ease,border-color 150ms ease,background 150ms ease;
+					font-family:inherit;font-size:0.72rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;
+				"
+				onmouseover="this.style.color='rgba(239,68,68,1)';this.style.borderColor='rgba(239,68,68,0.6)';this.style.background='rgba(239,68,68,0.15)'"
+				onmouseout="this.style.color='rgba(239,68,68,0.8)';this.style.borderColor='rgba(239,68,68,0.35)';this.style.background='rgba(239,68,68,0.08)'">
+					Clear History
 				</button>
 			</div>
 		</header>
@@ -490,7 +495,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		const ENDPOINT = page.dataset.endpoint || '/chat';
 
 		const syncThemeIcon = () => {
-			const isLight = document.body.classList.contains('light-mode');
+			const isLight = document.documentElement.classList.contains('light-mode');
 			document.getElementById('chat-icon-dark').style.display = isLight ? 'none' : '';
 			document.getElementById('chat-icon-light').style.display = isLight ? '' : 'none';
 		};
