@@ -18,6 +18,7 @@ interface Props {
 	structuredData?: object | object[];
 	articleMeta?: { publishedTime?: string; modifiedTime?: string; tags?: string[] };
 	hideChatFab?: boolean;
+	particleSpeed?: number;
 }
 
 const {
@@ -31,13 +32,14 @@ const {
 	structuredData,
 	articleMeta,
 	hideChatFab = false,
+	particleSpeed = 1,
 } = Astro.props;
 
 const canonicalURL = canonical ?? SITE_URL;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-particle-speed={particleSpeed}>
 	<head>
 		<meta charset="UTF-8" />
 		<title>{title}</title>
@@ -530,15 +532,16 @@ const canonicalURL = canonical ?? SITE_URL;
 			alpha: number;
 
 			constructor(w: number, h: number) {
+				const sp = parseFloat((document.documentElement as HTMLElement).dataset.particleSpeed || '1');
 				this.x = Math.random() * w;
 				this.y = Math.random() * h;
 				this.r = Math.random() * 4 + 1;
-				this.vx = (Math.random() - 0.5) * 1.5;
-				this.vy = (Math.random() - 0.5) * 1.5;
+				this.vx = (Math.random() - 0.5) * 1.5 * sp;
+				this.vy = (Math.random() - 0.5) * 1.5 * sp;
 				this.color = particleState.colors[Math.floor(Math.random() * particleState.colors.length)];
 				this.type = Math.random() > 0.5 ? 'bubble' : 'line';
 				this.angle = Math.random() * Math.PI * 2;
-				this.va = (Math.random() - 0.5) * 0.15;
+				this.va = (Math.random() - 0.5) * 0.15 * sp;
 				this.alpha = 0;
 			}
 
