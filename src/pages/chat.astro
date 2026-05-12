@@ -293,6 +293,48 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		</form>
 	</div>
 	<div id="cfg-tooltip" role="tooltip"></div>
+
+	<!-- Clear-history confirm modal -->
+	<div id="clear-confirm" role="dialog" aria-modal="true" aria-labelledby="clear-confirm-title" style="
+		position:fixed;inset:0;z-index:200;
+		display:none;align-items:center;justify-content:center;
+		background:rgba(0,0,0,0.55);
+		backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+	">
+		<div style="
+			background:var(--bg-card);
+			border:1px solid rgba(244,63,94,0.25);
+			border-radius:14px;
+			padding:1.4rem 1.5rem 1.25rem;
+			width:min(90vw, 380px);
+			box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
+		">
+			<h2 id="clear-confirm-title" style="
+				margin:0 0 0.5rem;font-size:1.05rem;font-weight:700;
+				color:var(--text-primary);font-family:inherit;
+			">Clear conversation?</h2>
+			<p style="margin:0 0 1.2rem;font-size:0.85rem;line-height:1.5;color:var(--text-secondary);">
+				This will permanently delete all messages in this conversation. This action cannot be undone.
+			</p>
+			<div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+				<button id="clear-cancel" type="button" style="
+					padding:0.5rem 0.9rem;border-radius:8px;
+					border:1px solid var(--border-color);background:transparent;
+					color:var(--text-secondary);font-family:inherit;font-size:0.78rem;font-weight:600;
+					cursor:pointer;transition:color 150ms,border-color 150ms;
+				" onmouseover="this.style.color='var(--text-primary)';this.style.borderColor='rgba(255,255,255,0.2)'"
+				   onmouseout="this.style.color='var(--text-secondary)';this.style.borderColor='var(--border-color)'">Cancel</button>
+				<button id="clear-confirm-yes" type="button" style="
+					padding:0.5rem 0.9rem;border-radius:8px;
+					border:1px solid rgba(244,63,94,0.5);
+					background:rgba(244,63,94,0.15);
+					color:rgba(244,63,94,1);font-family:inherit;font-size:0.78rem;font-weight:700;
+					cursor:pointer;transition:background 150ms,border-color 150ms;
+				" onmouseover="this.style.background='rgba(244,63,94,0.25)';this.style.borderColor='rgba(244,63,94,0.7)'"
+				   onmouseout="this.style.background='rgba(244,63,94,0.15)';this.style.borderColor='rgba(244,63,94,0.5)'">Clear</button>
+			</div>
+		</div>
+	</div>
 </Layout>
 
 <style is:global>
@@ -873,8 +915,24 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
 		});
 
+		const clearModal = document.getElementById('clear-confirm');
+		const clearCancel = document.getElementById('clear-cancel');
+		const clearYes = document.getElementById('clear-confirm-yes');
+
+		const openClearModal = () => { clearModal.style.display = 'flex'; };
+		const closeClearModal = () => { clearModal.style.display = 'none'; };
+
 		clearBtn.addEventListener('click', () => {
 			if (streaming) return;
+			openClearModal();
+		});
+		clearCancel.addEventListener('click', closeClearModal);
+		clearModal.addEventListener('click', (e) => { if (e.target === clearModal) closeClearModal(); });
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && clearModal.style.display === 'flex') closeClearModal();
+		});
+		clearYes.addEventListener('click', () => {
+			closeClearModal();
 			history = [];
 			messagesEl.innerHTML = '';
 			appendMsg('assistant', "Conversation cleared! Fresh start — what would you like to talk about? I'm ready to help with code, writing, questions, or anything else on your mind.");
