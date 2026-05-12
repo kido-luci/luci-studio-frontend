@@ -251,11 +251,11 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 				"
 			></textarea>
 			<div style="
-				display:flex;align-items:center;justify-content:space-between;
+				display:flex;align-items:center;gap:0.5rem;
 				padding:0.4rem 0.6rem 0.5rem 0.75rem;
 				border-top:1px solid rgba(139,92,246,0.12);
 			">
-				<div style="position:relative;display:inline-flex;align-items:center;">
+				<div style="position:relative;display:inline-flex;align-items:center;flex-shrink:0;">
 				<svg style="position:absolute;left:0;pointer-events:none;color:var(--text-secondary);" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
 				<select id="cfg-model-bar" aria-label="Model" style="
 					-webkit-appearance:none;-moz-appearance:none;appearance:none;
@@ -276,7 +276,11 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					<option value="openai/gpt-oss-safeguard-20b">GPT OSS Safeguard 20B (preview)</option>
 					<option value="groq/compound">Groq Compound</option>
 				</select>
-			</div>
+				</div>
+				<span id="chat-total-tokens" style="
+					font-size:0.68rem;color:var(--text-tertiary);
+					user-select:none;white-space:nowrap;
+				"></span>
 				<button type="submit" id="chat-send" aria-label="Send" style="
 					width:36px;height:36px;
 					border-radius:10px;
@@ -284,7 +288,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					background:linear-gradient(135deg,rgba(139,92,246,0.95),rgba(99,102,241,0.95));
 					color:#fff;display:flex;align-items:center;justify-content:center;
 					cursor:pointer;transition:opacity 150ms ease,transform 150ms ease;
-					flex-shrink:0;
+					flex-shrink:0;margin-left:auto;
 				">
 					<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
 						<path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6c-.6-.3-1.4.3-1.2 1L4 11l11 1-11 1-1.8 6.4c-.2.7.6 1.3 1.2 1Z"/>
@@ -682,6 +686,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		const input = document.getElementById('chat-input');
 		const sendBtn = document.getElementById('chat-send');
 		const clearBtn = document.getElementById('chat-clear');
+		const totalTokensEl = document.getElementById('chat-total-tokens');
 
 		// ── Config panel ──────────────────────────────────────────────────────────
 		const configReset = document.getElementById('config-reset');
@@ -714,8 +719,26 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		// Keep panel model select and bar model select in sync
 		const modelPanel = document.getElementById('cfg-model');
 		const modelBar   = document.getElementById('cfg-model-bar');
-		modelPanel.addEventListener('change', () => { modelBar.value = modelPanel.value; });
-		modelBar.addEventListener('change',   () => { modelPanel.value = modelBar.value; });
+
+		// Auto-size the chatbox model select to fit its currently-selected label
+		// (default <select width:auto> sizes to longest option in Chrome/Safari)
+		const sizeModelBar = () => {
+			const opt = modelBar.options[modelBar.selectedIndex];
+			if (!opt) return;
+			const cs = getComputedStyle(modelBar);
+			const m = document.createElement('span');
+			m.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-family:${cs.fontFamily};font-size:${cs.fontSize};font-weight:${cs.fontWeight};letter-spacing:${cs.letterSpacing};`;
+			m.textContent = opt.textContent;
+			document.body.appendChild(m);
+			const textW = m.offsetWidth;
+			m.remove();
+			// +20px buffer for left chevron padding + native dropdown spacing
+			modelBar.style.width = Math.ceil(textW + 20) + 'px';
+		};
+
+		modelPanel.addEventListener('change', () => { modelBar.value = modelPanel.value; sizeModelBar(); });
+		modelBar.addEventListener('change',   () => { modelPanel.value = modelBar.value; sizeModelBar(); });
+		sizeModelBar();
 
 
 		const DEFAULTS = { temperature:'0.7', maxTokens:'1024', topP:'1.0', freqPen:'0', presPen:'0', model:'llama-3.3-70b-versatile' };
@@ -732,6 +755,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			document.getElementById('cfg-pres-pen-val').textContent = DEFAULTS.presPen;
 			modelPanel.value = DEFAULTS.model;
 			modelBar.value   = DEFAULTS.model;
+			sizeModelBar();
 			sliders.forEach(({ id }) => updateTrack(document.getElementById(id)));
 		});
 
@@ -840,6 +864,8 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 
 		const saveHistory = () => {
 			try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20))); } catch {}
+			const total = history.reduce((s, m) => s + estimateTokens(m.content), 0);
+			if (totalTokensEl) totalTokensEl.textContent = total > 0 ? `~${total} ctx tokens` : '';
 		};
 
 		const autosize = () => {
@@ -923,5 +949,6 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		});
 
 		loadHistory();
+		saveHistory();
 	})();
 </script>
