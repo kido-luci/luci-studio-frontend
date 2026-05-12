@@ -510,14 +510,14 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 	.cfg-range::-webkit-slider-thumb {
 		-webkit-appearance:none;appearance:none;
 		width:14px;height:14px;border-radius:9999px;
-		background:rgba(139,92,246,0.95);
-		border:2px solid rgba(139,92,246,0.4);
+		background:#fff;
+		border:2px solid rgba(139,92,246,0.9);
 		cursor:pointer;
 	}
 	.cfg-range::-moz-range-thumb {
 		width:14px;height:14px;border-radius:9999px;
-		background:rgba(139,92,246,0.95);
-		border:2px solid rgba(139,92,246,0.4);
+		background:#fff;
+		border:2px solid rgba(139,92,246,0.9);
 		cursor:pointer;
 	}
 
@@ -625,7 +625,14 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		// ── Config panel ──────────────────────────────────────────────────────────
 		const configReset = document.getElementById('config-reset');
 
-		// Live value display for each range input
+		// Live value display + purple fill track for each range input
+		const trackEmpty = () => document.documentElement.classList.contains('light-mode')
+			? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.1)';
+		const updateTrack = (el) => {
+			const pct = ((parseFloat(el.value) - parseFloat(el.min)) / (parseFloat(el.max) - parseFloat(el.min))) * 100;
+			el.style.background = `linear-gradient(to right, rgba(139,92,246,0.9) ${pct}%, ${trackEmpty()} ${pct}%)`;
+		};
+
 		const sliders = [
 			{ id: 'cfg-temperature', valId: 'cfg-temperature-val', decimals: 2 },
 			{ id: 'cfg-max-tokens',  valId: 'cfg-max-tokens-val',  decimals: 0 },
@@ -636,7 +643,11 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		sliders.forEach(({ id, valId, decimals }) => {
 			const el = document.getElementById(id);
 			const display = document.getElementById(valId);
-			el.addEventListener('input', () => { display.textContent = parseFloat(el.value).toFixed(decimals); });
+			updateTrack(el);
+			el.addEventListener('input', () => {
+				display.textContent = parseFloat(el.value).toFixed(decimals);
+				updateTrack(el);
+			});
 		});
 
 		// Keep panel model select and bar model select in sync
@@ -660,6 +671,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			document.getElementById('cfg-pres-pen-val').textContent = DEFAULTS.presPen;
 			modelPanel.value = DEFAULTS.model;
 			modelBar.value   = DEFAULTS.model;
+			sliders.forEach(({ id }) => updateTrack(document.getElementById(id)));
 		});
 
 		const getConfig = () => ({
