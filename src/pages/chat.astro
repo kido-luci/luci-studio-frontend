@@ -14,7 +14,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 >
 	<div id="chat-bg" style="
 		position:fixed;inset:0;z-index:-3;
-		background-image:url('https://i.pinimg.com/736x/3e/0f/0f/3e0f0fa37b135bbf3707511f96a0a3e0.jpg');
+		background-image:url('https://i.pinimg.com/736x/9d/fe/f7/9dfef73727e2ca78fb6122e7c935ab36.jpg');
 		background-size:cover;background-position:bottom center;background-repeat:no-repeat;
 	"></div>
 	<div style="
@@ -32,9 +32,6 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			display:flex;align-items:center;justify-content:space-between;
 			padding:1rem 1.5rem;
 			border-bottom:1px solid var(--border-color);
-			background:rgba(10,10,15,0.45);
-			backdrop-filter:blur(12px);
-			-webkit-backdrop-filter:blur(12px);
 			position:sticky;top:0;z-index:100;
 		">
 			<a href="/" style="
@@ -91,8 +88,6 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		<!-- Config panel -->
 		<aside id="config-panel" aria-label="AI configuration" style="
 			position:fixed;top:0;left:0;height:100vh;width:272px;
-			background:rgba(10,10,15,0.45);
-			backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
 			border-right:1px solid var(--border-color);
 			z-index:95;
 			display:flex;flex-direction:column;
@@ -478,11 +473,16 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		background:rgba(0,0,0,0.12);
 	}
 
-	body.light-mode #config-panel {
-		background:rgba(255,255,255,0.72) !important;
+	#config-panel { background: rgba(10,10,15,0.5); }
+	#chat-page header { background: rgba(10,10,15,0.5); }
+
+	body.light-mode #config-panel,
+	html.light-mode #config-panel {
+		background: rgba(255,255,255,0.88);
 	}
-	body.light-mode #chat-page > header {
-		background:rgba(255,255,255,0.72) !important;
+	body.light-mode #chat-page header,
+	html.light-mode #chat-page header {
+		background: rgba(255,255,255,0.88);
 	}
 
 	@media (max-width: 768px) {
