@@ -12,12 +12,8 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 	hideChatFab={true}
 	particleSpeed={0.3}
 >
-	<div id="chat-bg" style="
-		position:fixed;inset:0;z-index:-3;
-		background-image:url('https://i.pinimg.com/736x/9d/fe/f7/9dfef73727e2ca78fb6122e7c935ab36.jpg');
-		background-size:cover;background-position:bottom center;background-repeat:no-repeat;
-	"></div>
-	<div style="
+	<div id="chat-bg" style="position:fixed;inset:0;z-index:-3;"></div>
+	<div id="chat-vignette" style="
 		position:fixed;inset:0;z-index:-2;
 		pointer-events:none;
 		background:
@@ -292,6 +288,25 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 </Layout>
 
 <style is:global>
+	#chat-bg {
+		background-image: url('https://media.luci-studio.com/Chat-Background-16-9.jpg');
+		background-size: cover;
+		background-position: bottom center;
+		background-repeat: no-repeat;
+	}
+	@media (max-width: 768px) {
+		#chat-bg {
+			background-image: url('https://media.luci-studio.com/Chat-Background.jpg');
+		}
+	}
+	@media (min-width: 769px) {
+		#chat-vignette {
+			background:
+				radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.7) 100%),
+				linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.35) 25%, transparent 50%, transparent 75%, rgba(0,0,0,0.55) 100%);
+		}
+	}
+
 	.msg { display:flex; }
 	.msg-user { justify-content:flex-end; }
 	.msg-assistant { justify-content:flex-start; }
