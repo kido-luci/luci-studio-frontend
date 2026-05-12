@@ -204,9 +204,8 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			box-sizing:border-box;
 		">
 			<div class="msg msg-assistant">
-				<div class="msg-bubble">
-					Hi there! I'm Kido, your AI assistant at Luci Studio. I'm here to help with whatever you need — whether that's writing or debugging code, explaining system design, answering general knowledge questions, helping with creative writing, solving math problems, or just having a thoughtful conversation. There's no topic off-limits. What's on your mind?
-				</div>
+				<div class="msg-bubble">Hi there! I'm Kido, your AI assistant at Luci Studio. I'm here to help with whatever you need — whether that's writing or debugging code, explaining system design, answering general knowledge questions, helping with creative writing, solving math problems, or just having a thoughtful conversation.
+				<br/>There's no topic off-limits. What's on your mind?</div>
 			</div>
 		</div>
 
@@ -355,6 +354,46 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		text-underline-offset:2px;
 	}
 	.msg-bubble strong { color:inherit; }
+
+	/* Syntax highlighting — purple theme (dark mode) */
+	.msg-bubble .token.keyword,
+	.msg-bubble .token.rule        { color:#c084fc; font-style:normal; }
+	.msg-bubble .token.string,
+	.msg-bubble .token.attr-value  { color:#86efac; }
+	.msg-bubble .token.comment     { color:#64748b; font-style:italic; }
+	.msg-bubble .token.function    { color:#7dd3fc; }
+	.msg-bubble .token.number,
+	.msg-bubble .token.boolean     { color:#fb923c; }
+	.msg-bubble .token.class-name,
+	.msg-bubble .token.type        { color:#f0abfc; }
+	.msg-bubble .token.operator    { color:#a78bfa; }
+	.msg-bubble .token.punctuation { color:#94a3b8; }
+	.msg-bubble .token.builtin     { color:#7dd3fc; }
+	.msg-bubble .token.property,
+	.msg-bubble .token.attr-name   { color:#93c5fd; }
+	.msg-bubble .token.tag         { color:#c084fc; }
+	.msg-bubble .token.selector    { color:#f0abfc; }
+	.msg-bubble .token.variable    { color:#e2e8f0; }
+
+	/* Syntax highlighting — light mode overrides (darker for contrast) */
+	body.light-mode .msg-bubble .token.keyword,
+	body.light-mode .msg-bubble .token.rule        { color:#7c3aed; }
+	body.light-mode .msg-bubble .token.string,
+	body.light-mode .msg-bubble .token.attr-value  { color:#15803d; }
+	body.light-mode .msg-bubble .token.comment     { color:#94a3b8; font-style:italic; }
+	body.light-mode .msg-bubble .token.function    { color:#0369a1; }
+	body.light-mode .msg-bubble .token.number,
+	body.light-mode .msg-bubble .token.boolean     { color:#c2410c; }
+	body.light-mode .msg-bubble .token.class-name,
+	body.light-mode .msg-bubble .token.type        { color:#9333ea; }
+	body.light-mode .msg-bubble .token.operator    { color:#6d28d9; }
+	body.light-mode .msg-bubble .token.punctuation { color:#64748b; }
+	body.light-mode .msg-bubble .token.builtin     { color:#0369a1; }
+	body.light-mode .msg-bubble .token.property,
+	body.light-mode .msg-bubble .token.attr-name   { color:#1d4ed8; }
+	body.light-mode .msg-bubble .token.tag         { color:#7c3aed; }
+	body.light-mode .msg-bubble .token.selector    { color:#9333ea; }
+	body.light-mode .msg-bubble .token.variable    { color:#1e293b; }
 
 	body.light-mode .msg-assistant .msg-bubble {
 		background: rgba(255,255,255,0.88);
@@ -526,6 +565,19 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 	}
 </style>
 
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script is:inline>Prism.manual = true;</script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+
 <script is:inline>
 	(() => {
 		// ── Info tooltips ─────────────────────────────────────────────────────────
@@ -628,12 +680,17 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		const md = (text) => {
 			const e = esc(text);
 			return e
-				.replace(/```([\s\S]*?)```/g, (_,c) => `<pre><code>${c.trim()}</code></pre>`)
+				.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, c) => {
+					const cls = lang ? ` class="language-${lang}"` : '';
+					return `<pre><code${cls}>${c.trim()}</code></pre>`;
+				})
 				.replace(/`([^`]+)`/g, '<code>$1</code>')
 				.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
 				.replace(/\*([^*]+)\*/g, '<em>$1</em>')
 				.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 		};
+
+		const highlight = (el) => { if (window.Prism) Prism.highlightAllUnder(el); };
 
 		const scrollBottom = () => requestAnimationFrame(() => {
 			messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -647,6 +704,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			bubble.innerHTML = role === 'assistant' ? md(text) : esc(text);
 			wrap.appendChild(bubble);
 			messagesEl.appendChild(wrap);
+			if (role === 'assistant') highlight(bubble);
 			scrollBottom();
 			return bubble;
 		};
@@ -737,7 +795,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 				}
 
 				if (!bubble) { typingEl.remove(); appendMsg('assistant', 'No response received. The selected model may be unavailable — try switching to a different model.'); }
-				else if (acc.trim()) { history.push({ role: 'assistant', content: acc }); saveHistory(); }
+				else if (acc.trim()) { highlight(bubble); history.push({ role: 'assistant', content: acc }); saveHistory(); }
 			} catch (err) {
 				typingEl.remove();
 				appendMsg('assistant', `Network error: ${err?.message || 'unknown'}`);
