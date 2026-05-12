@@ -113,10 +113,9 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					</div>
 					<select id="cfg-model" class="cfg-select">
 						<option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-						<option value="llama-3.1-70b-versatile">Llama 3.1 70B</option>
 						<option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
-						<option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-						<option value="gemma2-9b-it">Gemma 2 9B</option>
+						<option value="meta-llama/llama-4-scout-17b-16e-instruct">Llama 4 Scout 17B (preview)</option>
+						<option value="qwen/qwen3-32b">Qwen3 32B (preview)</option>
 					</select>
 				</div>
 
@@ -262,10 +261,9 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					width:auto;
 				">
 					<option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-					<option value="llama-3.1-70b-versatile">Llama 3.1 70B</option>
 					<option value="llama-3.1-8b-instant">Llama 3.1 8B (fast)</option>
-					<option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-					<option value="gemma2-9b-it">Gemma 2 9B</option>
+					<option value="meta-llama/llama-4-scout-17b-16e-instruct">Llama 4 Scout 17B (preview)</option>
+					<option value="qwen/qwen3-32b">Qwen3 32B (preview)</option>
 				</select>
 			</div>
 				<button type="submit" id="chat-send" aria-label="Send" style="
@@ -724,7 +722,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					scrollBottom();
 				}
 
-				if (!bubble) { typingEl.remove(); appendMsg('assistant', '(no response)'); }
+				if (!bubble) { typingEl.remove(); appendMsg('assistant', 'No response received. The selected model may be unavailable — try switching to a different model.'); }
 				else if (acc.trim()) { history.push({ role: 'assistant', content: acc }); saveHistory(); }
 			} catch (err) {
 				typingEl.remove();
