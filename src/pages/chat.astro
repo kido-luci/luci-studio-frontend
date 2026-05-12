@@ -86,7 +86,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			border-right:1px solid var(--border-color);
 			z-index:95;
 			display:flex;flex-direction:column;
-			overflow-y:auto;
+			overflow:visible;
 		">
 			<div style="padding:1.25rem 1.1rem 0.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;">
 				<span style="font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-secondary);">Config</span>
@@ -98,11 +98,18 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 				" onmouseover="this.style.color='var(--text-primary)';this.style.borderColor='rgba(139,92,246,0.4)'" onmouseout="this.style.color='var(--text-secondary)';this.style.borderColor='var(--border-color)'">Reset</button>
 			</div>
 
-			<div style="padding:1rem 1.1rem;display:flex;flex-direction:column;gap:1.4rem;flex:1;">
+			<div style="padding:1rem 1.1rem;display:flex;flex-direction:column;gap:1.4rem;flex:1;overflow-y:auto;overflow-x:visible;">
 
 				<!-- Model -->
 				<div class="cfg-group">
-					<label class="cfg-label" for="cfg-model">Model</label>
+					<div class="cfg-label-row">
+						<label class="cfg-label" for="cfg-model">
+							Model
+							<span class="cfg-info" data-tip="The language model used to generate responses. Larger models are more capable; smaller ones are faster.">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+							</span>
+						</label>
+					</div>
 					<select id="cfg-model" class="cfg-select">
 						<option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
 						<option value="llama-3.1-70b-versatile">Llama 3.1 70B</option>
@@ -115,51 +122,71 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 				<!-- Temperature -->
 				<div class="cfg-group">
 					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-temperature">Temperature</label>
+						<label class="cfg-label" for="cfg-temperature">
+							Temperature
+							<span class="cfg-info" data-tip="Controls randomness. 0 = deterministic and focused. 2 = highly creative and unpredictable. Keep between 0.5–1.0 for most tasks.">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+							</span>
+						</label>
 						<span id="cfg-temperature-val" class="cfg-val">0.7</span>
 					</div>
 					<input id="cfg-temperature" type="range" min="0" max="2" step="0.05" value="0.7" class="cfg-range" />
-					<div class="cfg-hint">Randomness — lower = focused, higher = creative</div>
 				</div>
 
 				<!-- Max Tokens -->
 				<div class="cfg-group">
 					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-max-tokens">Max Tokens</label>
+						<label class="cfg-label" for="cfg-max-tokens">
+							Max Tokens
+							<span class="cfg-info" data-tip="Maximum number of tokens the model can generate in a single response. One token ≈ 0.75 words.">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+							</span>
+						</label>
 						<span id="cfg-max-tokens-val" class="cfg-val">1024</span>
 					</div>
 					<input id="cfg-max-tokens" type="range" min="64" max="4096" step="64" value="1024" class="cfg-range" />
-					<div class="cfg-hint">Maximum response length</div>
 				</div>
 
 				<!-- Top P -->
 				<div class="cfg-group">
 					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-top-p">Top P</label>
+						<label class="cfg-label" for="cfg-top-p">
+							Top P
+							<span class="cfg-info" data-tip="Nucleus sampling. The model considers only the top P% most likely tokens. Lower values make output more focused. Recommended: keep at 1.0 when tuning Temperature.">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+							</span>
+						</label>
 						<span id="cfg-top-p-val" class="cfg-val">1.0</span>
 					</div>
 					<input id="cfg-top-p" type="range" min="0" max="1" step="0.05" value="1.0" class="cfg-range" />
-					<div class="cfg-hint">Nucleus sampling threshold</div>
 				</div>
 
 				<!-- Frequency Penalty -->
 				<div class="cfg-group">
 					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-freq-pen">Frequency Penalty</label>
+						<label class="cfg-label" for="cfg-freq-pen">
+							Freq. Penalty
+							<span class="cfg-info" data-tip="Penalises tokens that have already appeared often in the output. Positive values reduce repetition. Range: -2 to 2.">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+							</span>
+						</label>
 						<span id="cfg-freq-pen-val" class="cfg-val">0</span>
 					</div>
 					<input id="cfg-freq-pen" type="range" min="-2" max="2" step="0.1" value="0" class="cfg-range" />
-					<div class="cfg-hint">Reduce repetition of frequent tokens</div>
 				</div>
 
 				<!-- Presence Penalty -->
 				<div class="cfg-group">
 					<div class="cfg-label-row">
-						<label class="cfg-label" for="cfg-pres-pen">Presence Penalty</label>
+						<label class="cfg-label" for="cfg-pres-pen">
+							Pres. Penalty
+							<span class="cfg-info" data-tip="Penalises tokens that have appeared at all so far, encouraging the model to explore new topics. Range: -2 to 2.">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+							</span>
+						</label>
 						<span id="cfg-pres-pen-val" class="cfg-val">0</span>
 					</div>
 					<input id="cfg-pres-pen" type="range" min="-2" max="2" step="0.1" value="0" class="cfg-range" />
-					<div class="cfg-hint">Encourage new topics</div>
 				</div>
 
 			</div>
@@ -229,6 +256,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			</button>
 		</form>
 	</div>
+	<div id="cfg-tooltip" role="tooltip"></div>
 </Layout>
 
 <style is:global>
@@ -330,7 +358,38 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 	/* Config panel */
 	.cfg-group { display:flex;flex-direction:column;gap:0.4rem; }
 	.cfg-label-row { display:flex;align-items:center;justify-content:space-between; }
-	.cfg-label { font-size:0.78rem;font-weight:600;color:var(--text-primary); }
+	.cfg-label {
+		font-size:0.78rem;font-weight:600;color:var(--text-primary);
+		display:flex;align-items:center;gap:0.3rem;
+	}
+	.cfg-info {
+		display:inline-flex;align-items:center;justify-content:center;
+		color:var(--text-tertiary);cursor:default;flex-shrink:0;
+		transition:color 150ms ease;
+	}
+	.cfg-info:hover { color:rgba(139,92,246,0.8); }
+	#cfg-tooltip {
+		position:fixed;
+		width:200px;
+		background:rgba(15,15,20,0.97);
+		color:#e5e7eb;
+		font-size:0.7rem;font-weight:400;
+		line-height:1.45;
+		padding:0.4rem 0.6rem;
+		border-radius:7px;
+		border:1px solid rgba(255,255,255,0.08);
+		box-shadow:0 4px 16px rgba(0,0,0,0.4);
+		pointer-events:none;
+		white-space:normal;text-align:left;
+		z-index:9999;
+		opacity:0;visibility:hidden;
+		transition:opacity 120ms ease,visibility 120ms ease;
+	}
+	#cfg-tooltip.visible { opacity:1;visibility:visible; }
+	body.light-mode #cfg-tooltip {
+		background:rgba(25,25,35,0.97);
+		border-color:rgba(0,0,0,0.18);
+	}
 	.cfg-val {
 		font-size:0.72rem;font-weight:600;
 		color:rgba(139,92,246,0.9);
@@ -382,6 +441,28 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 </style>
 
 <script is:inline>
+	(() => {
+		// ── Info tooltips ─────────────────────────────────────────────────────────
+		const tooltip = document.getElementById('cfg-tooltip');
+		document.querySelectorAll('.cfg-info').forEach(el => {
+			el.addEventListener('mouseenter', () => {
+				const tip = el.dataset.tip;
+				if (!tip || !tooltip) return;
+				tooltip.textContent = tip;
+				const r = el.getBoundingClientRect();
+				const left = r.right + 8;
+				let top = r.top + r.height / 2 - tooltip.offsetHeight / 2;
+				// clamp within viewport vertically
+				const margin = 8;
+				top = Math.max(margin, Math.min(top, window.innerHeight - tooltip.offsetHeight - margin));
+				tooltip.style.left = left + 'px';
+				tooltip.style.top = top + 'px';
+				tooltip.classList.add('visible');
+			});
+			el.addEventListener('mouseleave', () => tooltip && tooltip.classList.remove('visible'));
+		});
+	})();
+
 	(() => {
 		const page = document.getElementById('chat-page');
 		if (!page) return;
