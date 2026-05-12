@@ -25,14 +25,14 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 20%, transparent 75%, rgba(0,0,0,0.5) 100%);
 	"></div>
 
-	<div id="chat-page" data-endpoint={CHAT_ENDPOINT} style="display:flex;flex-direction:column;min-height:100vh;padding-top:0;position:relative;z-index:0;">
+	<div id="chat-page" data-endpoint={CHAT_ENDPOINT} style="display:flex;flex-direction:column;min-height:100vh;padding-top:68px;position:relative;z-index:0;">
 
 		<!-- Header -->
 		<header style="
 			display:flex;align-items:center;justify-content:space-between;
 			padding:1rem 1.5rem;
 			border-bottom:1px solid var(--border-color);
-			position:sticky;top:0;z-index:100;
+			position:fixed;top:0;left:0;right:0;z-index:100;
 		">
 			<a href="/" style="
 				display:flex;align-items:center;gap:0.65rem;
