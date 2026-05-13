@@ -1,6 +1,6 @@
 ---
 interface Props {
-  active?: 'home' | 'blog' | 'chat' | 'about' | null;
+  active?: 'home' | 'blog' | 'chat' | 'portfolio' | null;
   ctaLabel?: string;
   ctaHref?: string;
 }
@@ -12,7 +12,7 @@ const linkIdle = "text-gray-400 hover:text-white";
 const linkChatIdle = "text-gray-400 hover:text-violet-400";
 const linkActive = "is-active text-violet-400";
 
-const cls = (key: 'home' | 'blog' | 'chat' | 'about') => {
+const cls = (key: 'home' | 'blog' | 'chat' | 'portfolio') => {
   if (active === key) return `${linkBase} ${linkActive}`;
   if (key === 'chat') return `${linkBase} ${linkChatIdle}`;
   return `${linkBase} ${linkIdle}`;
@@ -36,7 +36,7 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
       <a href="/blog" class={cls('blog')}>Blog</a>
       <a href="/chat" class={cls('chat')}>AI Assistant</a>
       <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class={`${linkBase} ${linkIdle}`}>LinkedIn</a>
-      <a href="/about" class={cls('about')}>About</a>
+      <a href="/portfolio" class={cls('portfolio')}>Portfolio</a>
     </div>
 
     <div class="flex items-center gap-4">
@@ -72,7 +72,7 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
   <a href="/chat" class={active === 'chat' ? mobileActive : mobileBase}>AI Assistant</a>
   <div class="h-px w-12 bg-white/10 my-4"></div>
   <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class={mobileSmallBase}>LinkedIn</a>
-  <a href="/about" class={active === 'about' ? mobileSmallActive : mobileSmallBase}>About</a>
+  <a href="/portfolio" class={active === 'portfolio' ? mobileSmallActive : mobileSmallBase}>Portfolio</a>
   <a href={ctaHref} class="mobile-nav-link mt-8 px-8 py-4 bg-white text-black font-black rounded-full uppercase tracking-widest">{ctaLabel}</a>
 </div>
 
