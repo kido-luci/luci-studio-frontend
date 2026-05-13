@@ -6,7 +6,12 @@ import { calculateReadTime, formatDate, formatMarkdown, slugify } from "../../ut
 export async function getStaticPaths() {
   const posts = await postService.getAll();
   return Promise.all(posts.map(async (summary) => {
-    const post = await postService.getByID(summary.id);
+    let post;
+    try {
+      post = await postService.getByID(summary.id);
+    } catch {
+      post = null;
+    }
     return {
       params: { slug: `${slugify(summary.title)}-${summary.id}` },
       props: { post: post || summary },
