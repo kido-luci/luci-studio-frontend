@@ -709,6 +709,12 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 	}
 	#chat-messages { scrollbar-width:thin; scrollbar-color:rgba(139,92,246,0.45) transparent; }
 
+	/* Chat page has a dark floral background — make the nav nearly solid in light mode
+	   so the link text stays legible. */
+	body.light-mode nav {
+		background: rgba(255, 255, 255, 0.95) !important;
+	}
+
 	@media (max-width: 768px) {
 		#config-panel { display:none !important; }
 		#chat-messages {
