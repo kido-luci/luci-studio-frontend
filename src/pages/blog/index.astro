@@ -33,7 +33,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
   keywords="Flutter, Go, technical blog, mobile development, engineering, clean architecture, Luci Studio"
 >
 
-  <TopNav active="blog" ctaLabel="Home" ctaHref="/" />
+  <TopNav active="blog" />
 
   <main class="pt-36 pb-24 px-4 md:px-6 min-h-screen bg-[var(--bg-primary)]" data-api-url={API_URL}>
     <div class="max-w-7xl mx-auto">

@@ -44,13 +44,13 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
       <button
         id="theme-toggle"
         onclick="window.toggleTheme()"
-        class="w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
+        class="topnav-theme-btn w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
         aria-label="Toggle theme"
       >
-        <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="topnav-theme-icon w-5 h-5 text-gray-400 group-hover:text-white transition-colors dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
         </svg>
-        <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="topnav-theme-icon w-5 h-5 text-gray-400 group-hover:text-white transition-colors light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
         </svg>
       </button>
@@ -111,9 +111,25 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
 
   const syncTheme = () => {
     const light = document.documentElement.classList.contains('light-mode');
-    document.querySelectorAll<HTMLElement>('.dark-icon').forEach(el => el.style.display = light ? 'none' : '');
-    document.querySelectorAll<HTMLElement>('.light-icon').forEach(el => el.style.display = light ? '' : 'none');
+    document.querySelectorAll('.dark-icon').forEach(el => el.classList.toggle('hidden', light));
+    document.querySelectorAll('.light-icon').forEach(el => el.classList.toggle('hidden', !light));
   };
   syncTheme();
   document.getElementById('theme-toggle')?.addEventListener('click', () => requestAnimationFrame(syncTheme));
 </script>
+
+<style is:global>
+  body.light-mode .topnav-theme-btn {
+    border-color: rgba(17, 24, 39, 0.2) !important;
+  }
+  body.light-mode .topnav-theme-btn:hover {
+    border-color: rgba(139, 92, 246, 0.6) !important;
+    background-color: rgba(139, 92, 246, 0.08) !important;
+  }
+  body.light-mode .topnav-theme-icon {
+    color: rgb(31, 41, 55) !important;
+  }
+  body.light-mode .topnav-theme-btn:hover .topnav-theme-icon {
+    color: rgb(139, 92, 246) !important;
+  }
+</style>
