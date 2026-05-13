@@ -97,8 +97,6 @@ const canonicalURL = canonical ?? SITE_URL;
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
-		<!-- Anime.js Animation Library -->
-		<script is:inline defer src="https://cdn.jsdelivr.net/npm/animejs@4.0.0-beta.102/lib/anime.min.js"></script>
 
 		<script is:inline>
 			tailwind.config = {
@@ -479,8 +477,6 @@ const canonicalURL = canonical ?? SITE_URL;
 		</style>
 
 		<script>
-		declare const anime: any;
-
 		// ── Platform Detection ──────────────────────────────────────────────────
 		const isWindows = navigator.platform.startsWith('Win') ||
 			((navigator as any).userAgentData?.platform === 'Windows') ||
@@ -981,170 +977,6 @@ const canonicalURL = canonical ?? SITE_URL;
 				resumeCanvasParticles();
 			}
 		});
-
-		// ── Anime.js Animations ─────────────────────────────────────────────────
-		// Wait for anime to be available
-		const initAnimeAnimations = () => {
-			if (typeof anime === 'undefined') {
-				setTimeout(initAnimeAnimations, 100);
-				return;
-			}
-
-			// Animate navigation items on load
-			anime({
-				targets: 'nav a, nav button',
-				translateY: [-20, 0],
-				opacity: [0, 1],
-				delay: anime.stagger(80, { start: 300 }),
-				duration: 800,
-				easing: 'easeOutExpo'
-			});
-
-			// Animate hero badge
-			anime({
-				targets: '.hero-badge',
-				scale: [0.8, 1],
-				opacity: [0, 1],
-				duration: 1000,
-				easing: 'easeOutElastic(1, .6)',
-				delay: 100
-			});
-			// Hero subtitle animation is handled in index.astro using Moving Letters
-			// Animate stat pills with stagger
-			anime({
-				targets: '.hero-stat-pill',
-				scale: [0.5, 1],
-				opacity: [0, 1],
-				translateY: [30, 0],
-				delay: anime.stagger(100, { start: 600 }),
-				duration: 800,
-				easing: 'easeOutExpo'
-			});
-
-			// Animate CTA buttons
-			anime({
-				targets: '.hero-cta-primary, .hero-cta-secondary',
-				scale: [0.9, 1],
-				opacity: [0, 1],
-				delay: anime.stagger(150, { start: 800 }),
-				duration: 1000,
-				easing: 'easeOutElastic(1, .8)'
-			});
-
-			// Floating animation for hero orbs — paused when hero is off-screen
-			const orbAnim = anime({
-				targets: '.hero-orb',
-				translateY: [
-					{ value: -20, duration: 2000 },
-					{ value: 0, duration: 2000 }
-				],
-				translateX: [
-					{ value: 10, duration: 2500 },
-					{ value: -10, duration: 2500 }
-				],
-				loop: true,
-				easing: 'easeInOutSine',
-				delay: anime.stagger(500)
-			});
-			const heroEl = document.querySelector('section.relative.min-h-screen');
-			if (heroEl && orbAnim) {
-				new IntersectionObserver((entries) => {
-					if (entries[0].isIntersecting) orbAnim.play?.();
-					else orbAnim.pause?.();
-				}, { threshold: 0 }).observe(heroEl);
-			}
-
-			// Pulse animation for project cards on hover
-			document.querySelectorAll('.tilt-card[data-project]').forEach(card => {
-				card.addEventListener('mouseenter', () => {
-					anime({
-						targets: card.querySelector('img'),
-						scale: [1, 1.05],
-						duration: 600,
-						easing: 'easeOutQuad'
-					});
-				});
-				card.addEventListener('mouseleave', () => {
-					anime({
-						targets: card.querySelector('img'),
-						scale: [1.05, 1],
-						duration: 600,
-						easing: 'easeOutQuad'
-					});
-				});
-			});
-
-			// Add ripple effect on button clicks
-			document.querySelectorAll('button, a.magnetic').forEach(btn => {
-				btn.addEventListener('click', function(e) {
-					const mouseEvent = e as MouseEvent;
-					const target = btn as HTMLElement;
-					const rect = target.getBoundingClientRect();
-					const x = mouseEvent.clientX - rect.left;
-					const y = mouseEvent.clientY - rect.top;
-					
-					const ripple = document.createElement('span');
-					ripple.style.cssText = `
-						position: absolute;
-						width: 20px;
-						height: 20px;
-						border-radius: 50%;
-						background: rgba(139, 92, 246, 0.5);
-						left: ${x}px;
-						top: ${y}px;
-						transform: translate(-50%, -50%);
-						pointer-events: none;
-					`;
-					target.style.position = 'relative';
-					target.style.overflow = 'hidden';
-					target.appendChild(ripple);
-
-					anime({
-						targets: ripple,
-						scale: [0, 30],
-						opacity: [1, 0],
-						duration: 800,
-						easing: 'easeOutExpo',
-						complete: () => ripple.remove()
-					});
-				});
-			});
-
-			// Add hover animation for tech tags
-			document.querySelectorAll('.tilt-card span[class*="bg-white"]').forEach(tag => {
-				tag.addEventListener('mouseenter', function() {
-					anime({
-						targets: tag,
-						scale: [1, 1.1],
-						duration: 300,
-						easing: 'easeOutQuad'
-					});
-				});
-				tag.addEventListener('mouseleave', function() {
-					anime({
-						targets: tag,
-						scale: [1.1, 1],
-						duration: 300,
-						easing: 'easeOutQuad'
-					});
-				});
-			});
-
-			// Animate scroll indicator
-			const scrollIndicator = document.querySelector('.scroll-hint, [class*="scroll"]');
-			if (scrollIndicator) {
-				anime({
-					targets: scrollIndicator,
-					translateY: [0, 10, 0],
-					opacity: [0.3, 0.6, 0.3],
-					duration: 2000,
-					loop: true,
-					easing: 'easeInOutSine'
-				});
-			}
-		};
-
-		initAnimeAnimations();
 		</script>
 	</body>
 </html>

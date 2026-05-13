@@ -736,7 +736,6 @@ body.light-mode #mobile-menu a[href="#contact"] {
   width: 520px; height: 520px;
   background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
   top: 5%; left: -10%;
-  /* animation handled by anime.js */
 }
 body.light-mode .hero-orb-1 {
   background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
@@ -745,7 +744,6 @@ body.light-mode .hero-orb-1 {
   width: 400px; height: 400px;
   background: radial-gradient(circle, rgba(59,130,246,0.14) 0%, transparent 70%);
   bottom: 10%; right: -8%;
-  /* animation handled by anime.js */
 }
 body.light-mode .hero-orb-2 {
   background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
@@ -1377,7 +1375,7 @@ body.light-mode .hero-bg-img {
   // ML9 "Coffee Mornings" — scale from 0→1 with spring bounce, triggered on scroll into view
   // All styles inline to bypass Astro scoped CSS (dynamic spans have no scope attribute)
   (function () {
-    // CSS equivalent of anime.js elasticity:600 — cubic-bezier with overshoot
+    // Cubic-bezier overshoot for the letter reveal.
     const TRANS = 'transform 0.8s cubic-bezier(0.34,1.56,0.64,1)';
     const INIT  = `display:inline-block;transform:scale(0);transform-origin:50% 100%;transition:${TRANS}`;
 
