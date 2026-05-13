@@ -27,7 +27,8 @@ const SITE_URL = 'https://luci-studio.com';
 
 const readTime = post ? calculateReadTime(post.content) : '';
 const formattedDate = post ? formatDate(post.created_at) : '';
-const htmlContent = post ? formatMarkdown(post.content) : '';
+const contentWithoutTitle = post ? post.content.replace(/^#\s+.*(\r?\n|$)/, '').replace(/^#\s/gm, '## ').trimStart() : '';
+const htmlContent = contentWithoutTitle ? formatMarkdown(contentWithoutTitle) : '';
 const tags = (post && post.topics && post.topics.length > 0) ? post.topics : ['Engineering'];
 const isArt = post.topics?.some(t => t.toLowerCase().startsWith('art')) ?? false;
 
@@ -70,6 +71,33 @@ const articleSchema = {
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalURL },
     ...(post.topics?.length ? { keywords: post.topics.join(', ') } : {}),
 };
+
+const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: SITE_URL,
+        },
+        {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Blog',
+            item: `${SITE_URL}/blog`,
+        },
+        {
+            '@type': 'ListItem',
+            position: 3,
+            name: post.title,
+            item: canonicalURL,
+        },
+    ],
+};
+
+const structuredData = [articleSchema, breadcrumbSchema];
 ---
 
 {!post ? (
@@ -94,14 +122,16 @@ const articleSchema = {
   description={seoDescription}
   ogImage={ogImage}
   ogImageAlt={post.title}
+  ogImageWidth={600}
   ogType="article"
   canonical={canonicalURL}
   keywords={post.topics?.join(', ')}
-  structuredData={articleSchema}
+  structuredData={structuredData}
   articleMeta={{
     publishedTime: post.created_at,
     modifiedTime: post.updated_at,
     tags: post.topics,
+    author: 'https://luci-studio.com',
   }}
   hideChatFab={true}
 >
