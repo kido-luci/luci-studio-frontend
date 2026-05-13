@@ -1065,6 +1065,8 @@ const canonicalURL = canonical ?? SITE_URL;
 		}, { passive: true });
 
 		// ── Timeline Toggle ─────────────────────────────────────────────────────
+		// Expand all timeline items by default
+		document.querySelectorAll('.timeline-item').forEach(item => item.classList.add('active'));
 		document.querySelectorAll('.timeline-item').forEach(item => {
 			item.addEventListener('click', () => {
 				const isActive = item.classList.contains('active');
