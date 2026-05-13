@@ -7,10 +7,10 @@ interface Props {
 
 const { active = null, ctaLabel = "Let's Talk", ctaHref = '/#contact' } = Astro.props;
 
-const linkBase = "text-xs font-bold transition-all duration-300 uppercase tracking-[0.2em]";
+const linkBase = "topnav-link text-xs font-bold transition-all duration-300 uppercase tracking-[0.2em]";
 const linkIdle = "text-gray-400 hover:text-white";
 const linkChatIdle = "text-gray-400 hover:text-violet-400";
-const linkActive = "text-violet-400";
+const linkActive = "is-active text-violet-400";
 
 const cls = (key: 'home' | 'blog' | 'art' | 'chat' | 'about') => {
   if (active === key) return `${linkBase} ${linkActive}`;
@@ -119,6 +119,18 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
 </script>
 
 <style is:global>
+  /* Brighter nav link text in dark mode for better contrast over the translucent nav bg */
+  body:not(.light-mode) nav .topnav-link {
+    color: rgb(229, 231, 235) !important; /* gray-200 */
+  }
+  body:not(.light-mode) nav .topnav-link:hover {
+    color: #ffffff !important;
+  }
+  body:not(.light-mode) nav .topnav-link.is-active {
+    color: #a78bfa !important; /* violet-400 keeps active state */
+  }
+
+  /* Theme toggle button — light-mode contrast fix */
   body.light-mode .topnav-theme-btn {
     border-color: rgba(17, 24, 39, 0.2) !important;
   }
