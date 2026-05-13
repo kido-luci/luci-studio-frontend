@@ -1,6 +1,6 @@
 ---
 interface Props {
-  active?: 'blog' | 'art' | 'chat' | 'about' | null;
+  active?: 'home' | 'blog' | 'art' | 'chat' | 'about' | null;
   ctaLabel?: string;
   ctaHref?: string;
 }
@@ -12,7 +12,7 @@ const linkIdle = "text-gray-400 hover:text-white";
 const linkChatIdle = "text-gray-400 hover:text-violet-400";
 const linkActive = "text-violet-400";
 
-const cls = (key: 'blog' | 'art' | 'chat' | 'about') => {
+const cls = (key: 'home' | 'blog' | 'art' | 'chat' | 'about') => {
   if (active === key) return `${linkBase} ${linkActive}`;
   if (key === 'chat') return `${linkBase} ${linkChatIdle}`;
   return `${linkBase} ${linkIdle}`;
@@ -32,6 +32,7 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
       <span class="text-xl font-black tracking-[0em]">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
     </a>
     <div class="hidden md:flex items-center gap-8">
+      <a href="/" class={cls('home')}>Home</a>
       <a href="/blog" class={cls('blog')}>Blog</a>
       <a href="/#art" class={cls('art')}>Art</a>
       <a href="/chat" class={cls('chat')}>AI Assistant</a>
@@ -67,6 +68,7 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
 
 <!-- Mobile Menu Overlay -->
 <div id="mobile-menu" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-all duration-500">
+  <a href="/" class={active === 'home' ? mobileActive : mobileBase}>Home</a>
   <a href="/blog" class={active === 'blog' ? mobileActive : mobileBase}>Blog</a>
   <a href="/#art" class={active === 'art' ? mobileActive : mobileBase}>Art</a>
   <a href="/chat" class={active === 'chat' ? mobileActive : mobileBase}>AI Assistant</a>
