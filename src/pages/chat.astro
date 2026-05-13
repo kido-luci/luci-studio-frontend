@@ -1183,6 +1183,11 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 
 		signOutBtn.addEventListener('click', () => {
 			clearToken();
+			history = [];
+			try { localStorage.removeItem(STORAGE_KEY); } catch {}
+			messagesEl.innerHTML = '';
+			appendMsg('assistant', "Hi there! I'm Kido, your AI assistant at Luci Studio. I'm here to help with whatever you need — whether that's writing or debugging code, explaining system design, answering general knowledge questions, helping with creative writing, solving math problems, or just having a thoughtful conversation.\nThere's no topic off-limits. What's on your mind?");
+			if (totalTokensEl) totalTokensEl.textContent = '';
 			renderAuthUI();
 		});
 
