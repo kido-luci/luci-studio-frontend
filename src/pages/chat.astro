@@ -21,7 +21,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 20%, transparent 75%, rgba(0,0,0,0.5) 100%);
 	"></div>
 
-	<div id="chat-page" data-endpoint={CHAT_ENDPOINT} style="display:flex;flex-direction:column;height:100vh;overflow:hidden;padding-top:68px;position:relative;z-index:0;">
+	<div id="chat-page" data-endpoint={CHAT_ENDPOINT} data-api-url={API_BASE} style="display:flex;flex-direction:column;height:100vh;overflow:hidden;padding-top:68px;position:relative;z-index:0;">
 
 		<!-- Header -->
 		<header style="
@@ -64,6 +64,46 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 						<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
 					</svg>
 				</button>
+
+				<div id="chat-user" style="display:none;position:relative;">
+					<button id="chat-user-btn" aria-label="Account" style="
+						display:flex;align-items:center;justify-content:center;
+						width:34px;height:34px;padding:0;
+						border-radius:50%;border:1px solid var(--border-color);
+						background:transparent;cursor:pointer;overflow:hidden;
+						transition:border-color 150ms ease;
+					"
+					onmouseover="this.style.borderColor='rgba(139,92,246,0.5)'"
+					onmouseout="this.style.borderColor='var(--border-color)'">
+						<img id="chat-user-avatar" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;" />
+					</button>
+					<div id="chat-user-menu" style="
+						display:none;position:absolute;top:42px;right:0;
+						min-width:200px;padding:0.4rem;
+						background:var(--bg-card);
+						border:1px solid var(--border-color);
+						border-radius:10px;
+						box-shadow:0 8px 30px rgba(0,0,0,0.35);
+						backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+						z-index:120;
+					">
+						<div style="padding:0.5rem 0.6rem 0.4rem;border-bottom:1px solid var(--border-color);">
+							<div id="chat-user-name" style="font-size:0.8rem;font-weight:600;color:var(--text-primary);"></div>
+							<div id="chat-user-email" style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.1rem;"></div>
+						</div>
+						<button id="chat-signout" type="button" style="
+							display:block;width:100%;text-align:left;
+							padding:0.45rem 0.6rem;margin-top:0.25rem;
+							border:none;background:transparent;
+							color:rgba(244,63,94,0.95);font-family:inherit;
+							font-size:0.78rem;font-weight:600;
+							border-radius:6px;cursor:pointer;
+							transition:background 150ms;
+						"
+						onmouseover="this.style.background='rgba(244,63,94,0.1)'"
+						onmouseout="this.style.background='transparent'">Sign out</button>
+					</div>
+				</div>
 			</div>
 		</header>
 
@@ -1009,9 +1049,13 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			let acc = '';
 
 			try {
+				const tok = localStorage.getItem('user_token');
 				const res = await fetch(ENDPOINT, {
 					method: 'POST',
-					headers: { 'content-type': 'application/json' },
+					headers: {
+						'content-type': 'application/json',
+						...(tok ? { 'Authorization': `Bearer ${tok}` } : {}),
+					},
 					body: JSON.stringify({ messages: history, ...getConfig() }),
 				});
 
@@ -1059,5 +1103,84 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 
 		loadHistory();
 		saveHistory();
+
+		// ── Google Sign-In (same redirect flow as blog comments) ─────────────────
+		const API_URL = page.dataset.apiUrl || '';
+		const TOKEN_KEY = 'user_token';
+
+		const getToken   = () => localStorage.getItem(TOKEN_KEY);
+		const setTokenLS = (t) => localStorage.setItem(TOKEN_KEY, t);
+		const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+
+		const parseJWT = (token) => {
+			try {
+				const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+				const bytes = atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('');
+				return JSON.parse(decodeURIComponent(bytes));
+			} catch { return null; }
+		};
+		const isTokenValid = (token) => {
+			if (!token) return false;
+			const p = parseJWT(token);
+			return p && p.role === 'user' && p.exp > Math.floor(Date.now() / 1000);
+		};
+
+		// Capture token returned by the OAuth redirect (?user_token=...)
+		const params = new URLSearchParams(window.location.search);
+		const urlToken = params.get('user_token');
+		if (urlToken) {
+			setTokenLS(urlToken);
+			params.delete('user_token');
+			const newSearch = params.toString();
+			window.history.replaceState({}, '', window.location.pathname + (newSearch ? '?' + newSearch : ''));
+		}
+
+		const loginOverlay = document.getElementById('chat-login');
+		const loginBtn     = document.getElementById('login-google');
+		const userBox      = document.getElementById('chat-user');
+		const userBtn      = document.getElementById('chat-user-btn');
+		const userMenu     = document.getElementById('chat-user-menu');
+		const userAvatar   = document.getElementById('chat-user-avatar');
+		const userName     = document.getElementById('chat-user-name');
+		const userEmail    = document.getElementById('chat-user-email');
+		const signOutBtn   = document.getElementById('chat-signout');
+
+		const renderAuthUI = () => {
+			const token = getToken();
+			if (isTokenValid(token)) {
+				const p = parseJWT(token);
+				userAvatar.src = p.avatar || '';
+				userAvatar.alt = p.name || '';
+				userName.textContent = p.name || '';
+				userEmail.textContent = p.email || '';
+				userBox.style.display = '';
+				loginOverlay.style.display = 'none';
+			} else {
+				if (token) clearToken();
+				userBox.style.display = 'none';
+				userMenu.style.display = 'none';
+				loginOverlay.style.display = 'flex';
+			}
+		};
+
+		loginBtn.addEventListener('click', () => {
+			const returnTo = encodeURIComponent(window.location.href);
+			window.location.href = `${API_URL}/auth/google?return_to=${returnTo}`;
+		});
+
+		userBtn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			userMenu.style.display = userMenu.style.display === 'block' ? 'none' : 'block';
+		});
+		document.addEventListener('click', (e) => {
+			if (!userBox.contains(e.target)) userMenu.style.display = 'none';
+		});
+
+		signOutBtn.addEventListener('click', () => {
+			clearToken();
+			renderAuthUI();
+		});
+
+		renderAuthUI();
 	})();
 </script>
