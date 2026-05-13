@@ -1111,14 +1111,17 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			return p && p.role === 'user' && p.exp > Math.floor(Date.now() / 1000);
 		};
 
-		// Capture token returned by the OAuth redirect (?user_token=...)
+		// Capture token returned by the OAuth redirect (#user_token=...)
 		const params = new URLSearchParams(window.location.search);
-		const urlToken = params.get('user_token');
+		const fragmentParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+		const urlToken = fragmentParams.get('user_token') || params.get('user_token');
 		if (urlToken) {
 			setTokenLS(urlToken);
+			fragmentParams.delete('user_token');
 			params.delete('user_token');
 			const newSearch = params.toString();
-			window.history.replaceState({}, '', window.location.pathname + (newSearch ? '?' + newSearch : ''));
+			const newHash = fragmentParams.toString();
+			window.history.replaceState({}, '', window.location.pathname + (newSearch ? '?' + newSearch : '') + (newHash ? '#' + newHash : ''));
 		}
 
 		const loginOverlay = document.getElementById('chat-login');

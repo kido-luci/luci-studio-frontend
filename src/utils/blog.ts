@@ -5,6 +5,11 @@ export function calculateReadTime(content: string): string {
     return `${minutes} min`;
 }
 
+export function calculateReadTimeFromWordCount(wordCount?: number): string {
+    if (!wordCount || wordCount < 1) return '1 min';
+    return `${Math.ceil(wordCount / 200)} min`;
+}
+
 export function formatDate(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', {
@@ -32,6 +37,7 @@ function escapeHtml(text: string): string {
 }
 
 const UNSAFE_URL = /^(javascript|data|vbscript|file):/i;
+const SAFE_LANGUAGE = /[^A-Za-z0-9_+-]/g;
 
 function safeImgSrc(url: string): string {
     return UNSAFE_URL.test(url) ? '#' : url;
@@ -64,8 +70,9 @@ export function formatMarkdown(text: string) {
     // 1. Extract fenced code blocks → placeholders (escape content inside)
     processedText = processedText.replace(/```(.*?)\r?\n([\s\S]*?)```/gim, (_, lang, code) => {
         const index = codeBlocks.length;
+        const safeLang = escapeHtml(lang.trim().replace(SAFE_LANGUAGE, ''));
         codeBlocks.push(
-            `<div class="code-block-container"><pre><code class="language-${lang.trim()}">${escapeHtml(code)}</code></pre></div>`
+            `<div class="code-block-container"><pre><code class="language-${safeLang}">${escapeHtml(code)}</code></pre></div>`
         );
         return `__CODE_BLOCK_${index}__`;
     });

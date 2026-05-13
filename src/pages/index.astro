@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import TopNav from "../components/TopNav.astro";
 import { postService } from "../services/posts";
-import { calculateReadTime, formatDate, slugify } from "../utils/blog";
+import { calculateReadTime, calculateReadTimeFromWordCount, formatDate, slugify } from "../utils/blog";
 
 const projects = [
   { title: 'memoirMe', year: '2024–Now', desc: 'Zero-knowledge RSA/AES encrypted diary with geolocation mapping, AI features, and cross-platform sync. Privacy-first, no server-side compromise.', links: [{ label: 'App Store', url: 'https://apps.apple.com/au/app/memoirme/id1640973202' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=com.nartus.interactiveDiary&pcampaignid=web_share' }, { label: 'The Nartus', url: 'https://www.thenartus.com/' }], img: 'https://media.luci-studio.com/MEMOIRME.png', logo: 'https://media.luci-studio.com/MEMOIRME-LOGO.webp' },
@@ -20,7 +20,7 @@ const blogPosts = rawPosts
   title: p.title,
   subtitle: p.subtitle || '',
   date: formatDate(p.created_at),
-  read: calculateReadTime(p.content),
+  read: p.word_count ? calculateReadTimeFromWordCount(p.word_count) : calculateReadTime(p.content || ''),
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
   likes: p.likes ?? 0,
@@ -1459,4 +1459,3 @@ body.light-mode .hero-bg-img {
     });
   })();
 </script>
-

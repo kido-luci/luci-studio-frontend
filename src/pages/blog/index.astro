@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../../components/TopNav.astro";
 import { postService } from "../../services/posts";
-import { calculateReadTime, formatDate, slugify } from "../../utils/blog";
+import { calculateReadTime, calculateReadTimeFromWordCount, formatDate, slugify } from "../../utils/blog";
 
 const rawPosts = await postService.getAll();
 const allPosts = rawPosts
@@ -15,7 +15,7 @@ const allPosts = rawPosts
     tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
     topics: p.topics || [],
     date: formatDate(p.created_at),
-    read: calculateReadTime(p.content),
+    read: p.word_count ? calculateReadTimeFromWordCount(p.word_count) : calculateReadTime(p.content || ''),
     likes: p.likes ?? 0,
     views: p.views ?? 0,
     img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',

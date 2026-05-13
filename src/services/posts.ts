@@ -10,6 +10,7 @@ export interface Post {
     cover_image_url?: string;
     views: number;
     likes: number;
+    word_count?: number;
     created_at: string;
     updated_at: string;
 }

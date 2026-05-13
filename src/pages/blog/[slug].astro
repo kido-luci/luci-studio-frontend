@@ -5,9 +5,12 @@ import { calculateReadTime, formatDate, formatMarkdown, slugify } from "../../ut
 
 export async function getStaticPaths() {
   const posts = await postService.getAll();
-  return posts.map((post) => ({
-    params: { slug: `${slugify(post.title)}-${post.id}` },
-    props: { post },
+  return Promise.all(posts.map(async (summary) => {
+    const post = await postService.getByID(summary.id);
+    return {
+      params: { slug: `${slugify(summary.title)}-${summary.id}` },
+      props: { post: post || summary },
+    };
   }));
 }
 
@@ -694,12 +697,15 @@ const articleSchema = {
 
     // --- Grab token from URL after OAuth redirect ---
     const params = new URLSearchParams(window.location.search);
-    const urlToken = params.get('user_token');
+    const fragmentParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const urlToken = fragmentParams.get('user_token') || params.get('user_token');
     if (urlToken) {
       setToken(urlToken);
+      fragmentParams.delete('user_token');
       params.delete('user_token');
       const newSearch = params.toString();
-      window.history.replaceState({}, '', window.location.pathname + (newSearch ? '?' + newSearch : ''));
+      const newHash = fragmentParams.toString();
+      window.history.replaceState({}, '', window.location.pathname + (newSearch ? '?' + newSearch : '') + (newHash ? '#' + newHash : ''));
     }
 
     // --- UI elements ---
