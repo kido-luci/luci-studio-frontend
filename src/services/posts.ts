@@ -1,5 +1,6 @@
 const rawBaseUrl = import.meta.env.PUBLIC_API_URL || '';
 const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+const failFast = import.meta.env.PROD && import.meta.env.ALLOW_EMPTY_POSTS !== '1';
 
 export interface Post {
     id: number;
@@ -19,11 +20,12 @@ export const postService = {
     async getAll(): Promise<Post[]> {
         try {
             const response = await fetch(`${BASE_URL}/posts`);
-            if (!response.ok) return [];
+            if (!response.ok) throw new Error(`GET /posts failed with ${response.status}`);
             const data = await response.json();
             return Array.isArray(data) ? data : (data || []);
         } catch (error) {
             console.error('Failed to fetch posts:', error);
+            if (failFast) throw error;
             return [];
         }
     },
@@ -31,10 +33,11 @@ export const postService = {
     async getByID(id: string | number): Promise<Post | null> {
         try {
             const response = await fetch(`${BASE_URL}/posts/${id}`);
-            if (!response.ok) return null;
+            if (!response.ok) throw new Error(`GET /posts/${id} failed with ${response.status}`);
             return response.json();
         } catch (error) {
             console.error(`Failed to fetch post ${id}:`, error);
+            if (failFast) throw error;
             return null;
         }
     }

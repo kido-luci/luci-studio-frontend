@@ -734,18 +734,17 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 	}
 </style>
 
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-<script is:inline>document.addEventListener('DOMContentLoaded', () => { if (window.Prism) Prism.manual = true; });</script>
+	<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+	<script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+	<script is:inline>
+		document.addEventListener('DOMContentLoaded', () => {
+			if (!window.Prism) return;
+			Prism.manual = true;
+			if (Prism.plugins?.autoloader) {
+				Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+			}
+		});
+	</script>
 
 <script is:inline>
 	(() => {
@@ -866,20 +865,40 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		let history = [];
 		let streaming = false;
 
-		const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+			const esc = (s) => String(s ?? '')
+				.replace(/&/g,'&amp;')
+				.replace(/</g,'&lt;')
+				.replace(/>/g,'&gt;')
+				.replace(/"/g,'&quot;')
+				.replace(/'/g,'&#39;');
+			const safeHttpHref = (href) => {
+				try {
+					const u = new URL(href.replace(/&amp;/g, '&'));
+					if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+					return esc(u.href);
+				} catch {
+					return '';
+				}
+			};
 
-		const md = (text) => {
-			const e = esc(text);
-			return e
-				.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, c) => {
-					const cls = lang ? ` class="language-${lang}"` : '';
-					return `<pre><code${cls}>${c.trim()}</code></pre>`;
-				})
-				.replace(/`([^`]+)`/g, '<code>$1</code>')
-				.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-				.replace(/\*([^*]+)\*/g, '<em>$1</em>')
-				.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-		};
+			const md = (text) => {
+				const codeBlocks = [];
+				const withPlaceholders = String(text ?? '').replace(/```([A-Za-z0-9_+-]*)\n?([\s\S]*?)```/g, (_, lang, c) => {
+					const cls = lang ? ` class="language-${esc(lang)}"` : '';
+					const index = codeBlocks.length;
+					codeBlocks.push(`<pre><code${cls}>${esc(c.trim())}</code></pre>`);
+					return `__CHAT_CODE_BLOCK_${index}__`;
+				});
+				return esc(withPlaceholders)
+					.replace(/`([^`]+)`/g, '<code>$1</code>')
+					.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+					.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+					.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, href) => {
+						const safeHref = safeHttpHref(href);
+						return safeHref ? `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">${label}</a>` : label;
+					})
+					.replace(/__CHAT_CODE_BLOCK_(\d+)__/g, (_, i) => codeBlocks[Number(i)] || '');
+			};
 
 		const highlight = (el) => { if (window.Prism) Prism.highlightAllUnder(el); };
 
