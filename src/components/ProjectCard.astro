@@ -16,7 +16,7 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
   <!-- Image Container -->
   <div class="relative aspect-[16/10] rounded-2xl overflow-hidden mb-5 sm:mb-8 border border-white/5 shadow-2xl">
     <div class="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10"></div>
-    <img src={img} alt={title} class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110" />
+    <img src={img} alt={title} loading="lazy" class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110" />
     
     <!-- Year Tag -->
     <div class="absolute top-5 left-5 z-20">
@@ -28,7 +28,7 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
   <div class="px-2 flex flex-col flex-1">
     <div class="flex items-start justify-between mb-4">
       <h3 class="text-4xl font-black tracking-tighter text-white drop-shadow-sm group-hover:text-shimmer transition-all duration-500 leading-none flex items-center gap-2">
-        {logo && <img src={logo} alt={title} class="w-14 h-14 rounded-xl object-contain bg-white/5 p-1.5 border border-white/10 shadow-2xl shrink-0 group-hover:scale-110 group-hover:border-white/20 transition-all duration-500" />}
+        {logo && <img src={logo} alt={title} loading="lazy" class="w-14 h-14 rounded-xl object-contain bg-white/5 p-1.5 border border-white/10 shadow-2xl shrink-0 group-hover:scale-110 group-hover:border-white/20 transition-all duration-500" />}
         <span>{title}<span class="text-violet-500">.</span></span>
       </h3>
       <div class="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center text-white/20 group-hover:text-white group-hover:border-violet-500/40 group-hover:bg-violet-500/5 transition-all duration-500 shrink-0">
