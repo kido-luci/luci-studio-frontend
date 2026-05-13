@@ -266,6 +266,10 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					font-size:0.68rem;color:var(--text-tertiary);
 					user-select:none;white-space:nowrap;
 				"></span>
+				<span id="chat-daily-quota" style="
+					font-size:0.68rem;color:var(--text-tertiary);
+					user-select:none;white-space:nowrap;
+				"></span>
 				<button type="button" id="chat-clear" aria-label="Clear conversation" style="
 					background:transparent;border:none;padding:0;
 					font-family:inherit;font-size:0.68rem;font-weight:500;
@@ -963,6 +967,24 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			if (totalTokensEl) totalTokensEl.textContent = total > 0 ? `~${total} ctx tokens` : '';
 		};
 
+		// Daily quota indicator — fetched on load and after every chat reply.
+		const quotaEl = document.getElementById('chat-daily-quota');
+		const QUOTA_ENDPOINT = `${page.dataset.apiUrl || ''}/chat/quota`;
+		const refreshQuota = async () => {
+			if (!quotaEl) return;
+			const tok = localStorage.getItem('user_token');
+			if (!tok) { quotaEl.textContent = ''; return; }
+			try {
+				const res = await fetch(QUOTA_ENDPOINT, { headers: { 'Authorization': `Bearer ${tok}` } });
+				if (!res.ok) { quotaEl.textContent = ''; return; }
+				const d = await res.json();
+				if (d.unlimited) { quotaEl.textContent = '∞ daily'; return; }
+				const pct = d.limit > 0 ? Math.round((d.used / d.limit) * 100) : 0;
+				quotaEl.textContent = `${d.used}/${d.limit} daily (${pct}%)`;
+				quotaEl.style.color = pct >= 90 ? 'rgba(244,63,94,0.9)' : 'var(--text-tertiary)';
+			} catch { quotaEl.textContent = ''; }
+		};
+
 		const autosize = () => {
 			input.style.height = 'auto';
 			input.style.height = Math.min(input.scrollHeight, 240) + 'px';
@@ -1044,6 +1066,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 
 				if (!bubble) { typingEl.remove(); appendMsg('assistant', 'No response received. The selected model may be unavailable — try switching to a different model.'); }
 				else if (acc.trim()) { highlight(bubble._content); if (bubble._setTokens) bubble._setTokens(acc); history.push({ role: 'assistant', content: acc }); saveHistory(); }
+				refreshQuota();
 			} catch (err) {
 				typingEl.remove();
 				appendMsg('assistant', `Network error: ${err?.message || 'unknown'}`);
@@ -1065,6 +1088,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 
 		loadHistory();
 		saveHistory();
+		refreshQuota();
 
 		// ── Google Sign-In (same redirect flow as blog comments) ─────────────────
 		const API_URL = page.dataset.apiUrl || '';
@@ -1145,6 +1169,7 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			messagesEl.innerHTML = '';
 			appendMsg('assistant', "Hi there! I'm Kido, your AI assistant at Luci Studio. I'm here to help with whatever you need — whether that's writing or debugging code, explaining system design, answering general knowledge questions, helping with creative writing, solving math problems, or just having a thoughtful conversation.\nThere's no topic off-limits. What's on your mind?");
 			if (totalTokensEl) totalTokensEl.textContent = '';
+			if (quotaEl) quotaEl.textContent = '';
 			renderAuthUI();
 		});
 
