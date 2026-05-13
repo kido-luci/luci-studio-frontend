@@ -953,22 +953,27 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			inner.style.cssText = `display:flex;flex-direction:column;gap:0.3rem;align-items:${role === 'user' ? 'flex-end' : 'flex-start'};`;
 			const bubble = document.createElement('div');
 			bubble.className = 'msg-bubble';
-			bubble.innerHTML = role === 'assistant' ? md(text) : esc(text);
+
+			const content = document.createElement('div');
+			content.className = 'msg-content';
+			content.innerHTML = role === 'assistant' ? md(text) : esc(text);
+			bubble.appendChild(content);
 
 			const footer = document.createElement('div');
 			footer.className = 'msg-footer';
 			const tokenEl = document.createElement('span');
 			tokenEl.className = 'msg-tokens';
 			tokenEl.textContent = text ? `~${estimateTokens(text)} tokens` : '';
-			footer.appendChild(makeCopyBtn(() => bubble));
+			footer.appendChild(makeCopyBtn(() => content));
 			footer.appendChild(tokenEl);
 
 			bubble.appendChild(footer);
 			inner.appendChild(bubble);
 			wrap.appendChild(inner);
 			messagesEl.appendChild(wrap);
-			if (role === 'assistant') highlight(bubble);
+			if (role === 'assistant') highlight(content);
 			scrollBottom();
+			bubble._content = content;
 			bubble._setTokens = (t) => { tokenEl.textContent = `~${estimateTokens(t)} tokens`; };
 			return bubble;
 		};
@@ -1076,12 +1081,12 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					if (!chunk) continue;
 					if (!bubble) { typingEl.remove(); bubble = appendMsg('assistant', ''); }
 					acc += chunk;
-					bubble.innerHTML = md(acc);
+					bubble._content.innerHTML = md(acc);
 					scrollBottom();
 				}
 
 				if (!bubble) { typingEl.remove(); appendMsg('assistant', 'No response received. The selected model may be unavailable — try switching to a different model.'); }
-				else if (acc.trim()) { highlight(bubble); if (bubble._setTokens) bubble._setTokens(acc); history.push({ role: 'assistant', content: acc }); saveHistory(); }
+				else if (acc.trim()) { highlight(bubble._content); if (bubble._setTokens) bubble._setTokens(acc); history.push({ role: 'assistant', content: acc }); saveHistory(); }
 			} catch (err) {
 				typingEl.remove();
 				appendMsg('assistant', `Network error: ${err?.message || 'unknown'}`);
