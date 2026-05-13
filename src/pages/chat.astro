@@ -270,10 +270,10 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					font-size:0.68rem;color:var(--text-tertiary);
 					user-select:none;white-space:nowrap;
 				"></span>
-				<button type="button" id="chat-clear" aria-label="Clear conversation" style="
-					background:transparent;border:none;padding:0;
-					font-family:inherit;font-size:0.68rem;font-weight:500;
-					color:rgba(244,63,94,0.9);
+					<button type="button" id="chat-clear" aria-label="Clear conversation" style="
+						display:none;background:transparent;border:none;padding:0;
+						font-family:inherit;font-size:0.68rem;font-weight:500;
+						color:rgba(244,63,94,0.9);
 					text-decoration:underline;text-underline-offset:2px;
 					cursor:pointer;white-space:nowrap;
 					transition:color 150ms ease;
@@ -861,11 +861,15 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			presence_penalty:  parseFloat(document.getElementById('cfg-pres-pen').value),
 		});
 
-		const STORAGE_KEY = 'luci-chat-history-v1';
-		let history = [];
-		let streaming = false;
+			const STORAGE_KEY = 'luci-chat-history-v1';
+			let history = [];
+			let streaming = false;
+			const updateClearButton = () => {
+				if (!clearBtn) return;
+				clearBtn.style.display = history.length > 0 ? '' : 'none';
+			};
 
-			const esc = (s) => String(s ?? '')
+				const esc = (s) => String(s ?? '')
 				.replace(/&/g,'&amp;')
 				.replace(/</g,'&lt;')
 				.replace(/>/g,'&gt;')
@@ -971,20 +975,25 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			return wrap;
 		};
 
-		const loadHistory = () => {
-			try {
-				const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-				if (!Array.isArray(parsed)) return;
-				history = parsed.filter(m => m && (m.role==='user'||m.role==='assistant') && typeof m.content==='string');
-				history.forEach(m => appendMsg(m.role, m.content));
-			} catch {}
-		};
+			const loadHistory = () => {
+				try {
+					const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+					if (!Array.isArray(parsed)) {
+						updateClearButton();
+						return;
+					}
+					history = parsed.filter(m => m && (m.role==='user'||m.role==='assistant') && typeof m.content==='string');
+					history.forEach(m => appendMsg(m.role, m.content));
+				} catch {}
+				updateClearButton();
+			};
 
-		const saveHistory = () => {
-			try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20))); } catch {}
-			const total = history.reduce((s, m) => s + estimateTokens(m.content), 0);
-			if (totalTokensEl) totalTokensEl.textContent = total > 0 ? `~${total} ctx tokens` : '';
-		};
+			const saveHistory = () => {
+				try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20))); } catch {}
+				const total = history.reduce((s, m) => s + estimateTokens(m.content), 0);
+				if (totalTokensEl) totalTokensEl.textContent = total > 0 ? `~${total} ctx tokens` : '';
+				updateClearButton();
+			};
 
 		// Daily quota indicator — fetched on load and after every chat reply.
 		const quotaEl = document.getElementById('chat-daily-quota');
@@ -1033,9 +1042,9 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		clearYes.addEventListener('click', () => {
 			closeClearModal();
 			history = [];
-			messagesEl.innerHTML = '';
-			appendMsg('assistant', "Conversation cleared! Fresh start — what would you like to talk about? I'm ready to help with code, writing, questions, or anything else on your mind.");
-			saveHistory();
+				messagesEl.innerHTML = '';
+				appendMsg('assistant', "Conversation cleared! Fresh start — what would you like to talk about? I'm ready to help with code, writing, questions, or anything else on your mind.");
+				saveHistory();
 		});
 
 		const send = async (text) => {
@@ -1190,10 +1199,11 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			try { localStorage.removeItem(STORAGE_KEY); } catch {}
 			messagesEl.innerHTML = '';
 			appendMsg('assistant', "Hi there! I'm Kido, your AI assistant at Luci Studio. I'm here to help with whatever you need — whether that's writing or debugging code, explaining system design, answering general knowledge questions, helping with creative writing, solving math problems, or just having a thoughtful conversation.\nThere's no topic off-limits. What's on your mind?");
-			if (totalTokensEl) totalTokensEl.textContent = '';
-			if (quotaEl) quotaEl.textContent = '';
-			renderAuthUI();
-		});
+				if (totalTokensEl) totalTokensEl.textContent = '';
+				if (quotaEl) quotaEl.textContent = '';
+				updateClearButton();
+				renderAuthUI();
+			});
 
 		renderAuthUI();
 	})();
