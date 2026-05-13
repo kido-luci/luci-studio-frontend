@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
+import TopNav from "../components/TopNav.astro";
 import { postService } from "../services/posts";
 import { calculateReadTime, formatDate, slugify } from "../utils/blog";
 
@@ -82,59 +83,7 @@ const homepageSchema = [
   structuredData={homepageSchema}
 >
 
-  <!-- NAV -->
-  <nav class="fixed top-0 w-full z-[100] border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
-    <div class="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3 group">
-        <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
-        <span class="text-xl font-black tracking-[0em]">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
-      </a>
-      <div class="hidden md:flex items-center gap-8">
-        <a href="/blog" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">Blog</a>
-        <a href="#art" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">Art</a>
-        <a href="/chat" class="text-xs font-bold text-gray-400 hover:text-violet-400 transition-all duration-300 uppercase tracking-[0.2em]">AI Assistant</a>
-        <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">LinkedIn</a>
-        <a href="/about" class="text-xs font-bold text-gray-400 hover:text-violet-400 transition-all duration-300 uppercase tracking-[0.2em]">About</a>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <!-- Theme Toggle Button -->
-        <button 
-          id="theme-toggle" 
-          onclick="window.toggleTheme()"
-          class="w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
-          aria-label="Toggle theme"
-        >
-          <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-          </svg>
-          <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-          </svg>
-        </button>
-
-        <a href="#contact" class="magnetic hidden sm:block px-5 py-2.5 bg-white text-black text-xs font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest">Let's Talk</a>
-        
-        <!-- Mobile Menu Toggle -->
-        <button id="mobile-menu-toggle" class="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[100] group">
-          <span class="w-6 h-0.5 transition-transform duration-300 group-[.active]:rotate-45 group-[.active]:translate-y-2" style="background-color: var(--text-primary);"></span>
-          <span class="w-6 h-0.5 transition-opacity duration-300 group-[.active]:opacity-0" style="background-color: var(--text-primary);"></span>
-          <span class="w-6 h-0.5 transition-transform duration-300 group-[.active]:-rotate-45 group-[.active]:-translate-y-2" style="background-color: var(--text-primary);"></span>
-        </button>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Mobile Menu Overlay -->
-  <div id="mobile-menu" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-all duration-500">
-    <a href="/blog" class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">Blog</a>
-    <a href="#art" class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">Art</a>
-    <a href="/chat" class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">AI Assistant</a>
-    <div class="h-px w-12 bg-white/10 my-4"></div>
-    <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">LinkedIn</a>
-    <a href="/about" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">About</a>
-    <a href="#contact" class="mobile-nav-link mt-8 px-8 py-4 bg-white text-black font-black rounded-full uppercase tracking-widest">Let's Talk</a>
-  </div>
+  <TopNav ctaLabel="Let's Talk" ctaHref="#contact" />
 
   <main data-api-url={API_URL}>
 
@@ -1128,39 +1077,6 @@ body.light-mode .hero-bg-img {
 </style>
 
 <script>
-  // Mobile Menu Logic
-  const toggle = document.getElementById('mobile-menu-toggle');
-  const menu = document.getElementById('mobile-menu');
-  const links = document.querySelectorAll('.mobile-nav-link');
-
-  toggle?.addEventListener('click', () => {
-    toggle.classList.toggle('active');
-    menu?.classList.toggle('opacity-100');
-    menu?.classList.toggle('pointer-events-auto');
-    // Toggle body scroll
-    document.body.style.overflow = toggle.classList.contains('active') ? 'hidden' : '';
-  });
-
-  links.forEach(link => {
-    link.addEventListener('click', () => {
-      toggle?.classList.remove('active');
-      menu?.classList.remove('opacity-100');
-      menu?.classList.remove('pointer-events-auto');
-      document.body.style.overflow = '';
-    });
-  });
-
-  // Auto-close menu on landscape or larger screens
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768 || window.matchMedia("(orientation: landscape)").matches) {
-      if (toggle?.classList.contains('active')) {
-        toggle.classList.remove('active');
-        menu?.classList.remove('opacity-100', 'pointer-events-auto');
-        document.body.style.overflow = '';
-      }
-    }
-  });
-
 
   // EXPERIENCE timeline items — each animates as it scrolls into view
   (function () {

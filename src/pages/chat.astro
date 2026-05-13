@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import TopNav from "../components/TopNav.astro";
 
 const rawBaseUrl = (import.meta.env.PUBLIC_API_URL as string | undefined) || '';
 const API_BASE = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
@@ -21,95 +22,54 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 20%, transparent 75%, rgba(0,0,0,0.5) 100%);
 	"></div>
 
-	<div id="chat-page" data-endpoint={CHAT_ENDPOINT} data-api-url={API_BASE} style="display:flex;flex-direction:column;height:100vh;overflow:hidden;padding-top:68px;position:relative;z-index:0;">
+	<TopNav active="chat" ctaLabel="Home" ctaHref="/" />
 
-		<!-- Header -->
-		<header style="
-			display:flex;align-items:center;justify-content:space-between;
-			padding:1rem 1.5rem;
-			border:1px solid rgba(0, 0, 0, 0.671);
-			box-shadow:0 1px 0 rgba(139,92,246,0.08);
-			position:fixed;top:0;left:0;right:0;z-index:100;
+	<!-- Floating user-account button (sits just below the nav, top-right) -->
+	<div id="chat-user" style="display:none;position:fixed;top:88px;right:16px;z-index:110;">
+		<button id="chat-user-btn" aria-label="Account" style="
+			display:flex;align-items:center;justify-content:center;
+			width:40px;height:40px;padding:0;
+			border-radius:50%;border:1px solid rgba(255,255,255,0.1);
+			background:transparent;cursor:pointer;overflow:hidden;
+			transition:border-color 150ms ease;
+		"
+		onmouseover="this.style.borderColor='rgba(139,92,246,0.5)'"
+		onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+			<img id="chat-user-avatar" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;" />
+		</button>
+		<div id="chat-user-menu" style="
+			display:none;position:absolute;top:48px;right:0;
+			min-width:200px;padding:0.4rem;
+			background:var(--bg-card);
+			border:1px solid var(--border-color);
+			border-radius:10px;
+			box-shadow:0 8px 30px rgba(0,0,0,0.35);
+			backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+			z-index:120;
 		">
-			<a href="/" style="
-				display:flex;align-items:center;gap:0.65rem;
-				text-decoration:none;color:var(--text-primary);
-			">
-				<img src="/images/logo_icon.png" alt="Luci Studio" style="width:36px;height:36px;border-radius:10px;" />
-				<span style="font-size:1rem;font-weight:900;letter-spacing:0em;line-height:1;">
-					LUCI <span class="text-shimmer">STUDIO</span><span style="color:#8b5cf6;">.</span>
-				</span>
-			</a>
-			<div style="display:flex;align-items:center;gap:0.5rem;">
-				<button
-					id="chat-theme-toggle"
-					onclick="window.toggleTheme && window.toggleTheme()"
-					aria-label="Toggle theme"
-					style="
-						width:34px;height:34px;
-						display:flex;align-items:center;justify-content:center;
-						border-radius:8px;border:1px solid var(--border-color);
-						background:transparent;color:var(--text-secondary);
-						cursor:pointer;transition:color 150ms ease,border-color 150ms ease;
-					"
-					onmouseover="this.style.color='var(--text-primary)';this.style.borderColor='rgba(139,92,246,0.4)'"
-					onmouseout="this.style.color='var(--text-secondary)';this.style.borderColor='var(--border-color)'"
-				>
-					<!-- Moon: shown in dark mode -->
-					<svg id="chat-icon-dark" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-					</svg>
-					<!-- Sun: shown in light mode -->
-					<svg id="chat-icon-light" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none">
-						<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-					</svg>
-				</button>
-
-				<div id="chat-user" style="display:none;position:relative;">
-					<button id="chat-user-btn" aria-label="Account" style="
-						display:flex;align-items:center;justify-content:center;
-						width:34px;height:34px;padding:0;
-						border-radius:50%;border:1px solid var(--border-color);
-						background:transparent;cursor:pointer;overflow:hidden;
-						transition:border-color 150ms ease;
-					"
-					onmouseover="this.style.borderColor='rgba(139,92,246,0.5)'"
-					onmouseout="this.style.borderColor='var(--border-color)'">
-						<img id="chat-user-avatar" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;" />
-					</button>
-					<div id="chat-user-menu" style="
-						display:none;position:absolute;top:42px;right:0;
-						min-width:200px;padding:0.4rem;
-						background:var(--bg-card);
-						border:1px solid var(--border-color);
-						border-radius:10px;
-						box-shadow:0 8px 30px rgba(0,0,0,0.35);
-						backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-						z-index:120;
-					">
-						<div style="padding:0.5rem 0.6rem 0.4rem;border-bottom:1px solid var(--border-color);">
-							<div id="chat-user-name" style="font-size:0.8rem;font-weight:600;color:var(--text-primary);"></div>
-							<div id="chat-user-email" style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.1rem;"></div>
-						</div>
-						<button id="chat-signout" type="button" style="
-							display:block;width:100%;text-align:left;
-							padding:0.45rem 0.6rem;margin-top:0.25rem;
-							border:none;background:transparent;
-							color:rgba(244,63,94,0.95);font-family:inherit;
-							font-size:0.78rem;font-weight:600;
-							border-radius:6px;cursor:pointer;
-							transition:background 150ms;
-						"
-						onmouseover="this.style.background='rgba(244,63,94,0.1)'"
-						onmouseout="this.style.background='transparent'">Sign out</button>
-					</div>
-				</div>
+			<div style="padding:0.5rem 0.6rem 0.4rem;border-bottom:1px solid var(--border-color);">
+				<div id="chat-user-name" style="font-size:0.8rem;font-weight:600;color:var(--text-primary);"></div>
+				<div id="chat-user-email" style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.1rem;"></div>
 			</div>
-		</header>
+			<button id="chat-signout" type="button" style="
+				display:block;width:100%;text-align:left;
+				padding:0.45rem 0.6rem;margin-top:0.25rem;
+				border:none;background:transparent;
+				color:rgba(244,63,94,0.95);font-family:inherit;
+				font-size:0.78rem;font-weight:600;
+				border-radius:6px;cursor:pointer;
+				transition:background 150ms;
+			"
+			onmouseover="this.style.background='rgba(244,63,94,0.1)'"
+			onmouseout="this.style.background='transparent'">Sign out</button>
+		</div>
+	</div>
+
+	<div id="chat-page" data-endpoint={CHAT_ENDPOINT} data-api-url={API_BASE} style="display:flex;flex-direction:column;height:100vh;overflow:hidden;padding-top:80px;position:relative;z-index:0;">
 
 		<!-- Config panel -->
 		<aside id="config-panel" aria-label="AI configuration" style="
-			position:fixed;top:68px;left:0;height:calc(100vh - 68px);width:272px;
+			position:fixed;top:80px;left:0;height:calc(100vh - 80px);width:272px;
 			border-right:1px solid rgba(0,0,0,0.671);
 			z-index:95;
 			display:flex;flex-direction:column;
@@ -803,16 +763,6 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 		const page = document.getElementById('chat-page');
 		if (!page) return;
 		const ENDPOINT = page.dataset.endpoint || '/chat';
-
-		const syncThemeIcon = () => {
-			const isLight = document.documentElement.classList.contains('light-mode');
-			document.getElementById('chat-icon-dark').style.display = isLight ? 'none' : '';
-			document.getElementById('chat-icon-light').style.display = isLight ? '' : 'none';
-		};
-		syncThemeIcon();
-		document.getElementById('chat-theme-toggle').addEventListener('click', () => {
-			requestAnimationFrame(syncThemeIcon);
-		});
 
 		const messagesEl = document.getElementById('chat-messages');
 		const form = document.getElementById('chat-form');
