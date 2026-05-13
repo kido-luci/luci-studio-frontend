@@ -370,10 +370,13 @@ const homepageSchema = [
             <img src="/images/logo_icon.png" alt="Luci Studio Logo" loading="lazy" class="h-8 w-8 rounded-lg" />
             <span class="text-2xl font-black tracking-tighter">LUCI-STUDIO<span class="text-violet-500">.</span></span>
           </a>
-          <div class="flex items-center gap-8">
+          <div class="flex flex-wrap items-center justify-center gap-6 md:gap-8">
             {[['GitHub','https://github.com/kido-luci'],['LinkedIn','https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/'],['Medium','https://medium.com/@lapl1412.work']].map(([l,h]) => (
               <a href={h} target="_blank" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">{l}</a>
             ))}
+            <a href="/terms" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Terms</a>
+            <a href="/privacy" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Privacy</a>
+            <button type="button" data-cookie-settings class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Cookie Settings</button>
           </div>
           <div class="flex flex-col items-center md:items-end gap-3">
             <div class="flex flex-col items-center md:items-end gap-1">
