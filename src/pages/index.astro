@@ -104,12 +104,11 @@ const homepageSchema = [
         <span class="text-xl font-black tracking-[0em]">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
       </a>
       <div class="hidden md:flex items-center gap-8">
-        {['About','Work','Art'].map(l => (
-          <a href={`#${l.toLowerCase()}`} class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">{l}</a>
-        ))}
         <a href="/blog" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">Blog</a>
-        <a href="https://medium.com/@lapl1412.work" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">Medium</a>
+        <a href="#art" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">Art</a>
+        <a href="/chat" class="text-xs font-bold text-gray-400 hover:text-violet-400 transition-all duration-300 uppercase tracking-[0.2em]">AI Assistant</a>
         <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">LinkedIn</a>
+        <a href="#about" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em]">About</a>
       </div>
 
       <div class="flex items-center gap-4">
@@ -142,13 +141,12 @@ const homepageSchema = [
 
   <!-- Mobile Menu Overlay -->
   <div id="mobile-menu" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-all duration-500">
-    {['About','Work','Art'].map(l => (
-      <a href={`#${l.toLowerCase()}`} class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">{l}</a>
-    ))}
     <a href="/blog" class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">Blog</a>
+    <a href="#art" class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">Art</a>
+    <a href="/chat" class="mobile-nav-link text-4xl font-black tracking-tighter hover:text-violet-500 transition-colors">AI Assistant</a>
     <div class="h-px w-12 bg-white/10 my-4"></div>
-    <a href="https://medium.com/@lapl1412.work" target="_blank" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">Medium</a>
     <a href="https://www.linkedin.com/in/trung-l%E1%BA%ADp-luci-ba0b6a339/" target="_blank" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">LinkedIn</a>
+    <a href="#about" class="mobile-nav-link text-xl font-bold text-gray-400 uppercase tracking-widest">About</a>
     <a href="#contact" class="mobile-nav-link mt-8 px-8 py-4 bg-white text-black font-black rounded-full uppercase tracking-widest">Let's Talk</a>
   </div>
 
