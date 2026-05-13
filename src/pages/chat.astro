@@ -262,13 +262,9 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 					<option value="groq/compound">Groq Compound</option>
 				</select>
 				</div>
-				<span id="chat-total-tokens" style="
-					font-size:0.68rem;color:var(--text-tertiary);
-					user-select:none;white-space:nowrap;
-				"></span>
-				<span id="chat-daily-quota" style="
-					font-size:0.68rem;color:var(--text-tertiary);
-					user-select:none;white-space:nowrap;
+					<span id="chat-daily-quota" style="
+						font-size:0.68rem;color:var(--text-tertiary);
+						user-select:none;white-space:nowrap;
 				"></span>
 					<button type="button" id="chat-clear" aria-label="Clear conversation" style="
 						display:none;background:transparent;border:none;padding:0;
@@ -776,10 +772,9 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 
 		const messagesEl = document.getElementById('chat-messages');
 		const form = document.getElementById('chat-form');
-		const input = document.getElementById('chat-input');
-		const sendBtn = document.getElementById('chat-send');
-		const clearBtn = document.getElementById('chat-clear');
-		const totalTokensEl = document.getElementById('chat-total-tokens');
+			const input = document.getElementById('chat-input');
+			const sendBtn = document.getElementById('chat-send');
+			const clearBtn = document.getElementById('chat-clear');
 
 		// ── Config panel ──────────────────────────────────────────────────────────
 		const configReset = document.getElementById('config-reset');
@@ -988,12 +983,10 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 				updateClearButton();
 			};
 
-			const saveHistory = () => {
-				try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20))); } catch {}
-				const total = history.reduce((s, m) => s + estimateTokens(m.content), 0);
-				if (totalTokensEl) totalTokensEl.textContent = total > 0 ? `~${total} ctx tokens` : '';
-				updateClearButton();
-			};
+				const saveHistory = () => {
+					try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20))); } catch {}
+					updateClearButton();
+				};
 
 		// Daily quota indicator — fetched on load and after every chat reply.
 		const quotaEl = document.getElementById('chat-daily-quota');
@@ -1199,7 +1192,6 @@ const CHAT_ENDPOINT = `${API_BASE}/chat`;
 			try { localStorage.removeItem(STORAGE_KEY); } catch {}
 			messagesEl.innerHTML = '';
 			appendMsg('assistant', "Hi there! I'm Kido, your AI assistant at Luci Studio. I'm here to help with whatever you need — whether that's writing or debugging code, explaining system design, answering general knowledge questions, helping with creative writing, solving math problems, or just having a thoughtful conversation.\nThere's no topic off-limits. What's on your mind?");
-				if (totalTokensEl) totalTokensEl.textContent = '';
 				if (quotaEl) quotaEl.textContent = '';
 				updateClearButton();
 				renderAuthUI();
