@@ -239,6 +239,8 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
 </style>
 
 <script>
+  import { refreshPostStats } from '../../utils/postStats';
+
   // Home links: use history.back() if we came from / (preserves scroll)
   document.querySelectorAll<HTMLAnchorElement>('a[href="/"]').forEach(link => {
     link.addEventListener('click', e => {
@@ -459,6 +461,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     el.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      el.dataset.userInteracted = '1';
       if (!liked) { burstHearts(el); if (icon) pulseIcon(icon); }
       const endpoint = liked ? 'unlike' : 'like';
       fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST' })
@@ -473,4 +476,5 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
   });
 
   render();
+  refreshPostStats();
 </script>

@@ -1075,6 +1075,7 @@ body.light-mode .hero-bg-img {
 </style>
 
 <script>
+  import { refreshPostStats } from '../utils/postStats';
 
   // EXPERIENCE timeline items — each animates as it scrolls into view
   (function () {
@@ -1252,6 +1253,7 @@ body.light-mode .hero-bg-img {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        btn.dataset.userInteracted = '1';
         const isLiking = !liked;
         if (isLiking) {
           burstHearts(btn);
@@ -1267,6 +1269,8 @@ body.light-mode .hero-bg-img {
           .catch(() => {});
       });
     });
+
+    refreshPostStats();
   })();
 
   // Art tile like buttons
