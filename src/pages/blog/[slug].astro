@@ -5,18 +5,20 @@ import { calculateReadTime, formatDate, formatMarkdown, slugify } from "../../ut
 
 export async function getStaticPaths() {
   const posts = await postService.getAll();
-  return Promise.all(posts.map(async (summary) => {
+  const results = await Promise.all(posts.map(async (summary) => {
     let post;
     try {
       post = await postService.getByID(summary.id);
     } catch {
       post = null;
     }
+    if (!post) return null;
     return {
       params: { slug: `${slugify(summary.title)}-${summary.id}` },
-      props: { post: post || summary },
+      props: { post },
     };
   }));
+  return results.filter((r): r is NonNullable<typeof r> => r !== null);
 }
 
 const { post } = Astro.props;

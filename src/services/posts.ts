@@ -33,6 +33,7 @@ export const postService = {
     async getByID(id: string | number): Promise<Post | null> {
         try {
             const response = await fetch(`${BASE_URL}/posts/${id}`);
+            if (response.status === 404) return null;
             if (!response.ok) throw new Error(`GET /posts/${id} failed with ${response.status}`);
             return response.json();
         } catch (error) {
