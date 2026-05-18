@@ -64,11 +64,11 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
       </div>
 
       <!-- Posts Grid -->
-      <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-3 items-stretch md:auto-rows-fr gap-8">
         {allPosts.map((p) => (
-          <div class="post-item" data-id={p.id} data-topics={JSON.stringify(p.topics)} style="display:none">
-            <a href={`/blog/${p.slug}`} class="block no-underline">
-              <article class="tilt-card blog-card group cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]">
+          <div class="post-item h-full" data-id={p.id} data-topics={JSON.stringify(p.topics)} style="display:none">
+            <a href={`/blog/${p.slug}`} class="block h-full no-underline">
+              <article class="tilt-card blog-card group flex h-full flex-col cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]">
                 <div class="blog-img-container aspect-video overflow-hidden mb-6 -mx-2 -mt-2 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
                   <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" onerror="this.style.opacity='0'" />
                 </div>
@@ -81,7 +81,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
                 </div>
                 <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
                 {p.subtitle && <p class="text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
-                <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                <div class="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
                   <span class="text-xs text-gray-600">Read →</span>
                   <div class="flex items-center gap-3">
                     <span class="tile-view-area flex items-center gap-1.5" data-id={String(p.id)}>
