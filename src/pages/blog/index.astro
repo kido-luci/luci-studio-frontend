@@ -64,7 +64,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
       </div>
 
       <!-- Posts Grid -->
-      <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-3 items-stretch md:auto-rows-fr gap-8">
+      <div id="posts-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch md:auto-rows-fr gap-8">
         {allPosts.map((p) => (
           <div class="post-item h-full" data-id={p.id} data-topics={JSON.stringify(p.topics)} style="display:none">
             <a href={`/blog/${p.slug}`} class="block h-full no-underline">

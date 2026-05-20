@@ -189,7 +189,7 @@ const homepageSchema = {
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Raw Output</span>
             <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h2>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 items-stretch md:auto-rows-fr gap-8" id="home-blog-grid">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch md:auto-rows-fr gap-8" id="home-blog-grid">
             {blogPosts.slice(0, 6).map((p, i) => (
               <div class="relative h-full" data-post-id={p.id} data-post-likes={p.likes}>
                 <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block h-full no-underline">
