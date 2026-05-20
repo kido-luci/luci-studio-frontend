@@ -189,11 +189,11 @@ const homepageSchema = {
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Raw Output</span>
             <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h2>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="home-blog-grid">
+          <div class="grid grid-cols-1 md:grid-cols-3 items-stretch md:auto-rows-fr gap-8" id="home-blog-grid">
             {blogPosts.slice(0, 6).map((p, i) => (
-              <div class="relative" data-post-id={p.id} data-post-likes={p.likes}>
-                <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block no-underline">
-                  <article class="tilt-card blog-card group cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]" data-blog-card={String(i)}>
+              <div class="relative h-full" data-post-id={p.id} data-post-likes={p.likes}>
+                <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block h-full no-underline">
+                  <article class="tilt-card blog-card group flex h-full flex-col cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]" data-blog-card={String(i)}>
                     <div class="blog-img-container aspect-video overflow-hidden mb-6 -mx-2 -mt-2 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
                       <img src={p.img} alt={p.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />
                     </div>
@@ -206,7 +206,7 @@ const homepageSchema = {
                     </div>
                     <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
                     {p.subtitle && <p class="text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
-                    <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                    <div class="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
                       <span class="text-xs text-gray-600">Read →</span>
                       <div class="flex items-center gap-3">
                         <span class="tile-view-area flex items-center gap-1.5" data-id={p.id}>
