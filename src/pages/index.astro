@@ -415,35 +415,20 @@ const homepageSchema = {
   100%{ transform: rotate(360deg) scale(1); }
 }
 
-/* ── Semantic CTA button classes (theme-aware) ── */
+/* ── Semantic CTA button classes (theme-independent for hero) ── */
 .hero-cta-primary {
-  background: white;
-  color: black;
-}
-body.light-mode .hero-cta-primary {
-  background: rgb(17, 24, 39);
-  color: white;
+  background: rgb(17, 24, 39) !important;
+  color: white !important;
 }
 .hero-cta-secondary {
-  border-color: rgba(255, 255, 255, 0.1);
-  color: rgb(156, 163, 175);
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: rgb(107, 114, 128) !important;
+  background: transparent !important;
 }
 .hero-cta-secondary:hover {
-  color: white;
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.05);
-}
-body.light-mode .hero-cta-secondary {
-  border-color: rgba(255, 255, 255, 0.55);
-  color: rgba(255, 255, 255, 0.95);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-body.light-mode .hero-cta-secondary:hover {
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.18);
+  color: rgb(17, 24, 39) !important;
+  border-color: rgba(0, 0, 0, 0.3) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
 }
 
 /* ── Light Mode Overrides ── */
@@ -482,56 +467,25 @@ body.light-mode nav .magnetic:hover {
   background: #8b5cf6;
 }
 
-/* Hero text */
-body.light-mode .hero-line-top .text-white,
-body.light-mode .hero-line-bottom .text-white {
+/* Hero text — theme-independent, always dark/readable */
+.hero-line-top .text-white {
   color: rgb(17, 24, 39) !important;
 }
-body.light-mode .hero-line-bottom .text-gray-300 {
+.hero-line-bottom .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+.hero-line-bottom .text-gray-300 {
+  color: rgb(107, 114, 128) !important;
+}
+.hero-line-bottom .text-gray-400 {
+  color: rgb(107, 114, 128) !important;
+}
+.hero-line-bottom .text-gray-500 {
   color: rgb(107, 114, 128) !important;
 }
 
-body.light-mode .hero-badge {
-  border-color: rgba(139, 92, 246, 0.3);
-  background: rgba(139, 92, 246, 0.08);
-}
-body.light-mode .hero-badge-text {
+.hero-badge-text {
   color: rgb(75, 85, 99);
-}
-body.light-mode .hero-subtitle {
-  color: rgb(75, 85, 99);
-}
-body.light-mode .hero-stat-pill {
-  color: rgb(17, 24, 39);
-  border-color: rgba(17, 24, 39, 0.2);
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 2px 6px rgba(17, 24, 39, 0.06);
-}
-body.light-mode .hero-stat-pill:hover {
-  color: #6d28d9;
-  border-color: rgba(139, 92, 246, 0.6);
-  background: rgba(255, 255, 255, 0.75);
-}
-body.light-mode .hero-stat-sep {
-  color: rgba(17, 24, 39, 0.45);
-}
-
-/* CTA buttons in hero */
-body.light-mode .hero-line ~ div a.magnetic:first-child,
-body.light-mode section a[href="#work"].magnetic {
-  background: rgb(17, 24, 39);
-  color: white;
-}
-body.light-mode section a[href="#art"].magnetic {
-  border-color: rgba(0, 0, 0, 0.12);
-  color: rgb(107, 114, 128);
-}
-body.light-mode section a[href="#art"].magnetic:hover {
-  color: rgb(17, 24, 39);
-  border-color: rgba(0, 0, 0, 0.3);
-  background: rgba(0, 0, 0, 0.04);
 }
 
 /* Scroll hint */
@@ -798,7 +752,7 @@ body.light-mode .hero-orb-2 {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.45);
+  color: rgb(107, 114, 128);
 }
 .hero-word-main,
 .hero-word-accent,
@@ -836,7 +790,7 @@ body.light-mode .hero-orb-2 {
 .hero-subtitle {
   font-family: 'SN Pro', sans-serif;
   font-size: clamp(0.95rem, 2vw, 1.25rem);
-  color: rgba(156,163,175,0.85);
+  color: rgb(75, 85, 99) !important;
   max-width: 720px;
   margin: 0 auto 2rem;
   line-height: 1.75;
@@ -858,19 +812,23 @@ body.light-mode .hero-orb-2 {
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(156,163,175,0.6);
+  color: rgb(17, 24, 39);
   padding: 4px 12px;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(17, 24, 39, 0.2);
   border-radius: 999px;
-  background: rgba(255,255,255,0.02);
-  transition: color 0.3s, border-color 0.3s;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 6px rgba(17, 24, 39, 0.06);
+  transition: color 0.3s, border-color 0.3s, background 0.3s;
 }
 .hero-stat-pill:hover {
-  color: rgba(255,255,255,0.8);
-  border-color: rgba(139,92,246,0.3);
+  color: #6d28d9;
+  border-color: rgba(139, 92, 246, 0.6);
+  background: rgba(255, 255, 255, 0.75);
 }
 .hero-stat-sep {
-  color: rgba(255,255,255,0.15);
+  color: rgba(17, 24, 39, 0.45);
   font-size: 1rem;
 }
 
