@@ -97,7 +97,7 @@ const canonicalURL = canonical ?? SITE_URL;
 		)}
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Limelight&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Limelight&family=Outfit:wght@300;400;500;600;700;800;900&family=Cause:wght@300..700&display=swap" rel="stylesheet">
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
 
 		<script is:inline>
@@ -266,6 +266,10 @@ const canonicalURL = canonical ?? SITE_URL;
 				font-weight: normal;
 				filter: drop-shadow(0 4px 30px rgba(0,0,0,0.6));
 				color: var(--text-primary);
+			}
+			.post-subtitle,
+			.card-subtitle {
+				font-family: 'Cause', sans-serif;
 			}
 			body.light-mode h1,
 			body.light-mode h2,

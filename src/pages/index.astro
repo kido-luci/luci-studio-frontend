@@ -205,7 +205,7 @@ const homepageSchema = {
                       <span class="text-xs text-gray-600">{p.read} read</span>
                     </div>
                     <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
-                    {p.subtitle && <p class="text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
+                    {p.subtitle && <p class="card-subtitle text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
                     <div class="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
                       <span class="text-xs text-gray-600">Read →</span>
                       <div class="flex items-center gap-3">
@@ -834,7 +834,8 @@ body.light-mode .hero-orb-2 {
 
 /* ── Subtitle ── */
 .hero-subtitle {
-  font-size: clamp(0.88rem, 2vw, 1.15rem);
+  font-family: 'Cause', sans-serif;
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
   color: rgba(156,163,175,0.85);
   max-width: 720px;
   margin: 0 auto 2rem;
