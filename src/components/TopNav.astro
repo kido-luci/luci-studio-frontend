@@ -142,4 +142,32 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
   body.light-mode .topnav-theme-btn:hover .topnav-theme-icon {
     color: rgb(139, 92, 246) !important;
   }
+
+  /* Mobile menu overlay — always dark regardless of theme */
+  body.light-mode #mobile-menu {
+    background: rgba(0, 0, 0, 0.95) !important;
+  }
+  body.light-mode #mobile-menu .mobile-nav-link {
+    color: white !important;
+  }
+  body.light-mode #mobile-menu .mobile-nav-link:hover {
+    color: #8b5cf6 !important;
+  }
+  body.light-mode #mobile-menu a.text-violet-400,
+  body.light-mode #mobile-menu .mobile-nav-link.text-violet-400 {
+    color: #a78bfa !important;
+  }
+  /* "Let's Talk" button in mobile menu stays white bg / black text */
+  body.light-mode #mobile-menu a[class*="bg-white"][class*="text-black"] {
+    background: white !important;
+    color: black !important;
+  }
+  /* Divider line in mobile menu */
+  body.light-mode #mobile-menu .h-px {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  /* Small links (LinkedIn, Portfolio) */
+  body.light-mode #mobile-menu .text-gray-300 {
+    color: rgb(209, 213, 219) !important;
+  }
 </style>
