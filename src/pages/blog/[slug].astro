@@ -196,7 +196,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
           <div class="max-w-5xl mx-auto">
             <div class="flex items-center gap-3 mb-3 flex-wrap">
               {tags.map(t => (
-                <span class="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-[10px] font-black text-blue-400 uppercase tracking-widest">{t}</span>
+                <span class="tag-label px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-[10px] font-black text-blue-400 uppercase tracking-widest">{t}</span>
               ))}
               <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
               <span class="text-xs text-gray-400">{formattedDate}</span>
@@ -228,7 +228,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
         <header class="mb-16" data-reveal>
           <div class="flex items-center gap-4 mb-6 flex-wrap">
             {tags.map(t => (
-              <span class="px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest">{t}</span>
+              <span class="tag-label px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest">{t}</span>
             ))}
             <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
             <span class="text-xs text-gray-500">{formattedDate}</span>

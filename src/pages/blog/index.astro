@@ -73,7 +73,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
                   <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" onerror="this.style.opacity='0'" />
                 </div>
                 <div class="flex items-center gap-3 mb-4">
-                  <span class="text-xs font-black text-violet-400 uppercase tracking-widest">{p.tags.join(' · ')}</span>
+                  <span class="tag-label text-xs font-black text-violet-400 uppercase tracking-widest">{p.tags.join(' · ')}</span>
                   <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
                   <span class="text-xs text-gray-600">{p.date}</span>
                   <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
