@@ -3,7 +3,7 @@ const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl
 const failFast = import.meta.env.PROD && import.meta.env.ALLOW_EMPTY_POSTS !== '1';
 
 export interface Post {
-    id: number;
+    id: string;
     title: string;
     subtitle?: string;
     content: string;

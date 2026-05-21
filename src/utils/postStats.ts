@@ -4,7 +4,7 @@ const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl
 const CACHE_KEY = 'postStatsCache.v1';
 const TTL_MS = 5 * 60 * 1000;
 
-interface PostStat { id: number; views: number; likes: number }
+interface PostStat { id: string; views: number; likes: number }
 interface CachedStats { ts: number; data: PostStat[] }
 
 function readCache(): CachedStats | null {
