@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { postService } from "../../services/posts";
-import { calculateReadTime, formatDate, formatMarkdown, slugify } from "../../utils/blog";
+import { buildPostSlug, calculateReadTime, formatDate, formatMarkdown } from "../../utils/blog";
 
 export async function getStaticPaths() {
   const posts = await postService.getAll();
@@ -14,7 +14,7 @@ export async function getStaticPaths() {
     }
     if (!post) return null;
     return {
-      params: { slug: `${slugify(summary.title)}-${summary.id}` },
+      params: { slug: buildPostSlug(summary.title, summary.id) },
       props: { post },
     };
   }));

@@ -103,7 +103,7 @@ export function formatMarkdown(text: string) {
             blockquotes.push(`<blockquote>${body}</blockquote>`);
         }
 
-        return `__BLOCKQUOTE_${index}__`;
+        return `__BLOCKQUOTE_${index}__\n`;
     });
 
     // 3. Escape HTML in the remaining text
@@ -155,4 +155,12 @@ export function slugify(text: string): string {
         .replace(/--+/g, '-')
         .replace(/^-+/, '')
         .replace(/-+$/, '');
+}
+
+export function shortId(id: string): string {
+    return id.replace(/-/g, '').slice(0, 8);
+}
+
+export function buildPostSlug(title: string, id: string): string {
+    return `${slugify(title)}-${shortId(id)}`;
 }

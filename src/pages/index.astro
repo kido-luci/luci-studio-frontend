@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import TopNav from "../components/TopNav.astro";
 import { postService } from "../services/posts";
-import { calculateReadTime, calculateReadTimeFromWordCount, formatDate, slugify } from "../utils/blog";
+import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../utils/blog";
 
 const projects = [
   { title: 'memoirMe', year: '2024–Now', desc: 'Zero-knowledge RSA/AES encrypted diary with geolocation mapping, AI features, and cross-platform sync. Privacy-first, no server-side compromise.', links: [{ label: 'App Store', url: 'https://apps.apple.com/au/app/memoirme/id1640973202' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=com.nartus.interactiveDiary&pcampaignid=web_share' }, { label: 'The Nartus', url: 'https://www.thenartus.com/' }], img: 'https://media.luci-studio.com/MEMOIRME.png', logo: 'https://media.luci-studio.com/MEMOIRME-LOGO.webp' },
@@ -38,7 +38,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
           year: new Date(p.created_at).getFullYear().toString(),
           date: formatDate(p.created_at),
           topic: (p.topics || ['Art']).join(' · '),
-          url: `/blog/${slugify(p.title)}-${p.id}`,
+          url: `/blog/${buildPostSlug(p.title, p.id)}`,
           id: p.id,
           likes: p.likes ?? 0,
         }))
@@ -192,7 +192,7 @@ const homepageSchema = {
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch md:auto-rows-fr gap-8" id="home-blog-grid">
             {blogPosts.slice(0, 6).map((p, i) => (
               <div class="relative h-full" data-post-id={p.id} data-post-likes={p.likes}>
-                <a href={`/blog/${slugify(p.title)}-${p.id}`} class="block h-full no-underline">
+                <a href={`/blog/${buildPostSlug(p.title, p.id)}`} class="block h-full no-underline">
                   <article class="tilt-card blog-card group flex h-full flex-col cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]" data-blog-card={String(i)}>
                     <div class="blog-img-container aspect-video overflow-hidden mb-6 -mx-2 -mt-2 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
                       <img src={p.img} alt={p.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />

@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../../components/TopNav.astro";
 import { postService } from "../../services/posts";
-import { calculateReadTime, calculateReadTimeFromWordCount, formatDate, slugify } from "../../utils/blog";
+import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../../utils/blog";
 
 const rawPosts = await postService.getAll();
 const allPosts = rawPosts
@@ -11,7 +11,7 @@ const allPosts = rawPosts
     id: p.id,
     title: p.title,
     subtitle: p.subtitle || '',
-    slug: `${slugify(p.title)}-${p.id}`,
+    slug: buildPostSlug(p.title, p.id),
     tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
     topics: p.topics || [],
     date: formatDate(p.created_at),

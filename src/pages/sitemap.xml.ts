@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { postService } from '../services/posts';
-import { slugify } from '../utils/blog';
+import { buildPostSlug } from '../utils/blog';
 
 const SITE_URL = 'https://luci-studio.com';
 
@@ -14,7 +14,7 @@ export const GET: APIRoute = async () => {
     ];
 
     const postPages = posts.map(post => ({
-        loc: `${SITE_URL}/blog/${slugify(post.title)}-${post.id}`,
+        loc: `${SITE_URL}/blog/${buildPostSlug(post.title, post.id)}`,
         lastmod: new Date(post.updated_at).toISOString().split('T')[0],
         priority: '0.8',
         changefreq: 'monthly',
