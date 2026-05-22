@@ -1,10 +1,13 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { postService } from "../../services/posts";
-import { buildPostSlug, calculateReadTime, formatDate, formatMarkdown } from "../../utils/blog";
+import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate, formatMarkdown } from "../../utils/blog";
 
 export async function getStaticPaths() {
   const posts = await postService.getAll();
+  const isArtSummary = (p: typeof posts[number]) =>
+    p.topics?.some(t => t.toLowerCase().startsWith('art')) ?? false;
+
   const results = await Promise.all(posts.map(async (summary) => {
     let post;
     try {
@@ -13,15 +16,22 @@ export async function getStaticPaths() {
       post = null;
     }
     if (!post) return null;
+
+    const currentIsArt = isArtSummary(summary);
+    const related = posts
+      .filter(p => p.id !== summary.id && isArtSummary(p) === currentIsArt)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 3);
+
     return {
       params: { slug: buildPostSlug(summary.title, summary.id) },
-      props: { post },
+      props: { post, related },
     };
   }));
   return results.filter((r): r is NonNullable<typeof r> => r !== null);
 }
 
-const { post } = Astro.props;
+const { post, related } = Astro.props;
 const { slug } = Astro.params;
 
 if (!post) {
@@ -38,6 +48,17 @@ const contentWithoutTitle = post ? post.content.replace(/^#\s+.*(\r?\n|$)/, '').
 const htmlContent = contentWithoutTitle ? formatMarkdown(contentWithoutTitle) : '';
 const tags = (post && post.topics && post.topics.length > 0) ? post.topics : ['Engineering'];
 const isArt = post.topics?.some(t => t.toLowerCase().startsWith('art')) ?? false;
+
+const relatedPosts = (related ?? []).map(p => ({
+  id: p.id,
+  title: p.title,
+  subtitle: p.subtitle || '',
+  href: `/blog/${buildPostSlug(p.title, p.id)}`,
+  tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
+  date: formatDate(p.created_at),
+  read: p.word_count ? calculateReadTimeFromWordCount(p.word_count) : calculateReadTime(p.content || ''),
+  img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
+}));
 
 // SEO
 const canonicalURL = `${SITE_URL}/blog/${slug}`;
@@ -293,6 +314,40 @@ const structuredData = [articleSchema, breadcrumbSchema];
            </div>
         </div>
       </footer>
+
+      {relatedPosts.length > 0 && (
+        <section class="more-posts mt-20 pt-12 border-t border-white/5">
+          <div class="flex items-end justify-between mb-8 flex-wrap gap-4">
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-[0.3em]" style="color:var(--text-tertiary);">Continue Reading</span>
+              <h2 class="text-2xl md:text-3xl font-black tracking-tighter mt-2" style="color:var(--text-primary);">More Posts<span class="text-violet-500">.</span></h2>
+            </div>
+            <a href="/blog" class="text-xs font-bold uppercase tracking-widest flex items-center gap-2 group" style="color:var(--text-secondary);">
+              View All
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {relatedPosts.map(p => (
+              <a href={p.href} class="more-card group flex flex-col h-full p-4 border-2 border-violet-500/[0.22] bg-white/[0.02] transition-all duration-500 no-underline">
+                <div class="more-card-img aspect-video overflow-hidden mb-4 -mx-1 -mt-1 border border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
+                  <img src={p.img} alt={p.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />
+                </div>
+                <div class="flex items-center gap-2 mb-3 flex-wrap">
+                  <span class="text-[10px] font-black text-violet-400 uppercase tracking-widest">{p.tags[0]}</span>
+                  <span class="w-1 h-1 rounded-full" style="background:var(--text-tertiary);"></span>
+                  <span class="text-[10px]" style="color:var(--text-tertiary);">{p.date}</span>
+                  <span class="w-1 h-1 rounded-full" style="background:var(--text-tertiary);"></span>
+                  <span class="text-[10px]" style="color:var(--text-tertiary);">{p.read} read</span>
+                </div>
+                <h3 class="text-base font-bold leading-snug line-clamp-2 group-hover:text-violet-400 transition-colors duration-300" style="color:var(--text-primary);">{p.title}</h3>
+                {p.subtitle && <p class="text-sm mt-2 leading-relaxed line-clamp-2" style="color:var(--text-tertiary);">{p.subtitle}</p>}
+                <span class="mt-auto pt-4 text-[10px] font-black uppercase tracking-widest text-violet-400">Read →</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       <!-- ── Comments ── -->
       <section id="comments-section" class="mt-20">
@@ -2118,6 +2173,39 @@ const structuredData = [articleSchema, breadcrumbSchema];
   }
   main.bg-black footer,
   main.bg-black #like-count {
+    color: white;
+  }
+
+  /* ── More Posts cards ── */
+  .more-card {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .more-card:hover {
+    border-color: rgba(139, 92, 246, 0.75) !important;
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25),
+                0 12px 48px rgba(139, 92, 246, 0.18);
+    transform: translateY(-2px);
+  }
+  .more-card-img {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
+  }
+
+  body.light-mode .more-card {
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  }
+  body.light-mode .more-card:hover {
+    border-color: rgba(139, 92, 246, 0.45) !important;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.12);
+  }
+  body.light-mode .more-card-img {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
+  }
+  body.light-mode .more-posts {
+    border-top-color: rgba(0, 0, 0, 0.08) !important;
+  }
+  main.bg-black .more-card h3 {
     color: white;
   }
 
