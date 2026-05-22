@@ -67,7 +67,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
       <div id="posts-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch md:auto-rows-fr gap-8">
         {allPosts.map((p) => (
           <div class="post-item h-full" data-id={p.id} data-topics={JSON.stringify(p.topics)} style="display:none">
-            <a href={`/blog/${p.slug}`} class="block h-full no-underline">
+            <a href={`/blog/${p.slug}/`} class="block h-full no-underline">
               <article class="tilt-card blog-card group flex h-full flex-col cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]">
                 <div class="blog-img-container aspect-video overflow-hidden mb-6 -mx-2 -mt-2 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
                   <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" onerror="this.style.opacity='0'" />

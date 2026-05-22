@@ -19,6 +19,7 @@ interface Props {
 	keywords?: string;
 	structuredData?: object | object[];
 	articleMeta?: { publishedTime?: string; modifiedTime?: string; tags?: string[]; author?: string };
+	googleSiteVerification?: string;
 	hideChatFab?: boolean;
 	particleSpeed?: number;
 }
@@ -35,6 +36,7 @@ const {
 	keywords,
 	structuredData,
 	articleMeta,
+	googleSiteVerification = import.meta.env.PUBLIC_GSC_VERIFICATION,
 	hideChatFab = false,
 	particleSpeed = 1,
 } = Astro.props;
@@ -57,6 +59,7 @@ const canonicalURL = canonical ?? SITE_URL;
 		<meta name="author" content="Trung Lập (Luci)" />
 		<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 		<link rel="canonical" href={canonicalURL} />
+		{googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
 
 		<!-- Open Graph -->
 		<meta property="og:site_name" content={SITE_NAME} />
