@@ -8,13 +8,25 @@ export async function getStaticPaths() {
   const isArtSummary = (p: typeof posts[number]) =>
     p.topics?.some(t => t.toLowerCase().startsWith('art')) ?? false;
 
-  const results = await Promise.all(posts.map(async (summary) => {
-    let post;
-    try {
-      post = await postService.getByID(summary.id);
-    } catch {
-      post = null;
+  // Retry per-post fetch — backend cold-starts (Fly.io min_machines_running=0)
+  // can drop the first call in a burst. Without retry, a transient failure
+  // silently excludes the post from the build but still lists it in the sitemap,
+  // producing 404s that fall through to 404.astro's redirect-to-home.
+  async function fetchPostWithRetry(id: string) {
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await postService.getByID(id);
+      } catch (err) {
+        lastErr = err;
+        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+      }
     }
+    throw lastErr;
+  }
+
+  const results = await Promise.all(posts.map(async (summary) => {
+    const post = await fetchPostWithRetry(summary.id);
     if (!post) return null;
 
     const currentIsArt = isArtSummary(summary);
