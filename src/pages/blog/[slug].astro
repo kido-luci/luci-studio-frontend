@@ -17,6 +17,7 @@ export async function getStaticPaths() {
         return await postService.getByID(id);
       } catch (err) {
         lastErr = err;
+        console.error(`[getStaticPaths] post ${id} attempt ${attempt + 1}/3 failed:`, err);
         await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
       }
     }

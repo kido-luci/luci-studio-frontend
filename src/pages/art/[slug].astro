@@ -13,6 +13,7 @@ export async function getStaticPaths() {
         return await galleryService.getByID(id);
       } catch (err) {
         lastErr = err;
+        console.error(`[getStaticPaths] gallery ${id} attempt ${attempt + 1}/3 failed:`, err);
         await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
       }
     }
