@@ -32,3 +32,8 @@ Thumbs.db
 # Cloudflare Wrangler
 .wrangler/
 
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
