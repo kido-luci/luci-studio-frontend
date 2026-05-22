@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "npm run css:build && astro dev",
+    "build": "npm run css:build && astro build",
     "preview": "astro preview",
+    "css:build": "tailwindcss -i ./src/styles/tailwind.css -o ./public/tailwind.css --minify",
+    "css:watch": "tailwindcss -i ./src/styles/tailwind.css -o ./public/tailwind.css --watch",
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
@@ -25,6 +27,7 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "happy-dom": "^20.9.0",
+    "tailwindcss": "^3.4.19",
     "vitest": "^4.1.7"
   }
 }

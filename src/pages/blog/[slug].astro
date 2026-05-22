@@ -80,6 +80,18 @@ const ogImage = post.cover_image_url || `${SITE_URL}/images/og-default.png`;
 
 const wordCount = post.content.trim().split(/\s+/).length;
 
+// Only load Prism when the post actually contains fenced code blocks, and
+// only load the language components used. Saves 5 blocking-defer scripts +
+// a theme CSS on posts without code (most posts).
+const PRISM_LANGS = new Set(['dart', 'go', 'javascript', 'typescript']);
+const detectedLangs = new Set<string>();
+let hasCodeBlocks = false;
+for (const match of post.content.matchAll(/```([^\n`]*)/g)) {
+  hasCodeBlocks = true;
+  const lang = (match[1] || '').trim().toLowerCase();
+  if (PRISM_LANGS.has(lang)) detectedLangs.add(lang);
+}
+
 const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -175,12 +187,15 @@ const structuredData = [articleSchema, breadcrumbSchema];
   }}
   hideChatFab={true}
 >
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" is:inline></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-dart.min.js" is:inline></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" is:inline></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" is:inline></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" is:inline></script>
+  {hasCodeBlocks && (
+    <>
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+      <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" is:inline></script>
+      {[...detectedLangs].map(lang => (
+        <script defer src={`https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-${lang}.min.js`} is:inline></script>
+      ))}
+    </>
+  )}
 
   <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">

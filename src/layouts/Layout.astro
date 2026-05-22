@@ -87,10 +87,12 @@ const canonicalURL = canonical ?? SITE_URL;
 		<meta name="twitter:image:alt" content={ogImageAlt} />
 
 		<!-- DNS prefetch for CDN domains -->
-		<link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
 		<link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
 		<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
 		<link rel="dns-prefetch" href="https://media.luci-studio.com" />
+
+		<!-- Tailwind: pre-built at npm run prebuild, served from /tailwind.css -->
+		<link rel="stylesheet" href="/tailwind.css" />
 
 		<!-- JSON-LD Structured Data -->
 		{structuredData && (
@@ -100,39 +102,8 @@ const canonicalURL = canonical ?? SITE_URL;
 		)}
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Limelight&family=Outfit:wght@300;400;500;600;700;800;900&family=Boldonse&family=JetBrains+Mono:wght@400..800&display=swap" rel="stylesheet">
-		<link href="https://cdn.jsdelivr.net/npm/@fontsource/sn-pro@latest/index.css" rel="stylesheet">
-		<script is:inline src="https://cdn.tailwindcss.com"></script>
-
-		<script is:inline>
-			tailwind.config = {
-				theme: {
-					extend: {
-						animation: {
-							'gradient-xy': 'gradient-xy 15s ease infinite',
-							'spin-slow': 'spin 12s linear infinite',
-							'reverse-spin': 'reverse-spin 8s linear infinite',
-							'marquee': 'marquee 30s linear infinite',
-							'marquee2': 'marquee2 30s linear infinite',
-							'float': 'float 6s ease-in-out infinite',
-						},
-						keyframes: {
-							'gradient-xy': {
-								'0%, 100%': { 'background-size': '400% 400%', 'background-position': 'left center' },
-								'50%': { 'background-size': '200% 200%', 'background-position': 'right center' },
-							},
-							'reverse-spin': { 'from': { transform: 'rotate(360deg)' }, 'to': { transform: 'rotate(0deg)' } },
-							'marquee': { '0%': { transform: 'translateX(0%)' }, '100%': { transform: 'translateX(-50%)' } },
-							'marquee2': { '0%': { transform: 'translateX(50%)' }, '100%': { transform: 'translateX(0%)' } },
-							'float': {
-								'0%, 100%': { transform: 'translateY(0px)' },
-								'50%': { transform: 'translateY(-20px)' },
-							},
-						},
-					},
-				},
-			}
-		</script>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Limelight&family=Outfit:wght@400;500;700;800;900&family=Boldonse&family=JetBrains+Mono:wght@400..800&display=swap" rel="stylesheet">
+		<link href="https://cdn.jsdelivr.net/npm/@fontsource/sn-pro@5.2.6/index.css" rel="stylesheet">
 		<script is:inline>
 			// Initialize theme immediately to prevent flash
 			(function() {
