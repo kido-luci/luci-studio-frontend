@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import TopNav from "../components/TopNav.astro";
 import { postService } from "../services/posts";
+import { galleryService } from "../services/gallery";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../utils/blog";
 
 const projects = [
@@ -28,19 +29,18 @@ const blogPosts = rawPosts
 }));
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 
-const artItems: { img: string; label: string; year: string; date: string; topic: string; url?: string; id?: number; likes?: number }[] =
-  rawPosts.some(p => p.topics?.some(t => t.toLowerCase().startsWith('art')))
-    ? rawPosts
-        .filter(p => p.topics?.some(t => t.toLowerCase().startsWith('art')))
-        .map(p => ({
-          img: p.cover_image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800',
-          label: p.title,
-          year: new Date(p.created_at).getFullYear().toString(),
-          date: formatDate(p.created_at),
-          topic: (p.topics || ['Art']).join(' · '),
-          url: `/blog/${buildPostSlug(p.title, p.id)}/`,
-          id: p.id,
-          likes: p.likes ?? 0,
+const galleryItems = await galleryService.getAll();
+const artItems: { img: string; label: string; year: string; date: string; topic: string; url?: string; id?: string; likes?: number }[] =
+  galleryItems.length > 0
+    ? galleryItems.map(g => ({
+          img: g.cover_image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800',
+          label: g.title,
+          year: new Date(g.created_at).getFullYear().toString(),
+          date: formatDate(g.created_at),
+          topic: 'Art',
+          url: `/art/${buildPostSlug(g.title, g.id)}/`,
+          id: g.id,
+          likes: g.likes ?? 0,
         }))
     : [
         { img: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200', label: 'Neon Currents', year: '2024', date: 'Jan 2024', topic: 'Digital Art' },

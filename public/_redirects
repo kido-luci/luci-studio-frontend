@@ -1,0 +1,19 @@
+# Permanent redirects for art posts that moved from /blog/ to /art/ on 2026-05-22.
+# Slugs are unchanged (migration preserved post ids), only the path prefix changed.
+# Format: <source> <destination> <status>
+
+/blog/portrait-of-a-girl-blue-pen-64/                                       /art/portrait-of-a-girl-blue-pen-64/                                       301
+/blog/3d-snake-coloured-painting-63/                                        /art/3d-snake-coloured-painting-63/                                        301
+/blog/ken-2-tokyo-ghoul-62/                                                 /art/ken-2-tokyo-ghoul-62/                                                 301
+/blog/joker-coloured-pen-61/                                                /art/joker-coloured-pen-61/                                                301
+/blog/ken-tokyo-ghoul-60/                                                   /art/ken-tokyo-ghoul-60/                                                   301
+/blog/manga-eyes-pencil-59/                                                 /art/manga-eyes-pencil-59/                                                 301
+/blog/goku-ss3-blue-pen-58/                                                 /art/goku-ss3-blue-pen-58/                                                 301
+/blog/deep-feeling-blue-pen-57/                                             /art/deep-feeling-blue-pen-57/                                             301
+/blog/messi-portrait-blue-pen-56/                                           /art/messi-portrait-blue-pen-56/                                           301
+/blog/qinniart-cover-rip-her-55/                                            /art/qinniart-cover-rip-her-55/                                            301
+/blog/portrait-of-a-girl-2-blue-pen-54/                                     /art/portrait-of-a-girl-2-blue-pen-54/                                     301
+/blog/manga-a-student-girl-53/                                              /art/manga-a-student-girl-53/                                              301
+/blog/portrail-of-a-girl-microsoft-paint-51/                                /art/portrail-of-a-girl-microsoft-paint-51/                                301
+/blog/sagiri-izumi-eromanga-sensei-48/                                      /art/sagiri-izumi-eromanga-sensei-48/                                      301
+/blog/nanatsu-no-taizai-47/                                                 /art/nanatsu-no-taizai-47/                                                 301

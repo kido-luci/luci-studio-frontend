@@ -5,8 +5,6 @@ import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, forma
 
 export async function getStaticPaths() {
   const posts = await postService.getAll();
-  const isArtSummary = (p: typeof posts[number]) =>
-    p.topics?.some(t => t.toLowerCase().startsWith('art')) ?? false;
 
   // Retry per-post fetch — backend cold-starts (Fly.io min_machines_running=0)
   // can drop the first call in a burst. Without retry, a transient failure
@@ -29,9 +27,8 @@ export async function getStaticPaths() {
     const post = await fetchPostWithRetry(summary.id);
     if (!post) return null;
 
-    const currentIsArt = isArtSummary(summary);
     const related = posts
-      .filter(p => p.id !== summary.id && isArtSummary(p) === currentIsArt)
+      .filter(p => p.id !== summary.id)
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 3);
 
@@ -59,7 +56,6 @@ const formattedDate = post ? formatDate(post.created_at) : '';
 const contentWithoutTitle = post ? post.content.replace(/^#\s+.*(\r?\n|$)/, '').replace(/^#\s/gm, '## ').trimStart() : '';
 const htmlContent = contentWithoutTitle ? formatMarkdown(contentWithoutTitle) : '';
 const tags = (post && post.topics && post.topics.length > 0) ? post.topics : ['Engineering'];
-const isArt = post.topics?.some(t => t.toLowerCase().startsWith('art')) ?? false;
 
 const relatedPosts = (related ?? []).map(p => ({
   id: p.id,
@@ -223,70 +219,34 @@ const structuredData = [articleSchema, breadcrumbSchema];
     </button>
   </div>
 
-  <main class={isArt ? "min-h-screen bg-black" : "pt-32 pb-24 px-6 min-h-screen bg-[var(--bg-primary)]"} data-post-id={post.id} data-api-url={API_URL}>
+  <main class="pt-32 pb-24 px-6 min-h-screen bg-[var(--bg-primary)]" data-post-id={post.id} data-api-url={API_URL}>
 
-    {isArt && post.cover_image_url && (
-      <section class="art-hero">
-        <div class="art-hero-bg" style={`background-image:url('${post.cover_image_url}')`}></div>
-        <img src={post.cover_image_url} alt={post.title} class="art-hero-img" />
-        <div class="art-hero-info">
-          <div class="max-w-5xl mx-auto">
-            <div class="flex items-center gap-3 mb-3 flex-wrap">
-              {tags.map(t => (
-                <span class="tag-label px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-[10px] font-black text-blue-400 uppercase tracking-widest">{t}</span>
-              ))}
-              <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
-              <span class="text-xs text-gray-400">{formattedDate}</span>
-              <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
-              <span class="text-xs text-gray-400 flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                <span id="view-count">{post.views ?? '—'}</span>
-              </span>
-              <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
-              <span class="text-xs text-gray-400 flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                <span id="like-count-header">{post.likes ?? '—'}</span>
-              </span>
-            </div>
-            <h1 class="text-3xl md:text-5xl font-black text-white tracking-tighter leading-tight">{post.title}</h1>
-            {post.subtitle && <p class="post-subtitle text-gray-300 mt-2 text-base md:text-lg max-w-2xl">{post.subtitle}</p>}
-          </div>
+    <div class="max-w-4xl mx-auto">
+
+      <header class="mb-16" data-reveal>
+        <div class="flex items-center gap-4 mb-6 flex-wrap">
+          {tags.map(t => (
+            <span class="tag-label px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest">{t}</span>
+          ))}
+          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
+          <span class="text-xs text-gray-500">{formattedDate}</span>
+          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
+          <span class="text-xs text-gray-500">{readTime} read</span>
+          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
+          <span class="text-xs text-gray-500 flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span id="view-count">{post.views ?? '—'}</span>
+          </span>
+          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
+          <span class="text-xs text-gray-500 flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span id="like-count-header">{post.likes ?? '—'}</span>
+          </span>
         </div>
-        <div class="art-hero-scroll">
-          <span class="text-[10px] text-white uppercase tracking-widest">Scroll</span>
-          <div class="w-px h-10 bg-gradient-to-b from-white to-transparent"></div>
-        </div>
-      </section>
-    )}
-
-    <div class={isArt ? "max-w-4xl mx-auto px-6 py-16" : "max-w-4xl mx-auto"}>
-
-      {!isArt && (
-        <header class="mb-16" data-reveal>
-          <div class="flex items-center gap-4 mb-6 flex-wrap">
-            {tags.map(t => (
-              <span class="tag-label px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest">{t}</span>
-            ))}
-            <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
-            <span class="text-xs text-gray-500">{formattedDate}</span>
-            <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
-            <span class="text-xs text-gray-500">{readTime} read</span>
-            <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
-            <span class="text-xs text-gray-500 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <span id="view-count">{post.views ?? '—'}</span>
-            </span>
-            <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
-            <span class="text-xs text-gray-500 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              <span id="like-count-header">{post.likes ?? '—'}</span>
-            </span>
-          </div>
-          <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-tighter">
-            {post.title}
-          </h1>
-        </header>
-      )}
+        <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-tighter">
+          {post.title}
+        </h1>
+      </header>
 
       <!-- Content -->
       <article class="prose-custom markdown-content" set:html={htmlContent}>
@@ -294,7 +254,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
       <!-- Like CTA -->
       <div class="mt-24 flex flex-col items-center text-center gap-5">
-        <p class="text-[10px] font-black text-gray-600 uppercase tracking-[0.35em]">{isArt ? 'Loved this piece?' : 'Enjoyed this read?'}</p>
+        <p class="text-[10px] font-black text-gray-600 uppercase tracking-[0.35em]">Enjoyed this read?</p>
         <button id="like-btn" aria-label="Like this post" class="relative group outline-none">
           <div id="like-ring" class="absolute -inset-3 rounded-full opacity-0 transition-all duration-700 pointer-events-none" style="background:radial-gradient(circle,rgba(244,63,94,0.18) 0%,transparent 70%);"></div>
           <div id="like-ring-border" class="absolute -inset-3 rounded-full border border-rose-500/0 transition-all duration-500 pointer-events-none"></div>
@@ -1748,7 +1708,6 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
 <style is:global>
   header h1,
-  .art-hero-info h1,
   .markdown-content h1,
   .markdown-content h2,
   .markdown-content h3,
@@ -2120,76 +2079,6 @@ const structuredData = [articleSchema, breadcrumbSchema];
     --google-btn-bg: #fff;
     --google-btn-text: #111;
     --google-btn-border: rgba(0, 0, 0, 0.15);
-  }
-
-  /* ── Art post: full-screen painting viewer ── */
-  .art-hero {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background: #000;
-  }
-
-  .art-hero-bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    filter: blur(80px) brightness(0.15) saturate(1.5);
-    transform: scale(1.15);
-  }
-
-  .art-hero-img {
-    position: relative;
-    z-index: 10;
-    max-width: 100%;
-    max-height: calc(100vh - 80px);
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8);
-  }
-
-  .art-hero-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 20;
-    padding: 5rem 2rem 2rem;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
-  }
-
-  .art-hero-scroll {
-    position: absolute;
-    bottom: 1.5rem;
-    right: 2rem;
-    z-index: 20;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    opacity: 0.4;
-    animation: float 2s ease-in-out infinite;
-  }
-
-  /* Art posts always use dark background for optimal painting display */
-  main.bg-black .markdown-content {
-    color: #a1a1aa;
-  }
-  main.bg-black .markdown-content h1,
-  main.bg-black .markdown-content h2,
-  main.bg-black .markdown-content h3,
-  main.bg-black .markdown-content strong {
-    color: white;
-  }
-  main.bg-black footer,
-  main.bg-black #like-count {
-    color: white;
   }
 
   /* ── More Posts cards ── */
