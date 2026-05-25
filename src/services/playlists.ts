@@ -15,18 +15,30 @@ export interface Playlist {
     updated_at: string;
 }
 
+// Module-scoped cache of the in-flight getAll promise. Astro shares module
+// state across all pages within a single build, so this dedupes the three
+// build-time callers (/blog, /blog/playlists, /blog/playlists/[slug]) into
+// one network round-trip. Reset on error so a transient failure doesn't
+// poison subsequent retries.
+let getAllPromise: Promise<Playlist[]> | null = null;
+
 export const playlistService = {
     async getAll(): Promise<Playlist[]> {
-        try {
-            const response = await fetch(`${BASE_URL}/playlists`);
-            if (!response.ok) throw new Error(`GET /playlists failed with ${response.status}`);
-            const data = await response.json();
-            return Array.isArray(data) ? data : (data || []);
-        } catch (error) {
-            console.error('Failed to fetch playlists:', error);
-            if (failFast) throw error;
-            return [];
-        }
+        if (getAllPromise) return getAllPromise;
+        getAllPromise = (async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/playlists`);
+                if (!response.ok) throw new Error(`GET /playlists failed with ${response.status}`);
+                const data = await response.json();
+                return Array.isArray(data) ? data : (data || []);
+            } catch (error) {
+                console.error('Failed to fetch playlists:', error);
+                getAllPromise = null;
+                if (failFast) throw error;
+                return [];
+            }
+        })();
+        return getAllPromise;
     },
 
     async getByID(id: string | number): Promise<Playlist | null> {
