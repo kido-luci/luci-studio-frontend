@@ -152,7 +152,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
               const img = p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800';
               return (
                 <li>
-                  <a href={href} class="playlist-row no-underline">
+                  <a href={href} class="playlist-row no-underline" data-playlist-post-ids={JSON.stringify(p.post_ids ?? [])}>
                     <span class="playlist-row-number">{String(i + 1).padStart(2, '0')}</span>
                     <div class="playlist-row-thumb">
                       <img src={img} alt={p.title} loading="lazy" onerror="this.style.opacity='0'" />
@@ -163,13 +163,13 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
                         <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
                         <span class="text-[10px] text-gray-600">{count} {count === 1 ? 'post' : 'posts'}</span>
                         <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                        <span class="playlist-row-stat" title={`${p.totalViews} total views`}>
+                        <span class="playlist-row-stat">
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                          {p.totalViews}
+                          <span class="playlist-views-count">{p.totalViews}</span>
                         </span>
-                        <span class="playlist-row-stat" title={`${p.totalLikes} total likes`}>
+                        <span class="playlist-row-stat">
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                          {p.totalLikes}
+                          <span class="playlist-likes-count">{p.totalLikes}</span>
                         </span>
                       </div>
                       <h3 class="playlist-row-title">{p.title}</h3>

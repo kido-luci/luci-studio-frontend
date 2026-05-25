@@ -37,6 +37,24 @@ function applyStats(stats: PostStat[]) {
       if (countEl) countEl.textContent = String(s.likes);
     });
   }
+
+  // Recompute playlist aggregates from the fresh stats. Each .playlist-row
+  // carries a data-playlist-post-ids JSON array; sum across it. Posts missing
+  // from the stats map (deleted since build) contribute 0.
+  const byID = new Map(stats.map(s => [String(s.id), s]));
+  document.querySelectorAll<HTMLElement>('.playlist-row[data-playlist-post-ids]').forEach(row => {
+    let ids: string[];
+    try { ids = JSON.parse(row.dataset.playlistPostIds || '[]'); } catch { return; }
+    let v = 0, l = 0;
+    for (const id of ids) {
+      const s = byID.get(String(id));
+      if (s) { v += s.views; l += s.likes; }
+    }
+    const vEl = row.querySelector<HTMLElement>('.playlist-views-count');
+    const lEl = row.querySelector<HTMLElement>('.playlist-likes-count');
+    if (vEl) vEl.textContent = String(v);
+    if (lEl) lEl.textContent = String(l);
+  });
 }
 
 // Apply cached stats immediately (cheap, no network) and, if stale,
