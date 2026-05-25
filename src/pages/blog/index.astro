@@ -2,9 +2,14 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../../components/TopNav.astro";
 import { postService } from "../../services/posts";
+import { playlistService } from "../../services/playlists";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../../utils/blog";
 
 const rawPosts = await postService.getAll();
+const rawPlaylists = await playlistService.getAll();
+const playlists = [...rawPlaylists].sort((a, b) =>
+  new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+);
 const allPosts = rawPosts
   .filter(p => !p.topics?.some(t => t.toLowerCase().startsWith('art')))
   .map(p => ({
@@ -47,6 +52,42 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
         </p>
         <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
       </div>
+
+      <!-- Playlists strip -->
+      {playlists.length > 0 && (
+        <section data-reveal class="mb-16">
+          <div class="flex items-end justify-between gap-4 mb-6 flex-wrap">
+            <div>
+              <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-2 block">Curated Collections</span>
+              <h2 class="text-4xl md:text-5xl font-black tracking-tighter">PLAYLISTS<span class="text-violet-500">.</span></h2>
+            </div>
+            <a href="/blog/playlists" class="see-all-btn">See all →</a>
+          </div>
+          <div class="playlist-strip flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+            {playlists.map(p => {
+              const href = `/blog/playlists/${buildPostSlug(p.title, p.id)}/`;
+              const count = p.post_ids?.length ?? 0;
+              const img = p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800';
+              return (
+                <a href={href} class="snap-start shrink-0 w-72 no-underline group">
+                  <article class="tilt-card playlist-card flex flex-col h-full p-4 sm:p-5 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]">
+                    <div class="playlist-card-img aspect-video overflow-hidden mb-4 -mx-1 -mt-1 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
+                      <img src={img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" onerror="this.style.opacity='0'" />
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="tag-label text-[10px] font-black text-violet-400 uppercase tracking-widest">Playlist</span>
+                      <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                      <span class="text-[10px] text-gray-600">{count} {count === 1 ? 'post' : 'posts'}</span>
+                    </div>
+                    <h3 class="text-lg font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
+                    {p.description && <p class="card-subtitle text-xs text-gray-500 mt-2 leading-relaxed line-clamp-2">{p.description}</p>}
+                  </article>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <!-- Topic Filters -->
       {allTopics.length > 0 && (
@@ -167,6 +208,64 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
   }
   body.light-mode .tile-like-count {
     color: rgb(107, 114, 128) !important;
+  }
+
+  /* Playlist strip */
+  .playlist-strip {
+    scroll-padding: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+  }
+  .playlist-strip::-webkit-scrollbar { height: 6px; }
+  .playlist-strip::-webkit-scrollbar-track { background: transparent; }
+  .playlist-strip::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 9999px; }
+  .playlist-strip::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.5); }
+
+  .playlist-card:hover {
+    border-color: rgba(139, 92, 246, 0.75) !important;
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25),
+                0 12px 48px rgba(139, 92, 246, 0.18);
+  }
+  .playlist-card-img {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
+  }
+  body.light-mode .playlist-card {
+    border-color: rgba(0, 0, 0, 0.3) !important;
+  }
+  body.light-mode .playlist-card:hover {
+    border-color: rgba(139, 92, 246, 0.45) !important;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.12);
+  }
+  body.light-mode .playlist-card-img {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
+  }
+  body.light-mode article.playlist-card h3 { color: rgb(17, 24, 39) !important; }
+
+  .see-all-btn {
+    padding: 0.5rem 1.1rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    border-radius: 9999px;
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    color: rgb(167, 139, 250);
+    background: transparent;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .see-all-btn:hover {
+    background: rgba(139, 92, 246, 0.12);
+    border-color: rgba(139, 92, 246, 0.7);
+  }
+  body.light-mode .see-all-btn {
+    border-color: rgba(139, 92, 246, 0.35);
+    color: rgb(109, 40, 217);
+  }
+  body.light-mode .see-all-btn:hover {
+    background: rgba(139, 92, 246, 0.08);
+    border-color: rgba(139, 92, 246, 0.55);
   }
 
   /* Topic filter buttons */
