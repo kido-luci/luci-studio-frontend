@@ -7,9 +7,21 @@ import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, forma
 
 const rawPosts = await postService.getAll();
 const rawPlaylists = await playlistService.getAll();
-const playlists = [...rawPlaylists].sort((a, b) =>
-  new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-);
+
+// Aggregate views + likes per playlist by summing the stats of every post it contains.
+// Uses rawPosts (full list, already fetched) so this is zero extra network cost.
+const postStatsByID = new Map(rawPosts.map(p => [p.id, { views: p.views ?? 0, likes: p.likes ?? 0 }]));
+const playlists = [...rawPlaylists]
+  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  .map(p => {
+    let totalViews = 0;
+    let totalLikes = 0;
+    for (const id of (p.post_ids ?? [])) {
+      const stats = postStatsByID.get(id);
+      if (stats) { totalViews += stats.views; totalLikes += stats.likes; }
+    }
+    return { ...p, totalViews, totalLikes };
+  });
 const allPosts = rawPosts
   .filter(p => !p.topics?.some(t => t.toLowerCase().startsWith('art')))
   .map(p => ({
@@ -150,6 +162,15 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
                         <span class="tag-label text-[10px] font-black text-violet-400 uppercase tracking-widest">Playlist</span>
                         <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
                         <span class="text-[10px] text-gray-600">{count} {count === 1 ? 'post' : 'posts'}</span>
+                        <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                        <span class="playlist-row-stat" title={`${p.totalViews} total views`}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                          {p.totalViews}
+                        </span>
+                        <span class="playlist-row-stat" title={`${p.totalLikes} total likes`}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                          {p.totalLikes}
+                        </span>
                       </div>
                       <h3 class="playlist-row-title">{p.title}</h3>
                       {p.description && <p class="playlist-row-desc">{p.description}</p>}
@@ -257,6 +278,13 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
   .playlist-row:hover .playlist-row-thumb img { transform: scale(1.08); }
   .playlist-row-meta { min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
   .playlist-row-tags { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .playlist-row-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 10px;
+    color: rgb(107, 114, 128);
+  }
   .playlist-row-title {
     font-size: 1.375rem;
     font-weight: 800;
