@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { postService, type Post } from './posts';
+import type { Post, postService as PostService } from './posts';
 
 const samplePost: Post = {
     id: 'abc-123',
@@ -11,14 +11,21 @@ const samplePost: Post = {
     updated_at: '2026-05-22T00:00:00Z',
 };
 
+// posts.ts holds a module-scoped getAll cache. Reset modules between tests so
+// each one starts with a fresh, uncached service.
+let postService: typeof PostService;
+
 describe('postService', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         // Silence the expected console.error in failure paths.
         vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.resetModules();
+        ({ postService } = await import('./posts'));
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.unstubAllGlobals();
     });
 
     describe('getAll', () => {
