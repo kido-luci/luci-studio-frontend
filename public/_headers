@@ -1,0 +1,15 @@
+# Cloudflare Pages headers. Format: https://developers.cloudflare.com/pages/configuration/headers/
+#
+# CSP keeps 'unsafe-inline' because the site has many inline <script> and
+# inline style attributes (per-letter animations, IntersectionObserver setup,
+# cookie consent, etc.). Migrating those to nonces requires a build-time
+# rewrite and is out of scope for this hardening pass. The whitelist still
+# blocks externally-loaded malicious scripts (the most common XSS payload),
+# and frame-ancestors/base-uri/object-src close common pivots.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://www.google.com https://adservice.google.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://api.luci-studio.com https://*.googlesyndication.com https://*.google.com; frame-src https://googleads.g.doubleclick.net https://www.google.com https://*.googlesyndication.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
