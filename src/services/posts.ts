@@ -16,18 +16,30 @@ export interface Post {
     updated_at: string;
 }
 
+// Module-scoped cache of the in-flight getAll promise. Astro shares module
+// state across all pages within a single build, so this dedupes build-time
+// callers (/blog, /blog/[slug] getStaticPaths, /blog/playlists/[slug], etc.)
+// into one network round-trip. Reset on error so a transient failure doesn't
+// poison subsequent retries.
+let getAllPromise: Promise<Post[]> | null = null;
+
 export const postService = {
     async getAll(): Promise<Post[]> {
-        try {
-            const response = await fetch(`${BASE_URL}/posts`);
-            if (!response.ok) throw new Error(`GET /posts failed with ${response.status}`);
-            const data = await response.json();
-            return Array.isArray(data) ? data : (data || []);
-        } catch (error) {
-            console.error('Failed to fetch posts:', error);
-            if (failFast) throw error;
-            return [];
-        }
+        if (getAllPromise) return getAllPromise;
+        getAllPromise = (async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/posts`);
+                if (!response.ok) throw new Error(`GET /posts failed with ${response.status}`);
+                const data = await response.json();
+                return Array.isArray(data) ? data : (data || []);
+            } catch (error) {
+                console.error('Failed to fetch posts:', error);
+                getAllPromise = null;
+                if (failFast) throw error;
+                return [];
+            }
+        })();
+        return getAllPromise;
     },
 
     async getByID(id: string | number): Promise<Post | null> {
