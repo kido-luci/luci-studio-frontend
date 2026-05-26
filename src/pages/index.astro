@@ -1275,8 +1275,8 @@ body.light-mode .blog-img-container {
     });
   })();
 
-  // ML6 "Beautiful Questions" one-shot letter animation
-  // SplitText wraps words (preventing mid-word breaks) + chars; GSAP runs the slide-up.
+  // ML6 "Beautiful Questions" — word-level mask reveal: each word rises from behind a clip
+  // box, no opacity fade. Reads as one elegant gesture instead of letter popcorn.
   (function () {
     const w = window as any;
     const ready = () => w.gsap && w.SplitText;
@@ -1285,14 +1285,24 @@ body.light-mode .blog-img-container {
       gsap.registerPlugin(SplitText);
       const el = document.querySelector('.hero-subtitle') as HTMLElement | null;
       if (!el) return;
-      const split = SplitText.create(el, { type: 'words,chars', tag: 'span', aria: 'auto' });
-      gsap.from(split.chars, {
-        opacity: 0,
-        y: '1.2em',
-        duration: 0.75,
-        ease: 'expo.out',
-        stagger: 0.012,
-        delay: 0.3
+      const split = SplitText.create(el, { type: 'lines,words,chars', mask: 'lines', tag: 'span', aria: 'auto' });
+      // tag:'span' for valid HTML inside <p>. Force block layout so each line takes its own row
+      // and yPercent computes against a real height. Mask wrappers also need block layout.
+      split.lines.forEach((line: HTMLElement) => {
+        line.style.display = 'block';
+        if (line.parentElement?.getAttribute('style')?.includes('overflow')) {
+          line.parentElement.style.display = 'block';
+        }
+      });
+      gsap.set(split.lines, { willChange: 'transform' });
+      gsap.from(split.lines, {
+        yPercent: 110,
+        rotate: 4,
+        skewY: 3,
+        duration: 1.4,
+        ease: 'power3.out',
+        stagger: 0.18,
+        delay: 0.25
       });
     };
     if (ready()) run();
@@ -1328,9 +1338,8 @@ body.light-mode .blog-img-container {
 </script>
 
 <script>
-  // ML9 "Coffee Mornings" — scale from 0→1 with spring bounce, triggered on scroll into view
-  // GSAP SplitText handles letter splitting (preserves nested inline elements);
-  // ScrollTrigger fires once per header when it enters the viewport.
+  // ML9 "Coffee Mornings" — chars rise from behind a per-char mask with a slight tilt,
+  // settling with an expo decel. Triggered once per header on scroll into view.
   (function () {
     const w = window as any;
     const ready = () => w.gsap && w.ScrollTrigger && w.SplitText;
@@ -1339,14 +1348,18 @@ body.light-mode .blog-img-container {
       gsap.registerPlugin(ScrollTrigger, SplitText);
 
       document.querySelectorAll<HTMLElement>('[data-ml9]').forEach(h2 => {
-        const split = SplitText.create(h2, { type: 'chars,words', aria: 'auto' });
-        gsap.set(split.chars, { display: 'inline-block', transformOrigin: '50% 100%' });
+        // Mask wrappers need overflow visible? No — overflow:clip on the mask box is what
+        // gives the reveal. inline-block on chars so transforms apply.
+        const split = SplitText.create(h2, { type: 'words,chars', mask: 'chars', aria: 'auto' });
+        gsap.set(split.chars, { display: 'inline-block', transformOrigin: '50% 100%', willChange: 'transform' });
         gsap.from(split.chars, {
-          scale: 0,
-          duration: 0.8,
-          ease: 'back.out(1.7)',
-          stagger: 0.045,
-          scrollTrigger: { trigger: h2, start: 'top 80%', once: true }
+          yPercent: 120,
+          rotate: 10,
+          skewX: -6,
+          duration: 1.1,
+          ease: 'expo.out',
+          stagger: { each: 0.04, from: 'start' },
+          scrollTrigger: { trigger: h2, start: 'top 85%', once: true }
         });
       });
     };

@@ -15,39 +15,39 @@ test('ML6 GSAP migration — hero subtitle letters slide up to final position', 
   const subtitle = page.locator('.hero-subtitle');
   await expect(subtitle).toBeVisible();
 
-  // SplitText splits into words+chars; wait through 0.3s delay + ~12ms * N chars + 0.75s duration
-  await page.waitForTimeout(2500);
+  // SplitText splits into lines; wait through 0.25s delay + ~0.18s * N lines + 1.4s duration
+  await page.waitForTimeout(3500);
 
   const state = await page.evaluate(() => {
     const el = document.querySelector<HTMLElement>('.hero-subtitle');
     if (!el) return null;
-    // SplitText char spans live nested inside word spans
-    const chars = el.querySelectorAll<HTMLElement>('span span');
+    // SplitText with mask: 'lines' produces: <span overflow:clip>  <span display:block>line text</span>  </span>
+    // The animated unit is the inner display:block span (has will-change/transform residue).
+    const lines = Array.from(el.querySelectorAll<HTMLElement>('span[style*="display: block"]'));
     return {
       text: el.textContent?.trim(),
-      charCount: chars.length,
-      sample: Array.from(chars).slice(0, 6).map(c => ({
-        text: c.textContent,
-        opacity: getComputedStyle(c).opacity,
-        transform: c.style.transform || getComputedStyle(c).transform,
+      lineCount: lines.length,
+      sample: lines.map(l => ({
+        text: l.textContent?.slice(0, 40),
+        opacity: getComputedStyle(l).opacity,
+        transform: l.style.transform || getComputedStyle(l).transform,
+        height: l.offsetHeight,
       })),
-      lastTransform: chars.length ? (chars[chars.length - 1].style.transform || getComputedStyle(chars[chars.length - 1]).transform) : null,
     };
   });
   console.log('ML6 final state:', JSON.stringify(state, null, 2));
 
   expect(consoleErrors.filter(e => !/favicon|adsense|adsbygoogle|ERR_CONNECTION_REFUSED|Failed to load resource/i.test(e))).toEqual([]);
 
-  expect(state?.charCount).toBeGreaterThan(5);
-  // After animation, every sampled char should be fully visible (opacity 1) and not translated
-  for (const c of state?.sample ?? []) {
-    expect(parseFloat(c.opacity)).toBeGreaterThan(0.9);
-    expect(c.transform).not.toMatch(/translate\(0px, 1\.2em\)|translateY\(1\.2em\)/);
-    // matrix shouldn't show a significant Y offset (last 2 values are tx, ty)
-    const m = c.transform.match(/matrix\([^)]+\)/);
+  expect(state?.lineCount).toBeGreaterThan(0);
+  for (const line of state?.sample ?? []) {
+    expect(parseFloat(line.opacity)).toBeGreaterThan(0.9);
+    expect(line.height).toBeGreaterThan(10);
+    const m = line.transform.match(/matrix\([^)]+\)/);
     if (m) {
       const parts = m[0].replace(/matrix\(|\)/g, '').split(',').map(s => parseFloat(s));
       expect(Math.abs(parts[5] || 0)).toBeLessThan(2);
+      expect(Math.abs(parts[4] || 0)).toBeLessThan(2);
     }
   }
 });
