@@ -1288,8 +1288,12 @@ body.light-mode .blog-img-container {
       const host = document.querySelector<HTMLElement>('[data-hero-patches]');
       if (!host) return;
 
-      const cols = 14;
-      const rows = 9;
+      // Pick a target tile size in CSS pixels; derive cols/rows from the host's actual size
+      // so tiles stay roughly square on any viewport (a fixed grid stretches into rectangles
+      // on narrow / tall screens).
+      const targetCell = window.innerWidth < 640 ? 50 : 85;
+      const cols = Math.max(4, Math.ceil(host.clientWidth / targetCell));
+      const rows = Math.max(4, Math.ceil(host.clientHeight / targetCell));
       host.style.display = 'grid';
       host.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
       host.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
@@ -1299,7 +1303,12 @@ body.light-mode .blog-img-container {
         const t = document.createElement('div');
         // Subtle lightness variance gives a mosaic feel rather than a flat black box
         const l = 4 + Math.random() * 8;
-        t.style.background = `hsl(${220 + Math.random() * 20}, 8%, ${l}%)`;
+        const color = `hsl(${220 + Math.random() * 20}, 8%, ${l}%)`;
+        t.style.background = color;
+        // Extend the tile by 1px in every direction so subpixel grid gaps don't leak
+        // the underlying hero background between cells. Mid-animation the shadow scales
+        // with the tile (transform), so this only matters in the initial obscured state.
+        t.style.boxShadow = `0 0 0 1px ${color}`;
         t.style.willChange = 'transform, opacity';
         tiles.push(t);
         host.appendChild(t);

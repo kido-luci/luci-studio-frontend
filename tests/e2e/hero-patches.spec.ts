@@ -14,7 +14,10 @@ test('Hero patch reveal — tiles populate then clean up', async ({ page }) => {
   }, { timeout: 10_000 });
 
   const initialCount = await page.locator('[data-hero-patches] > div').count();
-  expect(initialCount).toBe(14 * 9); // cols * rows
+  // cols/rows derived from host size + target cell px — exact count depends on viewport,
+  // but should be at least 4*4 = 16 (the floor) and well under 1000.
+  expect(initialCount).toBeGreaterThan(16);
+  expect(initialCount).toBeLessThan(1000);
 
   // Reveal: total stagger 1.4s + tile duration 0.55s + small buffer
   await page.waitForTimeout(2400);
