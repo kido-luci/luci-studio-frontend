@@ -1305,9 +1305,15 @@ body.light-mode .blog-img-container {
         const l = 4 + Math.random() * 8;
         const color = `hsl(${220 + Math.random() * 20}, 8%, ${l}%)`;
         t.style.background = color;
+        // Mixed opacity: most tiles fully obscure, but ~40% are partially transparent so
+        // hints of the underlying hero peek through, giving a "fragmented" obscured look.
+        const r = Math.random();
+        let initialOpacity = 1;
+        if (r < 0.15) initialOpacity = 0.45 + Math.random() * 0.25;       // 15%: 0.45–0.70
+        else if (r < 0.4) initialOpacity = 0.75 + Math.random() * 0.15;   // 25%: 0.75–0.90
+        t.style.opacity = String(initialOpacity);
         // Extend the tile by 1px in every direction so subpixel grid gaps don't leak
-        // the underlying hero background between cells. Mid-animation the shadow scales
-        // with the tile (transform), so this only matters in the initial obscured state.
+        // the underlying hero background between cells.
         t.style.boxShadow = `0 0 0 1px ${color}`;
         t.style.willChange = 'transform, opacity';
         tiles.push(t);
