@@ -1326,61 +1326,31 @@ body.light-mode .blog-img-container {
 
 <script>
   // ML9 "Coffee Mornings" — scale from 0→1 with spring bounce, triggered on scroll into view
-  // All styles inline to bypass Astro scoped CSS (dynamic spans have no scope attribute)
+  // GSAP SplitText handles letter splitting (preserves nested inline elements);
+  // ScrollTrigger fires once per header when it enters the viewport.
   (function () {
-    // Cubic-bezier overshoot for the letter reveal.
-    const TRANS = 'transform 0.8s cubic-bezier(0.34,1.56,0.64,1)';
-    const INIT  = `display:inline-block;transform:scale(0);transform-origin:50% 100%;transition:${TRANS}`;
+    const w = window as any;
+    const ready = () => w.gsap && w.ScrollTrigger && w.SplitText;
+    const run = () => {
+      const { gsap, ScrollTrigger, SplitText } = w;
+      gsap.registerPlugin(ScrollTrigger, SplitText);
 
-    function initLetters(h2: HTMLElement): HTMLElement[] {
-      const letters: HTMLElement[] = [];
-      const nodes = Array.from(h2.childNodes);
-      h2.innerHTML = '';
-
-      for (const node of nodes) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          for (const ch of node.textContent ?? '') {
-            if (ch === ' ') { h2.appendChild(document.createTextNode(' ')); continue; }
-            const s = document.createElement('span');
-            s.setAttribute('style', INIT);
-            s.textContent = ch;
-            h2.appendChild(s);
-            letters.push(s);
-          }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          const orig = node as HTMLElement;
-          const wrap = orig.cloneNode(false) as HTMLElement;
-          for (const ch of orig.textContent ?? '') {
-            const s = document.createElement('span');
-            s.setAttribute('style', INIT);
-            s.textContent = ch;
-            wrap.appendChild(s);
-            letters.push(s);
-          }
-          h2.appendChild(wrap);
-        }
-      }
-      return letters;
-    }
-
-    const letterMap = new Map<Element, HTMLElement[]>();
-    document.querySelectorAll<HTMLElement>('[data-ml9]').forEach(h2 => {
-      letterMap.set(h2, initLetters(h2));
-    });
-
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        observer.unobserve(entry.target);
-        const letters = letterMap.get(entry.target) ?? [];
-        letters.forEach((s, i) => {
-          s.style.transitionDelay = `${(i + 1) * 45}ms`;
-          s.style.transform = 'scale(1)';
+      document.querySelectorAll<HTMLElement>('[data-ml9]').forEach(h2 => {
+        const split = SplitText.create(h2, { type: 'chars,words', aria: 'auto' });
+        gsap.set(split.chars, { display: 'inline-block', transformOrigin: '50% 100%' });
+        gsap.from(split.chars, {
+          scale: 0,
+          duration: 0.8,
+          ease: 'back.out(1.7)',
+          stagger: 0.045,
+          scrollTrigger: { trigger: h2, start: 'top 80%', once: true }
         });
       });
-    }, { threshold: 0.3 });
-
-    document.querySelectorAll('[data-ml9]').forEach(el => observer.observe(el));
+    };
+    if (ready()) run();
+    else {
+      const id = setInterval(() => { if (ready()) { clearInterval(id); run(); } }, 30);
+    }
   })();
 
 
