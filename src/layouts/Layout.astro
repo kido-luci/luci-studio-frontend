@@ -103,6 +103,9 @@ const canonicalURL = canonical ?? SITE_URL;
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Limelight&family=Outfit:wght@300;400;500;600;700;800;900&family=Boldonse&family=JetBrains+Mono:wght@400..800&display=swap" rel="stylesheet">
 		<link href="https://cdn.jsdelivr.net/npm/@fontsource/sn-pro@latest/index.css" rel="stylesheet">
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
+		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
 
 		<script is:inline>
 			tailwind.config = {
@@ -926,34 +929,74 @@ const canonicalURL = canonical ?? SITE_URL;
 			}
 		});
 
-		// ── IntersectionObserver Reveals ────────────────────────────────────────
-		const io = new IntersectionObserver((entries) => {
-			entries.forEach(e => {
-				if (e.isIntersecting) {
-					e.target.classList.add('is-visible');
-					io.unobserve(e.target);
-				}
-			});
-		}, { threshold: 0.05, rootMargin: '0px 0px 120px 0px' });
-		document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+		// ── GSAP Reveals — ScrollTrigger drives both [data-reveal] and [data-word-reveal] ──
+		// CSS keeps the initial hidden state (no FOUC); GSAP overrides the CSS transition and
+		// runs the in-motion itself.
+		(function () {
+			const w = window as any;
+			const ready = () => w.gsap && w.ScrollTrigger;
+			const run = () => {
+				const { gsap, ScrollTrigger } = w;
+				gsap.registerPlugin(ScrollTrigger);
 
-		// Fallback: reveal any elements still hidden after 1.5s (missed by observer or already in viewport)
-		setTimeout(() => {
-			document.querySelectorAll('[data-reveal]:not(.is-visible)').forEach(el => {
-				el.classList.add('is-visible');
-			});
-		}, 1500);
+				// [data-reveal]: group by variant, ScrollTrigger.batch animates each group together.
+				const allReveals = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+				if (allReveals.length) {
+					const groups: Record<string, HTMLElement[]> = { default: [], left: [], right: [], scale: [] };
+					for (const el of allReveals) {
+						const v = el.getAttribute('data-reveal') || '';
+						(groups[v as keyof typeof groups] ?? groups.default).push(el);
+						// Disable the CSS transition so it doesn't fight GSAP frame-by-frame
+						el.style.transition = 'none';
+					}
+					gsap.set(groups.default, { opacity: 0, y: 40 });
+					gsap.set(groups.left,    { opacity: 0, x: -40 });
+					gsap.set(groups.right,   { opacity: 0, x: 40 });
+					gsap.set(groups.scale,   { opacity: 0, scale: 0.92 });
 
-		const wordIo = new IntersectionObserver((entries) => {
-			entries.forEach(e => {
-				if (e.isIntersecting) {
-					const words = e.target.querySelectorAll('.reveal-word');
-					words.forEach((w, i) => { setTimeout(() => w.classList.add('revealed'), i * 120); });
-					wordIo.unobserve(e.target);
+					const batchTo = (toVars: any) => ({
+						start: 'top 92%',
+						once: true,
+						onEnter: (els: HTMLElement[]) => {
+							gsap.to(els, {
+								...toVars,
+								duration: 0.7,
+								ease: 'power2.out',
+								stagger: 0.06,
+								overwrite: true,
+								clearProps: 'transition'
+							});
+						}
+					});
+					if (groups.default.length) ScrollTrigger.batch(groups.default, batchTo({ opacity: 1, y: 0 }));
+					if (groups.left.length)    ScrollTrigger.batch(groups.left,    batchTo({ opacity: 1, x: 0 }));
+					if (groups.right.length)   ScrollTrigger.batch(groups.right,   batchTo({ opacity: 1, x: 0 }));
+					if (groups.scale.length)   ScrollTrigger.batch(groups.scale,   batchTo({ opacity: 1, scale: 1 }));
 				}
-			});
-		}, { threshold: 0.2 });
-		document.querySelectorAll('[data-word-reveal]').forEach(el => wordIo.observe(el));
+
+				// [data-word-reveal]: animate each .reveal-word > span from y:-60 up to y:0
+				// within the parent's overflow:hidden mask. 0.8s delay so the hero title
+				// rises as the patch overlay clears (otherwise it animates underneath).
+				document.querySelectorAll<HTMLElement>('[data-word-reveal]').forEach(host => {
+					const inners = host.querySelectorAll<HTMLElement>('.reveal-word > span');
+					inners.forEach(s => { s.style.transition = 'none'; });
+					gsap.set(inners, { y: -60, opacity: 0 });
+					gsap.to(inners, {
+						y: 0,
+						opacity: 1,
+						duration: 0.85,
+						ease: 'power3.out',
+						stagger: 0.12,
+						delay: 0.8,
+						scrollTrigger: { trigger: host, start: 'top 90%', once: true }
+					});
+				});
+			};
+			if (ready()) run();
+			else {
+				const id = setInterval(() => { if (ready()) { clearInterval(id); run(); } }, 30);
+			}
+		})();
 
 		const counterIo = new IntersectionObserver((entries) => {
 			entries.forEach(e => {
