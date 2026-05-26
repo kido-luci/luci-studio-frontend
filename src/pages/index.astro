@@ -1276,26 +1276,29 @@ body.light-mode .blog-img-container {
   })();
 
   // ML6 "Beautiful Questions" one-shot letter animation
-  // Word-level wrappers (white-space:nowrap) keep line-breaks between words, not mid-word
-  (function() {
-    const el = document.querySelector('.hero-subtitle') as HTMLElement | null;
-    if (!el) return;
-    const text = el.textContent?.trim() ?? '';
-    const trans = 'opacity 0.75s cubic-bezier(0.19,1,0.22,1),transform 0.75s cubic-bezier(0.19,1,0.22,1)';
-    let idx = 0;
-    el.innerHTML = text.split(' ').map(word =>
-      `<span style="white-space:nowrap;display:inline">${
-        [...word].map(ch =>
-          `<span style="display:inline-block;opacity:0;transform:translateY(1.2em);transition:${trans};transition-delay:${300 + idx++ * 12}ms">${ch}</span>`
-        ).join('')
-      }</span>`
-    ).join(' ');
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      el.querySelectorAll<HTMLElement>('span span').forEach(s => {
-        s.style.opacity = '1';
-        s.style.transform = 'translateY(0)';
+  // SplitText wraps words (preventing mid-word breaks) + chars; GSAP runs the slide-up.
+  (function () {
+    const w = window as any;
+    const ready = () => w.gsap && w.SplitText;
+    const run = () => {
+      const { gsap, SplitText } = w;
+      gsap.registerPlugin(SplitText);
+      const el = document.querySelector('.hero-subtitle') as HTMLElement | null;
+      if (!el) return;
+      const split = SplitText.create(el, { type: 'words,chars', tag: 'span', aria: 'auto' });
+      gsap.from(split.chars, {
+        opacity: 0,
+        y: '1.2em',
+        duration: 0.75,
+        ease: 'expo.out',
+        stagger: 0.012,
+        delay: 0.3
       });
-    }));
+    };
+    if (ready()) run();
+    else {
+      const id = setInterval(() => { if (ready()) { clearInterval(id); run(); } }, 30);
+    }
   })();
 
 
