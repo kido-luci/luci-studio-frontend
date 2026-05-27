@@ -518,34 +518,45 @@ const structuredData = [articleSchema, breadcrumbSchema];
     const postId = main.dataset.postId;
     const apiUrl = main.dataset.apiUrl;
 
-    // Always fetch fresh counts on load
-    fetch(`${apiUrl}/posts/${postId}`)
-      .then(r => r.json())
-      .then(d => {
-        document.querySelectorAll('#view-count').forEach(el => { if (d.views != null) el.textContent = d.views; });
-        if (d.likes != null) {
-          const likeEl = document.getElementById('like-count');
-          const floatingEl = document.getElementById('floating-like-count');
-          const headerEl = document.getElementById('like-count-header');
-          if (likeEl) likeEl.textContent = d.likes;
-          if (floatingEl) floatingEl.textContent = d.likes;
-          if (headerEl) headerEl.textContent = d.likes;
-        }
-      })
-      .catch(() => {});
+    function applyEngagementCounts(d) {
+      document.querySelectorAll('#view-count').forEach(el => { if (d.views != null) el.textContent = d.views; });
+      if (d.likes != null) {
+        const likeEl = document.getElementById('like-count');
+        const floatingEl = document.getElementById('floating-like-count');
+        const headerEl = document.getElementById('like-count-header');
+        if (likeEl) likeEl.textContent = d.likes;
+        if (floatingEl) floatingEl.textContent = d.likes;
+        if (headerEl) headerEl.textContent = d.likes;
+      }
+    }
+
+    function refreshEngagementCounts() {
+      return fetch(`${apiUrl}/posts/stats?t=${Date.now()}`, { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`stats ${r.status}`)))
+        .then(stats => {
+          if (!Array.isArray(stats)) return;
+          const current = stats.find(s => String(s.id) === String(postId));
+          if (current) applyEngagementCounts(current);
+        })
+        .catch(() => {});
+    }
 
     // Increment view once per session
     const sessionKey = `viewed_${postId}`;
     if (!sessionStorage.getItem(sessionKey)) {
-      fetch(`${apiUrl}/posts/${postId}/view`, { method: 'POST' })
-        .then(r => r.json())
+      fetch(`${apiUrl}/posts/${postId}/view`, { method: 'POST', cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`view ${r.status}`)))
         .then(d => {
           if (d && d.views != null) {
             document.querySelectorAll('#view-count').forEach(el => { el.textContent = d.views; });
           }
+          sessionStorage.setItem(sessionKey, '1');
+          try { localStorage.removeItem('postStatsCache.v1'); } catch {}
+          refreshEngagementCounts();
         })
-        .catch(() => {});
-      sessionStorage.setItem(sessionKey, '1');
+        .catch(() => { refreshEngagementCounts(); });
+    } else {
+      refreshEngagementCounts();
     }
 
     // Like button — footer + floating share the same state
@@ -560,6 +571,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
     const likedKey = `liked_${postId}`;
     let liked = localStorage.getItem(likedKey) === '1';
+    let likePending = false;
 
     // Show/hide floating button based on scroll position
     const header = document.querySelector('header[data-reveal]');
@@ -652,19 +664,30 @@ const structuredData = [articleSchema, breadcrumbSchema];
     setLiked(liked);
 
     function handleLikeClick(btn, icon) {
-      const isLiking = !liked;
+      if (likePending) return;
+      const nextLiked = !liked;
+      const isLiking = nextLiked;
       if (isLiking) {
         burstHearts(btn);
-        pulseIcon(icon);
+        if (icon) pulseIcon(icon);
       }
       const endpoint = liked ? 'unlike' : 'like';
-      fetch(`${apiUrl}/posts/${postId}/${endpoint}`, { method: 'POST' })
-        .then(r => r.json())
+      likePending = true;
+      likeBtn?.setAttribute('aria-busy', 'true');
+      floatingBtn?.setAttribute('aria-busy', 'true');
+      fetch(`${apiUrl}/posts/${postId}/${endpoint}`, { method: 'POST', cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`like ${r.status}`)))
         .then(d => {
           if (d.likes != null) updateAllCounts(d.likes);
-          setLiked(!liked);
+          setLiked(nextLiked);
+          try { localStorage.removeItem('postStatsCache.v1'); } catch {}
         })
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => {
+          likePending = false;
+          likeBtn?.removeAttribute('aria-busy');
+          floatingBtn?.removeAttribute('aria-busy');
+        });
     }
 
     likeBtn.addEventListener('click', () => handleLikeClick(likeBtn, likeIcon));

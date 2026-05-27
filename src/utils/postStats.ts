@@ -2,7 +2,6 @@ const rawBaseUrl = import.meta.env.PUBLIC_API_URL || '';
 const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
 
 const CACHE_KEY = 'postStatsCache.v1';
-const TTL_MS = 5 * 60 * 1000;
 
 interface PostStat { id: string; views: number; likes: number }
 interface CachedStats { ts: number; data: PostStat[] }
@@ -20,6 +19,12 @@ function readCache(): CachedStats | null {
 function writeCache(data: PostStat[]) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+  } catch {}
+}
+
+export function invalidatePostStatsCache() {
+  try {
+    localStorage.removeItem(CACHE_KEY);
   } catch {}
 }
 
@@ -57,18 +62,19 @@ function applyStats(stats: PostStat[]) {
   });
 }
 
-// Apply cached stats immediately (cheap, no network) and, if stale,
-// refresh from `/posts/stats` once in the background.
+function statsUrl() {
+  return `${BASE_URL}/posts/stats?t=${Date.now()}`;
+}
+
+// Apply cached stats immediately for a quick paint, but always refresh from
+// `/posts/stats` because engagement counters are expected to be live.
 export function refreshPostStats() {
   if (!BASE_URL) return;
 
   const cached = readCache();
   if (cached) applyStats(cached.data);
 
-  const fresh = cached && Date.now() - cached.ts < TTL_MS;
-  if (fresh) return;
-
-  fetch(`${BASE_URL}/posts/stats`)
+  fetch(statsUrl(), { cache: 'no-store' })
     .then(r => r.ok ? r.json() : Promise.reject(new Error(`stats ${r.status}`)))
     .then((data: unknown) => {
       if (!Array.isArray(data)) return;

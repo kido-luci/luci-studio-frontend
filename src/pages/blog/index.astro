@@ -439,7 +439,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
 </style>
 
 <script>
-  import { refreshPostStats } from '../../utils/postStats';
+  import { invalidatePostStatsCache, refreshPostStats } from '../../utils/postStats';
 
   // Home links: use history.back() if we came from / (preserves scroll)
   document.querySelectorAll<HTMLAnchorElement>('a[href="/"]').forEach(link => {
@@ -640,6 +640,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     const countEl = el.querySelector<HTMLElement>('.tile-like-count');
     const likedKey = `liked_${postId}`;
     let liked = localStorage.getItem(likedKey) === '1';
+    let pending = false;
 
     function applyLiked(state: boolean) {
       liked = state;
@@ -661,17 +662,27 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     el.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      if (pending) return;
       el.dataset.userInteracted = '1';
-      if (!liked) { burstHearts(el); if (icon) pulseIcon(icon); }
+      const nextLiked = !liked;
+      if (nextLiked) { burstHearts(el); if (icon) pulseIcon(icon); }
       const endpoint = liked ? 'unlike' : 'like';
-      fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST' })
-        .then(r => r.json())
+      pending = true;
+      el.setAttribute('aria-busy', 'true');
+      fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST', cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`like ${r.status}`)))
         .then(d => {
           if (d.likes != null && countEl) countEl.textContent = String(d.likes);
-          applyLiked(!liked);
-          localStorage.setItem(likedKey, liked ? '1' : '0');
+          applyLiked(nextLiked);
+          localStorage.setItem(likedKey, nextLiked ? '1' : '0');
+          invalidatePostStatsCache();
+          refreshPostStats();
         })
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => {
+          pending = false;
+          el.removeAttribute('aria-busy');
+        });
     });
   });
 

@@ -1034,7 +1034,7 @@ body.light-mode .blog-img-container {
 </style>
 
 <script>
-  import { refreshPostStats } from '../utils/postStats';
+  import { invalidatePostStatsCache, refreshPostStats } from '../utils/postStats';
 
   // EXPERIENCE timeline items — each animates as it scrolls into view
   (function () {
@@ -1191,6 +1191,7 @@ body.light-mode .blog-img-container {
       const countEl = btn.querySelector('.tile-like-count') as HTMLElement | null;
       const likedKey = `liked_${postId}`;
       let liked = localStorage.getItem(likedKey) === '1';
+      let pending = false;
 
       function applyLikedState(state: boolean) {
         liked = state;
@@ -1212,20 +1213,30 @@ body.light-mode .blog-img-container {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (pending) return;
         btn.dataset.userInteracted = '1';
-        const isLiking = !liked;
-        if (isLiking) {
+        const nextLiked = !liked;
+        if (nextLiked) {
           burstHearts(btn);
           if (icon) pulseIcon(icon);
         }
         const endpoint = liked ? 'unlike' : 'like';
+        pending = true;
+        btn.setAttribute('aria-busy', 'true');
         fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST' })
-          .then(r => r.json())
+          .then(r => r.ok ? r.json() : Promise.reject(new Error(`like ${r.status}`)))
           .then(d => {
             if (d.likes != null && countEl) countEl.textContent = d.likes;
-            applyLikedState(!liked);
+            applyLikedState(nextLiked);
+            localStorage.setItem(likedKey, nextLiked ? '1' : '0');
+            invalidatePostStatsCache();
+            refreshPostStats();
           })
-          .catch(() => {});
+          .catch(() => {})
+          .finally(() => {
+            pending = false;
+            btn.removeAttribute('aria-busy');
+          });
       });
     });
 
@@ -1241,8 +1252,9 @@ body.light-mode .blog-img-container {
       const postId = btn.dataset.id;
       const icon = btn.querySelector('.art-like-icon') as HTMLElement | null;
       const countEl = btn.querySelector('.art-like-count') as HTMLElement | null;
-      const likedKey = `liked_${postId}`;
+      const likedKey = `liked_gallery_${postId}`;
       let liked = localStorage.getItem(likedKey) === '1';
+      let pending = false;
 
       function apply(state: boolean) {
         liked = state;
@@ -1264,16 +1276,25 @@ body.light-mode .blog-img-container {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (pending) return;
+        const nextLiked = !liked;
         const endpoint = liked ? 'unlike' : 'like';
         icon && (icon.style.transform = 'scale(1.5)');
         setTimeout(() => { if (icon) icon.style.transform = 'scale(1)'; }, 150);
-        fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST' })
-          .then(r => r.json())
+        pending = true;
+        btn.setAttribute('aria-busy', 'true');
+        fetch(`${API_URL}/gallery/${postId}/${endpoint}`, { method: 'POST' })
+          .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery like ${r.status}`)))
           .then(d => {
             if (d.likes != null && countEl) countEl.textContent = d.likes;
-            apply(!liked);
+            apply(nextLiked);
+            localStorage.setItem(likedKey, nextLiked ? '1' : '0');
           })
-          .catch(() => {});
+          .catch(() => {})
+          .finally(() => {
+            pending = false;
+            btn.removeAttribute('aria-busy');
+          });
       });
     });
   })();

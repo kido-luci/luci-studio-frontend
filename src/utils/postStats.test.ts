@@ -6,6 +6,21 @@ const CACHE_KEY = 'postStatsCache.v1';
 // postStats.ts freezes BASE_URL at module-load time. To exercise the
 // network path we must stub the env and re-import the module fresh per test.
 let refreshPostStats: typeof import('./postStats').refreshPostStats;
+let invalidatePostStatsCache: typeof import('./postStats').invalidatePostStatsCache;
+
+function createStorageMock(): Storage {
+    const data = new Map<string, string>();
+    return {
+        get length() {
+            return data.size;
+        },
+        clear: () => data.clear(),
+        getItem: (key: string) => data.get(key) ?? null,
+        key: (index: number) => Array.from(data.keys())[index] ?? null,
+        removeItem: (key: string) => { data.delete(key); },
+        setItem: (key: string, value: string) => { data.set(key, String(value)); },
+    };
+}
 
 function buildTile(id: string, userInteracted = false) {
     document.body.insertAdjacentHTML('beforeend', `
@@ -21,10 +36,11 @@ function buildTile(id: string, userInteracted = false) {
 describe('refreshPostStats', () => {
     beforeEach(async () => {
         vi.stubEnv('PUBLIC_API_URL', 'http://test.local');
+        vi.stubGlobal('localStorage', createStorageMock());
         localStorage.clear();
         document.body.innerHTML = '';
         vi.resetModules();
-        ({ refreshPostStats } = await import('./postStats'));
+        ({ invalidatePostStatsCache, refreshPostStats } = await import('./postStats'));
     });
 
     afterEach(() => {
@@ -32,26 +48,34 @@ describe('refreshPostStats', () => {
         vi.restoreAllMocks();
     });
 
-    it('applies cached stats immediately on tiles', () => {
+    it('applies cached stats immediately and still refreshes from the server', async () => {
         buildTile('1');
         localStorage.setItem(CACHE_KEY, JSON.stringify({
             ts: Date.now(),
             data: [{ id: '1', views: 42, likes: 7 }],
         }));
-        const fetchMock = vi.fn();
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => [{ id: '1', views: 43, likes: 8 }],
+        });
         vi.stubGlobal('fetch', fetchMock);
 
         refreshPostStats();
 
         expect(document.querySelector('.tile-view-count')?.textContent).toBe('42');
         expect(document.querySelector('.tile-like-count')?.textContent).toBe('7');
-        // Fresh cache → no network call.
-        expect(fetchMock).not.toHaveBeenCalled();
+        expect(String(fetchMock.mock.calls[0][0])).toMatch(/^http:\/\/test\.local\/posts\/stats\?t=/);
+        expect(fetchMock.mock.calls[0][1]).toEqual({ cache: 'no-store' });
+
+        await vi.waitFor(() => {
+            expect(document.querySelector('.tile-view-count')?.textContent).toBe('43');
+        });
+        expect(document.querySelector('.tile-like-count')?.textContent).toBe('8');
     });
 
-    it('refetches from /posts/stats when cache is stale', async () => {
+    it('refetches from /posts/stats even when cached data exists', async () => {
         buildTile('1');
-        const staleTs = Date.now() - 10 * 60 * 1000; // TTL is 5 min
+        const staleTs = Date.now() - 10 * 60 * 1000;
         localStorage.setItem(CACHE_KEY, JSON.stringify({
             ts: staleTs,
             data: [{ id: '1', views: 1, likes: 1 }],
@@ -69,7 +93,8 @@ describe('refreshPostStats', () => {
             expect(document.querySelector('.tile-view-count')?.textContent).toBe('100');
         });
         expect(document.querySelector('.tile-like-count')?.textContent).toBe('50');
-        expect(String(fetchMock.mock.calls[0][0])).toBe('http://test.local/posts/stats');
+        expect(String(fetchMock.mock.calls[0][0])).toMatch(/^http:\/\/test\.local\/posts\/stats\?t=/);
+        expect(fetchMock.mock.calls[0][1]).toEqual({ cache: 'no-store' });
 
         const written = JSON.parse(localStorage.getItem(CACHE_KEY)!);
         expect(written.data).toEqual([{ id: '1', views: 100, likes: 50 }]);
@@ -97,7 +122,7 @@ describe('refreshPostStats', () => {
             ts: Date.now(),
             data: [{ id: '1', views: 42, likes: 7 }],
         }));
-        vi.stubGlobal('fetch', vi.fn());
+        vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('boom')));
 
         const countEl = document.querySelector('.tile-like-count')!;
         countEl.textContent = '999';
@@ -106,6 +131,17 @@ describe('refreshPostStats', () => {
 
         expect(document.querySelector('.tile-view-count')?.textContent).toBe('42');
         expect(countEl.textContent).toBe('999');
+    });
+
+    it('invalidates the cached stats snapshot', () => {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+            ts: Date.now(),
+            data: [{ id: '1', views: 42, likes: 7 }],
+        }));
+
+        invalidatePostStatsCache();
+
+        expect(localStorage.getItem(CACHE_KEY)).toBeNull();
     });
 
     it('swallows network failures silently', async () => {
