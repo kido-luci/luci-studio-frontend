@@ -176,7 +176,7 @@ const structuredData = [
     const likeEl = document.getElementById('like-count');
 
     fetch(`${apiUrl}/gallery/${id}`)
-      .then(r => r.json())
+      .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery ${r.status}`)))
       .then(d => {
         if (viewEl && d.views != null) viewEl.textContent = d.views;
         if (likeEl && d.likes != null) likeEl.textContent = d.likes;
@@ -186,10 +186,12 @@ const structuredData = [
     const sessionKey = `viewed_gallery_${id}`;
     if (!sessionStorage.getItem(sessionKey)) {
       fetch(`${apiUrl}/gallery/${id}/view`, { method: 'POST' })
-        .then(r => r.json())
-        .then(d => { if (viewEl && d.views != null) viewEl.textContent = d.views; })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery view ${r.status}`)))
+        .then(d => {
+          if (viewEl && d.views != null) viewEl.textContent = d.views;
+          sessionStorage.setItem(sessionKey, '1');
+        })
         .catch(() => {});
-      sessionStorage.setItem(sessionKey, '1');
     }
   })();
 </script>
