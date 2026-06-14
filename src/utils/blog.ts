@@ -62,9 +62,19 @@ function applyInlineMarkdown(text: string): string {
         });
 }
 
+function parseTableRow(line: string): string[] {
+    return line
+        .trim()
+        .replace(/^\|/, '')
+        .replace(/\|[ \t]*$/, '')
+        .split('|')
+        .map(c => c.trim());
+}
+
 export function formatMarkdown(text: string) {
     const codeBlocks: string[] = [];
     const blockquotes: string[] = [];
+    const tables: string[] = [];
     let processedText = text;
 
     // 1. Extract fenced code blocks → placeholders (escape content inside)
@@ -106,10 +116,43 @@ export function formatMarkdown(text: string) {
         return `__BLOCKQUOTE_${index}__\n`;
     });
 
-    // 3. Escape HTML in the remaining text
+    // 3. Extract GFM tables → placeholders. Header row, separator row (dashes /
+    //    optional colons for alignment), then zero or more body rows. Pipes must
+    //    lead and trail each row. Done before HTML escaping so `|` stays raw.
+    processedText = processedText.replace(
+        /^[ \t]*\|.+\|[ \t]*\r?\n[ \t]*\|[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|[ \t]*\r?\n(?:[ \t]*\|.*\|[ \t]*\r?\n?)*/gim,
+        (match) => {
+            const rows = match.trim().split(/\r?\n/);
+            const aligns = parseTableRow(rows[1]).map(s => {
+                const left = s.startsWith(':');
+                const right = s.endsWith(':');
+                if (left && right) return 'center';
+                if (right) return 'right';
+                if (left) return 'left';
+                return '';
+            });
+            const cell = (c: string) => applyInlineMarkdown(escapeHtml(c));
+            const attr = (i: number) => (aligns[i] ? ` style="text-align:${aligns[i]}"` : '');
+
+            const thead = '<thead><tr>' +
+                parseTableRow(rows[0]).map((c, i) => `<th${attr(i)}>${cell(c)}</th>`).join('') +
+                '</tr></thead>';
+            const tbody = '<tbody>' +
+                rows.slice(2).map(r =>
+                    '<tr>' + parseTableRow(r).map((c, i) => `<td${attr(i)}>${cell(c)}</td>`).join('') + '</tr>'
+                ).join('') +
+                '</tbody>';
+
+            const index = tables.length;
+            tables.push(`<div class="table-container"><table>${thead}${tbody}</table></div>`);
+            return `\n__TABLE_${index}__\n`;
+        }
+    );
+
+    // 4. Escape HTML in the remaining text
     processedText = escapeHtml(processedText);
 
-    // 4. Apply block + inline markdown
+    // 5. Apply block + inline markdown
     processedText = processedText
         .replace(/^# (.*$)/gim, '<h1>$1</h1>')
         .replace(/^## (.*$)/gim, '<h2>$1</h2>')
@@ -127,7 +170,7 @@ export function formatMarkdown(text: string) {
         .replace(/^- (.*$)/gim, '<li>$1</li>')
         .replace(/`(.*?)`/gim, '<code>$1</code>');
 
-    // 5. Wrap paragraphs and re-insert extracted blocks
+    // 6. Wrap paragraphs and re-insert extracted blocks
     return processedText
         .split(/\r?\n\s*\r?\n/g)
         .map(p => p.trim())
@@ -138,6 +181,9 @@ export function formatMarkdown(text: string) {
             }
             if (p.startsWith('__BLOCKQUOTE_')) {
                 return blockquotes[parseInt(p.match(/\d+/)![0])];
+            }
+            if (p.startsWith('__TABLE_')) {
+                return tables[parseInt(p.match(/\d+/)![0])];
             }
             if (p.startsWith('<h') || p.startsWith('<li')) return p;
             return `<p>${p.replace(/\n/g, '<br />')}</p>`;
