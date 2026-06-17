@@ -2,11 +2,16 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master, dev]
   pull_request:
 
 permissions:
   contents: read
+
+# Cancel an in-progress run when a newer commit lands on the same ref.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
