@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & unit test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Build
+        run: npm run build
+        env:
+          # No backend is reachable in CI. The site fetches posts at build time
+          # and fail-fasts in prod when the API is down, so allow an empty-posts
+          # build — this job verifies the site compiles, not content rendering.
+          PUBLIC_API_URL: http://localhost:3000
+          ALLOW_EMPTY_POSTS: "1"
