@@ -788,17 +788,22 @@ const structuredData = [articleSchema, breadcrumbSchema];
       return p && p.role === 'user' && p.exp > Math.floor(Date.now() / 1000);
     }
 
-    // --- Grab token from URL after OAuth redirect ---
-    const params = new URLSearchParams(window.location.search);
+    // --- Grab token from URL fragment after OAuth redirect ---
+    // The OAuth callback returns the token ONLY in the URL fragment (#user_token=…),
+    // never the query string, so it never reaches servers, proxies, or access logs.
+    // Read it exclusively from the fragment: honoring a ?user_token= query param too
+    // would let a crafted link seed an attacker-chosen token into a victim's
+    // localStorage (token fixation). Validate before storing so a malformed or
+    // expired token is never persisted (the server still re-validates every call).
     const fragmentParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-    const urlToken = fragmentParams.get('user_token') || params.get('user_token');
+    const urlToken = fragmentParams.get('user_token');
     if (urlToken) {
-      setToken(urlToken);
+      if (isTokenValid(urlToken)) {
+        setToken(urlToken);
+      }
       fragmentParams.delete('user_token');
-      params.delete('user_token');
-      const newSearch = params.toString();
       const newHash = fragmentParams.toString();
-      window.history.replaceState({}, '', window.location.pathname + (newSearch ? '?' + newSearch : '') + (newHash ? '#' + newHash : ''));
+      window.history.replaceState({}, '', window.location.pathname + window.location.search + (newHash ? '#' + newHash : ''));
     }
 
     // --- UI elements ---
