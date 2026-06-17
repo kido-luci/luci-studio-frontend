@@ -400,6 +400,11 @@ const structuredData = [articleSchema, breadcrumbSchema];
             <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--text-tertiary);">Loading…</p>
           </div>
         </div>
+
+        <!-- Load more -->
+        <div style="display:flex;justify-content:center;padding:0.5rem 0 0.25rem;">
+          <button id="load-more-comments" type="button" style="display:none;align-items:center;gap:0.4rem;font-size:0.75rem;font-weight:600;color:var(--text-secondary);background:transparent;border:1px solid var(--border-color, rgba(255,255,255,0.12));cursor:pointer;padding:0.5rem 1.1rem;border-radius:9999px;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">Load more comments</button>
+        </div>
       </section>
     </div>
   </main>
@@ -1357,6 +1362,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
           const reply = await res.json();
           const p = parseJWT(t);
           reply.user = { id: p.sub, name: p.name, email: p.email, avatar: p.avatar || '' };
+          trackLocalComment(reply);
 
           // Find or create replies container
           let repliesWrap = parentWrap.nextElementSibling;
@@ -1398,8 +1404,55 @@ const structuredData = [articleSchema, breadcrumbSchema];
     }
 
     // --- Fetch and render comments ---
-    let cachedComments = null;
+    let cachedComments = [];
     let sortOrder = 'newest'; // 'newest' | 'oldest'
+
+    // Pagination state. The server pages top-level comments (newest first);
+    // each page carries its replies. commentOffset counts top-level comments.
+    const COMMENT_PAGE = 20;
+    let commentOffset = 0;
+    let commentsHasMore = false;
+    let commentsLoading = false;
+    const seenCommentIds = new Set();
+
+    // Merge a fetched page into cachedComments, skipping anything already held
+    // (a freshly posted comment shifts server offsets, so a later page can
+    // re-return a row we already have — dedupe keeps the list clean).
+    function mergeComments(list) {
+      for (const c of list) {
+        if (seenCommentIds.has(c.id)) continue;
+        seenCommentIds.add(c.id);
+        cachedComments.push(c);
+        if (c.user_reaction) reactionState.set(String(c.id), c.user_reaction);
+      }
+    }
+
+    // Track a comment created in this session so re-renders (sort, load-more)
+    // keep it instead of dropping it.
+    function trackLocalComment(c) {
+      if (seenCommentIds.has(c.id)) return;
+      seenCommentIds.add(c.id);
+      cachedComments.push(c);
+    }
+
+    async function fetchCommentsPage(offset) {
+      const t = getToken();
+      const headers = isTokenValid(t) ? { 'Authorization': `Bearer ${t}` } : {};
+      const res = await fetch(`${API_URL}/posts/${postID}/comments?limit=${COMMENT_PAGE}&offset=${offset}`, { headers });
+      if (!res.ok) throw new Error();
+      const list = await res.json();
+      const total = parseInt(res.headers.get('X-Total-Count')) || list.length;
+      const hasMore = res.headers.get('X-Has-More') === 'true';
+      return { list, total, hasMore };
+    }
+
+    function updateLoadMoreBtn() {
+      const btn = document.getElementById('load-more-comments');
+      if (!btn) return;
+      btn.style.display = commentsHasMore ? 'inline-flex' : 'none';
+      btn.disabled = commentsLoading;
+      btn.textContent = commentsLoading ? 'Loading…' : 'Load more comments';
+    }
 
     function renderComments(all) {
       if (!all.length) {
@@ -1434,22 +1487,41 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
     async function loadComments() {
       try {
-        const t = getToken();
-        const headers = isTokenValid(t) ? { 'Authorization': `Bearer ${t}` } : {};
-        const res = await fetch(`${API_URL}/posts/${postID}/comments`, { headers });
-        if (!res.ok) throw new Error();
-        cachedComments = await res.json();
-        // Seed reaction state from server so highlights survive reload
-        cachedComments.forEach(c => {
-          if (c.user_reaction) reactionState.set(String(c.id), c.user_reaction);
-        });
+        const { list, total, hasMore } = await fetchCommentsPage(0);
+        cachedComments = [];
+        seenCommentIds.clear();
+        mergeComments(list);
+        commentOffset = COMMENT_PAGE;
+        commentsHasMore = hasMore;
         loadingEl?.remove();
-        updateCountBadge(cachedComments.length);
+        updateCountBadge(total);
         renderComments(cachedComments);
+        updateLoadMoreBtn();
       } catch {
         if (loadingEl) loadingEl.querySelector('p').textContent = 'Failed to load comments.';
       }
     }
+
+    async function loadMoreComments() {
+      if (commentsLoading || !commentsHasMore) return;
+      commentsLoading = true;
+      updateLoadMoreBtn();
+      try {
+        const { list, total, hasMore } = await fetchCommentsPage(commentOffset);
+        mergeComments(list);
+        commentOffset += COMMENT_PAGE;
+        commentsHasMore = hasMore;
+        updateCountBadge(total);
+        renderComments(cachedComments);
+      } catch {
+        // Leave the button visible so the user can retry.
+      } finally {
+        commentsLoading = false;
+        updateLoadMoreBtn();
+      }
+    }
+
+    document.getElementById('load-more-comments')?.addEventListener('click', loadMoreComments);
 
     document.getElementById('sort-toggle')?.addEventListener('click', () => {
       sortOrder = sortOrder === 'newest' ? 'oldest' : 'newest';
@@ -1484,6 +1556,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
         const comment = await res.json();
         const payload = parseJWT(token);
         comment.user = { id: payload.sub, name: payload.name, email: payload.email, avatar: payload.avatar || '' };
+        trackLocalComment(comment);
         const empty = document.getElementById('comments-empty');
         if (empty) empty.remove();
         const newEl = buildCommentEl(comment);
