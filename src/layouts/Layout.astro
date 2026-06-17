@@ -363,6 +363,12 @@ const canonicalURL = canonical ?? SITE_URL;
 				transform-style: preserve-3d;
 			}
 
+			/* === HIDE PARTICLE BACKGROUND ON MOBILE === */
+			/* JS skips the canvas loop on mobile; this keeps it hidden as a fallback. */
+			@media (max-width: 768px) {
+				#canvas-bg { display: none !important; }
+			}
+
 			/* === WINDOWS PERFORMANCE MODE === */
 			/* Applied via JS when Windows is detected. Disables expensive GPU ops. */
 
@@ -563,6 +569,10 @@ const canonicalURL = canonical ?? SITE_URL;
 			(/Windows/.test(navigator.userAgent));
 
 		if (isWindows) document.body.classList.add('win-perf-mode');
+
+		// ── Mobile Detection ────────────────────────────────────────────────────
+		// Skip the canvas particle background on mobile browsers (perf + clutter).
+		const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
 		// ── Global Elements ─────────────────────────────────────────────────────
 		const dot = document.getElementById('cursor-dot') as HTMLElement;
@@ -790,10 +800,7 @@ const canonicalURL = canonical ?? SITE_URL;
 			document.documentElement.classList.toggle('light-mode', isLight);
 			localStorage.setItem('theme', isLight ? 'light' : 'dark');
 			
-			if (isLight) {
-				document.getElementById('canvas-bg')!.style.opacity = '1';
-				initCanvasParticles();
-			} else {
+			if (!isMobile) {
 				document.getElementById('canvas-bg')!.style.opacity = '1';
 				initCanvasParticles();
 			}
@@ -1151,12 +1158,15 @@ const canonicalURL = canonical ?? SITE_URL;
 			});
 		});
 
-		// ── Canvas Particles Background (always on, all platforms) ──────────
-		document.getElementById('canvas-bg')!.style.opacity = '1';
-		initCanvasParticles();
+		// ── Canvas Particles Background (desktop only — skipped on mobile) ──────
+		if (!isMobile) {
+			document.getElementById('canvas-bg')!.style.opacity = '1';
+			initCanvasParticles();
+		}
 
 		// ── Page Visibility: pause all animations when tab is hidden ─────────
 		document.addEventListener('visibilitychange', () => {
+			if (isMobile) return;
 			if (document.hidden) {
 				pauseCanvasParticles();
 			} else if (!isBgPaused) {
