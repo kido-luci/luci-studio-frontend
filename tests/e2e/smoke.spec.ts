@@ -20,11 +20,6 @@ test.describe('Page smoke tests', () => {
         await expect(page).toHaveTitle(/Blog/);
         await expect(page.getByRole('heading', { name: /THOUGHTS/i })).toBeVisible();
     });
-
-    test('/chat renders the chat title', async ({ page }) => {
-        await page.goto('/chat');
-        await expect(page).toHaveTitle(/Kido/);
-    });
 });
 
 test.describe('Resilience', () => {
@@ -112,7 +107,7 @@ async function scrollToBottom(page: Page) {
     await page.waitForTimeout(600);
 }
 
-const SWEEP_PAGES = ['/', '/blog', '/portfolio', '/chat', '/privacy', '/terms'];
+const SWEEP_PAGES = ['/', '/blog', '/portfolio', '/privacy', '/terms'];
 
 test.describe('Full-page error sweep', () => {
     for (const path of SWEEP_PAGES) {

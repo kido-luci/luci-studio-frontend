@@ -1,6 +1,4 @@
 ---
-import ChatBot from '../components/ChatBot.astro';
-
 const SITE_URL = 'https://luci-studio.com';
 const SITE_NAME = 'Luci Studio';
 const TWITTER_HANDLE = '@luci_studio';
@@ -20,7 +18,6 @@ interface Props {
 	structuredData?: object | object[];
 	articleMeta?: { publishedTime?: string; modifiedTime?: string; tags?: string[]; author?: string };
 	googleSiteVerification?: string;
-	hideChatFab?: boolean;
 	particleSpeed?: number;
 }
 
@@ -37,7 +34,6 @@ const {
 	structuredData,
 	articleMeta,
 	googleSiteVerification = import.meta.env.PUBLIC_GSC_VERIFICATION,
-	hideChatFab = false,
 	particleSpeed = 1,
 } = Astro.props;
 
@@ -163,8 +159,6 @@ const canonicalURL = canonical ?? SITE_URL;
 		<div id="cursor-ring" class="fixed w-10 h-10 border border-white/40 rounded-full pointer-events-none z-[9998] mix-blend-difference" style="top:0;left:0;transform:translate(-20px,-20px);"></div>
 
 		<slot />
-
-		{!hideChatFab && <ChatBot />}
 
 		<section
 			id="cookie-consent"
