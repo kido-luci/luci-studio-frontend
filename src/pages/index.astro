@@ -179,8 +179,11 @@ const homepageSchema = {
 
         <!-- Quick stat pills -->
         <div class="hero-stats">
-          {(profile?.stat_pills ?? []).map((pill) => (
-            <span class="hero-stat-pill">{pill}</span>
+          {(profile?.stat_pills ?? []).map((pill, i) => (
+            <>
+              {i > 0 && <span class="hero-stat-sep">·</span>}
+              <span class="hero-stat-pill">{pill}</span>
+            </>
           ))}
         </div>
       </div>

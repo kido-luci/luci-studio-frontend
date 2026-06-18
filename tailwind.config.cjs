@@ -32,6 +32,7 @@ module.exports = {
     { pattern: /hover:border-(violet|blue|cyan|pink|amber)-500\/(20|40)/ },
     { pattern: /bg-(violet|blue|cyan|pink|amber)-500\/(10|15|20)/ },
     { pattern: /hover:bg-(violet|blue|cyan|pink|amber)-500\/10/ },
+    { pattern: /group-hover:bg-(violet|blue|cyan|pink|amber)-500\/(10|20)/ },
   ],
   plugins: [],
 };
