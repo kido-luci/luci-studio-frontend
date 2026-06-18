@@ -17,7 +17,7 @@ export interface Playlist {
 
 // Module-scoped cache of the in-flight getAll promise. Astro shares module
 // state across all pages within a single build, so this dedupes the three
-// build-time callers (/blog, /blog/playlists, /blog/playlists/[slug]) into
+// build-time callers (/blog, /blog/series, /blog/series/[slug]) into
 // one network round-trip. Reset on error so a transient failure doesn't
 // poison subsequent retries.
 let getAllPromise: Promise<Playlist[]> | null = null;

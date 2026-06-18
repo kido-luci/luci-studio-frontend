@@ -226,7 +226,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
       <header class="mb-16" data-reveal>
         <div class="flex items-center gap-4 mb-6 flex-wrap">
           {tags.map(t => (
-            <span class="tag-label px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest">{t}</span>
+            <span class="tag-label px-3 py-1 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest">{t}</span>
           ))}
           <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
           <span class="text-xs text-gray-500">{formattedDate}</span>
@@ -243,7 +243,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
             <span id="like-count-header">{post.likes ?? '—'}</span>
           </span>
         </div>
-        <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-tighter">
+        <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-normal">
           {post.title}
         </h1>
       </header>
@@ -252,8 +252,8 @@ const structuredData = [articleSchema, breadcrumbSchema];
       <article class="prose-custom markdown-content" set:html={htmlContent}>
       </article>
 
-      <!-- Like CTA -->
-      <div class="mt-24 flex flex-col items-center text-center gap-5">
+      <!-- Like + Support card -->
+      <div class="support-card mt-24 rounded-3xl border border-white/10 bg-white/[0.02] px-6 py-12 md:px-12 flex flex-col items-center text-center gap-4">
         <p class="text-[10px] font-black text-gray-600 uppercase tracking-[0.35em]">Enjoyed this read?</p>
         <button id="like-btn" aria-label="Like this post" class="relative group outline-none">
           <div id="like-ring" class="absolute -inset-3 rounded-full opacity-0 transition-all duration-700 pointer-events-none" style="background:radial-gradient(circle,rgba(244,63,94,0.18) 0%,transparent 70%);"></div>
@@ -267,6 +267,22 @@ const structuredData = [articleSchema, breadcrumbSchema];
         <div>
           <span id="like-count" class="text-2xl font-black text-white tabular-nums">{post.likes ?? '—'}</span>
           <span class="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] ml-2">likes</span>
+        </div>
+
+        <div class="w-full max-w-xs border-t border-white/5 mt-6 mb-2"></div>
+
+        <p class="text-[10px] font-black text-gray-600 uppercase tracking-[0.35em]">Found this helpful?</p>
+        <h3 class="text-2xl md:text-3xl font-black text-white">Support my work<span class="text-violet-500">.</span></h3>
+        <p class="text-sm text-gray-400 max-w-md leading-relaxed">If this post saved you time or taught you something, you can buy me a coffee. Every bit keeps me writing and shipping.</p>
+        <a href="https://paypal.me/TrungLapTieu?locale.x=en_US&country.x=VN" target="_blank" rel="noopener noreferrer"
+           class="group mt-2 inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full font-black text-sm uppercase tracking-widest text-white bg-[#0070ba] hover:bg-[#005ea6] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(0,112,186,0.4)]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Support via PayPal
+        </a>
+
+        <div class="mt-3 flex flex-col items-center gap-1.5">
+          <img src="/images/paypal-qr.png" alt="Scan to support via PayPal" width="96" height="96" loading="lazy" class="w-24 h-24 rounded-lg bg-white p-1" />
+          <span class="text-[10px] text-gray-600 uppercase tracking-[0.2em]">Scan to pay</span>
         </div>
       </div>
 
@@ -282,11 +298,11 @@ const structuredData = [articleSchema, breadcrumbSchema];
              </div>
            </div>
            <div class="flex flex-wrap items-center justify-center gap-6">
-             <button id="share-btn" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Share Post <span>↗</span></button>
+             <button id="share-btn" style="font-family: inherit;" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Share Post <span>↗</span></button>
              <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Connect <span>↗</span></a>
              <a href="/terms" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Terms</a>
              <a href="/privacy" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Privacy</a>
-             <button type="button" data-cookie-settings class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Cookie Settings</button>
+             <button type="button" data-cookie-settings style="font-family: inherit;" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Cookie Settings</button>
            </div>
         </div>
       </footer>
@@ -296,7 +312,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
           <div class="flex items-end justify-between mb-8 flex-wrap gap-4">
             <div>
               <span class="text-[10px] font-black uppercase tracking-[0.3em]" style="color:var(--text-tertiary);">Continue Reading</span>
-              <h2 class="text-2xl md:text-3xl font-black tracking-tighter mt-2" style="color:var(--text-primary);">More Posts<span class="text-violet-500">.</span></h2>
+              <h2 class="text-2xl md:text-3xl font-black tracking-wide mt-2" style="color:var(--text-primary);">More Posts<span class="text-violet-500">.</span></h2>
             </div>
             <a href="/blog" class="text-xs font-bold uppercase tracking-widest flex items-center gap-2 group" style="color:var(--text-secondary);">
               View All
@@ -1878,12 +1894,12 @@ const structuredData = [articleSchema, breadcrumbSchema];
   }
 
   .markdown-content pre {
-    background: #0a0a0a !important;
+    background: #17171d !important;
     padding: 2rem !important;
     border-radius: 1.5rem !important;
     overflow-x: auto;
     margin: 0 !important;
-    border: 1px solid rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
     font-size: 1rem !important;
     box-shadow: 0 20px 50px -20px rgba(0,0,0,0.5);
   }
@@ -1965,23 +1981,27 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
   .copy-btn {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 0.85rem;
+    right: 0.85rem;
     background: rgba(255, 255, 255, 0.05);
     color: #71717a;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.75rem;
-    font-size: 0.75rem;
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.55rem;
+    font-size: 0.6rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.35rem;
     backdrop-filter: blur(8px);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+  }
+  .copy-btn svg {
+    width: 12px;
+    height: 12px;
   }
 
   .copy-btn:hover {
@@ -2136,6 +2156,18 @@ const structuredData = [articleSchema, breadcrumbSchema];
     background: rgba(255, 255, 255, 0.8);
     color: #64748b;
     border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  body.light-mode .support-card {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  }
+  body.light-mode .support-card h3 {
+    color: rgb(17, 24, 39);
+  }
+  body.light-mode .support-card .border-t {
+    border-color: rgba(0, 0, 0, 0.08);
   }
 
   body.light-mode nav {

@@ -17,3 +17,7 @@
 /blog/portrail-of-a-girl-microsoft-paint-51/                                /art/portrail-of-a-girl-microsoft-paint-51/                                301
 /blog/sagiri-izumi-eromanga-sensei-48/                                      /art/sagiri-izumi-eromanga-sensei-48/                                      301
 /blog/nanatsu-no-taizai-47/                                                 /art/nanatsu-no-taizai-47/                                                 301
+
+# "Playlists" feature renamed to "Series" on 2026-06-18. Path prefix changed; slugs unchanged.
+/blog/playlists                                                             /blog/series                                                              301
+/blog/playlists/*                                                           /blog/series/:splat                                                       301
