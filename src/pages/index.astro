@@ -5,14 +5,20 @@ import TopNav from "../components/TopNav.astro";
 import { postService } from "../services/posts";
 import { playlistService } from "../services/playlists";
 import { galleryService } from "../services/gallery";
+import { workService } from "../services/work";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../utils/blog";
 
-const projects = [
-  { title: 'memoirMe', year: '2024–Now', desc: 'Zero-knowledge RSA/AES encrypted diary with geolocation mapping, AI features, and cross-platform sync. Privacy-first, no server-side compromise.', links: [{ label: 'App Store', url: 'https://apps.apple.com/au/app/memoirme/id1640973202' }, { label: 'Play Store', url: 'https://play.google.com/store/apps/details?id=com.nartus.interactiveDiary&pcampaignid=web_share' }, { label: 'The Nartus', url: 'https://www.thenartus.com/' }], img: 'https://media.luci-studio.com/MEMOIRME.png', logo: 'https://media.luci-studio.com/MEMOIRME-LOGO.webp' },
-  { title: 'TBchat', year: '2024–Now', desc: 'Web3 messenger with on-chain wallets, PoS miner orchestration, and audio chat with real-time waveforms. Cross-platform. No shortcuts.', links: [{ label: 'App Store', url: 'https://apps.apple.com/us/app/tbchat-web3/id6739870518' }, { label: 'Chain-Views', url: 'https://www.chainviews.net/' }], img: 'https://media.luci-studio.com/TBCHAT.png', logo: 'https://media.luci-studio.com/TBCHAT-LOGO.webp' },
-  { title: 'IU PETSHOP', year: '2021–2022', desc: 'Blockchain-based pet microchip identification with VNPay payment integration. University capstone — designed the UI, built the app, shipped the demo.', links: [{ label: 'GitHub', url: 'https://github.com/binhtt13122000/PetCare_User_Mobile' }, { label: 'Demo Video', url: 'https://drive.google.com/file/d/1tYOotBwaK2GCclhNcoFpm_q9G9nu00Rf/view' }], img: 'https://media.luci-studio.com/IUPET-shop.png', logo: 'https://media.luci-studio.com/IU-PET-LOGO.png' },
-  { title: 'Survive in Shadow', year: '2018', desc: 'Top-down 2D survival game built in Unity — procedural spawning, custom shadow system, resource management.', links: [{ label: 'itch.io', url: 'https://lapl1412.itch.io/survive-in-shadow' }], img: 'https://media.luci-studio.com/SURVIVE-GAME.png' },
-];
+const work = await workService.getAll();
+const projects = work
+  .filter(w => w.featured)
+  .map(w => ({
+    title: w.title,
+    year: w.period,
+    desc: w.card_description || w.summary || '',
+    links: w.links,
+    img: w.card_image_url || '',
+    logo: w.logo_url || undefined,
+  }));
 
 const [rawPosts, rawPlaylists] = await Promise.all([
   postService.getAll(),
