@@ -36,8 +36,8 @@ PUBLIC_API_URL=http://localhost:3000
 - Blog post content is fetched at build time and rendered server-side; no client-side data fetching
 
 **Styling**:
-- Tailwind CSS loaded via CDN (configured inline in `src/layouts/Layout.astro`)
-- All global CSS lives in `Layout.astro` (`<style is:global>`) — over 600 lines of custom styles
+- Tailwind CSS is compiled at build time via PostCSS (`tailwind.config.cjs`, `postcss.config.cjs`); the `@tailwind` directives live in `src/styles/global.css`, imported once in `src/layouts/Layout.astro`. Custom animations/keyframes are defined in `tailwind.config.cjs`. (Previously loaded via the `cdn.tailwindcss.com` runtime JIT — replaced to remove the render-blocking script.)
+- All other global CSS lives in `Layout.astro` (`<style is:global>`) — over 600 lines of custom styles
 - Theme system (dark default / light toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
 
 **Third-party libraries** (all loaded via CDN in `Layout.astro`):
@@ -55,4 +55,6 @@ PUBLIC_API_URL=http://localhost:3000
 | `src/services/posts.ts` | API client — Post type definition lives here |
 | `src/utils/blog.ts` | Markdown parser and blog utilities |
 | `astro.config.mjs` | Static output + Cloudflare adapter |
+| `tailwind.config.cjs` / `postcss.config.cjs` | Build-time Tailwind config (content globs, custom animations) + PostCSS pipeline |
+| `src/styles/global.css` | `@tailwind` directives, imported in `Layout.astro` |
 | `wrangler.jsonc` | Cloudflare Pages deployment config |
