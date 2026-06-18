@@ -3,8 +3,22 @@ import Layout from "../layouts/Layout.astro";
 import TimelineItem from "../components/TimelineItem.astro";
 import TopNav from "../components/TopNav.astro";
 import { workService } from "../services/work";
+import { profileService } from "../services/profile";
+import { skillsService } from "../services/skills";
 
+const profile = await profileService.getProfile();
+const skills = await skillsService.getAll();
 const work = await workService.getAll();
+
+// Static map so the literal Tailwind classes exist in the build (token comes from the DB).
+const ACCENT: Record<string, { text: string; dot: string }> = {
+  violet: { text: "text-violet-500", dot: "bg-violet-500" },
+  blue:   { text: "text-blue-500",   dot: "bg-blue-500" },
+  cyan:   { text: "text-cyan-500",   dot: "bg-cyan-500" },
+  pink:   { text: "text-pink-500",   dot: "bg-pink-500" },
+  amber:  { text: "text-amber-500",  dot: "bg-amber-500" },
+};
+const accentOf = (token: string) => ACCENT[token] ?? ACCENT.violet;
 const toTimelineShape = (w) => ({
   id: w.title,
   y: w.period,
@@ -39,10 +53,10 @@ const indieProjects = work.filter(w => w.category === 'indie').map(toTimelineSha
           <div data-story-photo class="relative group">
             <div class="absolute -inset-4 bg-gradient-to-tr from-violet-600/20 to-blue-600/20 rounded-2xl blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
             <div class="relative aspect-square md:aspect-auto md:h-[600px] rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]">
-              <img src="https://media.luci-studio.com/My%20Story.webp" alt="Trung Lap" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
+              <img src={profile?.story_photo_url} alt="Trung Lap" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
               <div data-story-badge class="absolute bottom-8 left-8 right-8 p-6 backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl">
                 <p class="text-xs font-black text-violet-400 uppercase tracking-[0.2em] mb-1">Based in</p>
-                <p class="text-xl font-bold">Ho Chi Minh City, VN</p>
+                <p class="text-xl font-bold">{profile?.story_location}</p>
               </div>
             </div>
           </div>
@@ -52,29 +66,15 @@ const indieProjects = work.filter(w => w.category === 'indie').map(toTimelineSha
             <span data-story-label class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4 block">The Person</span>
             <h2 data-ml9 class="text-5xl md:text-7xl font-black tracking-wide mb-8">MY STORY<span class="text-violet-500">.</span></h2>
             <div class="space-y-6 text-gray-400 text-lg leading-relaxed">
-              <p data-story-para="0">
-                I'm <span class="text-white font-bold">Trung Lập (Luci)</span>. I engineer high-performance systems. Over five years specializing in Flutter, I've shipped production applications across <span class="text-white font-bold">Android, iOS, macOS, Windows, and Web</span>, backed by robust Go microservices and automated Python pipelines.
-              </p>
-              <p data-story-para="1">
-                I operate across the entire product lifecycle. Architecture. State management. Real-time infrastructure. CI/CD. I build systems that scale, from a <span class="text-white">zero-knowledge encrypted diary</span> to a live Web3 messaging platform with integrated on-chain wallets.
-              </p>
-              <p data-story-para="2">
-                I am also a visual artist. That discipline strictly dictates how I approach <span class="text-white">visual hierarchy, proportion, and interface logic</span>. My design decisions are deliberate. Nothing is accidental.
-              </p>
-              <p data-story-para="3">
-                My baseline standard is production-grade stability. No fragility. No deferred technical debt. I execute with <span class="text-shimmer font-bold">clean architecture</span>, rigid state management, and an absolute obsession with edge cases. Ship. Refine. Repeat.
-              </p>
+              {(profile?.bio_paragraphs ?? []).map((para, i) => (
+                <p data-story-para={String(i)} class="text-gray-400 text-lg leading-relaxed" set:html={para} />
+              ))}
             </div>
             <div class="grid grid-cols-2 gap-4 mt-12">
-              {[
-                { label: 'Origin story', val: 'Drawing · then Game dev · 2018' },
-                { label: 'Stack', val: 'Flutter · Go · PostgreSQL' },
-                { label: 'Art mediums', val: 'Pencil · Ballpoint · Watercolor · Digital' },
-                { label: 'Motto', val: 'Ship. Refine. Repeat.' }
-              ].map((f, fi) => (
+              {(profile?.story_facts ?? []).map((f, fi) => (
                 <div data-reveal="scale" data-delay={String(fi + 1)} class="p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
                   <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">{f.label}</p>
-                  <p class="text-sm font-bold text-gray-300">{f.val}</p>
+                  <p class="text-sm font-bold text-gray-300">{f.value}</p>
                 </div>
               ))}
             </div>
@@ -90,15 +90,10 @@ const indieProjects = work.filter(w => w.category === 'indie').map(toTimelineSha
     <!-- STATS -->
     <section class="py-6 px-4 md:px-6">
       <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-1">
-        {[
-          { n: 5, suffix: '+', label: 'Years', sub: 'Deep in Flutter' },
-          { n: 10, suffix: '+', label: 'Projects', sub: 'In production. For real.' },
-          { n: 5, suffix: '', label: 'Platforms', sub: 'Android · iOS · macOS · Web · Windows' },
-          { n: 50, suffix: '%', label: 'Scholarship', sub: 'FPT University · Merit' },
-        ].map((s, i) => (
+        {(profile?.portfolio_stats ?? []).map((s, i) => (
           <div data-reveal data-delay={String(i+1)} class="tilt-card p-5 sm:p-8 border border-white/5 rounded-2xl text-center hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
             <div class="text-6xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 mb-2">
-              <span class="count-up" data-count={s.n} data-suffix={s.suffix}>0{s.suffix}</span>
+              <span class="count-up" data-count={s.number} data-suffix={s.suffix}>0{s.suffix}</span>
             </div>
             <div class="text-white font-bold mb-1">{s.label}</div>
             <div class="text-xs text-gray-400 uppercase tracking-widest">{s.sub}</div>
@@ -155,66 +150,38 @@ const indieProjects = work.filter(w => w.category === 'indie').map(toTimelineSha
           <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-wide">SKILLS<span class="text-emerald-500">.</span></h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div data-reveal class="group p-5 sm:p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-violet-500/20 transition-all duration-500 relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all"></div>
-            <h3 class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-violet-500"></span>Mobile
-            </h3>
-            <div class="flex flex-wrap gap-2">
-              {['Flutter','Dart','BLoC','Riverpod','Clean Architecture','Custom UI','Animations','ObjectBox'].map(s => (
-                <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-violet-500/40 hover:bg-violet-500/10 transition-all cursor-default">{s}</span>
-              ))}
-            </div>
-          </div>
-          <div data-reveal data-delay="1" class="group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-blue-500/20 transition-all duration-500 relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"></div>
-            <h3 class="text-xs font-black text-blue-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-blue-500"></span>Backend
-            </h3>
-            <div class="flex flex-wrap gap-2">
-              {['Golang','gRPC','REST API','Firebase','GCP','PostgreSQL','MySQL','Redis'].map(s => (
-                <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-blue-500/40 hover:bg-blue-500/10 transition-all cursor-default">{s}</span>
-              ))}
-            </div>
-          </div>
-          <div data-reveal data-delay="2" class="group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-cyan-500/20 transition-all duration-500 relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all"></div>
-            <h3 class="text-xs font-black text-cyan-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-cyan-500"></span>DevOps
-            </h3>
-            <div class="flex flex-wrap gap-2">
-              {['Docker','CI/CD','GitHub Actions','Jenkins','Cloudflare','Docker Compose','Linux'].map(s => (
-                <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-cyan-500/40 hover:bg-cyan-500/10 transition-all cursor-default">{s}</span>
-              ))}
-            </div>
-          </div>
-          <div data-reveal data-delay="3" class="group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-pink-500/20 transition-all duration-500 relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-pink-500/10 rounded-full blur-2xl group-hover:bg-pink-500/20 transition-all"></div>
-            <h3 class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-pink-500"></span>Specialized
-            </h3>
-            <div class="flex flex-wrap gap-2">
-              {['RSA/AES','Web3','Blockchain','Local LLM','llama.cpp','On-device AI','Security'].map(s => (
-                <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-pink-500/40 hover:bg-pink-500/10 transition-all cursor-default">{s}</span>
-              ))}
-            </div>
-          </div>
-          <div data-reveal data-delay="4" class="group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-amber-500/20 transition-all duration-500 relative overflow-hidden md:col-span-2 lg:col-span-4">
-            <div class="absolute -right-8 -top-8 w-48 h-48 bg-amber-500/8 rounded-full blur-3xl group-hover:bg-amber-500/15 transition-all"></div>
-            <div class="flex flex-col md:flex-row md:items-start gap-8">
-              <div class="flex-shrink-0 md:w-56">
-                <h3 class="text-xs font-black text-amber-500 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-amber-500"></span>Art & Creative
+          {(skills ?? []).map((cat) => (
+            cat.wide ? (
+              <div data-reveal class={`group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-${cat.accent_color}-500/20 transition-all duration-500 relative overflow-hidden md:col-span-2 lg:col-span-4`}>
+                <div class={`absolute -right-8 -top-8 w-48 h-48 bg-${cat.accent_color}-500/10 rounded-full blur-3xl group-hover:bg-${cat.accent_color}-500/20 transition-all`}></div>
+                <div class="flex flex-col md:flex-row md:items-start gap-8">
+                  <div class="flex-shrink-0 md:w-56">
+                    <h3 class={`text-xs font-black ${accentOf(cat.accent_color).text} uppercase tracking-[0.3em] mb-4 flex items-center gap-2`}>
+                      <span class={`w-2 h-2 rounded-full ${accentOf(cat.accent_color).dot}`}></span>{cat.name}
+                    </h3>
+                    {cat.description && <p class="text-gray-600 text-sm leading-relaxed">{cat.description}</p>}
+                  </div>
+                  <div class="flex flex-wrap gap-2 content-start">
+                    {cat.items.map((s) => (
+                      <span class={`px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-${cat.accent_color}-500/40 hover:bg-${cat.accent_color}-500/10 transition-all cursor-default`}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div data-reveal class={`group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-${cat.accent_color}-500/20 transition-all duration-500 relative overflow-hidden`}>
+                <div class={`absolute -right-4 -top-4 w-24 h-24 bg-${cat.accent_color}-500/10 rounded-full blur-2xl group-hover:bg-${cat.accent_color}-500/20 transition-all`}></div>
+                <h3 class={`text-xs font-black ${accentOf(cat.accent_color).text} uppercase tracking-[0.3em] mb-8 flex items-center gap-2`}>
+                  <span class={`w-2 h-2 rounded-full ${accentOf(cat.accent_color).dot}`}></span>{cat.name}
                 </h3>
-                <p class="text-gray-600 text-sm leading-relaxed">Traditional and digital — portraits, character illustration, watercolor, and pixel art. A creative practice running parallel to the engineering work since 2016.</p>
+                <div class="flex flex-wrap gap-2">
+                  {cat.items.map((s) => (
+                    <span class={`px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-${cat.accent_color}-500/40 hover:bg-${cat.accent_color}-500/10 transition-all cursor-default`}>{s}</span>
+                  ))}
+                </div>
               </div>
-              <div class="flex flex-wrap gap-2 content-start">
-                {['Pencil Portrait','Ballpoint Pen','Anime · Manga','Watercolor','Digital Illustration','Pixel Art','Character Design','Ink & Sketch','Figure Drawing','Eye Studies'].map(s => (
-                  <span class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-amber-500/40 hover:bg-amber-500/10 transition-all cursor-default">{s}</span>
-                ))}
-              </div>
-            </div>
-          </div>
+            )
+          ))}
         </div>
       </div>
     </section>

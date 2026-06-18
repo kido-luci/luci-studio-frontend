@@ -26,5 +26,12 @@ module.exports = {
       },
     },
   },
+  safelist: [
+    // Dynamic accent-color classes driven by skills API data (accent_color token from DB).
+    // Without these, Tailwind's purge scan misses template-literal class strings.
+    { pattern: /hover:border-(violet|blue|cyan|pink|amber)-500\/(20|40)/ },
+    { pattern: /bg-(violet|blue|cyan|pink|amber)-500\/(10|15|20)/ },
+    { pattern: /hover:bg-(violet|blue|cyan|pink|amber)-500\/10/ },
+  ],
   plugins: [],
 };
