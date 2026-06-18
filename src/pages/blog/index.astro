@@ -58,7 +58,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
       <!-- Header -->
       <div data-reveal class="mb-16">
         <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Raw Output</span>
-        <h1 class="text-6xl md:text-8xl font-black tracking-tighter">THOUGHTS<span class="text-violet-500">.</span></h1>
+        <h1 class="text-6xl md:text-8xl font-black tracking-wide">THOUGHTS<span class="text-violet-500">.</span></h1>
         <p class="text-gray-500 max-w-lg text-sm leading-relaxed mt-4">
           {allPosts.length} {allPosts.length === 1 ? 'article' : 'articles'} on engineering, architecture, and the craft of building software.
         </p>
@@ -85,7 +85,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
         {allPosts.map((p) => (
           <div class="post-item h-full" data-id={p.id} data-topics={JSON.stringify(p.topics)} style="display:none">
             <a href={`/blog/${p.slug}/`} class="block h-full no-underline">
-              <article class="tilt-card blog-card group flex h-full flex-col cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]">
+              <article class="tilt-card blog-card group flex h-full flex-col cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-[#17171d]">
                 <div class="blog-img-container aspect-video overflow-hidden mb-6 -mx-2 -mt-2 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
                   <img src={p.img} alt={p.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" onerror="this.style.opacity='0'" />
                 </div>
@@ -141,13 +141,13 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
           <div class="flex items-end justify-between gap-4 mb-6 flex-wrap">
             <div>
               <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-2 block">Curated Collections</span>
-              <h2 class="text-4xl md:text-5xl font-black tracking-tighter">PLAYLISTS<span class="text-violet-500">.</span></h2>
+              <h2 class="text-4xl md:text-5xl font-black tracking-wide">SERIES<span class="text-violet-500">.</span></h2>
             </div>
-            <a href="/blog/playlists" class="see-all-btn">See all →</a>
+            <a href="/blog/series" class="see-all-btn">See all →</a>
           </div>
           <ol class="playlist-list space-y-3 list-none p-0 m-0">
             {playlists.map((p, i) => {
-              const href = `/blog/playlists/${buildPostSlug(p.title, p.id)}/`;
+              const href = `/blog/series/${buildPostSlug(p.title, p.id)}/`;
               const count = p.post_ids?.length ?? 0;
               const img = p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800';
               return (
@@ -159,7 +159,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
                     </div>
                     <div class="playlist-row-meta">
                       <div class="playlist-row-tags">
-                        <span class="tag-label text-[10px] font-black text-violet-400 uppercase tracking-widest">Playlist</span>
+                        <span class="tag-label text-[10px] font-black text-violet-400 uppercase tracking-widest">Series</span>
                         <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
                         <span class="text-[10px] text-gray-600">{count} {count === 1 ? 'post' : 'posts'}</span>
                         <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
@@ -199,6 +199,8 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
   .blog-card {
     opacity: 0;
     transform: translateY(28px);
+    background-color: #17171d;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
   }
   .blog-card.card-visible {
     animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -372,14 +374,14 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
   /* Topic filter buttons */
   .topic-btn {
     padding: 0.375rem 1rem;
-    font-size: 0.65rem;
+    font-size: 0.58rem;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgb(107, 114, 128);
-    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgb(209, 213, 219);
+    background: rgba(255, 255, 255, 0.03);
     cursor: pointer;
     transition: all 0.2s;
   }
@@ -393,8 +395,9 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     color: rgb(167, 139, 250);
   }
   body.light-mode .topic-btn {
-    border-color: rgba(0, 0, 0, 0.1);
-    color: rgb(107, 114, 128);
+    border-color: rgba(0, 0, 0, 0.18);
+    color: rgb(55, 65, 81);
+    background: rgba(0, 0, 0, 0.02);
   }
   body.light-mode .topic-btn:hover {
     border-color: rgba(139, 92, 246, 0.4);

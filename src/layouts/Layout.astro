@@ -233,10 +233,15 @@ const canonicalURL = canonical ?? SITE_URL;
 				color: rgb(17, 24, 39);
 				border-color: rgba(17, 24, 39, 0.3);
 			}
-			h1, h2 { 
-				font-family: 'Limelight', sans-serif; 
+			h1, h2 {
+				font-family: 'Limelight', sans-serif;
 				font-weight: normal;
 				color: var(--text-primary);
+				/* The display font crowds at tight tracking. Enforce comfortable
+				   letter-spacing globally so individual headings never need a
+				   per-heading tracking fix. !important overrides any inline
+				   Tailwind tracking-* utility (which otherwise wins on specificity). */
+				letter-spacing: 0.02em !important;
 			}
 			h3, h4, h5, h6 {
 				font-family: 'Outfit', sans-serif;

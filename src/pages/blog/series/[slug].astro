@@ -56,7 +56,7 @@ export async function getStaticPaths() {
 const { playlist } = Astro.props;
 
 if (!playlist) {
-  return Astro.redirect('/blog/playlists');
+  return Astro.redirect('/blog/series');
 }
 
 const SITE_URL = 'https://luci-studio.com';
@@ -75,10 +75,10 @@ const posts = (playlist.posts ?? []).map(p => ({
 }));
 
 const coverImage = playlist.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1600';
-const canonicalURL = `${SITE_URL}/blog/playlists/${buildPostSlug(playlist.title, playlist.id)}/`;
+const canonicalURL = `${SITE_URL}/blog/series/${buildPostSlug(playlist.title, playlist.id)}/`;
 const seoDescription = playlist.description
   ? playlist.description.slice(0, 160)
-  : `A curated playlist of ${posts.length} posts from Luci Studio.`;
+  : `A curated series of ${posts.length} posts from Luci Studio.`;
 ---
 
 <Layout
@@ -88,16 +88,16 @@ const seoDescription = playlist.description
   ogImage={coverImage}
 >
 
-  <TopNav active="blog" />
+  <TopNav active="series" />
 
   <main class="pt-36 pb-24 px-4 md:px-6 min-h-screen bg-[var(--bg-primary)]">
     <div class="max-w-5xl mx-auto">
 
       <!-- Hero -->
       <div data-reveal class="mb-16">
-        <a href="/blog/playlists" class="inline-flex items-center gap-2 mb-6 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-violet-400 transition-colors duration-300">
+        <a href="/blog/series" class="inline-flex items-center gap-2 mb-6 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-violet-400 transition-colors duration-300">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          All Playlists
+          All Series
         </a>
 
         <div class="playlist-hero-cover aspect-video overflow-hidden mb-8 border-2 border-violet-500/[0.22] relative">
@@ -105,7 +105,7 @@ const seoDescription = playlist.description
           <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%);"></div>
         </div>
 
-        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Curated Playlist</span>
+        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Curated Series</span>
         <h1 class="text-5xl md:text-7xl font-black tracking-tighter leading-[1.05]">{playlist.title}<span class="text-violet-500">.</span></h1>
 
         {playlist.description && (
@@ -124,7 +124,7 @@ const seoDescription = playlist.description
       <!-- Empty state -->
       {posts.length === 0 && (
         <div class="text-center py-24">
-          <p class="text-gray-500 text-sm uppercase tracking-widest">This playlist is empty</p>
+          <p class="text-gray-500 text-sm uppercase tracking-widest">This series is empty</p>
         </div>
       )}
 
