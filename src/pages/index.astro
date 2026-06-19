@@ -8,6 +8,7 @@ import { galleryService } from "../services/gallery";
 import { workService } from "../services/work";
 import { profileService } from "../services/profile";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../utils/blog";
+import { ADS_ENABLED } from "../config/features";
 
 const profile = await profileService.getProfile();
 const work = await workService.getAll();
@@ -445,6 +446,9 @@ const homepageSchema = {
             ))}
             <a href="/terms" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Terms</a>
             <a href="/privacy" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Privacy</a>
+            {ADS_ENABLED && (
+            <button type="button" data-cookie-settings style="font-family: inherit;" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Cookie Settings</button>
+            )}
           </div>
           <div class="flex flex-col items-center md:items-end gap-3">
             <div class="flex flex-col items-center md:items-end gap-1">
