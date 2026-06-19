@@ -3,14 +3,14 @@ import Layout from "../layouts/Layout.astro";
 import TopNav from "../components/TopNav.astro";
 
 const SITE_URL = 'https://luci-studio.com';
-const lastUpdated = 'May 13, 2026';
+const lastUpdated = 'June 19, 2026';
 ---
 
 <Layout
   title="Privacy Policy | Luci Studio"
-  description="Privacy Policy for Luci Studio, including local storage, comments, AI chat, Google login, and AdSense consent."
+  description="Privacy Policy for Luci Studio, including local storage, comments, AI chat, and Google login."
   canonical={`${SITE_URL}/privacy/`}
-  keywords="Luci Studio privacy, privacy policy, cookies, AdSense, Google login"
+  keywords="Luci Studio privacy, privacy policy, local storage, Google login"
 >
   <TopNav />
 
@@ -41,27 +41,14 @@ const lastUpdated = 'May 13, 2026';
         <section>
           <h2>Local Storage and Required Features</h2>
           <p>
-            The site uses browser local storage for required and user-requested features, including theme preference, liked posts, viewed-post or session markers, Google OAuth user token, chat history, and chat configuration. These features remain available even if you reject optional advertising cookies.
-          </p>
-          <p>
-            The cookie consent choice is stored as <code>luci_cookie_consent</code> with a value of <code>accepted</code> or <code>rejected</code>.
-          </p>
-        </section>
-
-        <section>
-          <h2>Optional Advertising Cookies</h2>
-          <p>
-            Luci Studio may use Google AdSense. The AdSense script is only loaded after you choose "Accept optional" in the cookie notice. If you choose "Reject optional," AdSense is not loaded for that browser unless you later change your cookie settings.
-          </p>
-          <p>
-            Google and its partners may use cookies or similar technologies for ad delivery, measurement, and personalization according to their own policies.
+            The site uses browser local storage for required and user-requested features, including theme preference, liked posts, viewed-post or session markers, Google OAuth user token, chat history, and chat configuration.
           </p>
         </section>
 
         <section>
           <h2>Third-Party Services and Media</h2>
           <p>
-            Pages may load content or services from third parties, including Google login, Google AdSense after consent, hosted images and media, fonts, and CDNs. These providers may receive technical information such as IP address, browser details, referrer, and requested URLs.
+            Pages may load content or services from third parties, including Google login, hosted images and media, fonts, and CDNs. These providers may receive technical information such as IP address, browser details, referrer, and requested URLs.
           </p>
         </section>
 
@@ -69,9 +56,6 @@ const lastUpdated = 'May 13, 2026';
           <h2>Data Retention and Choices</h2>
           <p>
             Browser-stored preferences remain until you clear site data or change them in the interface. Comments, login-related records, and server logs may be retained as needed to operate, protect, debug, and improve the site.
-          </p>
-          <p>
-            You can reopen cookie choices through "Cookie Settings" links in the site footer.
           </p>
         </section>
 
