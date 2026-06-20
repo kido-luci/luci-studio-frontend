@@ -75,10 +75,10 @@ const SITE_URL = 'https://luci-studio.com';
 <style>
   /* ====== Series page — header + layout (card lives in SeriesCard.astro) ====== */
   .series-main {
-    --series-accent: #6c4df6;
+    --series-accent: #8b5cf6;
     --series-ink: var(--text-primary);
     --series-muted: var(--text-secondary, #6b7280);
-    --series-line: rgba(108, 77, 246, 0.18);
+    --series-line: rgba(139, 92, 246, 0.18);
     position: relative;
     background: var(--bg-primary);
     overflow: hidden;
@@ -89,7 +89,7 @@ const SITE_URL = 'https://luci-studio.com';
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    background-image: radial-gradient(circle, rgba(108, 77, 246, 0.10) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgba(139, 92, 246, 0.10) 1px, transparent 1px);
     background-size: 38px 38px;
     -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
             mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
@@ -100,7 +100,7 @@ const SITE_URL = 'https://luci-studio.com';
   .series-head { margin-bottom: 4.5rem; }
   .series-back {
     display: inline-flex; align-items: center; gap: 0.55rem;
-    font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.22em;
     color: var(--series-muted); text-decoration: none;
     transition: color 0.3s ease; margin-bottom: 2.5rem;
@@ -111,7 +111,7 @@ const SITE_URL = 'https://luci-studio.com';
 
   .series-eyebrow {
     display: block;
-    font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.3em;
     color: var(--series-accent); margin-bottom: 0.9rem;
   }
@@ -134,7 +134,7 @@ const SITE_URL = 'https://luci-studio.com';
   .series-marker { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.5rem; }
   .series-marker-num,
   .series-marker-label {
-    font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.28em; color: var(--series-muted);
   }
   .series-marker-num { color: var(--series-accent); }
@@ -143,7 +143,7 @@ const SITE_URL = 'https://luci-studio.com';
   /* ---- Empty ---- */
   .series-empty { text-align: center; padding: 6rem 0; }
   .series-empty p {
-    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
     text-transform: uppercase; letter-spacing: 0.25em; color: var(--series-muted);
   }
 
