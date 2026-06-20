@@ -199,8 +199,8 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
         <section data-reveal class="mt-24">
           <div class="flex items-end justify-between gap-4 mb-6 flex-wrap">
             <div>
-              <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-2 block">Curated Collections</span>
-              <h2 class="text-4xl md:text-5xl font-black tracking-wide">SERIES<span class="text-violet-500">.</span></h2>
+              <span class="text-xs font-black text-[#6c4df6] uppercase tracking-[0.3em] mb-2 block">Curated Collections</span>
+              <h2 class="text-4xl md:text-5xl font-black tracking-wide">SERIES<span class="text-[#6c4df6]">.</span></h2>
             </div>
             <a href="/blog/series" class="see-all-btn">See all →</a>
           </div>
@@ -382,24 +382,24 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     text-transform: uppercase;
     letter-spacing: 0.18em;
     border-radius: 9999px;
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    color: rgb(167, 139, 250);
+    border: 1px solid rgba(108, 77, 246, 0.4);
+    color: rgb(149, 128, 255);
     background: transparent;
     text-decoration: none;
     transition: all 0.2s;
     white-space: nowrap;
   }
   .see-all-btn:hover {
-    background: rgba(139, 92, 246, 0.12);
-    border-color: rgba(139, 92, 246, 0.7);
+    background: rgba(108, 77, 246, 0.12);
+    border-color: rgba(108, 77, 246, 0.7);
   }
   body.light-mode .see-all-btn {
-    border-color: rgba(139, 92, 246, 0.35);
-    color: rgb(109, 40, 217);
+    border-color: rgba(108, 77, 246, 0.35);
+    color: rgb(91, 58, 230);
   }
   body.light-mode .see-all-btn:hover {
-    background: rgba(139, 92, 246, 0.08);
-    border-color: rgba(139, 92, 246, 0.55);
+    background: rgba(108, 77, 246, 0.08);
+    border-color: rgba(108, 77, 246, 0.55);
   }
 
   /* Topic filter buttons */
