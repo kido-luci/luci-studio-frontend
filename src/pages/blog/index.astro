@@ -322,6 +322,16 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
   .tb-card-body { padding: 20px 20px 16px; display: flex; flex-direction: column; flex: 1; }
   .tb-card-title { font-weight: 700; font-size: 20.5px; line-height: 1.18; letter-spacing: -.01em; color: var(--ink); margin: 12px 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .tb-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  /* Phone screens: keep topic filtering but collapse the chips into a single
+     horizontal-scroll row instead of wrapping to fill the whole viewport */
+  @media (max-width: 768px) {
+    /* overflow-x:auto forces overflow-y to clip, which would cut off the active
+       chip's drop-shadow — pad the scroll box vertically (and pull the next block
+       back up) so the shadow has room without adding a big gap */
+    .tb-chips { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 8px 2px 18px; margin-bottom: -14px; }
+    .tb-chips::-webkit-scrollbar { display: none; }
+    .topic-btn { flex: 0 0 auto; }
+  }
 
   /* Empty state */
   .tb-empty { margin-top: 60px; padding: 72px 24px; text-align: center; background: var(--card-bg); border: 1px solid var(--card-bd); border-radius: 20px; }
