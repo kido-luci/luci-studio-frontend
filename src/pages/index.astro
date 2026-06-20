@@ -2,8 +2,10 @@
 import Layout from "../layouts/Layout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import TopNav from "../components/TopNav.astro";
+import SeriesCard from "../components/SeriesCard.astro";
 import { postService } from "../services/posts";
 import { playlistService } from "../services/playlists";
+import { buildSeriesViews } from "../utils/series";
 import { galleryService } from "../services/gallery";
 import { workService } from "../services/work";
 import { profileService } from "../services/profile";
@@ -41,22 +43,7 @@ const blogPosts = rawPosts
   views: p.views ?? 0,
 }));
 
-const postStatsByID = new Map(rawPosts.map(p => [p.id, { views: p.views ?? 0, likes: p.likes ?? 0 }]));
-const homePlaylists = [...rawPlaylists]
-  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  .slice(0, 3)
-  .map(p => {
-    let totalViews = 0;
-    let totalLikes = 0;
-    for (const id of (p.post_ids ?? [])) {
-      const stats = postStatsByID.get(id);
-      if (stats) {
-        totalViews += stats.views;
-        totalLikes += stats.likes;
-      }
-    }
-    return { ...p, totalViews, totalLikes };
-  });
+const homePlaylists = buildSeriesViews(rawPlaylists, rawPosts).slice(0, 3);
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 
 const galleryItems = await galleryService.getAll();
@@ -270,41 +257,10 @@ const homepageSchema = {
                 <a href="/blog/series" class="playlist-see-all">View series</a>
               </div>
 
-              <ol class="home-playlist-list list-none p-0 m-0">
-                {homePlaylists.map((p, i) => {
-                  const href = `/blog/series/${buildPostSlug(p.title, p.id)}/`;
-                  const count = p.post_ids?.length ?? 0;
-                  const img = p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800';
-                  return (
-                    <li>
-                      <a href={href} class="playlist-row no-underline" data-playlist-post-ids={JSON.stringify(p.post_ids ?? [])}>
-                        <span class="playlist-row-number">{String(i + 1).padStart(2, '0')}</span>
-                        <div class="playlist-row-thumb">
-                          <img src={img} alt={p.title} loading="lazy" onerror="this.style.opacity='0'" />
-                        </div>
-                        <div class="playlist-row-meta">
-                          <div class="playlist-row-tags">
-                            <span class="tag-label text-[10px] font-black text-cyan-400 uppercase tracking-widest">Series</span>
-                            <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                            <span class="text-[10px] text-gray-600">{count} {count === 1 ? 'post' : 'posts'}</span>
-                            <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                            <span class="playlist-row-stat">
-                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                              <span class="playlist-views-count">{p.totalViews}</span>
-                            </span>
-                            <span class="playlist-row-stat">
-                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                              <span class="playlist-likes-count">{p.totalLikes}</span>
-                            </span>
-                          </div>
-                          <h4 class="playlist-row-title">{p.title}</h4>
-                          {p.description && <p class="playlist-row-desc">{p.description}</p>}
-                        </div>
-                        <span class="playlist-row-arrow" aria-hidden="true">→</span>
-                      </a>
-                    </li>
-                  );
-                })}
+              <ol class="series-strip list-none p-0 m-0">
+                {homePlaylists.map((p) => (
+                  <li><SeriesCard series={p} /></li>
+                ))}
               </ol>
             </div>
           )}
@@ -1109,106 +1065,10 @@ body.light-mode .art-img-frame {
 .home-playlists {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
-.home-playlist-list {
-  display: grid;
-  gap: 0.75rem;
-}
-.playlist-row {
-  display: grid;
-  grid-template-columns: 3.5rem 7rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 1.75rem;
-  padding: 1.5rem 1.75rem;
-  border: 2px solid rgba(34, 211, 238, 0.18);
-  background: rgba(255, 255, 255, 0.02);
-  color: inherit;
-  min-width: 0;
-  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-}
-.playlist-row:hover {
-  border-color: rgba(34, 211, 238, 0.55);
-  background: rgba(34, 211, 238, 0.045);
-  transform: translateX(4px);
-  box-shadow: 0 10px 34px rgba(34, 211, 238, 0.12);
-}
-.playlist-row-number {
-  color: rgba(34, 211, 238, 0.82);
-  font-size: 2.25rem;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  text-align: center;
-}
-.playlist-row-thumb {
-  width: 7rem;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  border: 1px solid rgba(34, 211, 238, 0.24);
-  background: linear-gradient(135deg, rgba(34, 211, 238, 0.12) 0%, rgba(139, 92, 246, 0.1) 100%);
-}
-.playlist-row-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.45s ease;
-}
-.playlist-row:hover .playlist-row-thumb img {
-  transform: scale(1.08);
-}
-.playlist-row-meta {
+.series-strip {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  min-width: 0;
-}
-.playlist-row-tags {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-.playlist-row-stat {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: rgb(107, 114, 128);
-  font-size: 10px;
-}
-.playlist-row-title {
-  margin: 0;
-  color: var(--text-primary);
-  font-size: 1.375rem;
-  font-weight: 800;
-  line-height: 1.25;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-}
-.playlist-row:hover .playlist-row-title {
-  color: rgb(103, 232, 249);
-}
-.playlist-row-desc {
-  margin: 0;
-  color: rgb(107, 114, 128);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-.playlist-row-arrow {
-  color: rgba(34, 211, 238, 0.55);
-  font-size: 1.5rem;
-  line-height: 1;
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-.playlist-row:hover .playlist-row-arrow {
-  color: rgb(103, 232, 249);
-  transform: translateX(4px);
+  gap: 1.5rem;
 }
 .playlist-see-all {
   display: inline-flex;
@@ -1235,20 +1095,6 @@ body.light-mode .art-img-frame {
 body.light-mode .home-playlists {
   border-color: rgba(0, 0, 0, 0.08);
 }
-body.light-mode .playlist-row {
-  border-color: rgba(8, 145, 178, 0.2);
-  background: rgba(255, 255, 255, 0.82);
-}
-body.light-mode .playlist-row:hover {
-  border-color: rgba(8, 145, 178, 0.48);
-  background: rgba(236, 254, 255, 0.78);
-}
-body.light-mode .playlist-row-title {
-  color: rgb(17, 24, 39);
-}
-body.light-mode .playlist-row:hover .playlist-row-title {
-  color: rgb(8, 145, 178);
-}
 body.light-mode .playlist-see-all {
   border-color: rgba(8, 145, 178, 0.35);
   color: rgb(14, 116, 144);
@@ -1256,29 +1102,6 @@ body.light-mode .playlist-see-all {
 body.light-mode .playlist-see-all:hover {
   background: rgba(8, 145, 178, 0.08);
   border-color: rgba(8, 145, 178, 0.55);
-}
-
-@media (max-width: 640px) {
-  .playlist-row {
-    grid-template-columns: 2.25rem 4.5rem minmax(0, 1fr);
-    gap: 1rem;
-    padding: 1rem 1.125rem;
-  }
-  .playlist-row-number {
-    font-size: 1.375rem;
-  }
-  .playlist-row-thumb {
-    width: 4.5rem;
-  }
-  .playlist-row-title {
-    font-size: 1.05rem;
-  }
-  .playlist-row-desc {
-    font-size: 0.8rem;
-  }
-  .playlist-row-arrow {
-    display: none;
-  }
 }
 
 /* ── Art item scroll-triggered reveal ── */
