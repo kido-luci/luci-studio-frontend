@@ -116,9 +116,10 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
       <!-- Featured hero (first post; hidden when filtering/searching) -->
       {featured && (
         <a id="tb-featured" href={`/blog/${featured.slug}/`} class="tb-featured" data-featured-id={String(featured.id)}>
-          <div class="tb-feat-cover" style={`background:${featured.cover}`}>
-            {featured.img && <img src={featured.img} alt={featured.title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />}
-            <span class="tb-cover-word">{featured.coverWord}</span>
+          <div class="tb-feat-cover" style={!featured.img ? `background:${featured.cover}` : undefined}>
+            {featured.img
+              ? <img src={featured.img} alt={featured.title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
+              : <span class="tb-cover-word">{featured.coverWord}</span>}
             <span class="tb-badge tb-badge--feat">★ Featured</span>
           </div>
           <div class="tb-feat-body">
@@ -158,8 +159,9 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
             <a href={`/blog/${p.slug}/`} class="tb-card-link">
               <article class="tb-card">
                 <div class="tb-card-cover" style={`background:${p.cover}`}>
-                  {p.img && <img src={p.img} alt={p.title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />}
-                  <span class="tb-cover-word tb-cover-word--sm">{p.coverWord}</span>
+                  {p.img
+                    ? <img src={p.img} alt={p.title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
+                    : <span class="tb-cover-word tb-cover-word--sm">{p.coverWord}</span>}
                   <span class="tb-badge">Blog</span>
                 </div>
                 <div class="tb-card-body">
@@ -273,6 +275,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     --chip-bg: rgba(255,255,255,0.04); --chip-bd: rgba(255,255,255,0.14); --chip-ink: #d6d8de;
     --search-bg: rgba(255,255,255,0.04); --search-bd: rgba(255,255,255,0.12);
     --badge-bg: rgba(20,20,28,0.82); --badge-ink: #f3f3f6;
+    --feat-mat: #1c1c26;
   }
   body.light-mode .tb-root {
     --card-bg: #ffffff; --card-bd: #e9e6df;
@@ -283,6 +286,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     --chip-bg: #fff; --chip-bd: #e6e3dc; --chip-ink: #3a3d4d;
     --search-bg: #fff; --search-bd: #e6e3dc;
     --badge-bg: rgba(255,255,255,0.92); --badge-ink: #161827;
+    --feat-mat: #f1efe9;
   }
   /* light-mode page glow to echo the design's backdrop */
   body.light-mode main[data-api-url] {
@@ -341,7 +345,8 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
   /* Featured hero */
   .tb-featured { display: grid; grid-template-columns: 1.08fr 1fr; gap: 0; margin-top: 44px; background: var(--card-bg); border: 1px solid var(--card-bd); border-radius: 22px; overflow: hidden; text-decoration: none; box-shadow: var(--card-shadow); transition: transform .25s ease, box-shadow .25s ease; }
   .tb-featured:hover { transform: translateY(-4px); box-shadow: var(--feat-shadow-hover); }
-  .tb-feat-cover { position: relative; overflow: hidden; min-height: 430px; }
+  .tb-feat-cover { position: relative; overflow: hidden; min-height: 320px; background: var(--feat-mat); display: flex; align-items: center; justify-content: center; padding: clamp(12px,1.5vw,16px); }
+  .tb-feat-cover .tb-cover-img { position: static; inset: auto; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 14px; }
   .tb-feat-body { padding: 46px 46px 40px; display: flex; flex-direction: column; }
   .tb-feat-title { font-weight: 800; font-size: clamp(26px,3vw,36px); line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin: 16px 0 0; }
   .tb-feat-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--line); }
