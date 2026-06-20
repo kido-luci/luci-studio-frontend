@@ -98,6 +98,10 @@ const canonicalURL = canonical ?? SITE_URL;
 		)}
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<!-- R2 image host: connect early so LCP/hero images aren't delayed by DNS+TLS -->
+		<link rel="preconnect" href="https://media.luci-studio.com" crossorigin>
+		<!-- Per-page <head> injection (LCP image preloads, page-specific meta) -->
+		<slot name="head" />
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Limelight&family=Outfit:wght@300;400;500;600;700;800;900&family=Boldonse&family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400..800&display=swap" rel="stylesheet">
 		<link href="https://cdn.jsdelivr.net/npm/@fontsource/sn-pro@latest/index.css" rel="stylesheet">
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
@@ -346,6 +350,24 @@ const canonicalURL = canonical ?? SITE_URL;
 			/* JS skips the canvas loop on mobile; this keeps it hidden as a fallback. */
 			@media (max-width: 768px) {
 				#canvas-bg { display: none !important; }
+			}
+
+			/* === MOBILE GPU RELIEF: drop backdrop-filter on fixed elements === */
+			/* backdrop-filter on a fixed/sticky element re-rasterizes its blur on every
+			   scroll frame — the top scroll-jank source on low-end mobile GPUs. The fixed
+			   nav (blur 16→32px on scroll) is the worst offender. Cards (ProjectCard /
+			   TimelineItem) scroll away and only blur once per paint, so they keep theirs.
+			   Backgrounds here are already opaque enough to stay legible without the blur
+			   (--nav-bg/--nav-bg-scroll, mobile menu bg-black/95).
+			   !important beats both the inline style and the JS-set nav.style.backdropFilter. */
+			@media (max-width: 768px) {
+				nav,
+				#bg-dimmer,
+				#mobile-menu,
+				#floating-like-btn {
+					backdrop-filter: none !important;
+					-webkit-backdrop-filter: none !important;
+				}
 			}
 
 			/* === WINDOWS PERFORMANCE MODE === */
@@ -916,10 +938,13 @@ const canonicalURL = canonical ?? SITE_URL;
 						// Disable the CSS transition so it doesn't fight GSAP frame-by-frame
 						el.style.transition = 'none';
 					}
-					gsap.set(groups.default, { opacity: 0, y: 40 });
-					gsap.set(groups.left,    { opacity: 0, x: -40 });
-					gsap.set(groups.right,   { opacity: 0, x: 40 });
-					gsap.set(groups.scale,   { opacity: 0, scale: 0.92 });
+					// Guard each set: a page may have no elements for a given variant, and
+					// gsap.set([]) logs a "GSAP target not found" warning. Mirrors the
+					// length guards on the ScrollTrigger.batch calls below.
+					if (groups.default.length) gsap.set(groups.default, { opacity: 0, y: 40 });
+					if (groups.left.length)    gsap.set(groups.left,    { opacity: 0, x: -40 });
+					if (groups.right.length)   gsap.set(groups.right,   { opacity: 0, x: 40 });
+					if (groups.scale.length)   gsap.set(groups.scale,   { opacity: 0, scale: 0.92 });
 
 					const batchTo = (toVars: any) => ({
 						start: 'top 92%',
@@ -946,6 +971,7 @@ const canonicalURL = canonical ?? SITE_URL;
 				// rises as the patch overlay clears (otherwise it animates underneath).
 				document.querySelectorAll<HTMLElement>('[data-word-reveal]').forEach(host => {
 					const inners = host.querySelectorAll<HTMLElement>('.reveal-word > span');
+					if (!inners.length) return;
 					inners.forEach(s => { s.style.transition = 'none'; });
 					gsap.set(inners, { y: -60, opacity: 0 });
 					gsap.to(inners, {

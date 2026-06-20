@@ -38,14 +38,15 @@ PUBLIC_API_URL=http://localhost:3000
 **Styling**:
 - Tailwind CSS is compiled at build time via PostCSS (`tailwind.config.cjs`, `postcss.config.cjs`); the `@tailwind` directives live in `src/styles/global.css`, imported once in `src/layouts/Layout.astro`. Custom animations/keyframes are defined in `tailwind.config.cjs`. (Previously loaded via the `cdn.tailwindcss.com` runtime JIT — replaced to remove the render-blocking script.)
 - All other global CSS lives in `Layout.astro` (`<style is:global>`) — over 600 lines of custom styles
-- Theme system (dark default / light toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
+- Theme system (light default / dark toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
 
-**Third-party libraries** (all loaded via CDN in `Layout.astro`):
-- Vanta.js (Three.js + p5.js) — animated background
-- Anime.js — animation orchestration
-- Prism.js — code syntax highlighting (Dart, Go, JS, TS)
+**Animated background**: a lightweight 2D `<canvas>` particle system (~50 particles, capped at 60fps) in `Layout.astro` — NOT Vanta/Three.js/p5.js (those were removed; only a stale `--vanta-bg` CSS var name remains). The canvas loop is skipped on mobile (`max-width: 768px`) and on Windows (`win-perf-mode`).
 
-**Windows performance mode**: Runtime detection of Windows disables backdrop-filter, 3D transforms, and heavy animations.
+**Third-party libraries** (via CDN):
+- GSAP + ScrollTrigger + SplitText (jsDelivr, in `Layout.astro`) — scroll reveals, hero/section text animations
+- Prism.js (cdnjs, in `blog/[slug].astro` only) — code syntax highlighting (Dart, Go, JS, TS)
+
+**Windows performance mode** (`win-perf-mode`): runtime Windows detection disables backdrop-filter, 3D transforms, and heavy animations. A parallel `max-width: 768px` rule drops backdrop-filter on fixed elements (nav, dimmer, mobile menu) to cut mobile scroll jank.
 
 ## Key Files
 
