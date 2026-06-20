@@ -26,10 +26,10 @@ const skVars = (token: string) => {
 const highlightYear = (s?: string) => (s ?? "").replace(/\b(\d{4})\b/, '<span class="sk-year">$1</span>');
 const toTimelineShape = (w) => ({
   id: w.title,
-  y: w.period,
+  year: w.period,
   role: w.role,
-  co: w.company,
-  loc: w.location,
+  company: w.company,
+  location: w.location,
   desc: w.summary,
   details: w.achievements,
   tech: w.tech,
