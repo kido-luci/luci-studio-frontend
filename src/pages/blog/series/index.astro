@@ -1,42 +1,17 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
 import TopNav from "../../../components/TopNav.astro";
+import SeriesCard from "../../../components/SeriesCard.astro";
 import { postService } from "../../../services/posts";
 import { playlistService } from "../../../services/playlists";
-import { buildPostSlug } from "../../../utils/blog";
+import { buildSeriesViews } from "../../../utils/series";
 
 const [rawPosts, rawPlaylists] = await Promise.all([
   postService.getAll(),
   playlistService.getAll(),
 ]);
 
-// Index every post by id once so we can aggregate stats + topics per series
-// without any extra network calls (rawPosts is already fetched).
-const postByID = new Map(rawPosts.map(p => [p.id, p]));
-
-const sorted = [...rawPlaylists]
-  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  .map(p => {
-    let totalViews = 0;
-    let totalLikes = 0;
-    const topicCounts = new Map<string, number>();
-    for (const id of (p.post_ids ?? [])) {
-      const post = postByID.get(id);
-      if (!post) continue;
-      totalViews += post.views ?? 0;
-      totalLikes += post.likes ?? 0;
-      for (const t of (post.topics ?? [])) {
-        if (t) topicCounts.set(t, (topicCounts.get(t) ?? 0) + 1);
-      }
-    }
-    // Top topics across the series → tag pills (most common first)
-    const topics = [...topicCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 4)
-      .map(([t]) => t);
-    const year = new Date(p.created_at).getFullYear();
-    return { ...p, totalViews, totalLikes, topics, year };
-  });
+const sorted = buildSeriesViews(rawPlaylists, rawPosts);
 
 const SITE_URL = 'https://luci-studio.com';
 ---
@@ -79,80 +54,16 @@ const SITE_URL = 'https://luci-studio.com';
       <!-- Series list -->
       {sorted.length > 0 && (
         <ol class="series-list">
-          {sorted.map((p, i) => {
-            const href = `/blog/series/${buildPostSlug(p.title, p.id)}/`;
-            const count = p.post_ids?.length ?? 0;
-            const num = String(i + 1).padStart(2, '0');
-            const cover = p.cover_image_url;
-            return (
-              <li class="series-item" data-reveal>
-                <div class="series-marker">
-                  <span class="series-marker-num">{num}</span>
-                  <span class="series-marker-label">Collection</span>
-                  <span class="series-marker-line"></span>
-                </div>
-
-                <a
-                  href={href}
-                  class="playlist-row series-card no-underline"
-                  data-playlist-post-ids={JSON.stringify(p.post_ids ?? [])}
-                >
-                  <div
-                    class={`series-thumb${cover ? ' has-cover' : ''}`}
-                    style={cover ? `background-image:url('${cover}')` : ''}
-                  >
-                    {!cover && (
-                      <>
-                        <span class="thumb-deco thumb-deco-tl">{'{ }'}</span>
-                        <span class="thumb-deco thumb-deco-tr">&lt;/&gt;</span>
-                        <span class="thumb-glyph">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                        </span>
-                        <div class="thumb-center">
-                          <h3 class="thumb-title">{p.title}</h3>
-                          <span class="thumb-caption">Curated guides · tips</span>
-                        </div>
-                      </>
-                    )}
-                    <span class="thumb-pill">{count} {count === 1 ? 'post' : 'posts'} · {p.year}</span>
-                  </div>
-
-                  <div class="series-body">
-                    <div class="series-meta">
-                      <span class="series-meta-kicker">Series</span>
-                      <span class="series-meta-sep">/</span>
-                      <span>{count} {count === 1 ? 'post' : 'posts'}</span>
-                      <span class="series-meta-sep">/</span>
-                      <span class="series-meta-stat">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        <span class="playlist-views-count">{p.totalViews.toLocaleString()}</span>
-                      </span>
-                      <span class="series-meta-sep">/</span>
-                      <span class="series-meta-stat">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        <span class="playlist-likes-count">{p.totalLikes.toLocaleString()}</span>
-                      </span>
-                    </div>
-
-                    <h2 class="series-title">{p.title}</h2>
-                    {p.description && <p class="series-desc">{p.description}</p>}
-
-                    {p.topics.length > 0 && (
-                      <div class="series-tags">
-                        {p.topics.map(t => <span class="series-tag">{t}</span>)}
-                      </div>
-                    )}
-
-                    <span class="series-cta">Read the series →</span>
-                  </div>
-
-                  <span class="series-arrow" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </span>
-                </a>
-              </li>
-            );
-          })}
+          {sorted.map((p, i) => (
+            <li class="series-item" data-reveal>
+              <div class="series-marker">
+                <span class="series-marker-num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="series-marker-label">Collection</span>
+                <span class="series-marker-line"></span>
+              </div>
+              <SeriesCard series={p} />
+            </li>
+          ))}
         </ol>
       )}
 
@@ -162,15 +73,12 @@ const SITE_URL = 'https://luci-studio.com';
 </Layout>
 
 <style>
-  /* ====== Series page — editorial redesign ======
-     Accent + type tokens scoped to this page. */
+  /* ====== Series page — header + layout (card lives in SeriesCard.astro) ====== */
   .series-main {
     --series-accent: #6c4df6;
     --series-ink: var(--text-primary);
     --series-muted: var(--text-secondary, #6b7280);
     --series-line: rgba(108, 77, 246, 0.18);
-    --series-card-bg: rgba(255, 255, 255, 0.02);
-    --series-card-border: rgba(108, 77, 246, 0.16);
     position: relative;
     background: var(--bg-primary);
     overflow: hidden;
@@ -221,10 +129,8 @@ const SITE_URL = 'https://luci-studio.com';
     color: var(--series-muted);
   }
 
-  /* ---- List ---- */
+  /* ---- List + per-series marker ---- */
   .series-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4rem; }
-
-  /* marker row above each card */
   .series-marker { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.5rem; }
   .series-marker-num,
   .series-marker-label {
@@ -233,129 +139,6 @@ const SITE_URL = 'https://luci-studio.com';
   }
   .series-marker-num { color: var(--series-accent); }
   .series-marker-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--series-line), transparent); }
-
-  /* ---- Card ---- */
-  .series-card {
-    position: relative;
-    display: grid;
-    grid-template-columns: clamp(190px, 24%, 300px) 1fr auto;
-    align-items: stretch;
-    gap: 2.25rem;
-    padding: 1.5rem;
-    border: 1px solid var(--series-card-border);
-    border-radius: 1.25rem;
-    background: var(--series-card-bg);
-    color: inherit; text-decoration: none;
-    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .series-card:hover {
-    border-color: rgba(108, 77, 246, 0.5);
-    box-shadow: 0 22px 60px -28px rgba(108, 77, 246, 0.5);
-    transform: translateY(-3px);
-  }
-
-  /* ---- Thumbnail panel ---- */
-  .series-thumb {
-    position: relative; overflow: hidden;
-    border-radius: 0.85rem;
-    min-height: 230px;
-    background-color: #161430;
-    background-image: linear-gradient(150deg, #221a4d 0%, #14152a 55%, #2b1c5e 100%);
-    background-size: cover; background-position: center;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    isolation: isolate;
-  }
-  .series-thumb.has-cover::after {
-    content: ''; position: absolute; inset: 0; z-index: 0;
-    background: linear-gradient(to top, rgba(20, 21, 42, 0.88) 0%, rgba(20, 21, 42, 0.25) 42%, rgba(20, 21, 42, 0.05) 100%);
-  }
-  .thumb-deco {
-    position: absolute; top: 0.9rem; z-index: 2;
-    font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.35);
-  }
-  .thumb-deco-tl { left: 1rem; }
-  .thumb-deco-tr { right: 1rem; }
-  .thumb-glyph {
-    position: relative; z-index: 2;
-    width: 56px; height: 56px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px dashed rgba(167, 139, 250, 0.55);
-    color: rgba(199, 186, 255, 0.9);
-    margin-bottom: 1.1rem;
-  }
-  .thumb-center { position: relative; z-index: 2; text-align: center; padding: 0 1.1rem; }
-  .thumb-title {
-    font-family: 'DM Serif Display', Georgia, serif; font-weight: 400;
-    font-size: clamp(1.15rem, 1.7vw, 1.5rem); line-height: 1.15;
-    color: #fff; margin: 0;
-  }
-  .thumb-caption {
-    display: block; margin-top: 0.6rem;
-    font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 400;
-    text-transform: uppercase; letter-spacing: 0.22em; color: rgba(255, 255, 255, 0.5);
-  }
-  .thumb-pill {
-    position: absolute; bottom: 1.1rem; left: 50%; transform: translateX(-50%); z-index: 2;
-    padding: 0.35rem 0.85rem; border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.08);
-    font-family: 'Space Mono', monospace; font-size: 0.58rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255, 255, 255, 0.85);
-    white-space: nowrap;
-  }
-
-  /* ---- Body ---- */
-  .series-body { min-width: 0; display: flex; flex-direction: column; justify-content: center; padding: 0.5rem 0; }
-  .series-meta {
-    display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;
-    font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.04em;
-    color: var(--series-muted); margin-bottom: 0.85rem;
-  }
-  .series-meta-kicker { color: var(--series-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; }
-  .series-meta-sep { color: rgba(108, 77, 246, 0.4); }
-  .series-meta-stat { display: inline-flex; align-items: center; gap: 0.32rem; }
-  .series-meta-stat svg { opacity: 0.8; }
-
-  .series-title {
-    font-family: 'DM Serif Display', Georgia, serif; font-weight: 400;
-    font-size: clamp(1.7rem, 3vw, 2.6rem); line-height: 1.08; letter-spacing: -0.01em;
-    color: var(--series-ink); margin: 0 0 0.85rem;
-    transition: color 0.3s ease;
-  }
-  .series-card:hover .series-title { color: var(--series-accent); }
-  .series-desc {
-    font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.6;
-    color: var(--series-muted); margin: 0; max-width: 46rem;
-    overflow: hidden; text-overflow: ellipsis;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-  }
-  .series-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.1rem; }
-  .series-tag {
-    padding: 0.3rem 0.8rem; border-radius: 999px;
-    border: 1px solid var(--series-card-border);
-    font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.06em;
-    color: var(--series-muted); white-space: nowrap;
-  }
-  .series-cta {
-    display: inline-block; margin-top: 1.35rem;
-    font-family: 'Space Mono', monospace; font-size: 0.66rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.2em; color: var(--series-accent);
-    transition: letter-spacing 0.3s ease;
-  }
-  .series-card:hover .series-cta { letter-spacing: 0.26em; }
-
-  /* ---- Arrow button ---- */
-  .series-arrow {
-    align-self: center; flex-shrink: 0;
-    width: 50px; height: 50px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px solid var(--series-card-border); color: var(--series-accent);
-    transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
-  }
-  .series-card:hover .series-arrow {
-    background: var(--series-accent); border-color: var(--series-accent); color: #fff;
-    transform: translateX(4px);
-  }
 
   /* ---- Empty ---- */
   .series-empty { text-align: center; padding: 6rem 0; }
@@ -368,28 +151,13 @@ const SITE_URL = 'https://luci-studio.com';
   body.light-mode .series-main {
     --series-ink: #14152a;
     --series-muted: #6b6c84;
-    --series-card-bg: #ffffff;
-    --series-card-border: rgba(20, 21, 42, 0.1);
-  }
-  body.light-mode .series-card { box-shadow: 0 1px 2px rgba(20, 21, 42, 0.04); }
-  body.light-mode .series-card:hover {
-    border-color: rgba(108, 77, 246, 0.35);
-    box-shadow: 0 22px 55px -30px rgba(108, 77, 246, 0.45);
   }
   body.light-mode .series-grid-bg {
     background-image: radial-gradient(circle, rgba(20, 21, 42, 0.07) 1px, transparent 1px);
   }
 
   /* ---- Responsive ---- */
-  @media (max-width: 860px) {
-    .series-card { grid-template-columns: 150px 1fr; gap: 1.25rem; padding: 1.1rem; }
-    .series-arrow { display: none; }
-    .series-thumb { min-height: 180px; }
-    .thumb-glyph { width: 44px; height: 44px; margin-bottom: 0.8rem; }
-  }
   @media (max-width: 560px) {
-    .series-card { grid-template-columns: 1fr; gap: 1.1rem; }
-    .series-thumb { min-height: 170px; }
     .series-list { gap: 3rem; }
     .series-head { margin-bottom: 3rem; }
   }
