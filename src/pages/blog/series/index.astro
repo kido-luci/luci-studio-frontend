@@ -1,29 +1,17 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
 import TopNav from "../../../components/TopNav.astro";
+import SeriesCard from "../../../components/SeriesCard.astro";
 import { postService } from "../../../services/posts";
 import { playlistService } from "../../../services/playlists";
-import { buildPostSlug } from "../../../utils/blog";
+import { buildSeriesViews } from "../../../utils/series";
 
 const [rawPosts, rawPlaylists] = await Promise.all([
   postService.getAll(),
   playlistService.getAll(),
 ]);
 
-// Aggregate views + likes per series by summing the stats of every post it contains.
-// Uses rawPosts (already fetched) so this is zero extra network cost.
-const postStatsByID = new Map(rawPosts.map(p => [p.id, { views: p.views ?? 0, likes: p.likes ?? 0 }]));
-const sorted = [...rawPlaylists]
-  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  .map(p => {
-    let totalViews = 0;
-    let totalLikes = 0;
-    for (const id of (p.post_ids ?? [])) {
-      const stats = postStatsByID.get(id);
-      if (stats) { totalViews += stats.views; totalLikes += stats.likes; }
-    }
-    return { ...p, totalViews, totalLikes };
-  });
+const sorted = buildSeriesViews(rawPlaylists, rawPosts);
 
 const SITE_URL = 'https://luci-studio.com';
 ---
@@ -37,67 +25,45 @@ const SITE_URL = 'https://luci-studio.com';
 
   <TopNav active="series" />
 
-  <main class="pt-36 pb-24 px-4 md:px-6 min-h-screen bg-[var(--bg-primary)]">
-    <div class="max-w-7xl mx-auto">
+  <main class="series-main pt-36 pb-28 px-5 md:px-8 min-h-screen">
+    <div class="series-grid-bg" aria-hidden="true"></div>
+
+    <div class="series-shell">
 
       <!-- Header -->
-      <div data-reveal class="mb-16">
-        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Curated Collections</span>
-        <h1 class="text-6xl md:text-8xl font-black tracking-wide">SERIES<span class="text-violet-500">.</span></h1>
-        <p class="text-gray-500 max-w-lg text-sm leading-relaxed mt-4">
-          {sorted.length} {sorted.length === 1 ? 'series' : 'series'} — themed, ordered reading lists.
-        </p>
-        <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
-        <a href="/blog" class="inline-flex items-center gap-2 mt-6 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-violet-400 transition-colors duration-300">
+      <header class="series-head" data-reveal>
+        <a href="/blog" class="series-back">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Back to Thoughts
         </a>
-      </div>
+        <span class="series-eyebrow">Curated Collections</span>
+        <h1 class="series-display">Series<span class="series-dot">.</span></h1>
+        <p class="series-sub">
+          {sorted.length} {sorted.length === 1 ? 'series' : 'series'} — themed, ordered reading
+          lists meant to be followed end-to-end.
+        </p>
+      </header>
 
       <!-- Empty state -->
       {sorted.length === 0 && (
-        <div class="text-center py-24">
-          <p class="text-gray-500 text-sm uppercase tracking-widest">No series yet</p>
+        <div class="series-empty">
+          <p>No series yet</p>
         </div>
       )}
 
-      <!-- Series list (Spotify-style rows) -->
+      <!-- Series list -->
       {sorted.length > 0 && (
-        <ol data-reveal class="playlist-list space-y-3 list-none p-0 m-0">
-          {sorted.map((p, i) => {
-            const href = `/blog/series/${buildPostSlug(p.title, p.id)}/`;
-            const count = p.post_ids?.length ?? 0;
-            const img = p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800';
-            return (
-              <li>
-                <a href={href} class="playlist-row no-underline" data-playlist-post-ids={JSON.stringify(p.post_ids ?? [])}>
-                  <span class="playlist-row-number">{String(i + 1).padStart(2, '0')}</span>
-                  <div class="playlist-row-thumb">
-                    <img src={img} alt={p.title} loading="lazy" onerror="this.style.opacity='0'" />
-                  </div>
-                  <div class="playlist-row-meta">
-                    <div class="playlist-row-tags">
-                      <span class="tag-label text-[10px] font-black text-violet-400 uppercase tracking-widest">Series</span>
-                      <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                      <span class="text-[10px] text-gray-600">{count} {count === 1 ? 'post' : 'posts'}</span>
-                      <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                      <span class="playlist-row-stat">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        <span class="playlist-views-count">{p.totalViews}</span>
-                      </span>
-                      <span class="playlist-row-stat">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        <span class="playlist-likes-count">{p.totalLikes}</span>
-                      </span>
-                    </div>
-                    <h3 class="playlist-row-title">{p.title}</h3>
-                    {p.description && <p class="playlist-row-desc">{p.description}</p>}
-                  </div>
-                  <span class="playlist-row-arrow">→</span>
-                </a>
-              </li>
-            );
-          })}
+        <ol class="series-list">
+          {sorted.map((p, i) => (
+            <li class="series-item" data-reveal>
+              <div class="series-marker">
+                <span class="series-marker-num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="series-marker-label">Collection</span>
+                <span class="series-marker-line"></span>
+              </div>
+              <SeriesCard series={p} />
+            </li>
+          ))}
         </ol>
       )}
 
@@ -107,110 +73,92 @@ const SITE_URL = 'https://luci-studio.com';
 </Layout>
 
 <style>
-  /* Series list (Spotify-style rows) */
-  .playlist-list { margin: 0; padding: 0; }
-  .playlist-row {
-    display: grid;
-    grid-template-columns: 3.5rem 7rem 1fr auto;
-    gap: 1.75rem;
-    align-items: center;
-    padding: 1.5rem 1.75rem;
-    border: 2px solid rgba(139, 92, 246, 0.22);
-    background: rgba(255, 255, 255, 0.02);
-    color: inherit;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .playlist-row:hover {
-    border-color: rgba(139, 92, 246, 0.7);
-    background: rgba(139, 92, 246, 0.05);
-    transform: translateX(4px);
-    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
-  }
-  .playlist-row-number {
-    font-size: 2.25rem;
-    font-weight: 900;
-    color: rgba(139, 92, 246, 0.85);
-    letter-spacing: -0.03em;
-    line-height: 1;
-    text-align: center;
-  }
-  .playlist-row-thumb {
-    width: 7rem;
-    aspect-ratio: 1 / 1;
+  /* ====== Series page — header + layout (card lives in SeriesCard.astro) ====== */
+  .series-main {
+    --series-accent: #6c4df6;
+    --series-ink: var(--text-primary);
+    --series-muted: var(--text-secondary, #6b7280);
+    --series-line: rgba(108, 77, 246, 0.18);
+    position: relative;
+    background: var(--bg-primary);
     overflow: hidden;
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
   }
-  .playlist-row-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
+  /* faint dot grid */
+  .series-grid-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: radial-gradient(circle, rgba(108, 77, 246, 0.10) 1px, transparent 1px);
+    background-size: 38px 38px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
   }
-  .playlist-row:hover .playlist-row-thumb img { transform: scale(1.08); }
-  .playlist-row-meta { min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-  .playlist-row-tags { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-  .playlist-row-stat {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 10px;
-    color: rgb(107, 114, 128);
+  .series-shell { position: relative; z-index: 1; max-width: 72rem; margin: 0 auto; }
+
+  /* ---- Header ---- */
+  .series-head { margin-bottom: 4.5rem; }
+  .series-back {
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.22em;
+    color: var(--series-muted); text-decoration: none;
+    transition: color 0.3s ease; margin-bottom: 2.5rem;
   }
-  .playlist-row-title {
-    font-size: 1.375rem;
-    font-weight: 800;
-    line-height: 1.25;
-    color: var(--text-primary);
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
+  .series-back:hover { color: var(--series-accent); }
+  .series-back svg { transition: transform 0.3s ease; }
+  .series-back:hover svg { transform: translateX(-3px); }
+
+  .series-eyebrow {
+    display: block;
+    font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.3em;
+    color: var(--series-accent); margin-bottom: 0.9rem;
   }
-  .playlist-row:hover .playlist-row-title { color: rgb(167, 139, 250); }
-  .playlist-row-desc {
-    font-size: 0.9rem;
-    color: rgb(107, 114, 128);
-    line-height: 1.5;
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+  .series-display {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400; font-style: normal;
+    font-size: clamp(4rem, 11vw, 8.8rem);
+    line-height: 0.92; letter-spacing: -0.02em;
+    color: var(--series-ink); margin: 0;
   }
-  .playlist-row-arrow {
-    color: rgba(139, 92, 246, 0.5);
-    font-size: 1.5rem;
-    transition: transform 0.3s, color 0.3s;
-  }
-  .playlist-row:hover .playlist-row-arrow {
-    color: rgb(167, 139, 250);
-    transform: translateX(4px);
+  .series-dot { color: var(--series-accent); }
+  .series-sub {
+    max-width: 30rem; margin: 1.6rem 0 0;
+    font-family: 'Inter', sans-serif; font-size: 1rem; line-height: 1.65;
+    color: var(--series-muted);
   }
 
-  @media (max-width: 640px) {
-    .playlist-row {
-      grid-template-columns: 2.25rem 4.5rem 1fr;
-      gap: 1rem;
-      padding: 1rem 1.125rem;
-    }
-    .playlist-row-number { font-size: 1.375rem; }
-    .playlist-row-thumb { width: 4.5rem; }
-    .playlist-row-title { font-size: 1.05rem; }
-    .playlist-row-desc { font-size: 0.8rem; }
-    .playlist-row-arrow { display: none; }
+  /* ---- List + per-series marker ---- */
+  .series-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4rem; }
+  .series-marker { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.5rem; }
+  .series-marker-num,
+  .series-marker-label {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.28em; color: var(--series-muted);
+  }
+  .series-marker-num { color: var(--series-accent); }
+  .series-marker-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--series-line), transparent); }
+
+  /* ---- Empty ---- */
+  .series-empty { text-align: center; padding: 6rem 0; }
+  .series-empty p {
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.25em; color: var(--series-muted);
   }
 
-  body.light-mode .playlist-row {
-    border-color: rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.85);
+  /* ---- Light mode ---- */
+  body.light-mode .series-main {
+    --series-ink: #14152a;
+    --series-muted: #6b6c84;
   }
-  body.light-mode .playlist-row:hover {
-    border-color: rgba(139, 92, 246, 0.45);
-    background: rgba(139, 92, 246, 0.05);
+  body.light-mode .series-grid-bg {
+    background-image: radial-gradient(circle, rgba(20, 21, 42, 0.07) 1px, transparent 1px);
   }
-  body.light-mode .playlist-row-title { color: rgb(17, 24, 39); }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 560px) {
+    .series-list { gap: 3rem; }
+    .series-head { margin-bottom: 3rem; }
+  }
 </style>

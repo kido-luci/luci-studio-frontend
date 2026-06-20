@@ -1,27 +1,17 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../../components/TopNav.astro";
+import SeriesCard from "../../components/SeriesCard.astro";
 import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
+import { buildSeriesViews } from "../../utils/series";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../../utils/blog";
 
 const rawPosts = await postService.getAll();
 const rawPlaylists = await playlistService.getAll();
 
-// Aggregate views + likes per playlist by summing the stats of every post it contains.
-// Uses rawPosts (full list, already fetched) so this is zero extra network cost.
-const postStatsByID = new Map(rawPosts.map(p => [p.id, { views: p.views ?? 0, likes: p.likes ?? 0 }]));
-const playlists = [...rawPlaylists]
-  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-  .map(p => {
-    let totalViews = 0;
-    let totalLikes = 0;
-    for (const id of (p.post_ids ?? [])) {
-      const stats = postStatsByID.get(id);
-      if (stats) { totalViews += stats.views; totalLikes += stats.likes; }
-    }
-    return { ...p, totalViews, totalLikes };
-  });
+// Series view-models (stats + topics + year aggregated from the post list).
+const playlists = buildSeriesViews(rawPlaylists, rawPosts);
 // Gradient cover fallback (shows behind the real image; visible if the image is missing/fails).
 const coverGradient = (tag: string) => {
   const map: Record<string, [string, string]> = {
@@ -209,46 +199,15 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
         <section data-reveal class="mt-24">
           <div class="flex items-end justify-between gap-4 mb-6 flex-wrap">
             <div>
-              <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-2 block">Curated Collections</span>
-              <h2 class="text-4xl md:text-5xl font-black tracking-wide">SERIES<span class="text-violet-500">.</span></h2>
+              <span class="text-xs font-black text-[#6c4df6] uppercase tracking-[0.3em] mb-2 block">Curated Collections</span>
+              <h2 class="text-4xl md:text-5xl font-black tracking-wide">SERIES<span class="text-[#6c4df6]">.</span></h2>
             </div>
             <a href="/blog/series" class="see-all-btn">See all →</a>
           </div>
-          <ol class="playlist-list space-y-3 list-none p-0 m-0">
-            {playlists.map((p, i) => {
-              const href = `/blog/series/${buildPostSlug(p.title, p.id)}/`;
-              const count = p.post_ids?.length ?? 0;
-              const img = p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800';
-              return (
-                <li>
-                  <a href={href} class="playlist-row no-underline" data-playlist-post-ids={JSON.stringify(p.post_ids ?? [])}>
-                    <span class="playlist-row-number">{String(i + 1).padStart(2, '0')}</span>
-                    <div class="playlist-row-thumb">
-                      <img src={img} alt={p.title} loading="lazy" onerror="this.style.opacity='0'" />
-                    </div>
-                    <div class="playlist-row-meta">
-                      <div class="playlist-row-tags">
-                        <span class="tag-label text-[10px] font-black text-violet-400 uppercase tracking-widest">Series</span>
-                        <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                        <span class="text-[10px] text-gray-600">{count} {count === 1 ? 'post' : 'posts'}</span>
-                        <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                        <span class="playlist-row-stat">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                          <span class="playlist-views-count">{p.totalViews}</span>
-                        </span>
-                        <span class="playlist-row-stat">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                          <span class="playlist-likes-count">{p.totalLikes}</span>
-                        </span>
-                      </div>
-                      <h3 class="playlist-row-title">{p.title}</h3>
-                      {p.description && <p class="playlist-row-desc">{p.description}</p>}
-                    </div>
-                    <span class="playlist-row-arrow">→</span>
-                  </a>
-                </li>
-              );
-            })}
+          <ol class="series-strip list-none p-0 m-0">
+            {playlists.map((p) => (
+              <li><SeriesCard series={p} /></li>
+            ))}
           </ol>
         </section>
       )}
@@ -413,112 +372,8 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     color: rgb(107, 114, 128) !important;
   }
 
-  /* Playlist list (Spotify-style rows) */
-  .playlist-list { margin: 0; padding: 0; }
-  .playlist-row {
-    display: grid;
-    grid-template-columns: 3.5rem 7rem 1fr auto;
-    gap: 1.75rem;
-    align-items: center;
-    padding: 1.5rem 1.75rem;
-    border: 2px solid rgba(139, 92, 246, 0.22);
-    background: rgba(255, 255, 255, 0.02);
-    color: inherit;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .playlist-row:hover {
-    border-color: rgba(139, 92, 246, 0.7);
-    background: rgba(139, 92, 246, 0.05);
-    transform: translateX(4px);
-    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
-  }
-  .playlist-row-number {
-    font-size: 2.25rem;
-    font-weight: 900;
-    color: rgba(139, 92, 246, 0.85);
-    letter-spacing: -0.03em;
-    line-height: 1;
-    text-align: center;
-  }
-  .playlist-row-thumb {
-    width: 7rem;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
-  }
-  .playlist-row-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-  .playlist-row:hover .playlist-row-thumb img { transform: scale(1.08); }
-  .playlist-row-meta { min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-  .playlist-row-tags { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-  .playlist-row-stat {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 10px;
-    color: rgb(107, 114, 128);
-  }
-  .playlist-row-title {
-    font-size: 1.375rem;
-    font-weight: 800;
-    line-height: 1.25;
-    color: var(--text-primary);
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-  }
-  .playlist-row:hover .playlist-row-title { color: rgb(167, 139, 250); }
-  .playlist-row-desc {
-    font-size: 0.9rem;
-    color: rgb(107, 114, 128);
-    line-height: 1.5;
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-  .playlist-row-arrow {
-    color: rgba(139, 92, 246, 0.5);
-    font-size: 1.5rem;
-    transition: transform 0.3s, color 0.3s;
-  }
-  .playlist-row:hover .playlist-row-arrow {
-    color: rgb(167, 139, 250);
-    transform: translateX(4px);
-  }
-
-  @media (max-width: 640px) {
-    .playlist-row {
-      grid-template-columns: 2.25rem 4.5rem 1fr;
-      gap: 1rem;
-      padding: 1rem 1.125rem;
-    }
-    .playlist-row-number { font-size: 1.375rem; }
-    .playlist-row-thumb { width: 4.5rem; }
-    .playlist-row-title { font-size: 1.05rem; }
-    .playlist-row-desc { font-size: 0.8rem; }
-    .playlist-row-arrow { display: none; }
-  }
-
-  body.light-mode .playlist-row {
-    border-color: rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.85);
-  }
-  body.light-mode .playlist-row:hover {
-    border-color: rgba(139, 92, 246, 0.45);
-    background: rgba(139, 92, 246, 0.05);
-  }
-  body.light-mode .playlist-row-title { color: rgb(17, 24, 39); }
+  /* Series strip — cards rendered by SeriesCard.astro */
+  .series-strip { margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.5rem; }
 
   .see-all-btn {
     padding: 0.5rem 1.1rem;
@@ -527,24 +382,24 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     text-transform: uppercase;
     letter-spacing: 0.18em;
     border-radius: 9999px;
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    color: rgb(167, 139, 250);
+    border: 1px solid rgba(108, 77, 246, 0.4);
+    color: rgb(149, 128, 255);
     background: transparent;
     text-decoration: none;
     transition: all 0.2s;
     white-space: nowrap;
   }
   .see-all-btn:hover {
-    background: rgba(139, 92, 246, 0.12);
-    border-color: rgba(139, 92, 246, 0.7);
+    background: rgba(108, 77, 246, 0.12);
+    border-color: rgba(108, 77, 246, 0.7);
   }
   body.light-mode .see-all-btn {
-    border-color: rgba(139, 92, 246, 0.35);
-    color: rgb(109, 40, 217);
+    border-color: rgba(108, 77, 246, 0.35);
+    color: rgb(91, 58, 230);
   }
   body.light-mode .see-all-btn:hover {
-    background: rgba(139, 92, 246, 0.08);
-    border-color: rgba(139, 92, 246, 0.55);
+    background: rgba(108, 77, 246, 0.08);
+    border-color: rgba(108, 77, 246, 0.55);
   }
 
   /* Topic filter buttons */
