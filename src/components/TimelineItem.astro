@@ -1,10 +1,10 @@
 ---
 interface Props {
   id: string;
-  y: string;
+  year: string;
   role: string;
-  co: string;
-  loc: string;
+  company: string;
+  location: string;
   desc: string;
   details: string[];
   tech: string[];
@@ -14,7 +14,7 @@ interface Props {
   logo?: string;
 }
 
-const { id, y, role, co, loc, desc, details, tech, links, index, img, logo } = Astro.props;
+const { id, year, role, company, location, desc, details, tech, links, index, img, logo } = Astro.props;
 ---
 
 <!--
@@ -34,7 +34,7 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img, logo } = A
 
     {/* Year label row */}
     <div class="tl-year flex items-center gap-3 mb-3 h-[18px]">
-      <span class="tag-label text-xs font-black text-gray-400 uppercase tracking-widest leading-none">{y}</span>
+      <span class="tag-label text-xs font-black text-gray-400 uppercase tracking-widest leading-none">{year}</span>
     </div>
 
     {/* ── Card ── */}
@@ -47,16 +47,16 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img, logo } = A
             <div class="flex items-center gap-4">
               {logo && (
                 <div class="w-12 h-12 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-lg group-hover:border-pink-500/30 transition-colors">
-                  <img src={logo} alt={`${co} Logo`} loading="lazy" class="w-full h-full object-cover" />
+                  <img src={logo} alt={`${company} Logo`} loading="lazy" class="w-full h-full object-cover" />
                 </div>
               )}
               <h3 class="text-2xl font-black drop-shadow-xl flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
                 <span style="color: var(--text-primary)">{role}</span>
-                <span class="text-pink-400 font-medium text-lg whitespace-nowrap">— {co}</span>
+                <span class="text-pink-400 font-medium text-lg whitespace-nowrap">— {company}</span>
               </h3>
             </div>
           </div>
-          <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{loc}</p>
+          <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{location}</p>
           <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{desc}</p>
 
           {/* Preview (collapsed) */}
@@ -130,7 +130,7 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img, logo } = A
         <div class="md:col-span-4 flex flex-col items-center md:items-end justify-center order-first md:order-last mb-8 md:mb-0">
           {img && (
             <div class="relative group/preview overflow-hidden border border-white/5 shadow-2xl w-full bg-white/5 transition-all duration-700 group-hover:border-pink-500/30 group-hover:shadow-pink-500/10">
-              <img src={img} alt={`${co} Preview`} loading="lazy" class="w-full h-auto block transition-all duration-700 group-hover/preview:scale-110" />
+              <img src={img} alt={`${company} Preview`} loading="lazy" class="w-full h-auto block transition-all duration-700 group-hover/preview:scale-110" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/preview:opacity-100 transition-opacity duration-500"></div>
             </div>
           )}
