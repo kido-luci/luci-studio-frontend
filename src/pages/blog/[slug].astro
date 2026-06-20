@@ -224,29 +224,54 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
     <div class="max-w-4xl mx-auto">
 
-      <header class="mb-16" data-reveal>
-        <div class="flex items-center gap-4 mb-6 flex-wrap">
+      <header class="bd-header" data-reveal>
+        <!-- Topic pills -->
+        <div class="bd-tags">
           {tags.map(t => (
-            <span class="tag-label px-3 py-1 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-400 uppercase tracking-widest">{t}</span>
+            <span class="bd-tag"><span class="bd-tag-dot"></span>{t}</span>
           ))}
-          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
-          <span class="text-xs text-gray-500">{formattedDate}</span>
-          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
-          <span class="text-xs text-gray-500">{readTime} read</span>
-          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
-          <span class="text-xs text-gray-500 flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            <span id="view-count">{post.views ?? '—'}</span>
-          </span>
-          <span class="w-1 h-1 bg-gray-800 rounded-full"></span>
-          <span class="text-xs text-gray-500 flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            <span id="like-count-header">{post.likes ?? '—'}</span>
-          </span>
         </div>
-        <h1 class="text-4xl md:text-6xl font-black text-white leading-[1.1] mb-8 tracking-normal">
-          {post.title}
-        </h1>
+
+        <!-- Title -->
+        <h1 class="bd-title">{post.title}</h1>
+
+        <div class="bd-rule"></div>
+
+        <!-- Byline -->
+        <div class="bd-byline">
+          <div class="bd-byline-left">
+            <div class="bd-avatar"><img src="/images/logo_icon.png" alt="Trung Lập (Luci)" width="46" height="46" loading="lazy" /></div>
+            <div class="bd-author">
+              <p class="bd-author-name">Trung Lập <span>(Luci)</span></p>
+              <div class="bd-meta">
+                <span>{formattedDate}</span>
+                <span class="bd-dot">·</span>
+                <span>{readTime} read</span>
+                <span class="bd-dot">·</span>
+                <span class="bd-meta-ic" title="Views">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <span id="view-count">{post.views ?? '—'}</span>
+                </span>
+                <span class="bd-dot">·</span>
+                <span class="bd-meta-ic" title="Likes">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  <span id="like-count-header">{post.likes ?? '—'}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="bd-byline-right">
+            <button type="button" data-share-trigger class="bd-share" aria-label="Share this post">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share
+            </button>
+            <button type="button" id="bd-bookmark" class="bd-iconbtn" aria-label="Save for later">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="bd-rule"></div>
       </header>
 
       <!-- Content -->
@@ -299,7 +324,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
              </div>
            </div>
            <div class="flex flex-wrap items-center justify-center gap-6">
-             <button id="share-btn" style="font-family: inherit;" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Share Post <span>↗</span></button>
+             <button id="share-btn" data-share-trigger style="font-family: inherit;" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Share Post <span>↗</span></button>
              <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Connect <span>↗</span></a>
              <a href="/terms" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Terms</a>
              <a href="/privacy" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Privacy</a>
@@ -504,20 +529,33 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
   // Handle share functionality
   function setupShare() {
-    const shareBtn = document.getElementById('share-btn');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', () => {
-        if (navigator.share) {
-          navigator.share({
-            title: document.title,
-            url: window.location.href
-          });
-        } else {
-          navigator.clipboard.writeText(window.location.href);
-          alert('Link copied to clipboard!');
-        }
-      });
-    }
+    const doShare = () => {
+      if (navigator.share) {
+        navigator.share({ title: document.title, url: window.location.href });
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
+    };
+    document.querySelectorAll('[data-share-trigger]').forEach(btn => btn.addEventListener('click', doShare));
+  }
+
+  // Local "save for later" bookmark — persists per post id in localStorage.
+  function setupBookmark() {
+    const btn = document.getElementById('bd-bookmark');
+    const main = document.querySelector('main[data-post-id]');
+    const id = main instanceof HTMLElement ? main.dataset.postId : undefined;
+    if (!btn || !id) return;
+    const KEY = 'luci_saved_posts';
+    const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+    const sync = () => btn.classList.toggle('is-saved', read().includes(id));
+    sync();
+    btn.addEventListener('click', () => {
+      const list = read();
+      const next = list.includes(id) ? list.filter(x => x !== id) : [...list, id];
+      localStorage.setItem(KEY, JSON.stringify(next));
+      sync();
+    });
   }
 
   // Theme icon sync
@@ -720,6 +758,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
   function bootEngagement() {
     setupCopyButtons();
     setupShare();
+    setupBookmark();
     updateThemeIcon();
     setupEngagement();
     document.querySelector('[aria-label="Toggle theme"]')?.addEventListener('click', () => {
@@ -1836,6 +1875,78 @@ const structuredData = [articleSchema, breadcrumbSchema];
   .markdown-content h6 {
     font-family: 'Outfit', sans-serif !important;
     font-weight: 800 !important;
+  }
+
+  /* ── Blog detail header (theme-aware) ───────────────────────────── */
+  .bd-header { margin-bottom: clamp(34px, 5vw, 52px); }
+
+  .bd-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: clamp(20px, 3vw, 30px); }
+  .bd-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 14px 7px 12px; border-radius: 999px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    background: rgba(6, 182, 212, 0.12);
+    border: 1px solid rgba(6, 182, 212, 0.26);
+    color: #22d3ee; white-space: nowrap;
+  }
+  .bd-tag-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  body.light-mode .bd-tag { background: #e3f6fb; border-color: #b9e7f0; color: #0e7490; }
+
+  .bd-title {
+    font-size: clamp(2.3rem, 6vw, 4.25rem); line-height: 1.05; letter-spacing: -0.02em;
+    color: #ffffff; margin: 0;
+  }
+  .bd-rule { height: 1px; background: rgba(255, 255, 255, 0.09); margin: clamp(22px, 3.2vw, 30px) 0; }
+  body.light-mode .bd-rule { background: rgba(17, 24, 40, 0.10); }
+
+  .bd-byline { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+  .bd-byline-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .bd-avatar {
+    width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.12); background: #0b1220;
+  }
+  .bd-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  body.light-mode .bd-avatar { border-color: rgba(17, 24, 40, 0.08); background: #eef2f7; }
+
+  .bd-author-name { margin: 0; font-weight: 800; font-size: 15px; color: #f3f4f6; letter-spacing: -0.01em; }
+  .bd-author-name span { font-weight: 500; color: #9aa3b2; }
+  body.light-mode .bd-author-name { color: #1b2330; }
+  body.light-mode .bd-author-name span { color: #6b7480; }
+
+  .bd-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 3px; font-size: 13px; color: #8a92a0; }
+  .bd-meta-ic { display: inline-flex; align-items: center; gap: 5px; }
+  .bd-meta-ic svg { width: 14px; height: 14px; opacity: 0.85; }
+  .bd-dot { opacity: 0.45; }
+
+  .bd-byline-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .bd-share {
+    display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 999px;
+    font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer;
+    background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #e5e7eb;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .bd-share svg { width: 15px; height: 15px; }
+  .bd-share:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.26); color: #fff; }
+  body.light-mode .bd-share { background: #fff; border-color: #e4e7ec; color: #1b2330; box-shadow: 0 1px 2px rgba(16, 24, 40, .06); }
+  body.light-mode .bd-share:hover { border-color: #c7ccd4; }
+
+  .bd-iconbtn {
+    width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+    background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd1da;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .bd-iconbtn svg { width: 17px; height: 17px; transition: fill .2s ease; }
+  .bd-iconbtn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+  .bd-iconbtn.is-saved { color: #f59e0b; border-color: rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.12); }
+  .bd-iconbtn.is-saved svg { fill: currentColor; }
+  body.light-mode .bd-iconbtn { background: #fff; border-color: #e4e7ec; color: #5b6472; box-shadow: 0 1px 2px rgba(16, 24, 40, .06); }
+  body.light-mode .bd-iconbtn:hover { color: #1b2330; }
+  body.light-mode .bd-iconbtn.is-saved { color: #d97706; border-color: rgba(217, 119, 6, 0.4); background: #fdf3e3; }
+
+  @media (max-width: 560px) {
+    .bd-byline { align-items: flex-start; }
+    .bd-byline-right { width: 100%; }
   }
 
   .twemoji-inline {

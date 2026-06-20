@@ -10,15 +10,20 @@ const profile = await profileService.getProfile();
 const skills = await skillsService.getAll();
 const work = await workService.getAll();
 
-// Static map so the literal Tailwind classes exist in the build (token comes from the DB).
-const ACCENT: Record<string, { text: string; dot: string }> = {
-  violet: { text: "text-violet-500", dot: "bg-violet-500" },
-  blue:   { text: "text-blue-500",   dot: "bg-blue-500" },
-  cyan:   { text: "text-cyan-500",   dot: "bg-cyan-500" },
-  pink:   { text: "text-pink-500",   dot: "bg-pink-500" },
-  amber:  { text: "text-amber-500",  dot: "bg-amber-500" },
+// Per-category accent triplet (base / soft tint / strong text) — matches the Skills v3 design.
+const SKILL_ACCENT: Record<string, { a: string; soft: string; strong: string }> = {
+  violet: { a: "#7c5cff", soft: "#f1ecff", strong: "#5a3fd6" },
+  blue:   { a: "#3b73ff", soft: "#e7eeff", strong: "#1d54e0" },
+  cyan:   { a: "#14b8bd", soft: "#ddf5f4", strong: "#0a8f93" },
+  pink:   { a: "#ec4899", soft: "#fce6f0", strong: "#d12a6c" },
+  amber:  { a: "#f59e0b", soft: "#fcf0db", strong: "#b9740a" },
 };
-const accentOf = (token: string) => ACCENT[token] ?? ACCENT.violet;
+const skAccent = (token: string) => SKILL_ACCENT[token] ?? SKILL_ACCENT.violet;
+const skVars = (token: string) => {
+  const c = skAccent(token);
+  return `--accent:${c.a};--accent-soft:${c.soft};--accent-strong:${c.strong}`;
+};
+const highlightYear = (s?: string) => (s ?? "").replace(/\b(\d{4})\b/, '<span class="sk-year">$1</span>');
 const toTimelineShape = (w) => ({
   id: w.title,
   y: w.period,
@@ -34,6 +39,16 @@ const toTimelineShape = (w) => ({
 });
 const experience    = work.filter(w => w.category === 'paid').map(toTimelineShape);
 const indieProjects = work.filter(w => w.category === 'indie').map(toTimelineShape);
+
+// Skills header stats (computed from the live data)
+const disciplineCount = skills.length;
+const totalItems = skills.reduce((n, c) => n + (c.items?.length ?? 0), 0);
+const toolsLabel = totalItems >= 5 ? `${Math.floor(totalItems / 5) * 5}+` : String(totalItems);
+
+// Number every category globally (01..0N in sort order), then split wide vs narrow for the grid.
+const numberedSkills = (skills ?? []).map((cat, i) => ({ cat, num: String(i + 1).padStart(2, "0") }));
+const narrowSkills = numberedSkills.filter((x) => !x.cat.wide);
+const wideSkills = numberedSkills.filter((x) => x.cat.wide);
 ---
 
 <Layout
@@ -145,44 +160,59 @@ const indieProjects = work.filter(w => w.category === 'indie').map(toTimelineSha
     <!-- SKILLS -->
     <section id="skills" class="py-16 px-4 md:px-6">
       <div class="max-w-7xl mx-auto">
-        <div data-reveal class="mb-20">
-          <span class="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] mb-3 block">The Stack</span>
-          <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-wide">SKILLS<span class="text-emerald-500">.</span></h2>
+        <div data-reveal class="sk-header">
+          <div>
+            <span class="sk-eyebrow"><span class="sk-eyebrow-dot"></span>The Stack</span>
+            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-wide">SKILLS<span class="text-emerald-500">.</span></h2>
+          </div>
+          <div class="sk-stats">
+            <div>
+              <div class="sk-stat-num tabular-nums">{disciplineCount}</div>
+              <div class="sk-stat-label">Disciplines</div>
+            </div>
+            <div>
+              <div class="sk-stat-num tabular-nums">{toolsLabel}</div>
+              <div class="sk-stat-label">Tools &amp; Crafts</div>
+            </div>
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {(skills ?? []).map((cat) => (
-            cat.wide ? (
-              <div data-reveal class={`group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-${cat.accent_color}-500/20 transition-all duration-500 relative overflow-hidden md:col-span-2 lg:col-span-4`}>
-                <div class={`absolute -right-8 -top-8 w-48 h-48 bg-${cat.accent_color}-500/10 rounded-full blur-3xl group-hover:bg-${cat.accent_color}-500/20 transition-all`}></div>
-                <div class="flex flex-col md:flex-row md:items-start gap-8">
-                  <div class="flex-shrink-0 md:w-56">
-                    <h3 class={`text-xs font-black ${accentOf(cat.accent_color).text} uppercase tracking-[0.3em] mb-4 flex items-center gap-2`}>
-                      <span class={`w-2 h-2 rounded-full ${accentOf(cat.accent_color).dot}`}></span>{cat.name}
-                    </h3>
-                    {cat.description && <p class="text-gray-600 text-sm leading-relaxed">{cat.description}</p>}
-                  </div>
-                  <div class="flex flex-wrap gap-2 content-start">
-                    {cat.items.map((s) => (
-                      <span class={`px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-${cat.accent_color}-500/40 hover:bg-${cat.accent_color}-500/10 transition-all cursor-default`}>{s}</span>
-                    ))}
-                  </div>
+
+        <div class="sk-grid">
+          {narrowSkills.map(({ cat, num }) => (
+            <div data-reveal class="sk-card" style={skVars(cat.accent_color)}>
+              <div class="sk-blob"></div>
+              <div class="sk-head">
+                <div class="sk-head-left">
+                  <span class="sk-dot"></span>
+                  <span class="sk-label">{cat.name}</span>
                 </div>
+                <span class="sk-num">{num}</span>
               </div>
-            ) : (
-              <div data-reveal class={`group p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-${cat.accent_color}-500/20 transition-all duration-500 relative overflow-hidden`}>
-                <div class={`absolute -right-4 -top-4 w-24 h-24 bg-${cat.accent_color}-500/10 rounded-full blur-2xl group-hover:bg-${cat.accent_color}-500/20 transition-all`}></div>
-                <h3 class={`text-xs font-black ${accentOf(cat.accent_color).text} uppercase tracking-[0.3em] mb-8 flex items-center gap-2`}>
-                  <span class={`w-2 h-2 rounded-full ${accentOf(cat.accent_color).dot}`}></span>{cat.name}
-                </h3>
-                <div class="flex flex-wrap gap-2">
-                  {cat.items.map((s) => (
-                    <span class={`px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-gray-400 hover:text-white hover:border-${cat.accent_color}-500/40 hover:bg-${cat.accent_color}-500/10 transition-all cursor-default`}>{s}</span>
-                  ))}
-                </div>
+              <div class="sk-chips">
+                {cat.items.map((s) => (<span class="sk-chip">{s}</span>))}
               </div>
-            )
+            </div>
           ))}
         </div>
+
+        {wideSkills.map(({ cat, num }) => (
+          <div data-reveal class="sk-card sk-card--wide" style={skVars(cat.accent_color)}>
+            <div class="sk-blob sk-blob--wide"></div>
+            <div class="sk-wide-left">
+              <div class="sk-head">
+                <div class="sk-head-left">
+                  <span class="sk-dot"></span>
+                  <span class="sk-label">{cat.name}</span>
+                </div>
+                <span class="sk-num">{num}</span>
+              </div>
+              {cat.description && <p class="sk-desc" set:html={highlightYear(cat.description)} />}
+            </div>
+            <div class="sk-chips sk-chips--wide">
+              {cat.items.map((s) => (<span class="sk-chip">{s}</span>))}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
 
@@ -266,6 +296,106 @@ body.light-mode .bg-white\/\[0\.02\] { background-color: rgba(255, 255, 255, 0.9
 body.light-mode .bg-white\/5 { background-color: rgba(0, 0, 0, 0.04) !important; }
 body.light-mode .bg-black\/40 { background-color: rgba(255, 255, 255, 0.85) !important; }
 body.light-mode .hover\:bg-white\/\[0\.05\]:hover { background-color: rgba(139, 92, 246, 0.05) !important; }
+
+/* ── SKILLS — Skills v3 design (theme-aware: pixel-match in light, adapted in dark) ── */
+.sk-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 32px; flex-wrap: wrap; margin-bottom: clamp(36px, 5vw, 56px);
+}
+.sk-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700; font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase;
+  color: #16a36b;
+}
+.sk-eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #16a36b; }
+.sk-stats { display: flex; gap: 36px; padding-bottom: 14px; }
+.sk-stat-num { font-weight: 800; font-size: 30px; line-height: 1; letter-spacing: -0.02em; color: #f3f4f6; }
+.sk-stat-label {
+  margin-top: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 400; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: #8a92a0;
+}
+
+.sk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+
+.sk-card {
+  position: relative; border-radius: 22px; padding: 26px 24px 28px; overflow: hidden;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 18px 36px -24px rgba(0, 0, 0, 0.7);
+}
+.sk-card--wide {
+  margin-top: 20px; display: grid;
+  grid-template-columns: minmax(240px, 330px) 1fr; gap: clamp(28px, 4vw, 56px); align-items: start;
+}
+.sk-blob {
+  position: absolute; top: -44px; right: -44px; width: 130px; height: 130px;
+  border-radius: 50%; background: var(--accent); opacity: 0.16; pointer-events: none;
+}
+.sk-blob--wide { width: 200px; height: 200px; top: -60px; right: -30px; opacity: 0.12; }
+
+.sk-head {
+  position: relative; display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.sk-head-left { display: flex; align-items: center; gap: 10px; }
+.sk-dot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.sk-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700; font-size: 12.5px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent);
+}
+.sk-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 400; font-size: 13px; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.28);
+}
+
+.sk-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.sk-chips--wide { align-content: flex-start; }
+.sk-chip {
+  display: inline-flex; align-items: center; padding: 9px 15px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(229, 231, 235, 0.92);
+  font-weight: 600; font-size: 13.5px; letter-spacing: -0.01em; cursor: default;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.sk-chip:hover {
+  transform: translateY(-3px);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: var(--accent); color: #fff;
+  box-shadow: 0 10px 22px -10px var(--accent);
+}
+.sk-desc { margin: 0; font-weight: 500; font-size: 16px; line-height: 1.6; color: rgba(255, 255, 255, 0.55); max-width: 34ch; }
+.sk-year { color: var(--accent); font-weight: 700; }
+
+/* Light mode — match the reference exactly */
+body.light-mode .sk-stat-num { color: #0f1420; }
+body.light-mode .sk-card {
+  background: #ffffff; border-color: #ebedf1;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 16px 34px -22px rgba(16, 24, 40, .16);
+}
+body.light-mode .sk-blob { opacity: 0.08; }
+body.light-mode .sk-blob--wide { opacity: 0.06; }
+body.light-mode .sk-head { border-bottom-color: #eef0f3; }
+body.light-mode .sk-dot { box-shadow: 0 0 0 4px var(--accent-soft); }
+body.light-mode .sk-label { color: var(--accent-strong); }
+body.light-mode .sk-num { color: #b6bcc8; }
+body.light-mode .sk-chip {
+  background: #eef0f3; border-color: #e4e7ec; color: #1b2330;
+  box-shadow: 0 1px 1px rgba(16, 24, 40, .03);
+}
+body.light-mode .sk-chip:hover {
+  background: var(--accent-soft); border-color: var(--accent); color: var(--accent-strong);
+  box-shadow: 0 10px 22px -10px var(--accent);
+}
+body.light-mode .sk-desc { color: #5b6472; }
+body.light-mode .sk-year { color: var(--accent-strong); }
+
+@media (max-width: 720px) { .sk-card--wide { grid-template-columns: 1fr; } }
 </style>
 
 <script>
