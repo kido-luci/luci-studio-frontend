@@ -179,6 +179,12 @@ const homepageSchema = {
           <span class="hp-sub">Shipped on 5 platforms</span>
           <span class="hp-arrow" aria-hidden="true">→</span>
         </a>
+
+        <!-- Scroll cue floating just above the bar — signals more content below -->
+        <a href="#blog" class="hero-scroll-cue" aria-label="Scroll down for more">
+          <span class="hero-scroll-text">SCROLL</span>
+          <svg class="hero-scroll-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
       </div>
     </section>
 
@@ -939,6 +945,40 @@ body.light-mode .hero-orb-2 {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .hp-card:hover .hp-arrow { opacity: 1; transform: translateX(0); }
+
+/* Scroll cue — floats above the bottom bar to signal there is more below */
+.hero-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  animation: heroScrollBounce 2s ease-in-out infinite;
+  transition: opacity 0.3s ease;
+}
+.hero-scroll-cue:hover { opacity: 0.65; }
+.hero-scroll-text {
+  font-family: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, monospace;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+}
+.hero-scroll-chev {
+  width: 18px;
+  height: 18px;
+}
+@keyframes heroScrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(6px); }
+}
 
 body.light-mode .hero-pillars {
   background: rgba(255, 255, 255, 0.4);
