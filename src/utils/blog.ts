@@ -19,6 +19,21 @@ export function formatDate(dateStr: string): string {
     });
 }
 
+// Gradient cover fallback shown behind the real image (visible if it's missing/fails).
+// Keyed by topic tag; falls back to the brand violet pair.
+export function coverGradient(tag: string): string {
+    const map: Record<string, [string, string]> = {
+        Flutter: ['#2a6fdb', '#5b8def'], Dart: ['#0a8f86', '#1bbba8'], 'Claude Code': ['#d2693f', '#e89a6b'],
+        'Firebase Test Lab': ['#df942b', '#f3c45e'], 'Share Links': ['#3b82c4', '#62a8e0'],
+        'State Management': ['#6d4bd8', '#9b7cf0'], 'Google Map': ['#2e9e5b', '#5bc47f'],
+        'Project Structure': ['#5147c9', '#867cf0'], 'Router Generator': ['#7b54d6', '#a98ef0'],
+        'Offline First': ['#1f8a8a', '#37bcae'], 'Dependency Injection': ['#8a4fd0', '#b07ce8'],
+        AI: ['#d2693f', '#e89a6b'], Go: ['#0a8f86', '#1bbba8'],
+    };
+    const [a, b] = map[tag] ?? ['#5147c9', '#867cf0'];
+    return `radial-gradient(circle at 78% 20%, rgba(255,255,255,.22), transparent 46%), linear-gradient(135deg, ${a}, ${b})`;
+}
+
 const CALLOUT_STYLES: Record<string, { color: string; bg: string; label: string }> = {
     NOTE:      { color: '#3b82f6', bg: 'rgba(59,130,246,0.08)',  label: 'ℹ Note' },
     TIP:       { color: '#10b981', bg: 'rgba(16,185,129,0.08)',  label: '💡 Tip' },

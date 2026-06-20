@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import TopNav from "../components/TopNav.astro";
 import SeriesCard from "../components/SeriesCard.astro";
+import PostCard from "../components/PostCard.astro";
 import { postService } from "../services/posts";
 import { playlistService } from "../services/playlists";
 import { buildSeriesViews } from "../utils/series";
@@ -38,7 +39,8 @@ const blogPosts = rawPosts
   date: formatDate(p.created_at),
   read: p.word_count ? calculateReadTimeFromWordCount(p.word_count) : calculateReadTime(p.content || ''),
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
-  img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
+  // empty cover → PostCard renders the gradient + tag-word fallback (same as /blog)
+  img: p.cover_image_url || '',
   likes: p.likes ?? 0,
   views: p.views ?? 0,
 }));
@@ -210,42 +212,20 @@ const homepageSchema = {
             <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-normal">THOUGHTS<span class="text-violet-500">.</span></h2>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch md:auto-rows-fr gap-8" id="home-blog-grid">
-            {blogPosts.slice(0, 6).map((p, i) => (
-              <div class="relative h-full" data-post-id={p.id} data-post-likes={p.likes}>
-                <a href={`/blog/${buildPostSlug(p.title, p.id)}/`} class="block h-full no-underline">
-                  <article class="tilt-card blog-card group flex h-full flex-col cursor-pointer p-5 sm:p-6 border-2 border-violet-500/[0.22] transition-all duration-500 bg-white/[0.02]" data-blog-card={String(i)}>
-                    <div class="blog-img-container aspect-video overflow-hidden mb-6 -mx-2 -mt-2 border-2 border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
-                      <img src={p.img} alt={p.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />
-                    </div>
-                    <div class="flex items-center gap-3 mb-4">
-                      <span class="tag-label text-xs font-black text-violet-400 uppercase tracking-widest">{p.tags.join(' · ')}</span>
-                      <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                      <span class="text-xs text-gray-600">{p.date}</span>
-                      <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                      <span class="text-xs text-gray-600">{p.read} read</span>
-                    </div>
-                    <h3 class="text-xl font-bold leading-snug group-hover:text-violet-400 transition-colors duration-300 line-clamp-2">{p.title}</h3>
-                    {p.subtitle && <p class="card-subtitle text-sm text-gray-500 mt-2 leading-relaxed line-clamp-3">{p.subtitle}</p>}
-                    <div class="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-                      <span class="text-xs text-gray-600">Read →</span>
-                      <div class="flex items-center gap-3">
-                        <span class="tile-view-area flex items-center gap-1.5" data-id={p.id}>
-                          <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                          </svg>
-                          <span class="tile-view-count text-xs text-gray-500">{p.views}</span>
-                        </span>
-                        <span class="tile-like-area flex items-center gap-1.5 cursor-pointer group/like" data-id={p.id}>
-                          <svg class="tile-like-icon w-4 h-4 text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                          </svg>
-                          <span class="tile-like-count text-xs text-gray-500 group-hover/like:text-rose-400 transition-colors duration-200">{p.likes}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                </a>
-              </div>
+            {blogPosts.slice(0, 6).map((p) => (
+              <PostCard
+                href={`/blog/${buildPostSlug(p.title, p.id)}/`}
+                title={p.title}
+                subtitle={p.subtitle}
+                tags={p.tags}
+                date={p.date}
+                read={p.read}
+                img={p.img}
+                id={p.id}
+                views={p.views}
+                likes={p.likes}
+                interactive
+              />
             ))}
           </div>
           {blogPosts.length > 6 && (
@@ -553,9 +533,6 @@ body.light-mode .tilt-card {
   background-color: rgba(255, 255, 255, 0.85) !important;
   border-color: rgba(0, 0, 0, 0.07) !important;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-}
-body.light-mode .blog-card {
-  border-color: rgba(0, 0, 0, 0.3) !important;
 }
 body.light-mode .tilt-card:hover {
   border-color: rgba(139, 92, 246, 0.25) !important;
@@ -1055,20 +1032,7 @@ body.light-mode .art-img-frame {
   border-color: rgba(168, 85, 247, 0.25);
 }
 
-/* ── Blog card scroll-triggered reveal ── */
-.blog-card {
-  opacity: 0;
-  transform: translateY(28px);
-}
-.blog-card.card-visible {
-  animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-/* Highlighted border + glow on hover */
-.blog-card:hover {
-  border-color: rgba(139, 92, 246, 0.75) !important;
-  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25),
-              0 12px 48px rgba(139, 92, 246, 0.18);
-}
+/* Blog cards now render via <PostCard> (data-reveal handles their reveal). */
 
 /* ── Home playlists below blog grid ── */
 .home-playlists {
@@ -1129,13 +1093,6 @@ body.light-mode .playlist-see-all:hover {
   box-shadow: 0 8px 32px rgba(168, 85, 247, 0.25);
 }
 
-/* ── Blog card image placeholder (shown while loading or on error) ── */
-.blog-img-container {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
-}
-body.light-mode .blog-img-container {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
-}
 #art-bg {
   background-image: url('https://media.luci-studio.com/ChatGPT%20Image%20May%205%2C%202026%2C%2011_03_29%20AM.jpg');
 }
@@ -1257,24 +1214,8 @@ body.light-mode .blog-img-container {
     }
   })();
 
-  // Blog card scroll-triggered stagger reveal
-  // Negative rootMargin ensures cards animate only when entering visible viewport, not while off-screen
-  (function () {
-    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-blog-card]'));
-    if (!cards.length) return;
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const el = entry.target as HTMLElement;
-        const idx = parseInt(el.dataset.blogCard ?? '0', 10);
-        // Stagger within each row of 3 columns; cap at 0.24s max
-        el.style.animationDelay = `${(idx % 3) * 0.12}s`;
-        el.classList.add('card-visible');
-        obs.unobserve(el);
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -20px 0px' });
-    cards.forEach(c => obs.observe(c));
-  })();
+  // Home blog cards now render via <PostCard> and are visible by default
+  // (the shared card carries its own hover-lift; no entrance reveal needed here).
 
   // Portfolio card scroll-triggered stagger reveal (left col first, right col 0.15s later)
   (function () {
