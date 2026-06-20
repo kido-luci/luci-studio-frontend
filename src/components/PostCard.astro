@@ -1,0 +1,120 @@
+---
+// Shared blog post card — the canonical "tb-card" design from /blog.
+// Used by the blog list (/blog), the homepage "Thoughts" grid, and the
+// "More Posts" related grid on a post page, so the card UI stays in one place.
+import { coverGradient } from "../utils/blog";
+
+interface Props {
+  href: string;
+  title: string;
+  subtitle?: string;
+  tags: string[];
+  date: string;
+  read: string;            // e.g. "5 min"
+  img?: string;            // cover image URL; empty falls back to a gradient + tag word
+  id?: string | number;    // post id (needed for interactive view/like wiring)
+  views?: number;
+  likes?: number;
+  badge?: string;          // cover badge label; pass "" to hide
+  interactive?: boolean;   // emit tile-* data-id so per-page JS can wire likes/refresh
+}
+
+const {
+  href, title, subtitle = "", tags, date, read,
+  img = "", id, views = 0, likes = 0,
+  badge = "Blog", interactive = false,
+} = Astro.props;
+
+const safeTags = (tags && tags.length > 0) ? tags : ["Engineering"];
+const catLine = safeTags.join("  ·  ");
+const coverWord = safeTags[0];
+const cover = coverGradient(safeTags[0]);
+const statId = interactive && id != null ? String(id) : undefined;
+---
+
+<a href={href} class="tb-card-link">
+  <article class="tb-card">
+    <div class="tb-card-cover" style={!img ? `background:${cover}` : undefined}>
+      {img
+        ? <img src={img} alt={title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
+        : <span class="tb-cover-word tb-cover-word--sm">{coverWord}</span>}
+      {badge && <span class="tb-badge">{badge}</span>}
+    </div>
+    <div class="tb-card-body">
+      <div class="tb-cat tb-cat--clamp">{catLine}</div>
+      <h3 class="tb-card-title">{title}</h3>
+      {subtitle && <p class="tb-excerpt">{subtitle}</p>}
+      <div class="tb-spacer"></div>
+      <div class="tb-meta tb-meta--sm">{date} &nbsp;•&nbsp; {read} read</div>
+      <div class="tb-card-foot">
+        <span class="tb-read tb-read--sm">Read <span class="tb-arrow">→</span></span>
+        <div class="tb-stats tb-stats--sm">
+          <span class="tile-view-area tb-stat" data-id={statId}>
+            <svg class="tb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="tile-view-count">{views}</span>
+          </span>
+          <span class="tile-like-area tb-stat tb-stat--like" data-id={statId}>
+            <svg class="tile-like-icon tb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="tile-like-count">{likes}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </article>
+</a>
+
+<style>
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Theme tokens live on the card root so the component renders correctly on any
+     page (homepage / post page / blog list), independent of an outer .tb-root. */
+  .tb-card-link {
+    --tb-accent: #6d4bd8;
+    --card-bg: #16161d; --card-bd: rgba(255,255,255,0.08);
+    --card-shadow: 0 4px 14px -10px rgba(0,0,0,0.6);
+    --card-shadow-hover: 0 24px 46px -22px rgba(0,0,0,0.85);
+    --ink: #f3f3f6; --muted: #8b909c; --line: rgba(255,255,255,0.08);
+    --badge-bg: rgba(20,20,28,0.82); --badge-ink: #f3f3f6;
+    display: block; text-decoration: none; height: 100%;
+  }
+  :global(body.light-mode) .tb-card-link {
+    --card-bg: #ffffff; --card-bd: #e9e6df;
+    --card-shadow: 0 4px 14px -10px rgba(30,25,70,.2);
+    --card-shadow-hover: 0 22px 44px -22px rgba(30,25,70,.36);
+    --ink: #161827; --muted: #9ca3af; --line: #f0eee8;
+    --badge-bg: rgba(255,255,255,0.92); --badge-ink: #161827;
+  }
+
+  .tb-card { display: flex; flex-direction: column; height: 100%; background: var(--card-bg); border: 1px solid var(--card-bd); border-radius: 18px; overflow: hidden; box-shadow: var(--card-shadow); transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
+  .tb-card.card-visible { animation: fadeSlideUp 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+  .tb-card:hover { transform: translateY(-6px); box-shadow: var(--card-shadow-hover); border-color: color-mix(in srgb, var(--tb-accent) 45%, var(--card-bd)); }
+  .tb-card-cover { position: relative; height: 194px; overflow: hidden; }
+  .tb-card-body { padding: 20px 20px 16px; display: flex; flex-direction: column; flex: 1; }
+  .tb-card-title { font-weight: 700; font-size: 20.5px; line-height: 1.18; letter-spacing: -.01em; color: var(--ink); margin: 12px 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tb-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+  .tb-badge { position: absolute; top: 14px; left: 14px; padding: 5px 11px; border-radius: 999px; background: var(--badge-bg); backdrop-filter: blur(6px); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--badge-ink); }
+  .tb-cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .tb-cover-word { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 16px; font-weight: 900; font-size: 62px; line-height: .85; letter-spacing: -.03em; color: rgba(255,255,255,.18); transform: rotate(-6deg); pointer-events: none; }
+  .tb-cover-word--sm { font-size: 56px; }
+  .tb-cat { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; font-size: 11px; line-height: 1.4; letter-spacing: 0.14em; text-transform: uppercase; color: var(--tb-accent); }
+  .tb-cat--clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  .tb-excerpt { font-size: 14.5px; line-height: 1.58; color: var(--muted); margin: 10px 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tb-spacer { flex: 1; }
+  .tb-meta { display: flex; align-items: center; gap: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 500; font-size: 13.5px; color: var(--muted); }
+  .tb-meta--sm { font-size: 12.5px; gap: 0; margin-top: 16px; }
+  .tb-read { display: inline-flex; align-items: center; gap: 7px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; color: var(--tb-accent); }
+  .tb-read--sm { font-size: 12.5px; }
+  .tb-arrow { font-size: 15px; }
+  .tb-stats { display: flex; align-items: center; gap: 18px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; font-size: 13.5px; }
+  .tb-stats--sm { gap: 14px; font-size: 12.5px; }
+  .tb-stat { display: inline-flex; align-items: center; gap: 6px; }
+  .tb-stat--like { cursor: pointer; }
+  .tb-ic { width: 16px; height: 16px; }
+  .tb-stat--like .tile-like-icon { transition: color .2s ease, fill .2s ease; }
+  .tb-stat--like:hover .tile-like-icon { color: #ef4d6b; }
+  :global(body.light-mode) .tile-like-count { color: rgb(107, 114, 128); }
+</style>

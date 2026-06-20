@@ -2,29 +2,18 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../../components/TopNav.astro";
 import SeriesCard from "../../components/SeriesCard.astro";
+import PostCard from "../../components/PostCard.astro";
 import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
 import { buildSeriesViews } from "../../utils/series";
-import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../../utils/blog";
+import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate, coverGradient } from "../../utils/blog";
 
 const rawPosts = await postService.getAll();
 const rawPlaylists = await playlistService.getAll();
 
 // Series view-models (stats + topics + year aggregated from the post list).
 const playlists = buildSeriesViews(rawPlaylists, rawPosts);
-// Gradient cover fallback (shows behind the real image; visible if the image is missing/fails).
-const coverGradient = (tag: string) => {
-  const map: Record<string, [string, string]> = {
-    Flutter: ['#2a6fdb', '#5b8def'], Dart: ['#0a8f86', '#1bbba8'], 'Claude Code': ['#d2693f', '#e89a6b'],
-    'Firebase Test Lab': ['#df942b', '#f3c45e'], 'Share Links': ['#3b82c4', '#62a8e0'],
-    'State Management': ['#6d4bd8', '#9b7cf0'], 'Google Map': ['#2e9e5b', '#5bc47f'],
-    'Project Structure': ['#5147c9', '#867cf0'], 'Router Generator': ['#7b54d6', '#a98ef0'],
-    'Offline First': ['#1f8a8a', '#37bcae'], 'Dependency Injection': ['#8a4fd0', '#b07ce8'],
-    AI: ['#d2693f', '#e89a6b'], Go: ['#0a8f86', '#1bbba8'],
-  };
-  const [a, b] = map[tag] ?? ['#5147c9', '#867cf0'];
-  return `radial-gradient(circle at 78% 20%, rgba(255,255,255,.22), transparent 46%), linear-gradient(135deg, ${a}, ${b})`;
-};
+// coverGradient lives in utils/blog and is shared with <PostCard>.
 
 const allPosts = rawPosts
   .filter(p => !p.topics?.some(t => t.toLowerCase().startsWith('art')))
@@ -146,36 +135,19 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
       <div id="posts-grid" class="tb-grid">
         {gridPosts.map((p) => (
           <div class="post-item" data-id={p.id} data-topics={JSON.stringify(p.topics)} data-search={p.search} style="display:none">
-            <a href={`/blog/${p.slug}/`} class="tb-card-link">
-              <article class="tb-card">
-                <div class="tb-card-cover" style={`background:${p.cover}`}>
-                  {p.img
-                    ? <img src={p.img} alt={p.title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
-                    : <span class="tb-cover-word tb-cover-word--sm">{p.coverWord}</span>}
-                  <span class="tb-badge">Blog</span>
-                </div>
-                <div class="tb-card-body">
-                  <div class="tb-cat tb-cat--clamp">{p.catLine}</div>
-                  <h3 class="tb-card-title">{p.title}</h3>
-                  {p.subtitle && <p class="tb-excerpt">{p.subtitle}</p>}
-                  <div class="tb-spacer"></div>
-                  <div class="tb-meta tb-meta--sm">{p.date} &nbsp;•&nbsp; {p.read} read</div>
-                  <div class="tb-card-foot">
-                    <span class="tb-read tb-read--sm">Read <span class="tb-arrow">→</span></span>
-                    <div class="tb-stats tb-stats--sm">
-                      <span class="tile-view-area tb-stat" data-id={String(p.id)}>
-                        <svg class="tb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        <span class="tile-view-count">{p.views}</span>
-                      </span>
-                      <span class="tile-like-area tb-stat tb-stat--like" data-id={String(p.id)}>
-                        <svg class="tile-like-icon tb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        <span class="tile-like-count">{p.likes}</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </a>
+            <PostCard
+              href={`/blog/${p.slug}/`}
+              title={p.title}
+              subtitle={p.subtitle}
+              tags={p.tags}
+              date={p.date}
+              read={p.read}
+              img={p.img}
+              id={p.id}
+              views={p.views}
+              likes={p.likes}
+              interactive
+            />
           </div>
         ))}
       </div>
@@ -313,15 +285,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
 
   /* Grid */
   .tb-grid { margin-top: 48px; display: grid; grid-template-columns: repeat(auto-fill, minmax(322px, 1fr)); gap: 26px; }
-  .tb-card-link { display: block; text-decoration: none; height: 100%; }
-  .tb-card { display: flex; flex-direction: column; height: 100%; background: var(--card-bg); border: 1px solid var(--card-bd); border-radius: 18px; overflow: hidden; box-shadow: var(--card-shadow); transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; opacity: 0; transform: translateY(24px); }
-  .tb-card.card-visible { animation: fadeSlideUp 0.55s cubic-bezier(0.16,1,0.3,1) both; }
-  .tb-card:hover { transform: translateY(-6px); box-shadow: var(--card-shadow-hover); border-color: color-mix(in srgb, var(--tb-accent) 45%, var(--card-bd)); }
-  .tb-card-cover { position: relative; height: 194px; overflow: hidden; }
-  .tb-cover-word--sm { font-size: 56px; }
-  .tb-card-body { padding: 20px 20px 16px; display: flex; flex-direction: column; flex: 1; }
-  .tb-card-title { font-weight: 700; font-size: 20.5px; line-height: 1.18; letter-spacing: -.01em; color: var(--ink); margin: 12px 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .tb-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  /* Grid card itself (cover/body/title/foot + shared bits) lives in PostCard.astro */
   /* Phone screens: keep topic filtering but collapse the chips into a single
      horizontal-scroll row instead of wrapping to fill the whole viewport */
   @media (max-width: 768px) {
