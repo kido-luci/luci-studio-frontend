@@ -27,11 +27,11 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
   <!-- Content -->
   <div class="px-2 flex flex-col flex-1">
     <div class="flex items-start justify-between mb-4">
-      <h3 class="text-4xl font-black tracking-tighter text-white drop-shadow-sm group-hover:text-shimmer transition-all duration-500 leading-none flex items-center gap-2">
+      <h3 class="text-4xl font-black tracking-tighter drop-shadow-sm group-hover:text-shimmer transition-all duration-500 leading-none flex items-center gap-2">
         {logo && <img src={logo} alt={title} loading="lazy" class="w-14 h-14 rounded-xl object-contain bg-white/5 p-1.5 border border-white/10 shadow-2xl shrink-0 group-hover:scale-110 group-hover:border-white/20 transition-all duration-500" />}
         <span>{title}<span class="text-violet-500">.</span></span>
       </h3>
-      <div class="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center text-white/20 group-hover:text-white group-hover:border-violet-500/40 group-hover:bg-violet-500/5 transition-all duration-500 shrink-0">
+      <div class="pc-arrow w-12 h-12 rounded-full border border-white/5 flex items-center justify-center text-white/20 group-hover:text-white group-hover:border-violet-500/40 group-hover:bg-violet-500/5 transition-all duration-500 shrink-0">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 7l-10 10M17 7H7M17 7v10"/></svg>
       </div>
     </div>
@@ -133,5 +133,20 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
     border-color: rgba(139, 92, 246, 0.45) !important;
     box-shadow: 0 20px 60px rgba(139, 92, 246, 0.16),
                 0 0 0 1px rgba(139, 92, 246, 0.12);
+  }
+
+  /* Light mode — match the canonical PostCard light surface.
+     Title color is handled by the global `h3 { color: var(--text-primary) }`
+     rule once `text-white` is removed, so it adapts to both themes. */
+  :global(body.light-mode) div[data-project-card] {
+    background: #ffffff;
+    border-color: var(--border-color);
+  }
+  :global(body.light-mode) div[data-project-card] .pc-arrow {
+    color: rgba(17, 24, 39, 0.3);
+    border-color: var(--border-color);
+  }
+  :global(body.light-mode) div[data-project-card]:hover .pc-arrow {
+    color: #8b5cf6;
   }
 </style>
