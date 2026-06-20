@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import PostCard from "../../components/PostCard.astro";
 import { postService } from "../../services/posts";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate, formatMarkdown } from "../../utils/blog";
 import { COOKIE_BANNER_ENABLED } from "../../config/features";
@@ -67,7 +68,10 @@ const relatedPosts = (related ?? []).map(p => ({
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   date: formatDate(p.created_at),
   read: p.word_count ? calculateReadTimeFromWordCount(p.word_count) : calculateReadTime(p.content || ''),
-  img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
+  // empty cover → PostCard renders the gradient + tag-word fallback (same as /blog)
+  img: p.cover_image_url || '',
+  views: p.views ?? 0,
+  likes: p.likes ?? 0,
 }));
 
 // SEO
@@ -349,21 +353,18 @@ const structuredData = [articleSchema, breadcrumbSchema];
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {relatedPosts.map(p => (
-              <a href={p.href} class="more-card group flex flex-col h-full p-4 border-2 border-violet-500/[0.22] bg-white/[0.02] transition-all duration-500 no-underline">
-                <div class="more-card-img aspect-video overflow-hidden mb-4 -mx-1 -mt-1 border border-violet-500/[0.15] group-hover:border-violet-500/40 transition-all duration-500">
-                  <img src={p.img} alt={p.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.style.opacity='0'" />
-                </div>
-                <div class="flex items-center gap-2 mb-3 flex-wrap">
-                  <span class="text-[10px] font-black text-violet-400 uppercase tracking-widest">{p.tags[0]}</span>
-                  <span class="w-1 h-1 rounded-full" style="background:var(--text-tertiary);"></span>
-                  <span class="text-[10px]" style="color:var(--text-tertiary);">{p.date}</span>
-                  <span class="w-1 h-1 rounded-full" style="background:var(--text-tertiary);"></span>
-                  <span class="text-[10px]" style="color:var(--text-tertiary);">{p.read} read</span>
-                </div>
-                <h3 class="text-base font-bold leading-snug line-clamp-2 group-hover:text-violet-400 transition-colors duration-300" style="color:var(--text-primary);">{p.title}</h3>
-                {p.subtitle && <p class="text-sm mt-2 leading-relaxed line-clamp-2" style="color:var(--text-tertiary);">{p.subtitle}</p>}
-                <span class="mt-auto pt-4 text-[10px] font-black uppercase tracking-widest text-violet-400">Read →</span>
-              </a>
+              <PostCard
+                href={p.href}
+                title={p.title}
+                subtitle={p.subtitle}
+                tags={p.tags}
+                date={p.date}
+                read={p.read}
+                img={p.img}
+                views={p.views}
+                likes={p.likes}
+                compact
+              />
             ))}
           </div>
         </section>
@@ -2397,37 +2398,9 @@ const structuredData = [articleSchema, breadcrumbSchema];
     --google-btn-border: rgba(0, 0, 0, 0.15);
   }
 
-  /* ── More Posts cards ── */
-  .more-card {
-    background: rgba(255, 255, 255, 0.02);
-  }
-  .more-card:hover {
-    border-color: rgba(139, 92, 246, 0.75) !important;
-    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25),
-                0 12px 48px rgba(139, 92, 246, 0.18);
-    transform: translateY(-2px);
-  }
-  .more-card-img {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
-  }
-
-  body.light-mode .more-card {
-    background-color: rgba(255, 255, 255, 0.85) !important;
-    border-color: rgba(0, 0, 0, 0.12) !important;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-  }
-  body.light-mode .more-card:hover {
-    border-color: rgba(139, 92, 246, 0.45) !important;
-    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.12);
-  }
-  body.light-mode .more-card-img {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
-  }
+  /* ── More Posts section (cards render via <PostCard>) ── */
   body.light-mode .more-posts {
     border-top-color: rgba(0, 0, 0, 0.08) !important;
-  }
-  main.bg-black .more-card h3 {
-    color: white;
   }
 
 </style>
