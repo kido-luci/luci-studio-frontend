@@ -17,12 +17,13 @@ interface Props {
   likes?: number;
   badge?: string;          // cover badge label; pass "" to hide
   interactive?: boolean;   // emit tile-* data-id so per-page JS can wire likes/refresh
+  compact?: boolean;       // shorter cover + tighter body (e.g. secondary "More Posts" grid)
 }
 
 const {
   href, title, subtitle = "", tags, date, read,
   img = "", id, views = 0, likes = 0,
-  badge = "Blog", interactive = false,
+  badge = "Blog", interactive = false, compact = false,
 } = Astro.props;
 
 const safeTags = (tags && tags.length > 0) ? tags : ["Engineering"];
@@ -33,7 +34,7 @@ const statId = interactive && id != null ? String(id) : undefined;
 ---
 
 <a href={href} class="tb-card-link">
-  <article class="tb-card">
+  <article class:list={["tb-card", { "tb-card--compact": compact }]}>
     <div class="tb-card-cover" style={!img ? `background:${cover}` : undefined}>
       {img
         ? <img src={img} alt={title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
@@ -95,6 +96,13 @@ const statId = interactive && id != null ? String(id) : undefined;
   .tb-card-body { padding: 20px 20px 16px; display: flex; flex-direction: column; flex: 1; }
   .tb-card-title { font-weight: 700; font-size: 20.5px; line-height: 1.18; letter-spacing: -.01em; color: var(--ink); margin: 12px 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .tb-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+  /* Compact variant — shorter cover + tighter body for secondary grids (e.g. "More Posts") */
+  .tb-card--compact .tb-card-cover { height: 156px; }
+  .tb-card--compact .tb-card-body { padding: 16px 18px 14px; }
+  .tb-card--compact .tb-card-title { font-size: 18.5px; margin-top: 10px; }
+  .tb-card--compact .tb-excerpt { margin-top: 8px; }
+  .tb-card--compact .tb-meta--sm { margin-top: 12px; }
 
   .tb-badge { position: absolute; top: 14px; left: 14px; padding: 5px 11px; border-radius: 999px; background: var(--badge-bg); backdrop-filter: blur(6px); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--badge-ink); }
   .tb-cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
