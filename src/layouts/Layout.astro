@@ -938,10 +938,13 @@ const canonicalURL = canonical ?? SITE_URL;
 						// Disable the CSS transition so it doesn't fight GSAP frame-by-frame
 						el.style.transition = 'none';
 					}
-					gsap.set(groups.default, { opacity: 0, y: 40 });
-					gsap.set(groups.left,    { opacity: 0, x: -40 });
-					gsap.set(groups.right,   { opacity: 0, x: 40 });
-					gsap.set(groups.scale,   { opacity: 0, scale: 0.92 });
+					// Guard each set: a page may have no elements for a given variant, and
+					// gsap.set([]) logs a "GSAP target not found" warning. Mirrors the
+					// length guards on the ScrollTrigger.batch calls below.
+					if (groups.default.length) gsap.set(groups.default, { opacity: 0, y: 40 });
+					if (groups.left.length)    gsap.set(groups.left,    { opacity: 0, x: -40 });
+					if (groups.right.length)   gsap.set(groups.right,   { opacity: 0, x: 40 });
+					if (groups.scale.length)   gsap.set(groups.scale,   { opacity: 0, scale: 0.92 });
 
 					const batchTo = (toVars: any) => ({
 						start: 'top 92%',
@@ -968,6 +971,7 @@ const canonicalURL = canonical ?? SITE_URL;
 				// rises as the patch overlay clears (otherwise it animates underneath).
 				document.querySelectorAll<HTMLElement>('[data-word-reveal]').forEach(host => {
 					const inners = host.querySelectorAll<HTMLElement>('.reveal-word > span');
+					if (!inners.length) return;
 					inners.forEach(s => { s.style.transition = 'none'; });
 					gsap.set(inners, { y: -60, opacity: 0 });
 					gsap.to(inners, {
