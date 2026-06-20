@@ -95,8 +95,8 @@ const homepageSchema = {
          can't discover it until the stylesheet parses (~600ms late on mobile). Preloading
          starts the fetch at HTML parse with high priority. Variants match the .hero-bg-img
          portrait/landscape media rules so only the needed one is fetched. -->
-    <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/5faf8313-a7e4-4f69-8cd9-e74b4bdaf846.jpg" media="(orientation: portrait)" />
-    <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/f1e986e9-5a6f-40b5-80d9-f69a8b49a1f7.jpg" media="(orientation: landscape)" />
+    <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-portrait.webp" media="(orientation: portrait)" />
+    <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-landscape.webp" media="(orientation: landscape)" />
   </Fragment>
 
   <TopNav active="home" ctaLabel="Let's Talk" ctaHref="#contact" />
@@ -1146,11 +1146,11 @@ body.light-mode .blog-img-container {
 }
 
 .hero-bg-img {
-  background-image: url('https://media.luci-studio.com/5faf8313-a7e4-4f69-8cd9-e74b4bdaf846.jpg');
+  background-image: url('https://media.luci-studio.com/hero/luci-hero-portrait.webp');
 }
 @media (orientation: landscape) {
   .hero-bg-img {
-    background-image: url('https://media.luci-studio.com/f1e986e9-5a6f-40b5-80d9-f69a8b49a1f7.jpg');
+    background-image: url('https://media.luci-studio.com/hero/luci-hero-landscape.webp');
   }
 }
 
