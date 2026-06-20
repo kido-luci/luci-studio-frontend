@@ -186,8 +186,20 @@ const { id, y, role, co, loc, desc, details, tech, links, index, img, logo } = A
                 0 0 0 1px rgba(236, 72, 153, 0.1);
   }
 
-  /* ── Light mode ── */
+  /* ── Light mode ──
+     The dark surface utilities (bg-[#151515]/60 and the expanded
+     group-[.active]:bg-[#1a1a1a]/70) are non-!important, so an !important
+     background here wins in both collapsed and expanded states without
+     needing to know how `.active` is toggled. */
   :global(body.light-mode) .tl-card {
-    border-color: #d0d0d0 !important;
+    background: #ffffff !important;
+    border-color: var(--border-color) !important;
+  }
+  /* Stack chips: white/5 fill + gray-300 text are invisible/low-contrast on
+     a light card — give them a readable light treatment (pink accent stays). */
+  :global(body.light-mode) .tl-card .tag-label {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
   }
 </style>
