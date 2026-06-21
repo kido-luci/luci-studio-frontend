@@ -68,6 +68,7 @@ const apps = appProjects.map((p: any, i: number) => {
     monogram: monogram(p.title),
     bar: BARS[i % BARS.length],
     logo: p.logo_url || p.cover_image_url || undefined,
+    image: p.cover_image_url || undefined,
     desc: p.description || "",
     tags: Array.isArray(p.tech) ? p.tech : [],
     stats: [],

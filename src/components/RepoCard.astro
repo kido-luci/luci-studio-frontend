@@ -16,6 +16,7 @@ interface Props {
   accent?: string;
   logo?: string;
   preview?: string;
+  image?: string;
   desc?: string;
   tags?: string[];
   stats?: Stat[];
@@ -31,24 +32,32 @@ const {
   accent = '#6c4cf1',
   logo,
   preview,
+  image,
   desc = '',
   tags = [],
   stats = [],
   host = 'github.com',
 } = Astro.props;
+
+// A banner image at the top — the GitHub OG preview (source repos) or an
+// uploaded cover (apps). When present, the card leads with the image and drops
+// the monogram tile / stats; the heading + description + tags sit below it.
+const bannerSrc = preview || image;
+const hasBanner = !!bannerSrc;
+const heading = title ?? name;
 ---
 
 <a href={url || '#'} target="_blank" rel="noopener noreferrer" class="repo-card">
-  {!preview && <div class="bar" style={`background:linear-gradient(90deg, ${bar} 0%, ${accent} 100%)`}></div>}
+  {!hasBanner && <div class="bar" style={`background:linear-gradient(90deg, ${bar} 0%, ${accent} 100%)`}></div>}
 
-  {preview && (
+  {hasBanner && (
     <div class="preview">
-      <img src={preview} alt={`${name} preview`} loading="lazy" />
+      <img src={bannerSrc} alt={`${heading} preview`} loading="lazy" />
     </div>
   )}
 
   <div class="body">
-    {!preview && (
+    {!hasBanner && (
       <div class="head">
         <div class="tile">
           {logo ? <img src={logo} alt={name} loading="lazy" /> : <span>{monogram}</span>}
@@ -60,11 +69,9 @@ const {
       </div>
     )}
 
-    {!preview && desc && <p class="desc">{desc}</p>}
+    {hasBanner && heading && <h3 class="preview-title">{heading}</h3>}
 
-    {preview && title && <h3 class="preview-title">{title}</h3>}
-
-    {preview && desc && <p class="desc">{desc}</p>}
+    {desc && <p class="desc">{desc}</p>}
 
     {tags.length > 0 && (
       <div class="tags">
@@ -72,7 +79,7 @@ const {
       </div>
     )}
 
-    {!preview && stats.length > 0 && (
+    {!hasBanner && stats.length > 0 && (
       <>
         <div class="divider"></div>
         <div class="stats">
