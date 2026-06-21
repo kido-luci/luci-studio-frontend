@@ -1,0 +1,147 @@
+---
+// Editorial repo/app card for the redesigned /lab (light theme).
+// Faithful to the Public Source.dc design: accent bar, monogram tile, owner/name,
+// description, tag chips, real GitHub stats row, and a host footer.
+export interface Stat {
+  n: string | number;
+  label: string;
+}
+interface Props {
+  url: string;
+  name: string;
+  owner?: string;
+  monogram: string;
+  bar?: string;
+  accent?: string;
+  logo?: string;
+  desc?: string;
+  tags?: string[];
+  stats?: Stat[];
+  host?: string;
+}
+const {
+  url,
+  name,
+  owner,
+  monogram,
+  bar = '#16a394',
+  accent = '#6c4cf1',
+  logo,
+  desc = '',
+  tags = [],
+  stats = [],
+  host = 'github.com',
+} = Astro.props;
+---
+
+<a href={url || '#'} target="_blank" rel="noopener noreferrer" class="repo-card">
+  <div class="bar" style={`background:linear-gradient(90deg, ${bar} 0%, ${accent} 100%)`}></div>
+
+  <div class="body">
+    <div class="head">
+      <div class="tile">
+        {logo ? <img src={logo} alt={name} loading="lazy" /> : <span>{monogram}</span>}
+      </div>
+      <div class="meta">
+        {owner && <div class="owner">{owner} /</div>}
+        <div class="name">{name}</div>
+      </div>
+    </div>
+
+    {desc && <p class="desc">{desc}</p>}
+
+    {tags.length > 0 && (
+      <div class="tags">
+        {tags.map((t) => <span class="tag">{t}</span>)}
+      </div>
+    )}
+
+    {stats.length > 0 && (
+      <>
+        <div class="divider"></div>
+        <div class="stats">
+          {stats.map((s) => (
+            <div class="stat">
+              <div class="n">{s.n}</div>
+              <div class="label">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+  </div>
+
+  <div class="footer">
+    <span class="host"><span class="dot"></span>{host}</span>
+    <span class="arrow">↗</span>
+  </div>
+</a>
+
+<style>
+  .repo-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    background: #ffffff;
+    border: 1px solid rgba(19, 21, 29, 0.08);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(19, 21, 29, 0.04);
+    transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.3, 1),
+                box-shadow 0.25s, border-color 0.25s;
+  }
+  .repo-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 50px -18px rgba(19, 21, 29, 0.28);
+    border-color: rgba(19, 21, 29, 0.16);
+  }
+
+  .bar { height: 4px; }
+
+  .body { padding: 30px 30px 24px; flex: 1; display: flex; flex-direction: column; }
+
+  .head { display: flex; align-items: flex-start; gap: 18px; }
+  .tile {
+    flex: none; width: 60px; height: 60px; border-radius: 15px;
+    background: radial-gradient(120% 120% at 30% 20%, #2a2d3a 0%, #0c0d12 70%);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    font-family: 'Bodoni Moda', serif; font-weight: 700; font-size: 22px; color: #e9e6df;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  .tile img { width: 100%; height: 100%; object-fit: cover; }
+  .meta { min-width: 0; padding-top: 2px; }
+  .owner { font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: #9a9ea8; }
+  .name {
+    font-size: 23px; font-weight: 800; line-height: 1.15; letter-spacing: -0.01em;
+    color: #13151d; margin-top: 3px; word-break: break-word;
+  }
+
+  .desc { margin: 22px 0 0; font-size: 15.5px; line-height: 1.6; color: #5c606b; flex: 1; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .tag {
+    font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #41454f; padding: 5px 11px;
+    border: 1px solid rgba(19, 21, 29, 0.1); border-radius: 999px; background: #f7f5f0;
+  }
+
+  .divider { height: 1px; background: rgba(19, 21, 29, 0.08); margin: 26px 0 22px; }
+
+  .stats { display: flex; gap: 30px; }
+  .stat .n { font-family: 'Bodoni Moda', serif; font-weight: 700; font-size: 26px; line-height: 1; color: #13151d; }
+  .stat .label {
+    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #9a9ea8; margin-top: 6px;
+  }
+
+  .footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 30px; border-top: 1px solid rgba(19, 21, 29, 0.07); background: #fbfaf7;
+    font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: #13151d;
+  }
+  .host { display: flex; align-items: center; gap: 9px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #13151d; }
+  .arrow { font-size: 15px; }
+</style>

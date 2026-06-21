@@ -1,104 +1,144 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import TopNav from "../components/TopNav.astro";
-import ProjectCard from "../components/ProjectCard.astro";
-import LinkCard from "../components/LinkCard.astro";
+import LabLayout from "../layouts/LabLayout.astro";
+import RepoCard from "../components/RepoCard.astro";
 import { projectService } from "../services/projects";
+import { getRepoStats, parseGitHub } from "../services/github";
+
+const ACCENT = "#6c4cf1";
+const BARS = ["#16a394", "#3aa0ff", "#ec5a9b", "#6c4cf1"];
+
+// Short lowercase monogram from a repo/app name (initials of word-parts, max 3).
+function monogram(name: string): string {
+  const parts = name.split(/[-_\s]+/).filter(Boolean);
+  let initials = parts.map((p) => p[0]).join("");
+  if (initials.length > 3) initials = initials.slice(0, 2) + initials.slice(-1);
+  return (initials || name.slice(0, 2)).toLowerCase();
+}
+
+const num = (n: number | null) => (n === null ? null : n.toLocaleString("en-US"));
 
 const projects = await projectService.getAll();
+const sourceProjects = projects.filter((p: any) => p.type === "source");
+const appProjects = projects.filter((p: any) => p.type === "app");
 
-const toCard = (p: any) => ({
-  title: p.title,
-  year: p.year || '',
-  desc: p.description || '',
-  links: Array.isArray(p.links) ? p.links : [],
-  img: p.cover_image_url || '',
-  logo: p.logo_url || undefined,
-  tech: Array.isArray(p.tech) ? p.tech : [],
+// Build source cards with live GitHub stats (deduped + fail-safe in the service).
+const sources = await Promise.all(
+  sourceProjects.map(async (p: any, i: number) => {
+    const link = (p.links || []).find((l: any) => /github\.com/i.test(l.url)) ?? (p.links || [])[0];
+    const url = link?.url ?? "";
+    const gh = parseGitHub(url);
+    let host = "github.com";
+    try { if (url) host = new URL(url).hostname.replace(/^www\./, ""); } catch {}
+
+    const stats: { n: string; label: string }[] = [];
+    if (gh) {
+      const s = await getRepoStats(gh.owner, gh.repo);
+      if (s.contributors !== null) stats.push({ n: num(s.contributors)!, label: s.contributors === 1 ? "Contributor" : "Contributors" });
+      if (s.issues !== null) stats.push({ n: num(s.issues)!, label: s.issues === 1 ? "Issue" : "Issues" });
+      if (s.stars !== null) stats.push({ n: num(s.stars)!, label: s.stars === 1 ? "Star" : "Stars" });
+      if (s.forks !== null) stats.push({ n: num(s.forks)!, label: s.forks === 1 ? "Fork" : "Forks" });
+    }
+
+    return {
+      url,
+      owner: gh?.owner,
+      name: gh ? gh.repo : p.title,
+      monogram: monogram(gh ? gh.repo : p.title),
+      bar: BARS[i % BARS.length],
+      logo: p.logo_url || undefined,
+      desc: p.description || "",
+      tags: Array.isArray(p.tech) ? p.tech : [],
+      stats,
+      host,
+    };
+  }),
+);
+
+const apps = appProjects.map((p: any, i: number) => {
+  const link = (p.links || [])[0];
+  const url = link?.url ?? "";
+  let host = "";
+  try { if (url) host = new URL(url).hostname.replace(/^www\./, ""); } catch {}
+  return {
+    url,
+    name: p.title,
+    monogram: monogram(p.title),
+    bar: BARS[i % BARS.length],
+    logo: p.logo_url || p.cover_image_url || undefined,
+    desc: p.description || "",
+    tags: Array.isArray(p.tech) ? p.tech : [],
+    stats: [],
+    host: host || "app",
+  };
 });
 
-const sources = projects.filter((p: any) => p.type === 'source').map(toCard);
-const apps = projects.filter((p: any) => p.type === 'app').map(toCard);
-const isEmpty = sources.length === 0 && apps.length === 0;
+const repoCount = String(sources.length).padStart(2, "0");
 ---
 
-<Layout
-  title="Lab · Luci Studio"
-  description="Open-source repositories and released apps — projects worth a look."
->
-  <TopNav active="lab" />
+<LabLayout>
+  <div style={`--accent:${ACCENT}; position:relative; min-height:100vh; width:100%; background:radial-gradient(120% 80% at 80% -10%, #efeae0 0%, #f4f2ec 60%); overflow:hidden; padding:0 0 100px;`}>
 
-  <main class="pt-20">
-    <!-- HEADER -->
-    <section class="py-24 px-4 md:px-6">
-      <div class="max-w-7xl mx-auto">
-        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Code &amp; Apps</span>
-        <h1 data-ml9 class="text-6xl md:text-8xl font-black tracking-normal">LAB<span class="text-violet-500">.</span></h1>
-        <p data-reveal class="text-gray-400 text-lg leading-relaxed mt-6 max-w-2xl">
-          Public source repositories and released apps — mine and others worth a look.
-        </p>
+    <!-- decorative confetti -->
+    <div style="position:absolute; inset:0; pointer-events:none; z-index:0;">
+      <span style="position:absolute; left:24%; top:9%; width:7px; height:7px; border-radius:50%; background:var(--accent); --r:0deg; animation:lab-floaty 7s ease-in-out infinite;"></span>
+      <span style="position:absolute; left:46%; top:6%; width:22px; height:3px; border-radius:3px; background:#ec5a9b; transform:rotate(-32deg); --r:-32deg; animation:lab-floaty 9s ease-in-out .4s infinite;"></span>
+      <span style="position:absolute; left:62%; top:13%; width:9px; height:9px; border:2px solid #3aa0ff; border-radius:50%;"></span>
+      <span style="position:absolute; left:74%; top:7%; width:6px; height:6px; border-radius:50%; background:#16a394;"></span>
+      <span style="position:absolute; left:84%; top:20%; width:20px; height:3px; border-radius:3px; background:#3aa0ff; transform:rotate(40deg); --r:40deg; animation:lab-floaty 8s ease-in-out 1s infinite;"></span>
+      <span style="position:absolute; left:12%; top:30%; width:8px; height:8px; border:2px solid var(--accent); border-radius:50%;"></span>
+      <span style="position:absolute; left:33%; top:38%; width:18px; height:3px; border-radius:3px; background:#ec5a9b; transform:rotate(58deg); --r:58deg; animation:lab-floaty 10s ease-in-out .2s infinite;"></span>
+      <span style="position:absolute; left:90%; top:34%; width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
+      <span style="position:absolute; left:6%; top:64%; width:7px; height:7px; border:2px solid #ec5a9b; border-radius:50%;"></span>
+      <span style="position:absolute; left:95%; top:58%; width:18px; height:3px; border-radius:3px; background:#16a394; transform:rotate(-24deg); --r:-24deg; animation:lab-floaty 9s ease-in-out .6s infinite;"></span>
+    </div>
+
+    <div style="position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 40px;">
+
+      <!-- top bar -->
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:34px 0 0;">
+        <a href="/" style="display:flex; align-items:baseline; gap:2px; text-decoration:none; font-family:'Bodoni Moda',serif; font-weight:800; font-size:30px; letter-spacing:.01em; color:#13151d;">
+          <span>LAB</span><span style="color:var(--accent);">.</span>
+        </a>
+        <div style="display:flex; align-items:center; gap:28px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#6b6f7a;">
+          <a href="#public-source" style="text-decoration:none; color:#13151d;">Public Source</a>
+          <a href="#released-apps" style="text-decoration:none; color:#6b6f7a;">Released Apps</a>
+          <span style="width:34px; height:34px; border-radius:50%; border:1.5px solid #d6d2c7; display:flex; align-items:center; justify-content:center;">
+            <span style="width:5px; height:5px; border-radius:50%; background:#13151d; animation:lab-spin 6s linear infinite;"></span>
+          </span>
+        </div>
       </div>
-    </section>
 
-    {sources.length > 0 && (
-      <section class="py-12 px-4 md:px-6">
-        <div class="max-w-7xl mx-auto">
-          <div data-reveal class="mb-12">
-            <h2 data-ml9 class="text-4xl md:text-6xl font-black tracking-normal">PUBLIC SOURCE<span class="text-violet-500">.</span></h2>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {sources.map((p, i) => (
-              <LinkCard {...p} index={i} />
+      <!-- hero -->
+      <div id="public-source" style="padding:72px 0 18px; scroll-margin-top:24px;">
+        <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {repoCount} repositories</div>
+        <h1 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(56px,9vw,128px); line-height:.92; letter-spacing:-.01em; color:#13151d;">PUBLIC<br>SOURCE<span style="color:var(--accent);">.</span></h1>
+        <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:#5c606b;">Public source repositories and released apps — mine, and a few others worth a look.</p>
+      </div>
+
+      <!-- repo grid -->
+      {sources.length > 0 ? (
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:28px; margin-top:64px;">
+          {sources.map((r) => (
+            <RepoCard {...r} accent={ACCENT} />
+          ))}
+        </div>
+      ) : (
+        <p style="margin-top:64px; font-family:'Space Mono',monospace; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:#9a9ea8;">No repositories yet.</p>
+      )}
+
+      <!-- released apps -->
+      {apps.length > 0 && (
+        <div id="released-apps" style="padding:96px 0 18px; scroll-margin-top:24px;">
+          <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {String(apps.length).padStart(2, "0")} apps</div>
+          <h2 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(44px,7vw,96px); line-height:.92; letter-spacing:-.01em; color:#13151d;">RELEASED<br>APPS<span style="color:var(--accent);">.</span></h2>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:28px; margin-top:56px;">
+            {apps.map((a) => (
+              <RepoCard {...a} accent={ACCENT} />
             ))}
           </div>
         </div>
-      </section>
-    )}
+      )}
 
-    {apps.length > 0 && (
-      <section class="py-12 px-4 md:px-6">
-        <div class="max-w-7xl mx-auto">
-          <div data-reveal class="mb-12">
-            <h2 data-ml9 class="text-4xl md:text-6xl font-black tracking-normal">APPS<span class="text-violet-500">.</span></h2>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {apps.map((p, i) => (
-              <ProjectCard {...p} index={i} />
-            ))}
-          </div>
-        </div>
-      </section>
-    )}
-
-    {isEmpty && (
-      <section class="py-24 px-4 md:px-6">
-        <div class="max-w-7xl mx-auto text-center text-gray-500">
-          <p>Nothing here yet — check back soon.</p>
-        </div>
-      </section>
-    )}
-
-    <div class="py-16"></div>
-  </main>
-</Layout>
-
-<script>
-  // Card scroll-triggered stagger reveal. ProjectCard's own CSS starts cards at
-  // opacity:0; this observer adds `.card-visible` to trigger the entrance. Copied
-  // from index.astro because that observer is page-local, not in Layout.
-  (function () {
-    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-project-card]'));
-    if (!cards.length) return;
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const el = entry.target as HTMLElement;
-        const idx = parseInt(el.dataset.projectCard ?? '0', 10);
-        el.style.animationDelay = `${(idx % 2) * 0.15}s`;
-        el.classList.add('card-visible');
-        obs.unobserve(el);
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
-    cards.forEach(c => obs.observe(c));
-  })();
-</script>
+    </div>
+  </div>
+</LabLayout>

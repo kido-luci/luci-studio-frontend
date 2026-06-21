@@ -1,0 +1,49 @@
+---
+// Standalone light/editorial layout for /lab — intentionally NOT the site's dark
+// shell (no TopNav, canvas, theme toggle). Loads the design's three families.
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = 'Lab · Luci Studio',
+  description = 'Public source repositories and released apps — mine, and a few others worth a look.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&family=Space+Mono:wght@400;700&display=swap"
+    />
+
+    <style is:global>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: #f4f2ec;
+        font-family: 'Hanken Grotesk', system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #13151d;
+      }
+      a { color: inherit; }
+      @keyframes lab-floaty {
+        0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+        50%      { transform: translateY(-14px) rotate(var(--r, 0deg)); }
+      }
+      @keyframes lab-spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
