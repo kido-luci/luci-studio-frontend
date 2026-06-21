@@ -187,7 +187,8 @@ const repoCount = String(sources.length).padStart(2, "0");
     color: var(--lab-text);
   }
 
-  html:not(.light-mode) .lab-root {
+  html:not(.light-mode) .lab-root,
+  .repo-card.is-dark {
     --lab-bg: radial-gradient(120% 80% at 80% -10%, #1b1e27 0%, #0e0f14 60%);
     --lab-text: #f1efe9;
     --lab-muted: #a5a9b4;

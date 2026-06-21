@@ -47,7 +47,7 @@ const hasBanner = !!bannerSrc;
 const heading = title ?? name;
 ---
 
-<a href={url || '#'} target="_blank" rel="noopener noreferrer" class="repo-card">
+<a href={url || '#'} target="_blank" rel="noopener noreferrer" class:list={['repo-card', { 'is-dark': !!preview }]}>
   {!hasBanner && <div class="bar" style={`background:linear-gradient(90deg, ${bar} 0%, ${accent} 100%)`}></div>}
 
   {hasBanner && (
