@@ -3,66 +3,13 @@ import Layout from "../layouts/Layout.astro";
 import TopNav from "../components/TopNav.astro";
 import RepoCard from "../components/RepoCard.astro";
 import { projectService } from "../services/projects";
-import { parseGitHub } from "../services/github";
+import { buildLabCards } from "../utils/labCards";
+import "../styles/lab-cards.css";
 
 const ACCENT = "#6c4cf1";
-const BARS = ["#16a394", "#3aa0ff", "#ec5a9b", "#6c4cf1"];
-
-// Short lowercase monogram from a repo/app name (initials of word-parts, max 3).
-function monogram(name: string): string {
-  const parts = name.split(/[-_\s]+/).filter(Boolean);
-  let initials = parts.map((p) => p[0]).join("");
-  if (initials.length > 3) initials = initials.slice(0, 2) + initials.slice(-1);
-  return (initials || name.slice(0, 2)).toLowerCase();
-}
 
 const projects = await projectService.getAll();
-const sourceProjects = projects.filter((p: any) => p.type === "source");
-const appProjects = projects.filter((p: any) => p.type === "app");
-
-// Build source cards. The GitHub social-preview (OG) image — derived from the
-// repo URL, no fetch — carries the stars/forks/etc., so we don't fetch stats.
-const sources = sourceProjects.map((p: any, i: number) => {
-  const link = (p.links || []).find((l: any) => /github\.com/i.test(l.url)) ?? (p.links || [])[0];
-  const url = link?.url ?? "";
-  const gh = parseGitHub(url);
-  let host = "github.com";
-  try { if (url) host = new URL(url).hostname.replace(/^www\./, ""); } catch {}
-
-  return {
-    url,
-    owner: gh?.owner,
-    name: gh ? gh.repo : p.title,
-    title: p.title,
-    monogram: monogram(gh ? gh.repo : p.title),
-    bar: BARS[i % BARS.length],
-    logo: p.logo_url || undefined,
-    preview: gh ? `https://opengraph.githubassets.com/lab/${gh.owner}/${gh.repo}` : undefined,
-    desc: p.description || "",
-    tags: Array.isArray(p.tech) ? p.tech : [],
-    host,
-  };
-});
-
-const apps = appProjects.map((p: any, i: number) => {
-  const link = (p.links || [])[0];
-  const url = link?.url ?? "";
-  let host = "";
-  try { if (url) host = new URL(url).hostname.replace(/^www\./, ""); } catch {}
-  return {
-    url,
-    name: p.title,
-    monogram: monogram(p.title),
-    bar: BARS[i % BARS.length],
-    logo: p.logo_url || p.cover_image_url || undefined,
-    image: p.cover_image_url || undefined,
-    desc: p.description || "",
-    tags: Array.isArray(p.tech) ? p.tech : [],
-    stats: [],
-    host: host || "app",
-  };
-});
-
+const { apps, sources } = buildLabCards(projects);
 const repoCount = String(sources.length).padStart(2, "0");
 ---
 
@@ -79,7 +26,7 @@ const repoCount = String(sources.length).padStart(2, "0");
 
   <TopNav active="lab" />
 
-  <div class="lab-root" style={`--accent:${ACCENT};`}>
+  <div class="lab-root lab-palette" style={`--accent:${ACCENT};`}>
 
     <!-- decorative confetti -->
     <div style="position:absolute; inset:0; pointer-events:none; z-index:0;">
@@ -135,35 +82,10 @@ const repoCount = String(sources.length).padStart(2, "0");
 
 <style is:global>
   /* /lab is an editorial page inside the site shell (keeps the standard TopNav).
-     Its palette is driven by --lab-* variables so it follows the site's theme
-     toggle: light defaults below, dark override keyed off <html> (set
-     synchronously by the theme init, so no flash). Its opaque surface covers
-     the shell background; keyframes live here because the confetti uses them. */
+     Its --lab-* palette + keyframes come from the shared lab-cards.css (imported
+     above, also used by the homepage LAB section). Only the page-level layout —
+     an opaque themed surface covering the shell background — lives here. */
   .lab-root {
-    --lab-bg: radial-gradient(120% 80% at 80% -10%, #efeae0 0%, #f4f2ec 60%);
-    --lab-text: #13151d;
-    --lab-muted: #5c606b;
-    --lab-card-bg: #ffffff;
-    --lab-card-border: rgba(19, 21, 29, 0.08);
-    --lab-card-shadow: 0 1px 2px rgba(19, 21, 29, 0.04);
-    --lab-card-shadow-hover: 0 22px 50px -18px rgba(19, 21, 29, 0.28);
-    --lab-card-border-hover: rgba(19, 21, 29, 0.16);
-    --lab-tile-grad: radial-gradient(120% 120% at 30% 20%, #2a2d3a 0%, #0c0d12 70%);
-    --lab-tile-text: #e9e6df;
-    --lab-owner: #9a9ea8;
-    --lab-name: #13151d;
-    --lab-desc: #5c606b;
-    --lab-tag-bg: #f7f5f0;
-    --lab-tag-border: rgba(19, 21, 29, 0.1);
-    --lab-tag-text: #41454f;
-    --lab-divider: rgba(19, 21, 29, 0.08);
-    --lab-stat-n: #13151d;
-    --lab-stat-label: #9a9ea8;
-    --lab-footer-bg: #fbfaf7;
-    --lab-footer-border: rgba(19, 21, 29, 0.07);
-    --lab-footer-text: #13151d;
-    --lab-dot: #13151d;
-
     position: relative;
     min-height: 100vh;
     width: 100%;
@@ -173,49 +95,4 @@ const repoCount = String(sources.length).padStart(2, "0");
     font-family: 'Hanken Grotesk', system-ui, sans-serif;
     color: var(--lab-text);
   }
-
-  html:not(.light-mode) .lab-root {
-    --lab-bg: radial-gradient(120% 80% at 80% -10%, #1b1e27 0%, #0e0f14 60%);
-    --lab-text: #f1efe9;
-    --lab-muted: #a5a9b4;
-    --lab-card-bg: #17191f;
-    --lab-card-border: rgba(255, 255, 255, 0.08);
-    --lab-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --lab-card-shadow-hover: 0 22px 50px -18px rgba(0, 0, 0, 0.7);
-    --lab-card-border-hover: rgba(255, 255, 255, 0.18);
-    --lab-tile-grad: radial-gradient(120% 120% at 30% 20%, #343a4d 0%, #181b24 70%);
-    --lab-tile-text: #ece9e1;
-    --lab-owner: #7f8390;
-    --lab-name: #f1efe9;
-    --lab-desc: #a5a9b4;
-    --lab-tag-bg: rgba(255, 255, 255, 0.04);
-    --lab-tag-border: rgba(255, 255, 255, 0.1);
-    --lab-tag-text: #c6cad2;
-    --lab-divider: rgba(255, 255, 255, 0.08);
-    --lab-stat-n: #f1efe9;
-    --lab-stat-label: #7f8390;
-    --lab-footer-bg: #121419;
-    --lab-footer-border: rgba(255, 255, 255, 0.07);
-    --lab-footer-text: #ece9e1;
-    --lab-dot: #ece9e1;
-  }
-
-  /* Git (Public Source) cards sit a shade darker than the rest in light mode,
-     so the dark GitHub OG banner doesn't clash with a bright-white surface.
-     Text stays dark/readable; in dark mode they just follow the dark palette. */
-  html.light-mode .repo-card.is-shaded {
-    --lab-card-bg: #faf8f3;
-    --lab-footer-bg: #f3efe6;
-    --lab-card-border: rgba(19, 21, 29, 0.08);
-    --lab-card-border-hover: rgba(19, 21, 29, 0.16);
-    --lab-tag-bg: #f3efe6;
-    --lab-tag-border: rgba(19, 21, 29, 0.1);
-    --lab-divider: rgba(19, 21, 29, 0.08);
-  }
-
-  @keyframes lab-floaty {
-    0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
-    50%      { transform: translateY(-14px) rotate(var(--r, 0deg)); }
-  }
-  @keyframes lab-spin { to { transform: rotate(360deg); } }
 </style>

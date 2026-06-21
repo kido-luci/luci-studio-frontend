@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import ProjectCard from "../components/ProjectCard.astro";
+import RepoCard from "../components/RepoCard.astro";
 import TopNav from "../components/TopNav.astro";
 import SeriesCard from "../components/SeriesCard.astro";
 import PostCard from "../components/PostCard.astro";
@@ -9,30 +9,22 @@ import { playlistService } from "../services/playlists";
 import { buildSeriesViews } from "../utils/series";
 import { galleryService } from "../services/gallery";
 import { projectService } from "../services/projects";
-import { parseGitHub } from "../services/github";
+import { buildLabCards } from "../utils/labCards";
 import { profileService } from "../services/profile";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../utils/blog";
 import { COOKIE_BANNER_ENABLED } from "../config/features";
+import "../styles/lab-cards.css";
+
+const LAB_ACCENT = "#6c4cf1";
 
 const profile = await profileService.getProfile();
 
-// Lab projects (open-source repos + released apps) drive the homepage showcase.
-// Source repos ship no cover image, so we fall back to their GitHub social-
-// preview (OG) image — the same banner used on /lab.
+// The homepage LAB section reuses the /lab editorial RepoCard, built from the
+// same `projects` entity via the shared buildLabCards mapping. Apps lead with
+// their cover; source repos with the GitHub social-preview (OG) banner.
 const labProjects = await projectService.getAll();
-const labCards = labProjects.map((p) => {
-  const ghLink = (p.links || []).find((l) => /github\.com/i.test(l.url)) ?? (p.links || [])[0];
-  const gh = p.type === 'source' && ghLink ? parseGitHub(ghLink.url) : null;
-  return {
-    title: p.title,
-    year: p.year || '',
-    desc: p.description || '',
-    links: p.links || [],
-    img: p.cover_image_url || (gh ? `https://opengraph.githubassets.com/home/${gh.owner}/${gh.repo}` : ''),
-    logo: p.logo_url || undefined,
-    tech: Array.isArray(p.tech) ? p.tech : [],
-  };
-});
+const { apps: labApps, sources: labSources } = buildLabCards(labProjects);
+const labCards = [...labApps, ...labSources];
 
 const [rawPosts, rawPlaylists] = await Promise.all([
   postService.getAll(),
@@ -107,6 +99,8 @@ const homepageSchema = {
          portrait/landscape media rules so only the needed one is fetched. -->
     <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-portrait.webp" media="(orientation: portrait)" />
     <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-landscape.webp" media="(orientation: landscape)" />
+    <!-- Editorial display fonts for the LAB section RepoCards (same as /lab; Space Mono already in Layout). -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap" />
   </Fragment>
 
   <TopNav active="home" ctaLabel="Let's Talk" ctaHref="#contact" />
@@ -276,9 +270,9 @@ const homepageSchema = {
             <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-normal">LAB<span class="text-violet-500">.</span></h2>
             <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {labCards.map((p, i) => (
-              <ProjectCard {...p} index={i} />
+          <div class="lab-palette grid grid-cols-1 md:grid-cols-2 gap-7" style="font-family:'Hanken Grotesk',system-ui,sans-serif;">
+            {labCards.map((c) => (
+              <RepoCard {...c} accent={LAB_ACCENT} />
             ))}
           </div>
           {labCards.length > 0 && (
