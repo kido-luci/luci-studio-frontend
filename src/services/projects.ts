@@ -32,7 +32,7 @@ export const projectService = {
                 const response = await fetch(`${BASE_URL}/projects`);
                 if (!response.ok) throw new Error(`GET /projects failed with ${response.status}`);
                 const data = await response.json();
-                return Array.isArray(data) ? data : (data || []);
+                return Array.isArray(data) ? data : [];
             } catch (error) {
                 console.error('Failed to fetch projects:', error);
                 getAllPromise = null;
