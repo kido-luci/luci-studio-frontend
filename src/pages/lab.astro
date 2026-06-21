@@ -47,6 +47,7 @@ const sources = await Promise.all(
       monogram: monogram(gh ? gh.repo : p.title),
       bar: BARS[i % BARS.length],
       logo: p.logo_url || undefined,
+      preview: gh ? `https://opengraph.githubassets.com/lab/${gh.owner}/${gh.repo}` : undefined,
       desc: p.description || "",
       tags: Array.isArray(p.tech) ? p.tech : [],
       stats,
