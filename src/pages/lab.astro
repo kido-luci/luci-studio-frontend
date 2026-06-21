@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import TopNav from "../components/TopNav.astro";
 import RepoCard from "../components/RepoCard.astro";
 import { projectService } from "../services/projects";
-import { getRepoStats, parseGitHub } from "../services/github";
+import { parseGitHub } from "../services/github";
 
 const ACCENT = "#6c4cf1";
 const BARS = ["#16a394", "#3aa0ff", "#ec5a9b", "#6c4cf1"];
@@ -16,46 +16,33 @@ function monogram(name: string): string {
   return (initials || name.slice(0, 2)).toLowerCase();
 }
 
-const num = (n: number | null) => (n === null ? null : n.toLocaleString("en-US"));
-
 const projects = await projectService.getAll();
 const sourceProjects = projects.filter((p: any) => p.type === "source");
 const appProjects = projects.filter((p: any) => p.type === "app");
 
-// Build source cards with live GitHub stats (deduped + fail-safe in the service).
-const sources = await Promise.all(
-  sourceProjects.map(async (p: any, i: number) => {
-    const link = (p.links || []).find((l: any) => /github\.com/i.test(l.url)) ?? (p.links || [])[0];
-    const url = link?.url ?? "";
-    const gh = parseGitHub(url);
-    let host = "github.com";
-    try { if (url) host = new URL(url).hostname.replace(/^www\./, ""); } catch {}
+// Build source cards. The GitHub social-preview (OG) image — derived from the
+// repo URL, no fetch — carries the stars/forks/etc., so we don't fetch stats.
+const sources = sourceProjects.map((p: any, i: number) => {
+  const link = (p.links || []).find((l: any) => /github\.com/i.test(l.url)) ?? (p.links || [])[0];
+  const url = link?.url ?? "";
+  const gh = parseGitHub(url);
+  let host = "github.com";
+  try { if (url) host = new URL(url).hostname.replace(/^www\./, ""); } catch {}
 
-    const stats: { n: string; label: string }[] = [];
-    if (gh) {
-      const s = await getRepoStats(gh.owner, gh.repo);
-      if (s.contributors !== null) stats.push({ n: num(s.contributors)!, label: s.contributors === 1 ? "Contributor" : "Contributors" });
-      if (s.issues !== null) stats.push({ n: num(s.issues)!, label: s.issues === 1 ? "Issue" : "Issues" });
-      if (s.stars !== null) stats.push({ n: num(s.stars)!, label: s.stars === 1 ? "Star" : "Stars" });
-      if (s.forks !== null) stats.push({ n: num(s.forks)!, label: s.forks === 1 ? "Fork" : "Forks" });
-    }
-
-    return {
-      url,
-      owner: gh?.owner,
-      name: gh ? gh.repo : p.title,
-      title: p.title,
-      monogram: monogram(gh ? gh.repo : p.title),
-      bar: BARS[i % BARS.length],
-      logo: p.logo_url || undefined,
-      preview: gh ? `https://opengraph.githubassets.com/lab/${gh.owner}/${gh.repo}` : undefined,
-      desc: p.description || "",
-      tags: Array.isArray(p.tech) ? p.tech : [],
-      stats,
-      host,
-    };
-  }),
-);
+  return {
+    url,
+    owner: gh?.owner,
+    name: gh ? gh.repo : p.title,
+    title: p.title,
+    monogram: monogram(gh ? gh.repo : p.title),
+    bar: BARS[i % BARS.length],
+    logo: p.logo_url || undefined,
+    preview: gh ? `https://opengraph.githubassets.com/lab/${gh.owner}/${gh.repo}` : undefined,
+    desc: p.description || "",
+    tags: Array.isArray(p.tech) ? p.tech : [],
+    host,
+  };
+});
 
 const apps = appProjects.map((p: any, i: number) => {
   const link = (p.links || [])[0];
