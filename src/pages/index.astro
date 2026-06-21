@@ -8,23 +8,31 @@ import { postService } from "../services/posts";
 import { playlistService } from "../services/playlists";
 import { buildSeriesViews } from "../utils/series";
 import { galleryService } from "../services/gallery";
-import { workService } from "../services/work";
+import { projectService } from "../services/projects";
+import { parseGitHub } from "../services/github";
 import { profileService } from "../services/profile";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../utils/blog";
 import { COOKIE_BANNER_ENABLED } from "../config/features";
 
 const profile = await profileService.getProfile();
-const work = await workService.getAll();
-const projects = work
-  .filter(w => w.featured)
-  .map(w => ({
-    title: w.title,
-    year: w.period,
-    desc: w.card_description || w.summary || '',
-    links: w.links,
-    img: w.card_image_url || '',
-    logo: w.logo_url || undefined,
-  }));
+
+// Lab projects (open-source repos + released apps) drive the homepage showcase.
+// Source repos ship no cover image, so we fall back to their GitHub social-
+// preview (OG) image — the same banner used on /lab.
+const labProjects = await projectService.getAll();
+const labCards = labProjects.map((p) => {
+  const ghLink = (p.links || []).find((l) => /github\.com/i.test(l.url)) ?? (p.links || [])[0];
+  const gh = p.type === 'source' && ghLink ? parseGitHub(ghLink.url) : null;
+  return {
+    title: p.title,
+    year: p.year || '',
+    desc: p.description || '',
+    links: p.links || [],
+    img: p.cover_image_url || (gh ? `https://opengraph.githubassets.com/home/${gh.owner}/${gh.repo}` : ''),
+    logo: p.logo_url || undefined,
+    tech: Array.isArray(p.tech) ? p.tech : [],
+  };
+});
 
 const [rawPosts, rawPlaylists] = await Promise.all([
   postService.getAll(),
@@ -260,19 +268,27 @@ const homepageSchema = {
         <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
       </div>
 
-      <!-- WORK -->
+      <!-- LAB -->
       <section id="work" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">What I Built</span>
-            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-normal">PORTFOLIO<span class="text-violet-500">.</span></h2>
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Open Source &amp; Apps</span>
+            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-normal">LAB<span class="text-violet-500">.</span></h2>
             <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {projects.map((p, i) => (
+            {labCards.map((p, i) => (
               <ProjectCard {...p} index={i} />
             ))}
           </div>
+          {labCards.length > 0 && (
+            <div data-reveal class="mt-12 text-center">
+              <a href="/lab" class="magnetic !inline-flex items-center gap-2 px-7 py-3 border border-violet-500/30 text-xs font-black uppercase tracking-widest text-violet-400 rounded-full hover:border-violet-500/70 hover:bg-violet-500/10 hover:text-violet-300 transition-all duration-300">
+                Explore the Lab
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          )}
         </div>
       </section>
 
