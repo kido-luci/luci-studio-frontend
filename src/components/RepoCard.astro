@@ -39,7 +39,7 @@ const {
 ---
 
 <a href={url || '#'} target="_blank" rel="noopener noreferrer" class="repo-card">
-  <div class="bar" style={`background:linear-gradient(90deg, ${bar} 0%, ${accent} 100%)`}></div>
+  {!preview && <div class="bar" style={`background:linear-gradient(90deg, ${bar} 0%, ${accent} 100%)`}></div>}
 
   {preview && (
     <div class="preview">
