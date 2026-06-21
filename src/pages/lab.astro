@@ -107,36 +107,37 @@ const repoCount = String(sources.length).padStart(2, "0");
 
     <div style="position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 40px;">
 
-      <!-- hero -->
-      <div id="public-source" style="padding:36px 0 18px; scroll-margin-top:96px;">
-        <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {repoCount} repositories</div>
-        <h1 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(56px,9vw,128px); line-height:.92; letter-spacing:-.01em; color:var(--lab-text);">PUBLIC<br>SOURCE<span style="color:var(--accent);">.</span></h1>
-        <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Public source repositories and released apps — mine, and a few others worth a look.</p>
-      </div>
-
-      <!-- repo grid -->
-      {sources.length > 0 ? (
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:28px; margin-top:64px;">
-          {sources.map((r) => (
-            <RepoCard {...r} accent={ACCENT} />
-          ))}
-        </div>
-      ) : (
-        <p style="margin-top:64px; font-family:'Space Mono',monospace; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--lab-stat-label);">No repositories yet.</p>
-      )}
-
-      <!-- released apps -->
+      <!-- released apps (top) -->
       {apps.length > 0 && (
-        <div id="released-apps" style="padding:96px 0 18px; scroll-margin-top:96px;">
+        <div id="released-apps" style="padding:36px 0 18px; scroll-margin-top:96px;">
           <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {String(apps.length).padStart(2, "0")} apps</div>
-          <h2 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(44px,7vw,96px); line-height:.92; letter-spacing:-.01em; color:var(--lab-text);">RELEASED<br>APPS<span style="color:var(--accent);">.</span></h2>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:28px; margin-top:56px;">
+          <h1 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(56px,9vw,128px); line-height:.92; letter-spacing:-.01em; color:var(--lab-text);">RELEASED<br>APPS<span style="color:var(--accent);">.</span></h1>
+          <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Public source repositories and released apps — mine, and a few others worth a look.</p>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:28px; margin-top:64px;">
             {apps.map((a) => (
               <RepoCard {...a} accent={ACCENT} />
             ))}
           </div>
         </div>
       )}
+
+      <!-- public source -->
+      <div id="public-source" style={`padding:${apps.length > 0 ? "96px" : "36px"} 0 18px; scroll-margin-top:96px;`}>
+        <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {repoCount} repositories</div>
+        <h2 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(44px,7vw,96px); line-height:.92; letter-spacing:-.01em; color:var(--lab-text);">PUBLIC<br>SOURCE<span style="color:var(--accent);">.</span></h2>
+        {apps.length === 0 && (
+          <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Public source repositories and released apps — mine, and a few others worth a look.</p>
+        )}
+        {sources.length > 0 ? (
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:28px; margin-top:64px;">
+            {sources.map((r) => (
+              <RepoCard {...r} accent={ACCENT} />
+            ))}
+          </div>
+        ) : (
+          <p style="margin-top:64px; font-family:'Space Mono',monospace; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--lab-stat-label);">No repositories yet.</p>
+        )}
+      </div>
 
     </div>
   </div>
