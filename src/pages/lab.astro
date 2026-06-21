@@ -1,5 +1,6 @@
 ---
-import LabLayout from "../layouts/LabLayout.astro";
+import Layout from "../layouts/Layout.astro";
+import TopNav from "../components/TopNav.astro";
 import RepoCard from "../components/RepoCard.astro";
 import { projectService } from "../services/projects";
 import { getRepoStats, parseGitHub } from "../services/github";
@@ -75,8 +76,20 @@ const apps = appProjects.map((p: any, i: number) => {
 const repoCount = String(sources.length).padStart(2, "0");
 ---
 
-<LabLayout>
-  <div style={`--accent:${ACCENT}; position:relative; min-height:100vh; width:100%; background:radial-gradient(120% 80% at 80% -10%, #efeae0 0%, #f4f2ec 60%); overflow:hidden; padding:0 0 100px;`}>
+<Layout
+  title="Lab · Luci Studio"
+  description="Public source repositories and released apps — mine, and a few others worth a look."
+>
+  <!-- Editorial display fonts (Space Mono is already loaded by Layout). -->
+  <link
+    slot="head"
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap"
+  />
+
+  <TopNav active="lab" />
+
+  <div class="lab-root" style={`--accent:${ACCENT};`}>
 
     <!-- decorative confetti -->
     <div style="position:absolute; inset:0; pointer-events:none; z-index:0;">
@@ -94,22 +107,8 @@ const repoCount = String(sources.length).padStart(2, "0");
 
     <div style="position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 40px;">
 
-      <!-- top bar -->
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:34px 0 0;">
-        <a href="/" style="display:flex; align-items:baseline; gap:2px; text-decoration:none; font-family:'Bodoni Moda',serif; font-weight:800; font-size:30px; letter-spacing:.01em; color:#13151d;">
-          <span>LAB</span><span style="color:var(--accent);">.</span>
-        </a>
-        <div style="display:flex; align-items:center; gap:28px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#6b6f7a;">
-          <a href="#public-source" style="text-decoration:none; color:#13151d;">Public Source</a>
-          <a href="#released-apps" style="text-decoration:none; color:#6b6f7a;">Released Apps</a>
-          <span style="width:34px; height:34px; border-radius:50%; border:1.5px solid #d6d2c7; display:flex; align-items:center; justify-content:center;">
-            <span style="width:5px; height:5px; border-radius:50%; background:#13151d; animation:lab-spin 6s linear infinite;"></span>
-          </span>
-        </div>
-      </div>
-
       <!-- hero -->
-      <div id="public-source" style="padding:72px 0 18px; scroll-margin-top:24px;">
+      <div id="public-source" style="padding:36px 0 18px; scroll-margin-top:96px;">
         <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {repoCount} repositories</div>
         <h1 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(56px,9vw,128px); line-height:.92; letter-spacing:-.01em; color:#13151d;">PUBLIC<br>SOURCE<span style="color:var(--accent);">.</span></h1>
         <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:#5c606b;">Public source repositories and released apps — mine, and a few others worth a look.</p>
@@ -128,7 +127,7 @@ const repoCount = String(sources.length).padStart(2, "0");
 
       <!-- released apps -->
       {apps.length > 0 && (
-        <div id="released-apps" style="padding:96px 0 18px; scroll-margin-top:24px;">
+        <div id="released-apps" style="padding:96px 0 18px; scroll-margin-top:96px;">
           <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {String(apps.length).padStart(2, "0")} apps</div>
           <h2 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(44px,7vw,96px); line-height:.92; letter-spacing:-.01em; color:#13151d;">RELEASED<br>APPS<span style="color:var(--accent);">.</span></h2>
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:28px; margin-top:56px;">
@@ -141,4 +140,25 @@ const repoCount = String(sources.length).padStart(2, "0");
 
     </div>
   </div>
-</LabLayout>
+</Layout>
+
+<style is:global>
+  /* /lab is an editorial light page that sits inside the site shell (so it keeps
+     the standard TopNav). Its own opaque cream surface covers the shell's
+     background; keyframes live here because the confetti uses them inline. */
+  .lab-root {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    background: radial-gradient(120% 80% at 80% -10%, #efeae0 0%, #f4f2ec 60%);
+    overflow: hidden;
+    padding: 96px 0 100px;
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    color: #13151d;
+  }
+  @keyframes lab-floaty {
+    0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+    50%      { transform: translateY(-14px) rotate(var(--r, 0deg)); }
+  }
+  @keyframes lab-spin { to { transform: rotate(360deg); } }
+</style>
