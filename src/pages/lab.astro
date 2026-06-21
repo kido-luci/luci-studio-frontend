@@ -1,0 +1,103 @@
+---
+import Layout from "../layouts/Layout.astro";
+import TopNav from "../components/TopNav.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import { projectService } from "../services/projects";
+
+const projects = await projectService.getAll();
+
+const toCard = (p: any) => ({
+  title: p.title,
+  year: p.year || '',
+  desc: p.description || '',
+  links: Array.isArray(p.links) ? p.links : [],
+  img: p.cover_image_url || '',
+  logo: p.logo_url || undefined,
+  tech: Array.isArray(p.tech) ? p.tech : [],
+});
+
+const sources = projects.filter((p: any) => p.type === 'source').map(toCard);
+const apps = projects.filter((p: any) => p.type === 'app').map(toCard);
+const isEmpty = sources.length === 0 && apps.length === 0;
+---
+
+<Layout
+  title="Lab · Luci Studio"
+  description="Open-source repositories and released apps — projects worth a look."
+>
+  <TopNav active="lab" />
+
+  <main class="pt-20">
+    <!-- HEADER -->
+    <section class="py-24 px-4 md:px-6">
+      <div class="max-w-7xl mx-auto">
+        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Code &amp; Apps</span>
+        <h1 data-ml9 class="text-6xl md:text-8xl font-black tracking-normal">LAB<span class="text-violet-500">.</span></h1>
+        <p data-reveal class="text-gray-400 text-lg leading-relaxed mt-6 max-w-2xl">
+          Public source repositories and released apps — mine and others worth a look.
+        </p>
+      </div>
+    </section>
+
+    {sources.length > 0 && (
+      <section class="py-12 px-4 md:px-6">
+        <div class="max-w-7xl mx-auto">
+          <div data-reveal class="mb-12">
+            <h2 data-ml9 class="text-4xl md:text-6xl font-black tracking-normal">PUBLIC SOURCE<span class="text-violet-500">.</span></h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sources.map((p, i) => (
+              <ProjectCard {...p} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {apps.length > 0 && (
+      <section class="py-12 px-4 md:px-6">
+        <div class="max-w-7xl mx-auto">
+          <div data-reveal class="mb-12">
+            <h2 data-ml9 class="text-4xl md:text-6xl font-black tracking-normal">APPS<span class="text-violet-500">.</span></h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {apps.map((p, i) => (
+              <ProjectCard {...p} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {isEmpty && (
+      <section class="py-24 px-4 md:px-6">
+        <div class="max-w-7xl mx-auto text-center text-gray-500">
+          <p>Nothing here yet — check back soon.</p>
+        </div>
+      </section>
+    )}
+
+    <div class="py-16"></div>
+  </main>
+</Layout>
+
+<script>
+  // Card scroll-triggered stagger reveal. ProjectCard's own CSS starts cards at
+  // opacity:0; this observer adds `.card-visible` to trigger the entrance. Copied
+  // from index.astro because that observer is page-local, not in Layout.
+  (function () {
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-project-card]'));
+    if (!cards.length) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        const idx = parseInt(el.dataset.projectCard ?? '0', 10);
+        el.style.animationDelay = `${(idx % 2) * 0.15}s`;
+        el.classList.add('card-visible');
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+    cards.forEach(c => obs.observe(c));
+  })();
+</script>
