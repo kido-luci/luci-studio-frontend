@@ -1,6 +1,6 @@
 ---
 interface Props {
-  active?: 'home' | 'blog' | 'series' | 'portfolio' | null;
+  active?: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | null;
   ctaLabel?: string;
   ctaHref?: string;
 }
@@ -11,7 +11,7 @@ const linkBase = "topnav-link text-xs font-bold transition-all duration-300 uppe
 const linkIdle = "text-gray-400 hover:text-white";
 const linkActive = "is-active text-violet-400";
 
-const cls = (key: 'home' | 'blog' | 'series' | 'portfolio') => {
+const cls = (key: 'home' | 'blog' | 'series' | 'portfolio' | 'lab') => {
   if (active === key) return `${linkBase} ${linkActive}`;
   return `${linkBase} ${linkIdle}`;
 };
@@ -35,6 +35,7 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
       <a href="/blog/series" class={cls('series')}>Series</a>
       <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" class={`${linkBase} ${linkIdle}`}>LinkedIn</a>
       <a href="/portfolio" class={cls('portfolio')}>Portfolio</a>
+      <a href="/lab" class={cls('lab')}>Lab</a>
     </div>
 
     <div class="flex items-center gap-4">
@@ -71,6 +72,7 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
   <div class="h-px w-12 bg-white/10 my-4"></div>
   <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" class={mobileSmallBase}>LinkedIn</a>
   <a href="/portfolio" class={active === 'portfolio' ? mobileSmallActive : mobileSmallBase}>Portfolio</a>
+  <a href="/lab" class={active === 'lab' ? mobileSmallActive : mobileSmallBase}>Lab</a>
   <a href={ctaHref} class="mobile-nav-link mt-8 px-8 py-4 bg-white text-black font-black rounded-full uppercase tracking-widest">{ctaLabel}</a>
 </div>
 

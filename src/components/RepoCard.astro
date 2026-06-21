@@ -1,0 +1,197 @@
+---
+// Editorial repo/app card for the redesigned /lab (light theme).
+// Faithful to the Public Source.dc design: accent bar, monogram tile, owner/name,
+// description, tag chips, real GitHub stats row, and a host footer.
+export interface Stat {
+  n: string | number;
+  label: string;
+}
+interface Props {
+  url: string;
+  name: string;
+  title?: string;
+  owner?: string;
+  monogram: string;
+  bar?: string;
+  accent?: string;
+  logo?: string;
+  preview?: string;
+  image?: string;
+  desc?: string;
+  tags?: string[];
+  stats?: Stat[];
+  host?: string;
+}
+const {
+  url,
+  name,
+  title,
+  owner,
+  monogram,
+  bar = '#16a394',
+  accent = '#6c4cf1',
+  logo,
+  preview,
+  image,
+  desc = '',
+  tags = [],
+  stats = [],
+  host = 'github.com',
+} = Astro.props;
+
+// A banner image at the top — the GitHub OG preview (source repos) or an
+// uploaded cover (apps). When present, the card leads with the image and drops
+// the monogram tile / stats; the heading + description + tags sit below it.
+const bannerSrc = preview || image;
+const hasBanner = !!bannerSrc;
+const heading = title ?? name;
+---
+
+<a href={url || '#'} target="_blank" rel="noopener noreferrer" class:list={['repo-card', { 'is-shaded': !!preview }]}>
+  {!hasBanner && <div class="bar" style={`background:linear-gradient(90deg, ${bar} 0%, ${accent} 100%)`}></div>}
+
+  {hasBanner && (
+    <div class="preview">
+      <img src={bannerSrc} alt={`${heading} preview`} loading="lazy" />
+    </div>
+  )}
+
+  <div class="body">
+    {!hasBanner && (
+      <div class="head">
+        <div class="tile">
+          {logo ? <img src={logo} alt={name} loading="lazy" /> : <span>{monogram}</span>}
+        </div>
+        <div class="meta">
+          {owner && <div class="owner">{owner} /</div>}
+          <div class="name">{name}</div>
+        </div>
+      </div>
+    )}
+
+    {hasBanner && heading && <h3 class="preview-title">{heading}</h3>}
+
+    {desc && <p class="desc">{desc}</p>}
+
+    {tags.length > 0 && (
+      <div class="tags">
+        {tags.map((t) => <span class="tag">{t}</span>)}
+      </div>
+    )}
+
+    {!hasBanner && stats.length > 0 && (
+      <>
+        <div class="divider"></div>
+        <div class="stats">
+          {stats.map((s) => (
+            <div class="stat">
+              <div class="n">{s.n}</div>
+              <div class="label">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+  </div>
+
+  <div class="footer">
+    <span class="host"><span class="dot"></span>{host}</span>
+    <span class="arrow">↗</span>
+  </div>
+</a>
+
+<style>
+  /* Colors come from --lab-* variables defined on .lab-root (light) with a dark
+     override (html:not(.light-mode) .lab-root) in lab.astro, so the card follows
+     the site theme toggle. Fallbacks keep it valid in isolation. */
+  .repo-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    background: var(--lab-card-bg, #ffffff);
+    border: 1px solid var(--lab-card-border, rgba(19, 21, 29, 0.08));
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--lab-card-shadow, 0 1px 2px rgba(19, 21, 29, 0.04));
+    transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.3, 1),
+                box-shadow 0.25s, border-color 0.25s;
+  }
+  .repo-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--lab-card-shadow-hover, 0 22px 50px -18px rgba(19, 21, 29, 0.28));
+    border-color: var(--lab-card-border-hover, rgba(19, 21, 29, 0.16));
+  }
+
+  .bar { height: 4px; }
+
+  /* GitHub social-preview banner (source repos). */
+  .preview {
+    aspect-ratio: 2 / 1;
+    overflow: hidden;
+    border-bottom: 1px solid var(--lab-card-border, rgba(19, 21, 29, 0.08));
+    background: var(--lab-tag-bg, #f7f5f0);
+  }
+  .preview img {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .repo-card:hover .preview img { transform: scale(1.03); }
+
+  .body { padding: 30px 30px 24px; flex: 1; display: flex; flex-direction: column; }
+
+  .head { display: flex; align-items: flex-start; gap: 18px; }
+  .tile {
+    flex: none; width: 60px; height: 60px; border-radius: 15px;
+    background: var(--lab-tile-grad, radial-gradient(120% 120% at 30% 20%, #2a2d3a 0%, #0c0d12 70%));
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    font-family: 'Bodoni Moda', serif; font-weight: 700; font-size: 22px; color: var(--lab-tile-text, #e9e6df);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  .tile img { width: 100%; height: 100%; object-fit: cover; }
+  .meta { min-width: 0; padding-top: 2px; }
+  .owner { font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: var(--lab-owner, #9a9ea8); }
+  .name {
+    font-size: 23px; font-weight: 800; line-height: 1.15; letter-spacing: -0.01em;
+    color: var(--lab-name, #13151d); margin-top: 3px; word-break: break-word;
+  }
+
+  .desc { margin: 22px 0 0; font-size: 15.5px; line-height: 1.6; color: var(--lab-desc, #5c606b); flex: 1; }
+
+  /* project title label on preview (source) cards */
+  .preview-title {
+    margin: 0 0 2px; font-size: 21px; font-weight: 800; line-height: 1.2;
+    letter-spacing: -0.01em; color: var(--lab-name, #13151d); word-break: break-word;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  /* preview cards have tags as the first body element — no top gap needed */
+  .tags:first-child { margin-top: 0; }
+  .preview-title + .tags { margin-top: 14px; }
+  .tag {
+    font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--lab-tag-text, #41454f); padding: 5px 11px;
+    border: 1px solid var(--lab-tag-border, rgba(19, 21, 29, 0.1)); border-radius: 999px;
+    background: var(--lab-tag-bg, #f7f5f0);
+  }
+
+  .divider { height: 1px; background: var(--lab-divider, rgba(19, 21, 29, 0.08)); margin: 26px 0 22px; }
+
+  .stats { display: flex; gap: 30px; }
+  .stat .n { font-family: 'Bodoni Moda', serif; font-weight: 700; font-size: 26px; line-height: 1; color: var(--lab-stat-n, #13151d); }
+  .stat .label {
+    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--lab-stat-label, #9a9ea8); margin-top: 6px;
+  }
+
+  .footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 30px; border-top: 1px solid var(--lab-footer-border, rgba(19, 21, 29, 0.07));
+    background: var(--lab-footer-bg, #fbfaf7);
+    font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--lab-footer-text, #13151d);
+  }
+  .host { display: flex; align-items: center; gap: 9px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lab-dot, #13151d); }
+  .arrow { font-size: 15px; }
+</style>
