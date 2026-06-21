@@ -64,6 +64,8 @@ const {
 
     {preview && title && <h3 class="preview-title">{title}</h3>}
 
+    {preview && desc && <p class="desc">{desc}</p>}
+
     {tags.length > 0 && (
       <div class="tags">
         {tags.map((t) => <span class="tag">{t}</span>)}
