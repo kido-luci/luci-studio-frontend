@@ -44,6 +44,7 @@ const sources = await Promise.all(
       url,
       owner: gh?.owner,
       name: gh ? gh.repo : p.title,
+      title: p.title,
       monogram: monogram(gh ? gh.repo : p.title),
       bar: BARS[i % BARS.length],
       logo: p.logo_url || undefined,
