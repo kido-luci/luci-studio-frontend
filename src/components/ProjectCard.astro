@@ -7,9 +7,10 @@ interface Props {
   img: string;
   index: number;
   logo?: string;
+  tech?: string[];
 }
 
-const { title, year, desc, links, img, index, logo } = Astro.props;
+const { title, year, desc, links, img, index, logo, tech = [] } = Astro.props;
 ---
 
 <div data-project={title} data-project-card={String(index)} class="tilt-card group relative flex flex-col p-5 sm:p-6 rounded-2xl border border-white/5 bg-white/[0.02] transition-all duration-700 cursor-pointer overflow-hidden h-full">
@@ -39,6 +40,14 @@ const { title, year, desc, links, img, index, logo } = Astro.props;
     <p class="text-gray-400 text-sm leading-relaxed mb-8 line-clamp-3 group-hover:text-gray-300 transition-colors duration-500">
       {desc}
     </p>
+
+    {tech.length > 0 && (
+      <div class="flex flex-wrap gap-2 mb-6">
+        {tech.map(t => (
+          <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-gray-400">{t}</span>
+        ))}
+      </div>
+    )}
 
     <!-- Links -->
     <div class="mt-auto flex flex-wrap gap-3">
