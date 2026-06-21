@@ -110,8 +110,8 @@ const repoCount = String(sources.length).padStart(2, "0");
       <!-- hero -->
       <div id="public-source" style="padding:36px 0 18px; scroll-margin-top:96px;">
         <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {repoCount} repositories</div>
-        <h1 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(56px,9vw,128px); line-height:.92; letter-spacing:-.01em; color:#13151d;">PUBLIC<br>SOURCE<span style="color:var(--accent);">.</span></h1>
-        <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:#5c606b;">Public source repositories and released apps — mine, and a few others worth a look.</p>
+        <h1 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(56px,9vw,128px); line-height:.92; letter-spacing:-.01em; color:var(--lab-text);">PUBLIC<br>SOURCE<span style="color:var(--accent);">.</span></h1>
+        <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Public source repositories and released apps — mine, and a few others worth a look.</p>
       </div>
 
       <!-- repo grid -->
@@ -122,14 +122,14 @@ const repoCount = String(sources.length).padStart(2, "0");
           ))}
         </div>
       ) : (
-        <p style="margin-top:64px; font-family:'Space Mono',monospace; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:#9a9ea8;">No repositories yet.</p>
+        <p style="margin-top:64px; font-family:'Space Mono',monospace; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--lab-stat-label);">No repositories yet.</p>
       )}
 
       <!-- released apps -->
       {apps.length > 0 && (
         <div id="released-apps" style="padding:96px 0 18px; scroll-margin-top:96px;">
           <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {String(apps.length).padStart(2, "0")} apps</div>
-          <h2 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(44px,7vw,96px); line-height:.92; letter-spacing:-.01em; color:#13151d;">RELEASED<br>APPS<span style="color:var(--accent);">.</span></h2>
+          <h2 style="margin:0; font-family:'Bodoni Moda',serif; font-weight:800; font-size:clamp(44px,7vw,96px); line-height:.92; letter-spacing:-.01em; color:var(--lab-text);">RELEASED<br>APPS<span style="color:var(--accent);">.</span></h2>
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); gap:28px; margin-top:56px;">
             {apps.map((a) => (
               <RepoCard {...a} accent={ACCENT} />
@@ -143,19 +143,72 @@ const repoCount = String(sources.length).padStart(2, "0");
 </Layout>
 
 <style is:global>
-  /* /lab is an editorial light page that sits inside the site shell (so it keeps
-     the standard TopNav). Its own opaque cream surface covers the shell's
-     background; keyframes live here because the confetti uses them inline. */
+  /* /lab is an editorial page inside the site shell (keeps the standard TopNav).
+     Its palette is driven by --lab-* variables so it follows the site's theme
+     toggle: light defaults below, dark override keyed off <html> (set
+     synchronously by the theme init, so no flash). Its opaque surface covers
+     the shell background; keyframes live here because the confetti uses them. */
   .lab-root {
+    --lab-bg: radial-gradient(120% 80% at 80% -10%, #efeae0 0%, #f4f2ec 60%);
+    --lab-text: #13151d;
+    --lab-muted: #5c606b;
+    --lab-card-bg: #ffffff;
+    --lab-card-border: rgba(19, 21, 29, 0.08);
+    --lab-card-shadow: 0 1px 2px rgba(19, 21, 29, 0.04);
+    --lab-card-shadow-hover: 0 22px 50px -18px rgba(19, 21, 29, 0.28);
+    --lab-card-border-hover: rgba(19, 21, 29, 0.16);
+    --lab-tile-grad: radial-gradient(120% 120% at 30% 20%, #2a2d3a 0%, #0c0d12 70%);
+    --lab-tile-text: #e9e6df;
+    --lab-owner: #9a9ea8;
+    --lab-name: #13151d;
+    --lab-desc: #5c606b;
+    --lab-tag-bg: #f7f5f0;
+    --lab-tag-border: rgba(19, 21, 29, 0.1);
+    --lab-tag-text: #41454f;
+    --lab-divider: rgba(19, 21, 29, 0.08);
+    --lab-stat-n: #13151d;
+    --lab-stat-label: #9a9ea8;
+    --lab-footer-bg: #fbfaf7;
+    --lab-footer-border: rgba(19, 21, 29, 0.07);
+    --lab-footer-text: #13151d;
+    --lab-dot: #13151d;
+
     position: relative;
     min-height: 100vh;
     width: 100%;
-    background: radial-gradient(120% 80% at 80% -10%, #efeae0 0%, #f4f2ec 60%);
+    background: var(--lab-bg);
     overflow: hidden;
     padding: 96px 0 100px;
     font-family: 'Hanken Grotesk', system-ui, sans-serif;
-    color: #13151d;
+    color: var(--lab-text);
   }
+
+  html:not(.light-mode) .lab-root {
+    --lab-bg: radial-gradient(120% 80% at 80% -10%, #1b1e27 0%, #0e0f14 60%);
+    --lab-text: #f1efe9;
+    --lab-muted: #a5a9b4;
+    --lab-card-bg: #17191f;
+    --lab-card-border: rgba(255, 255, 255, 0.08);
+    --lab-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --lab-card-shadow-hover: 0 22px 50px -18px rgba(0, 0, 0, 0.7);
+    --lab-card-border-hover: rgba(255, 255, 255, 0.18);
+    --lab-tile-grad: radial-gradient(120% 120% at 30% 20%, #343a4d 0%, #181b24 70%);
+    --lab-tile-text: #ece9e1;
+    --lab-owner: #7f8390;
+    --lab-name: #f1efe9;
+    --lab-desc: #a5a9b4;
+    --lab-tag-bg: rgba(255, 255, 255, 0.04);
+    --lab-tag-border: rgba(255, 255, 255, 0.1);
+    --lab-tag-text: #c6cad2;
+    --lab-divider: rgba(255, 255, 255, 0.08);
+    --lab-stat-n: #f1efe9;
+    --lab-stat-label: #7f8390;
+    --lab-footer-bg: #121419;
+    --lab-footer-border: rgba(255, 255, 255, 0.07);
+    --lab-footer-text: #ece9e1;
+    --lab-dot: #ece9e1;
+  }
+
   @keyframes lab-floaty {
     0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
     50%      { transform: translateY(-14px) rotate(var(--r, 0deg)); }
