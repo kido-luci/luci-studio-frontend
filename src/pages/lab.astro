@@ -187,8 +187,7 @@ const repoCount = String(sources.length).padStart(2, "0");
     color: var(--lab-text);
   }
 
-  html:not(.light-mode) .lab-root,
-  .repo-card.is-dark {
+  html:not(.light-mode) .lab-root {
     --lab-bg: radial-gradient(120% 80% at 80% -10%, #1b1e27 0%, #0e0f14 60%);
     --lab-text: #f1efe9;
     --lab-muted: #a5a9b4;
@@ -212,6 +211,19 @@ const repoCount = String(sources.length).padStart(2, "0");
     --lab-footer-border: rgba(255, 255, 255, 0.07);
     --lab-footer-text: #ece9e1;
     --lab-dot: #ece9e1;
+  }
+
+  /* Git (Public Source) cards sit a shade darker than the rest in light mode,
+     so the dark GitHub OG banner doesn't clash with a bright-white surface.
+     Text stays dark/readable; in dark mode they just follow the dark palette. */
+  html.light-mode .repo-card.is-shaded {
+    --lab-card-bg: #ddd7c9;
+    --lab-footer-bg: #d2ccbb;
+    --lab-card-border: rgba(19, 21, 29, 0.12);
+    --lab-card-border-hover: rgba(19, 21, 29, 0.22);
+    --lab-tag-bg: #d2ccbb;
+    --lab-tag-border: rgba(19, 21, 29, 0.14);
+    --lab-divider: rgba(19, 21, 29, 0.12);
   }
 
   @keyframes lab-floaty {
