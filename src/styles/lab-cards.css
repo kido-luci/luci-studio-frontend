@@ -1,0 +1,74 @@
+/* Editorial /lab card palette + keyframes — the single source of truth for the
+   RepoCard look. Colors are exposed as --lab-* variables scoped to .lab-palette
+   and follow the site theme toggle: light by default, dark when <html> has no
+   .light-mode class. Shared by the /lab page and the homepage LAB section so
+   both render identical cards from one place. */
+.lab-palette {
+  --lab-bg: radial-gradient(120% 80% at 80% -10%, #efeae0 0%, #f4f2ec 60%);
+  --lab-text: #13151d;
+  --lab-muted: #5c606b;
+  --lab-card-bg: #ffffff;
+  --lab-card-border: rgba(19, 21, 29, 0.08);
+  --lab-card-shadow: 0 1px 2px rgba(19, 21, 29, 0.04);
+  --lab-card-shadow-hover: 0 22px 50px -18px rgba(19, 21, 29, 0.28);
+  --lab-card-border-hover: rgba(19, 21, 29, 0.16);
+  --lab-tile-grad: radial-gradient(120% 120% at 30% 20%, #2a2d3a 0%, #0c0d12 70%);
+  --lab-tile-text: #e9e6df;
+  --lab-owner: #9a9ea8;
+  --lab-name: #13151d;
+  --lab-desc: #5c606b;
+  --lab-tag-bg: #f7f5f0;
+  --lab-tag-border: rgba(19, 21, 29, 0.1);
+  --lab-tag-text: #41454f;
+  --lab-divider: rgba(19, 21, 29, 0.08);
+  --lab-stat-n: #13151d;
+  --lab-stat-label: #9a9ea8;
+  --lab-footer-bg: #fbfaf7;
+  --lab-footer-border: rgba(19, 21, 29, 0.07);
+  --lab-footer-text: #13151d;
+  --lab-dot: #13151d;
+}
+
+html:not(.light-mode) .lab-palette {
+  --lab-bg: radial-gradient(120% 80% at 80% -10%, #1b1e27 0%, #0e0f14 60%);
+  --lab-text: #f1efe9;
+  --lab-muted: #a5a9b4;
+  --lab-card-bg: #17191f;
+  --lab-card-border: rgba(255, 255, 255, 0.08);
+  --lab-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --lab-card-shadow-hover: 0 22px 50px -18px rgba(0, 0, 0, 0.7);
+  --lab-card-border-hover: rgba(255, 255, 255, 0.18);
+  --lab-tile-grad: radial-gradient(120% 120% at 30% 20%, #343a4d 0%, #181b24 70%);
+  --lab-tile-text: #ece9e1;
+  --lab-owner: #7f8390;
+  --lab-name: #f1efe9;
+  --lab-desc: #a5a9b4;
+  --lab-tag-bg: rgba(255, 255, 255, 0.04);
+  --lab-tag-border: rgba(255, 255, 255, 0.1);
+  --lab-tag-text: #c6cad2;
+  --lab-divider: rgba(255, 255, 255, 0.08);
+  --lab-stat-n: #f1efe9;
+  --lab-stat-label: #7f8390;
+  --lab-footer-bg: #121419;
+  --lab-footer-border: rgba(255, 255, 255, 0.07);
+  --lab-footer-text: #ece9e1;
+  --lab-dot: #ece9e1;
+}
+
+/* Git (source) cards sit a shade darker than the rest in light mode, so the dark
+   GitHub OG banner doesn't clash with a bright-white surface. */
+html.light-mode .lab-palette .repo-card.is-shaded {
+  --lab-card-bg: #faf8f3;
+  --lab-footer-bg: #f3efe6;
+  --lab-card-border: rgba(19, 21, 29, 0.08);
+  --lab-card-border-hover: rgba(19, 21, 29, 0.16);
+  --lab-tag-bg: #f3efe6;
+  --lab-tag-border: rgba(19, 21, 29, 0.1);
+  --lab-divider: rgba(19, 21, 29, 0.08);
+}
+
+@keyframes lab-floaty {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50%      { transform: translateY(-14px) rotate(var(--r, 0deg)); }
+}
+@keyframes lab-spin { to { transform: rotate(360deg); } }
