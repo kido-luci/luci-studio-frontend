@@ -19,6 +19,29 @@ server's per-request compile doesn't surface. It's tuned to `--minimumFailingSev
 so the ~10 pre-existing legacy hints (implicit-any in inline event handlers,
 `is:inline` script notices) stay advisory; only real type errors fail it.
 
+## Development workflow
+
+**Per-change loop** — one focused change at a time:
+1. **Explore** the real code first (grep/read) before editing — don't assume how it's wired.
+2. **Edit** one focused change.
+3. **Verify**: run `npm run check` (type gate), then confirm behaviour. Screenshots come
+   out blank on the canvas+GSAP pages (`/`, `/blog/[slug]`) — verify those via DOM eval in
+   the preview, not screenshots (`/blog` and `/lab` screenshot fine).
+4. **Commit** one change per commit on a topic branch (keeps rollback points).
+
+**Release** (this app auto-deploys to Cloudflare Pages from `master`):
+- `dev` is the default/integration branch; `master` is the prod auto-deploy branch.
+- Flow: topic branch → PR into `dev` → merge → PR `dev → master` → merge → annotated tag
+  `vX.Y.Z` on `master`. (See the workspace CLAUDE.md for the repo-wide PR-only convention.)
+- **Always merge with `gh pr merge <n> --merge --delete-branch=false`.** A back-merge PR
+  (`head=master`) merged without it once auto-deleted the prod `master` branch — never let
+  a merge delete a long-lived branch.
+- After a `dev→master` promotion, **back-merge `master→dev`** (or recreate `master` from
+  `dev`) so the two don't drift apart in merge-commit topology.
+- **Build green before releasing**: with the local backend running, `npm run build` fetches
+  real data and renders every page. (The build is network-gated against the prod API, so
+  build against the local backend.)
+
 ## Environment Variables
 
 Requires a `.env` file (not committed):

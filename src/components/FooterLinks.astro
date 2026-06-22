@@ -1,0 +1,21 @@
+---
+// Shared footer nav/legal links — the one cluster the homepage footer and the
+// blog-detail footer have in common (Portfolio · Terms · Privacy · Cookie
+// Settings). Rendered as a fragment so each page drops it inside its own footer
+// flex row after its page-specific links. `linkColor` matches the host footer's
+// idle tone (homepage uses gray-600, blog detail uses gray-400).
+import { COOKIE_BANNER_ENABLED } from "../config/features";
+
+interface Props {
+  linkColor?: string;
+}
+const { linkColor = "text-gray-600" } = Astro.props;
+const cls = `text-xs font-bold ${linkColor} hover:text-white transition-colors uppercase tracking-widest`;
+---
+
+<a href="/portfolio" class={cls}>Portfolio</a>
+<a href="/terms" class={cls}>Terms</a>
+<a href="/privacy" class={cls}>Privacy</a>
+{COOKIE_BANNER_ENABLED && (
+  <button type="button" data-cookie-settings style="font-family: inherit;" class={cls}>Cookie Settings</button>
+)}
