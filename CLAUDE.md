@@ -8,9 +8,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev       # Start local development server
 npm run build     # Build for production (static output)
 npm run preview   # Preview production build locally
+npm run check     # Type-check .astro + .ts via `astro check` (fails on errors; hints/warnings don't block)
+npm run test      # Unit tests (vitest)
+npm run test:e2e  # End-to-end smoke tests (playwright)
+npm run test:all  # Unit + e2e
 ```
 
-No test, lint, or type-check scripts are configured.
+`npm run check` is the cheap pre-commit gate — it catches type errors the dev
+server's per-request compile doesn't surface. It's tuned to `--minimumFailingSeverity error`
+so the ~10 pre-existing legacy hints (implicit-any in inline event handlers,
+`is:inline` script notices) stay advisory; only real type errors fail it.
 
 ## Environment Variables
 
