@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import ProjectCard from "../components/ProjectCard.astro";
+import RepoCard from "../components/RepoCard.astro";
 import TopNav from "../components/TopNav.astro";
 import SeriesCard from "../components/SeriesCard.astro";
 import PostCard from "../components/PostCard.astro";
@@ -8,23 +8,25 @@ import { postService } from "../services/posts";
 import { playlistService } from "../services/playlists";
 import { buildSeriesViews } from "../utils/series";
 import { galleryService } from "../services/gallery";
-import { workService } from "../services/work";
+import { projectService } from "../services/projects";
+import { buildLabCards } from "../utils/labCards";
 import { profileService } from "../services/profile";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../utils/blog";
 import { COOKIE_BANNER_ENABLED } from "../config/features";
+import "../styles/lab-cards.css";
+
+const LAB_ACCENT = "#6c4cf1";
 
 const profile = await profileService.getProfile();
-const work = await workService.getAll();
-const projects = work
-  .filter(w => w.featured)
-  .map(w => ({
-    title: w.title,
-    year: w.period,
-    desc: w.card_description || w.summary || '',
-    links: w.links,
-    img: w.card_image_url || '',
-    logo: w.logo_url || undefined,
-  }));
+
+// The homepage LAB section reuses the /lab editorial RepoCard, built from the
+// same `projects` entity via the shared buildLabCards mapping. Apps lead with
+// their cover; source repos with the GitHub social-preview (OG) banner.
+const labProjects = await projectService.getAll();
+const { apps: labApps, sources: labSources } = buildLabCards(labProjects);
+// Homepage previews just the first 2 of each group (released apps + public
+// source); the full list lives on /lab via the "Explore the Lab" link.
+const labCards = [...labApps.slice(0, 2), ...labSources.slice(0, 2)];
 
 const [rawPosts, rawPlaylists] = await Promise.all([
   postService.getAll(),
@@ -99,6 +101,8 @@ const homepageSchema = {
          portrait/landscape media rules so only the needed one is fetched. -->
     <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-portrait.webp" media="(orientation: portrait)" />
     <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-landscape.webp" media="(orientation: landscape)" />
+    <!-- Editorial display fonts for the LAB section RepoCards (same as /lab; Space Mono already in Layout). -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap" />
   </Fragment>
 
   <TopNav active="home" ctaLabel="Let's Talk" ctaHref="#contact" />
@@ -260,19 +264,27 @@ const homepageSchema = {
         <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
       </div>
 
-      <!-- WORK -->
+      <!-- LAB -->
       <section id="work" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">What I Built</span>
-            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-normal">PORTFOLIO<span class="text-violet-500">.</span></h2>
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Open Source &amp; Apps</span>
+            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-normal">LAB<span class="text-violet-500">.</span></h2>
             <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {projects.map((p, i) => (
-              <ProjectCard {...p} index={i} />
+          <div class="lab-palette grid grid-cols-1 md:grid-cols-2 gap-7" style="font-family:'Hanken Grotesk',system-ui,sans-serif;">
+            {labCards.map((c) => (
+              <RepoCard {...c} accent={LAB_ACCENT} />
             ))}
           </div>
+          {labCards.length > 0 && (
+            <div data-reveal class="mt-12 text-center">
+              <a href="/lab" class="magnetic !inline-flex items-center gap-2 px-7 py-3 border border-violet-500/30 text-xs font-black uppercase tracking-widest text-violet-400 rounded-full hover:border-violet-500/70 hover:bg-violet-500/10 hover:text-violet-300 transition-all duration-300">
+                Explore the Lab
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          )}
         </div>
       </section>
 
@@ -381,6 +393,7 @@ const homepageSchema = {
             {(profile?.social_links ?? []).map((l) => (
               <a href={l.url} target="_blank" rel="noopener" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">{l.label}</a>
             ))}
+            <a href="/portfolio" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Portfolio</a>
             <a href="/terms" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Terms</a>
             <a href="/privacy" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Privacy</a>
             {COOKIE_BANNER_ENABLED && (
