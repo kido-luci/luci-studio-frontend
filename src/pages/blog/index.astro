@@ -172,7 +172,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
           <div class="flex items-end justify-between gap-4 mb-6 flex-wrap">
             <div>
               <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">Curated Collections</span>
-              <h2 class="text-4xl md:text-5xl font-black tracking-wide">SERIES<span class="text-[#8b5cf6]">.</span></h2>
+              <h2 class="text-4xl md:text-5xl" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">Series<span class="text-[#8b5cf6]">.</span></h2>
             </div>
             <a href="/blog/series" class="see-all-btn">See all →</a>
           </div>
@@ -230,7 +230,7 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
   .tb-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; margin-bottom: clamp(36px,5vw,52px); }
   .tb-head-main { max-width: 640px; }
   .tb-eyebrow { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--tb-accent); }
-  .tb-title { font-weight: 900; font-size: clamp(3.4rem,9vw,7rem); line-height: .86; letter-spacing: -0.03em; color: var(--ink); margin: 14px 0 0; }
+  .tb-title { font-family: 'DM Serif Display', Georgia, serif; font-weight: 400; font-size: clamp(3.4rem,9vw,7rem); line-height: 1; letter-spacing: -0.02em; color: var(--ink); margin: 14px 0 0; }
   .tb-dot { color: var(--tb-accent); }
   .tb-sub { font-size: 18px; line-height: 1.5; color: var(--muted); margin: 22px 0 0; max-width: 520px; }
   .tb-head-count { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; padding-bottom: 8px; }
@@ -295,6 +295,8 @@ const allTopics = [...new Set(allPosts.flatMap(p => p.topics).filter(Boolean))] 
     .tb-chips { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 8px 2px 18px; margin-bottom: -14px; }
     .tb-chips::-webkit-scrollbar { display: none; }
     .topic-btn { flex: 0 0 auto; }
+    /* Hide the "17 / Showing now" counter on mobile */
+    .tb-head-count { display: none; }
   }
 
   /* Empty state */

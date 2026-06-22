@@ -79,7 +79,7 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
           <!-- Right: Content -->
           <div>
             <span data-story-label class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4 block">The Person</span>
-            <h2 data-ml9 class="text-5xl md:text-7xl font-black tracking-wide mb-8">MY STORY<span class="text-violet-500">.</span></h2>
+            <h2 data-ml9 class="text-5xl md:text-7xl tracking-normal mb-8" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">My story<span class="text-violet-500">.</span></h2>
             <div class="space-y-6 text-gray-400 text-lg leading-relaxed">
               {(profile?.bio_paragraphs ?? []).map((para, i) => (
                 <p data-story-para={String(i)} class="text-gray-400 text-lg leading-relaxed" set:html={para} />
@@ -126,7 +126,7 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
       <div class="max-w-7xl mx-auto">
         <div data-reveal class="mb-20">
           <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">The Record</span>
-          <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-wide">EXPERIENCE<span class="text-pink-500">.</span></h2>
+          <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">Experience<span class="text-pink-500">.</span></h2>
         </div>
         <div class="mb-12">
           <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
@@ -163,7 +163,7 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
         <div data-reveal class="sk-header">
           <div>
             <span class="sk-eyebrow"><span class="sk-eyebrow-dot"></span>The Stack</span>
-            <h2 data-ml9 class="text-6xl md:text-8xl font-black tracking-wide">SKILLS<span class="text-emerald-500">.</span></h2>
+            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">Skills<span class="text-emerald-500">.</span></h2>
           </div>
           <div class="sk-stats">
             <div>
