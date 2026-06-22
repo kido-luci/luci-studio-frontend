@@ -240,23 +240,6 @@ const homepageSchema = {
               </a>
             </div>
           )}
-          {homePlaylists.length > 0 && (
-            <div data-reveal class="home-playlists mt-16 pt-12">
-              <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">Reading Paths</span>
-                  <h3 class="text-3xl md:text-4xl font-black tracking-normal">SERIES<span class="text-[#8b5cf6]">.</span></h3>
-                </div>
-                <a href="/blog/series" class="playlist-see-all">View series</a>
-              </div>
-
-              <ol class="series-strip list-none p-0 m-0">
-                {homePlaylists.map((p) => (
-                  <li><SeriesCard series={p} /></li>
-                ))}
-              </ol>
-            </div>
-          )}
         </div>
       </section>
 
@@ -291,6 +274,35 @@ const homepageSchema = {
       <div class="flex flex-col items-center py-8 opacity-40">
         <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
       </div>
+
+      <!-- SERIES -->
+      {homePlaylists.length > 0 && (
+        <Fragment>
+          <section id="series" class="py-16 px-4 md:px-6">
+            <div class="max-w-7xl mx-auto">
+              <div data-reveal class="home-playlists pt-12">
+                <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">Reading Paths</span>
+                    <h3 class="text-3xl md:text-4xl font-black tracking-normal">SERIES<span class="text-[#8b5cf6]">.</span></h3>
+                  </div>
+                  <a href="/blog/series" class="playlist-see-all">View series</a>
+                </div>
+
+                <ol class="series-strip list-none p-0 m-0">
+                  {homePlaylists.map((p) => (
+                    <li><SeriesCard series={p} /></li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </section>
+
+          <div class="flex flex-col items-center py-8 opacity-40">
+            <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+          </div>
+        </Fragment>
+      )}
 
       <!-- ART GALLERY -->
       <section id="art" class="py-16 px-4 md:px-6 relative">
