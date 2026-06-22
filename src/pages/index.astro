@@ -24,7 +24,9 @@ const profile = await profileService.getProfile();
 // their cover; source repos with the GitHub social-preview (OG) banner.
 const labProjects = await projectService.getAll();
 const { apps: labApps, sources: labSources } = buildLabCards(labProjects);
-const labCards = [...labApps, ...labSources];
+// Homepage previews just the first 2 of each group (released apps + public
+// source); the full list lives on /lab via the "Explore the Lab" link.
+const labCards = [...labApps.slice(0, 2), ...labSources.slice(0, 2)];
 
 const [rawPosts, rawPlaylists] = await Promise.all([
   postService.getAll(),
