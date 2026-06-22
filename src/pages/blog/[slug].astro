@@ -1,9 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import PostCard from "../../components/PostCard.astro";
+import FooterLinks from "../../components/FooterLinks.astro";
 import { postService } from "../../services/posts";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate, formatMarkdown } from "../../utils/blog";
-import { COOKIE_BANNER_ENABLED } from "../../config/features";
 
 export async function getStaticPaths() {
   const posts = await postService.getAll();
@@ -330,12 +330,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
            <div class="flex flex-wrap items-center justify-center gap-6">
              <button id="share-btn" data-share-trigger style="font-family: inherit;" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Share Post <span>↗</span></button>
              <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Connect <span>↗</span></a>
-             <a href="/portfolio" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Portfolio</a>
-             <a href="/terms" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Terms</a>
-             <a href="/privacy" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Privacy</a>
-             {COOKIE_BANNER_ENABLED && (
-             <button type="button" data-cookie-settings style="font-family: inherit;" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">Cookie Settings</button>
-             )}
+             <FooterLinks linkColor="text-gray-400" />
            </div>
         </div>
       </footer>
