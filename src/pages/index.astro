@@ -12,7 +12,7 @@ import { projectService } from "../services/projects";
 import { buildLabCards } from "../utils/labCards";
 import { profileService } from "../services/profile";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../utils/blog";
-import { COOKIE_BANNER_ENABLED } from "../config/features";
+import FooterLinks from "../components/FooterLinks.astro";
 import "../styles/lab-cards.css";
 
 const LAB_ACCENT = "#6c4cf1";
@@ -393,12 +393,7 @@ const homepageSchema = {
             {(profile?.social_links ?? []).map((l) => (
               <a href={l.url} target="_blank" rel="noopener" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">{l.label}</a>
             ))}
-            <a href="/portfolio" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Portfolio</a>
-            <a href="/terms" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Terms</a>
-            <a href="/privacy" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Privacy</a>
-            {COOKIE_BANNER_ENABLED && (
-            <button type="button" data-cookie-settings style="font-family: inherit;" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">Cookie Settings</button>
-            )}
+            <FooterLinks linkColor="text-gray-600" />
           </div>
           <div class="flex flex-col items-center md:items-end gap-3">
             <div class="flex flex-col items-center md:items-end gap-1">
