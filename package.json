@@ -20,7 +20,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@astrojs/cloudflare": "^13.7.0",
+    "@astrojs/cloudflare": "^14.0.0",
     "@sentry/astro": "^10.59.0",
     "@sentry/cloudflare": "^10.59.0",
     "astro": "^6.4.7"
