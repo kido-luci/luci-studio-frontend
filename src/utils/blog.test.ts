@@ -159,6 +159,11 @@ describe('Blog Utils', () => {
             expect(formatMarkdown('[buy](https://example.com)')).toContain('rel="noopener noreferrer"');
             expect(formatMarkdown('[buy](https://example.com)')).not.toContain('sponsored');
         });
+
+        it('marks tracked affiliate redirect links as sponsored', () => {
+            const html = formatMarkdown('[buy](https://api.luci-studio.com/affiliate-links/abc123/go)');
+            expect(html).toContain('rel="sponsored nofollow noopener noreferrer"');
+        });
     });
 
     describe('isAffiliateUrl', () => {
