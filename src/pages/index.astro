@@ -1719,29 +1719,22 @@ body.light-mode .playlist-see-all:hover {
         });
       };
 
-      // Lab + Series cards: each card reveals individually in the clip-mask idiom
-      // (top-down wipe + small rise) instead of popping in with its section.
-      // clearProps drops transform too (not just clipPath) because these cards
-      // carry their hover-lift on the SAME element — a leftover inline transform
-      // would override the :hover lift.
-      const clipCards = (selector: string, o: { y: number; stagger: number; ease: string; duration: number; start: string }) => {
-        const els = gsap.utils.toArray(selector);
-        if (!els.length) return;
-        gsap.set(els, { opacity: 0, y: o.y, clipPath: 'inset(0 0 100% 0)' });
-        ScrollTrigger.batch(els, {
-          start: o.start,
-          once: true,
-          onEnter: (batch: HTMLElement[]) => gsap.to(batch, {
-            opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)',
-            duration: o.duration, ease: o.ease,
-            stagger: { each: o.stagger, from: 'start' },
-            overwrite: true, clearProps: 'transform,clipPath',
-          }),
-        });
-      };
-
       const buildLabSeries = () => {
-        clipCards('.lab-palette > *', { y: 20, stagger: 0.08, ease: 'expo.out', duration: 1.0, start: 'top 85%' });
+        // Lab palette: soft fade-up (no clip-mask wipe).
+        const labItems = gsap.utils.toArray('.lab-palette > *');
+        if (labItems.length) {
+          gsap.set(labItems, { opacity: 0, y: 20 });
+          ScrollTrigger.batch(labItems, {
+            start: 'top 85%',
+            once: true,
+            onEnter: (batch: HTMLElement[]) => gsap.to(batch, {
+              opacity: 1, y: 0,
+              duration: 0.6, ease: 'power2.out',
+              stagger: { each: 0.08, from: 'start' },
+              overwrite: true, clearProps: 'transform',
+            }),
+          });
+        }
         // Series: soft fade-up (no clip-mask wipe) — gentler than the lab cards.
         const seriesItems = gsap.utils.toArray('.series-strip > li');
         if (seriesItems.length) {
