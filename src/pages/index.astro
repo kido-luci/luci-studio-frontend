@@ -1742,7 +1742,21 @@ body.light-mode .playlist-see-all:hover {
 
       const buildLabSeries = () => {
         clipCards('.lab-palette > *', { y: 20, stagger: 0.08, ease: 'expo.out', duration: 1.0, start: 'top 85%' });
-        clipCards('.series-strip > li', { y: 28, stagger: 0.12, ease: 'power3.out', duration: 0.9, start: 'top 88%' });
+        // Series: soft fade-up (no clip-mask wipe) — gentler than the lab cards.
+        const seriesItems = gsap.utils.toArray('.series-strip > li');
+        if (seriesItems.length) {
+          gsap.set(seriesItems, { opacity: 0, y: 18 });
+          ScrollTrigger.batch(seriesItems, {
+            start: 'top 88%',
+            once: true,
+            onEnter: (batch: HTMLElement[]) => gsap.to(batch, {
+              opacity: 1, y: 0,
+              duration: 0.7, ease: 'power2.out',
+              stagger: { each: 0.08, from: 'start' },
+              overwrite: true, clearProps: 'transform',
+            }),
+          });
+        }
         // Lab underline draws left→right as the header settles.
         const underline = document.querySelector('[data-lab-underline]');
         if (underline) {
