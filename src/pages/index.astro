@@ -103,6 +103,11 @@ const homepageSchema = {
     <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-landscape.webp" media="(orientation: landscape)" />
     <!-- Editorial display fonts for the LAB section RepoCards (same as /lab; Space Mono already in Layout). -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap" />
+    <!-- Mark the homepage for the scroll-animation system. Inline + in <head> so it runs
+         BEFORE the body paints: every CSS hidden initial-state below is gated on
+         html.home-anim, so JS-off visitors (class never added) and the GSAP-load failsafe
+         (class removed) both fall back to fully-visible content with zero FOUC. -->
+    <script is:inline>document.documentElement.classList.add('home-anim');</script>
   </Fragment>
 
   <TopNav active="home" ctaLabel="Let's Talk" ctaHref="#contact" />
@@ -1619,5 +1624,57 @@ body.light-mode .playlist-see-all:hover {
       }, { threshold: 0 });
       io.observe(el);
     });
+  })();
+</script>
+
+<script>
+  // ════════════════════════════════════════════════════════════════════════
+  // HOME SCROLL ANIMATIONS — "Develop & Dive"
+  // One gsap.matchMedia() gate wraps every new homepage scroll animation so the
+  // reduced-motion / mobile / desktop paths live in one place. Every CSS hidden
+  // initial-state is gated on html.home-anim; the load failsafe AND the reduce
+  // branch both drop that class so content reveals when motion is unavailable or
+  // unwanted. Reuses the deferred-CDN poll pattern from Layout.astro.
+  // ════════════════════════════════════════════════════════════════════════
+  (function () {
+    const w = window as any;
+    const root = document.documentElement;
+    const ready = () => w.gsap && w.ScrollTrigger;
+
+    const run = () => {
+      const { gsap, ScrollTrigger } = w;
+      gsap.registerPlugin(ScrollTrigger);
+
+      const REDUCE = '(prefers-reduced-motion: reduce)';
+      const FULL   = '(min-width: 769px) and (prefers-reduced-motion: no-preference)';
+      const MOBILE = '(max-width: 768px) and (prefers-reduced-motion: no-preference)';
+
+      const mm = gsap.matchMedia();
+
+      // Reduced motion: no tweens at all — strip the gate so every hidden initial
+      // state collapses to its visible default.
+      mm.add(REDUCE, () => { root.classList.remove('home-anim'); });
+
+      // Full desktop treatment — steps 2–6 register their tweens inside here.
+      mm.add(FULL, () => {
+      });
+
+      // Mobile: cheap once-reveals only, no scrub / parallax — steps 2,3,5.
+      mm.add(MOBILE, () => {
+      });
+    };
+
+    if (ready()) run();
+    else {
+      let waited = 0;
+      const id = setInterval(() => {
+        if (ready()) { clearInterval(id); run(); }
+        else if ((waited += 30) >= 2500) {
+          // GSAP CDN never arrived — reveal everything rather than leave it hidden.
+          clearInterval(id);
+          root.classList.remove('home-anim');
+        }
+      }, 30);
+    }
   })();
 </script>
