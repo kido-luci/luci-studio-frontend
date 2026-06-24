@@ -1,0 +1,204 @@
+---
+// Sponsored / affiliate banner card — matches the /blog "tb-" design language.
+// Self-contained theme tokens so it renders on any page. The link always carries
+// rel="sponsored nofollow ..." (Google requirement for paid links) and opens in a
+// new tab. Point `url` at the backend tracked redirect
+// ({API}/affiliate-links/{id}/go) so admin click counts increment; it 302s to the
+// real destination. Falls back fine to the destination URL directly.
+interface Props {
+  label: string;        // headline / product pitch
+  url: string;          // tracked redirect URL (preferred) or destination
+  badge?: string;       // pill label, e.g. "Sponsored"
+  network?: string;     // optional network/source name (e.g. "Rork")
+  cta?: string;         // button text
+  image?: string;       // optional preview thumbnail (self-hosted); falls back to a gradient icon
+  imageAlt?: string;    // alt text for the preview image
+  logo?: string;        // optional small brand logo-mark shown next to the network name
+}
+
+const {
+  label,
+  url,
+  badge = "Sponsored",
+  network = "",
+  cta = "Check it out",
+  image = "",
+  imageAlt = "",
+  logo = "",
+} = Astro.props;
+---
+
+<a
+  href={url}
+  target="_blank"
+  rel="sponsored nofollow noopener noreferrer"
+  class="aff-card"
+  aria-label={label}
+>
+  <span class="aff-glow" aria-hidden="true"></span>
+  {badge && <span class="aff-badge">{badge}</span>}
+  {image
+    ? <div class="aff-thumb"><img src={image} alt={imageAlt || label} loading="lazy" onerror="this.closest('.aff-thumb').style.display='none'" /></div>
+    : <div class="aff-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
+        </svg>
+      </div>}
+  <div class="aff-body">
+    {network && (
+      <span class="aff-source">
+        {logo && <img class="aff-logo" src={logo} alt="" aria-hidden="true" loading="lazy" onerror="this.style.display='none'" />}
+        <span class="aff-network">{network}</span>
+      </span>
+    )}
+    <p class="aff-label">{label}</p>
+  </div>
+  <span class="aff-cta">{cta}<span class="aff-arrow">→</span></span>
+</a>
+
+<style>
+  .aff-card {
+    --aff-accent: #8b5cf6;
+    --aff-accent-2: #3b82f6;
+    --card-bg: #16161d;
+    --card-bd: rgba(255,255,255,0.08);
+    --card-shadow: 0 4px 14px -10px rgba(0,0,0,0.6);
+    --card-shadow-hover: 0 24px 46px -22px rgba(0,0,0,0.85);
+    --ink: #f3f3f6;
+    --muted: #8b909c;
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-top: 28px;
+    padding: 16px 22px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-bd);
+    border-radius: 18px;
+    overflow: hidden;
+    text-decoration: none;
+    box-shadow: var(--card-shadow);
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+  :global(body.light-mode) .aff-card {
+    --card-bg: #ffffff;
+    --card-bd: #e9e6df;
+    --card-shadow: 0 4px 14px -10px rgba(30,25,70,.2);
+    --card-shadow-hover: 0 22px 44px -22px rgba(30,25,70,.36);
+    --ink: #161827;
+    --muted: #6b7280;
+  }
+  .aff-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+    border-color: color-mix(in srgb, var(--aff-accent) 45%, var(--card-bd));
+  }
+
+  /* Soft accent glow under/around the thumbnail — transitions blue → purple */
+  .aff-glow {
+    position: absolute;
+    left: -40px; top: 50%;
+    width: 380px; height: 240px;
+    transform: translateY(-50%);
+    background:
+      radial-gradient(circle at 24% 50%, rgba(59,130,246,0.22) 0%, rgba(59,130,246,0) 60%),
+      radial-gradient(circle at 58% 50%, rgba(139,92,246,0.22) 0%, rgba(139,92,246,0) 64%);
+    pointer-events: none;
+  }
+  /* Light mode: white card washes the glow out — push it stronger */
+  :global(body.light-mode) .aff-glow {
+    background:
+      radial-gradient(circle at 24% 50%, rgba(59,130,246,0.45) 0%, rgba(59,130,246,0) 62%),
+      radial-gradient(circle at 58% 50%, rgba(139,92,246,0.45) 0%, rgba(139,92,246,0) 66%);
+  }
+
+  .aff-icon {
+    flex: 0 0 auto;
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 14px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--aff-accent), var(--aff-accent-2));
+    box-shadow: 0 8px 20px -10px var(--aff-accent);
+  }
+  .aff-icon svg { width: 24px; height: 24px; }
+
+  /* Preview thumbnail (self-hosted product/og image) */
+  .aff-thumb {
+    position: relative;   /* lift above .aff-glow so the purple radial doesn't tint the image */
+    z-index: 1;
+    flex: 0 0 auto;
+    width: 210px; height: 118px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(139,92,246,0.10);
+    box-shadow: 0 6px 18px -12px rgba(0,0,0,0.6);
+  }
+  .aff-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .aff-body { flex: 1; min-width: 0; }
+  /* Quiet disclosure chip, pinned to the card's top-right corner so it stays clear
+     of the brand line. Solid card-bg keeps it readable when it overlaps the thumbnail
+     (mobile stacked layout). */
+  .aff-badge {
+    position: absolute;
+    top: 12px; right: 14px;
+    z-index: 2;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+    background: var(--card-bg);
+    border: 1px solid var(--card-bd);
+    padding: 3px 8px; border-radius: 999px;
+    opacity: 0.92;
+  }
+  .aff-source { display: inline-flex; align-items: center; gap: 7px; }
+  /* Brand logo-mark in a round box — white fill so a dark favicon stays visible
+     in dark mode too */
+  .aff-logo {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    padding: 3px;
+    object-fit: contain;
+    box-shadow: 0 0 0 1px var(--card-bd), 0 2px 6px -2px rgba(0,0,0,0.22);
+  }
+  .aff-network {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .aff-label {
+    color: var(--ink);
+    font-size: 15.5px; line-height: 1.5; font-weight: 600;
+    margin: 8px 0 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .aff-cta {
+    flex: 0 0 auto;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700; font-size: 12.5px;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: linear-gradient(135deg, var(--aff-accent), var(--aff-accent-2));
+    padding: 11px 18px; border-radius: 999px;
+    white-space: nowrap;
+    transition: filter .2s ease;
+  }
+  .aff-card:hover .aff-cta { filter: brightness(1.08); }
+  .aff-arrow { font-size: 14px; transition: transform .22s ease; }
+  .aff-card:hover .aff-arrow { transform: translateX(3px); }
+
+  @media (max-width: 640px) {
+    .aff-card { flex-wrap: wrap; gap: 14px; padding: 18px 18px; }
+    .aff-icon { width: 44px; height: 44px; }
+    .aff-thumb { width: 100%; height: 150px; }
+    .aff-body { flex: 1 1 100%; }
+    .aff-cta { width: 100%; justify-content: center; }
+  }
+</style>
