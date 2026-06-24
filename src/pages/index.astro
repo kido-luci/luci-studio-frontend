@@ -249,7 +249,7 @@ const homepageSchema = {
       </section>
 
       <div class="flex flex-col items-center py-8 opacity-40">
-        <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+        <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
       </div>
 
       <!-- LAB -->
@@ -277,7 +277,7 @@ const homepageSchema = {
       </section>
 
       <div class="flex flex-col items-center py-8 opacity-40">
-        <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+        <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
       </div>
 
       <!-- SERIES -->
@@ -304,7 +304,7 @@ const homepageSchema = {
           </section>
 
           <div class="flex flex-col items-center py-8 opacity-40">
-            <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+            <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
           </div>
         </Fragment>
       )}
@@ -368,7 +368,7 @@ const homepageSchema = {
       </section>
 
       <div class="flex flex-col items-center py-8 opacity-40">
-        <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+        <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
       </div>
 
     </div>
@@ -1195,8 +1195,12 @@ body.light-mode .playlist-see-all:hover {
   /* Step 2 — blog grid curtain: cards start invisible, GSAP owns the transform. */
   html.home-anim #home-blog-grid > .tb-card-link { opacity: 0; }
 
+  /* Step 3 — section connectors draw downward (collapsed from the top). */
+  html.home-anim [data-connector] { transform: scaleY(0); transform-origin: top center; }
+
   @media (prefers-reduced-motion: reduce) {
     html.home-anim #home-blog-grid > .tb-card-link { opacity: 1; }
+    html.home-anim [data-connector] { transform: none; }
   }
 </style>
 
@@ -1689,6 +1693,23 @@ body.light-mode .playlist-see-all:hover {
         });
       };
 
+      // Section connectors: the 4 pink lines draw downward (scaleY 0→1 from the
+      // top) as a handoff cue between sections. Once, not scrub — pure transform,
+      // win-perf-mode safe, no extra continuously-updating triggers.
+      const buildConnectors = () => {
+        const lines = gsap.utils.toArray('[data-connector]');
+        if (!lines.length) return;
+        gsap.set(lines, { scaleY: 0, transformOrigin: 'top center' });
+        (lines as HTMLElement[]).forEach((line) => {
+          gsap.to(line, {
+            scaleY: 1,
+            duration: 0.5,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: line, start: 'top 92%', once: true },
+          });
+        });
+      };
+
       // Reduced motion: no tweens at all — strip the gate so every hidden initial
       // state collapses to its visible default.
       mm.add(REDUCE, () => { root.classList.remove('home-anim'); });
@@ -1696,11 +1717,13 @@ body.light-mode .playlist-see-all:hover {
       // Full desktop treatment — steps 2–6 register their tweens inside here.
       mm.add(FULL, () => {
         buildBlogCurtain(false);
+        buildConnectors();
       });
 
       // Mobile: cheap once-reveals only, no scrub / parallax — steps 2,3,5.
       mm.add(MOBILE, () => {
         buildBlogCurtain(true);
+        buildConnectors();
       });
     };
 
