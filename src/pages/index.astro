@@ -258,7 +258,7 @@ const homepageSchema = {
           <div data-reveal class="mb-20">
             <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Open Source &amp; Apps</span>
             <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">Lab<span class="text-violet-500">.</span></h2>
-            <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
+            <div data-lab-underline class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
           </div>
           <div class="lab-palette grid grid-cols-1 md:grid-cols-2 gap-7" style="font-family:'Hanken Grotesk',system-ui,sans-serif;">
             {labCards.map((c) => (
@@ -285,8 +285,8 @@ const homepageSchema = {
         <Fragment>
           <section id="series" class="py-16 px-4 md:px-6">
             <div class="max-w-7xl mx-auto">
-              <div data-reveal class="home-playlists pt-12">
-                <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div class="home-playlists pt-12">
+                <div data-reveal class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">Reading Paths</span>
                     <h3 class="text-3xl md:text-4xl font-black tracking-normal">SERIES<span class="text-[#8b5cf6]">.</span></h3>
@@ -1198,9 +1198,18 @@ body.light-mode .playlist-see-all:hover {
   /* Step 3 — section connectors draw downward (collapsed from the top). */
   html.home-anim [data-connector] { transform: scaleY(0); transform-origin: top center; }
 
+  /* Step 5 — Lab + Series cards start invisible (GSAP clip-reveals each);
+     the Lab underline draws left→right from a collapsed scaleX. */
+  html.home-anim .lab-palette > *,
+  html.home-anim .series-strip > li { opacity: 0; }
+  html.home-anim [data-lab-underline] { transform: scaleX(0); transform-origin: left center; }
+
   @media (prefers-reduced-motion: reduce) {
     html.home-anim #home-blog-grid > .tb-card-link { opacity: 1; }
     html.home-anim [data-connector] { transform: none; }
+    html.home-anim .lab-palette > *,
+    html.home-anim .series-strip > li { opacity: 1; }
+    html.home-anim [data-lab-underline] { transform: none; }
   }
 </style>
 
@@ -1710,6 +1719,41 @@ body.light-mode .playlist-see-all:hover {
         });
       };
 
+      // Lab + Series cards: each card reveals individually in the clip-mask idiom
+      // (top-down wipe + small rise) instead of popping in with its section.
+      // clearProps drops transform too (not just clipPath) because these cards
+      // carry their hover-lift on the SAME element — a leftover inline transform
+      // would override the :hover lift.
+      const clipCards = (selector: string, o: { y: number; stagger: number; ease: string; duration: number; start: string }) => {
+        const els = gsap.utils.toArray(selector);
+        if (!els.length) return;
+        gsap.set(els, { opacity: 0, y: o.y, clipPath: 'inset(0 0 100% 0)' });
+        ScrollTrigger.batch(els, {
+          start: o.start,
+          once: true,
+          onEnter: (batch: HTMLElement[]) => gsap.to(batch, {
+            opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)',
+            duration: o.duration, ease: o.ease,
+            stagger: { each: o.stagger, from: 'start' },
+            overwrite: true, clearProps: 'transform,clipPath',
+          }),
+        });
+      };
+
+      const buildLabSeries = () => {
+        clipCards('.lab-palette > *', { y: 20, stagger: 0.08, ease: 'expo.out', duration: 1.0, start: 'top 85%' });
+        clipCards('.series-strip > li', { y: 28, stagger: 0.12, ease: 'power3.out', duration: 0.9, start: 'top 88%' });
+        // Lab underline draws left→right as the header settles.
+        const underline = document.querySelector('[data-lab-underline]');
+        if (underline) {
+          gsap.set(underline, { scaleX: 0, transformOrigin: 'left center' });
+          gsap.to(underline, {
+            scaleX: 1, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: { trigger: underline, start: 'top 90%', once: true },
+          });
+        }
+      };
+
       // Reduced motion: no tweens at all — strip the gate so every hidden initial
       // state collapses to its visible default.
       mm.add(REDUCE, () => { root.classList.remove('home-anim'); });
@@ -1718,12 +1762,14 @@ body.light-mode .playlist-see-all:hover {
       mm.add(FULL, () => {
         buildBlogCurtain(false);
         buildConnectors();
+        buildLabSeries();
       });
 
       // Mobile: cheap once-reveals only, no scrub / parallax — steps 2,3,5.
       mm.add(MOBILE, () => {
         buildBlogCurtain(true);
         buildConnectors();
+        buildLabSeries();
       });
     };
 
