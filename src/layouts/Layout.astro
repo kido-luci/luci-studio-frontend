@@ -928,6 +928,13 @@ const canonicalURL = canonical ?? SITE_URL;
 				const { gsap, ScrollTrigger } = w;
 				gsap.registerPlugin(ScrollTrigger);
 
+				// Homepage-only: upgrade the default [data-reveal] from a plain fade-up to a
+				// masked clip-rise (the page's native idiom — see the hero wordmark). Gated on
+				// .home-anim so every OTHER page keeps the fade unchanged, and off under
+				// reduced-motion since the clip is new motion.
+				const homeClip = document.documentElement.classList.contains('home-anim')
+					&& !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 				// [data-reveal]: group by variant, ScrollTrigger.batch animates each group together.
 				const allReveals = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
 				if (allReveals.length) {
@@ -941,7 +948,7 @@ const canonicalURL = canonical ?? SITE_URL;
 					// Guard each set: a page may have no elements for a given variant, and
 					// gsap.set([]) logs a "GSAP target not found" warning. Mirrors the
 					// length guards on the ScrollTrigger.batch calls below.
-					if (groups.default.length) gsap.set(groups.default, { opacity: 0, y: 40 });
+					if (groups.default.length) gsap.set(groups.default, homeClip ? { opacity: 0, y: 24, clipPath: 'inset(100% 0 0 0)' } : { opacity: 0, y: 40 });
 					if (groups.left.length)    gsap.set(groups.left,    { opacity: 0, x: -40 });
 					if (groups.right.length)   gsap.set(groups.right,   { opacity: 0, x: 40 });
 					if (groups.scale.length)   gsap.set(groups.scale,   { opacity: 0, scale: 0.92 });
@@ -960,7 +967,20 @@ const canonicalURL = canonical ?? SITE_URL;
 							});
 						}
 					});
-					if (groups.default.length) ScrollTrigger.batch(groups.default, batchTo({ opacity: 1, y: 0 }));
+					if (groups.default.length) ScrollTrigger.batch(groups.default, homeClip ? {
+						start: 'top 92%',
+						once: true,
+						onEnter: (els: HTMLElement[]) => {
+							gsap.to(els, {
+								opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)',
+								duration: 0.95, ease: 'power4.out', stagger: 0.10,
+								overwrite: true,
+								// Clear clipPath too, so revealed blocks aren't left clipping
+								// their own box-shadow / hover-lift (e.g. .hero-pillars).
+								clearProps: 'transition,clipPath'
+							});
+						}
+					} : batchTo({ opacity: 1, y: 0 }));
 					if (groups.left.length)    ScrollTrigger.batch(groups.left,    batchTo({ opacity: 1, x: 0 }));
 					if (groups.right.length)   ScrollTrigger.batch(groups.right,   batchTo({ opacity: 1, x: 0 }));
 					if (groups.scale.length)   ScrollTrigger.batch(groups.scale,   batchTo({ opacity: 1, scale: 1 }));
