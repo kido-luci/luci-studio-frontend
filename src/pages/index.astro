@@ -1754,6 +1754,25 @@ body.light-mode .playlist-see-all:hover {
         }
       };
 
+      // Art bg: the sticky full-bleed photo behind the masonry finally drifts —
+      // a slow scrubbed parallax so the gallery slides OVER it (depth). Driven by
+      // background-position, NOT a transform: #art-bg is a sticky child inside a
+      // clip-path:inset(0) wrapper that would crop/fight a transform. cover means
+      // the position shift never exposes a seam. The ONLY continuous trigger on
+      // the page — desktop-only (this is the called-out mobile jank source) and
+      // skipped under win-perf-mode.
+      const buildArtParallax = () => {
+        if (document.body.classList.contains('win-perf-mode')) return;
+        const bg = document.querySelector('#art-bg');
+        if (!bg) return;
+        gsap.fromTo(bg,
+          { backgroundPosition: 'center 38%' },
+          {
+            backgroundPosition: 'center 62%', ease: 'none',
+            scrollTrigger: { trigger: '#art', start: 'top bottom', end: 'bottom top', scrub: 1 },
+          });
+      };
+
       // Reduced motion: no tweens at all — strip the gate so every hidden initial
       // state collapses to its visible default.
       mm.add(REDUCE, () => { root.classList.remove('home-anim'); });
@@ -1763,6 +1782,7 @@ body.light-mode .playlist-see-all:hover {
         buildBlogCurtain(false);
         buildConnectors();
         buildLabSeries();
+        buildArtParallax();
       });
 
       // Mobile: cheap once-reveals only, no scrub / parallax — steps 2,3,5.
