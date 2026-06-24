@@ -1534,6 +1534,7 @@ body.light-mode .playlist-see-all:hover {
   // ML6 "Beautiful Questions" — word-level mask reveal: each word rises from behind a clip
   // box, no opacity fade. Reads as one elegant gesture instead of letter popcorn.
   (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const w = window as any;
     const ready = () => w.gsap && w.SplitText;
     const run = () => {
@@ -1599,6 +1600,7 @@ body.light-mode .playlist-see-all:hover {
   // ML9 "Coffee Mornings" — chars rise from behind a per-char mask with a slight tilt,
   // settling with an expo decel. Triggered once per header on scroll into view.
   (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const w = window as any;
     const ready = () => w.gsap && w.ScrollTrigger && w.SplitText;
     const run = () => {

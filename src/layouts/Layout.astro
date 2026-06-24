@@ -323,6 +323,11 @@ const canonicalURL = canonical ?? SITE_URL;
 				transform: translateY(0) translateX(0) scale(1) !important;
 				will-change: auto;
 			}
+			/* Reduced motion: shared reveals appear at rest — no fade/slide. */
+			@media (prefers-reduced-motion: reduce) {
+				.reveal-word span { transform: none !important; opacity: 1 !important; transition: none !important; }
+				[data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+			}
 			[data-delay="1"] { transition-delay: 0.06s; }
 			[data-delay="2"] { transition-delay: 0.12s; }
 			[data-delay="3"] { transition-delay: 0.18s; }
@@ -922,6 +927,8 @@ const canonicalURL = canonical ?? SITE_URL;
 		// CSS keeps the initial hidden state (no FOUC); GSAP overrides the CSS transition and
 		// runs the in-motion itself.
 		(function () {
+			// Reduced motion: skip every reveal; CSS resolves the hidden states to visible.
+			if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 			const w = window as any;
 			const ready = () => w.gsap && w.ScrollTrigger;
 			const run = () => {
