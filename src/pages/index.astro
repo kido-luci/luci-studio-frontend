@@ -1185,6 +1185,21 @@ body.light-mode .playlist-see-all:hover {
 }
 </style>
 
+<!-- ── Home scroll-animation hidden initial-states ──────────────────────────
+  Render-blocking + gated on html.home-anim so they exist before first paint
+  (no FOUC) and vanish when the foundation script drops .home-anim (JS off,
+  GSAP CDN failed, or reduced-motion). GSAP owns the in-motion; this only hides
+  the start. Targets PostCard/RepoCard/SeriesCard roots, which carry their own
+  Astro scope attr — so this MUST be is:global, not the scoped block above. -->
+<style is:global>
+  /* Step 2 — blog grid curtain: cards start invisible, GSAP owns the transform. */
+  html.home-anim #home-blog-grid > .tb-card-link { opacity: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.home-anim #home-blog-grid > .tb-card-link { opacity: 1; }
+  }
+</style>
+
 <script>
   import { invalidatePostStatsCache, refreshPostStats } from '../utils/postStats';
 
@@ -1651,16 +1666,41 @@ body.light-mode .playlist-see-all:hover {
 
       const mm = gsap.matchMedia();
 
+      // ── Section builders (called from the contexts below; tweens created here
+      // are auto-reverted by matchMedia when their context stops matching) ──────
+
+      // Blog grid: the 6 cards rise as ONE diagonal gesture (top-left → bottom-
+      // right) instead of 6 separate pops. Transform/opacity only — clip-path
+      // would crop PostCard's hover shadow (it lives on the inner .tb-card).
+      const buildBlogCurtain = (mobile: boolean) => {
+        const grid = document.querySelector('#home-blog-grid');
+        if (!grid) return;
+        const cards = gsap.utils.toArray('#home-blog-grid > *');
+        if (!cards.length) return;
+        gsap.set(cards, { opacity: 0, y: mobile ? 40 : 60, scale: 0.96 });
+        gsap.to(cards, {
+          opacity: 1, y: 0, scale: 1,
+          duration: mobile ? 0.6 : 0.8,
+          ease: 'power3.out',
+          // grid:'auto' infers rows/cols from layout, so the diagonal works at
+          // 3-col / 2-col / 1-col without hardcoding a grid shape per breakpoint.
+          stagger: { each: 0.08, grid: 'auto', from: 'start' },
+          scrollTrigger: { trigger: grid, start: 'top 85%', once: true },
+        });
+      };
+
       // Reduced motion: no tweens at all — strip the gate so every hidden initial
       // state collapses to its visible default.
       mm.add(REDUCE, () => { root.classList.remove('home-anim'); });
 
       // Full desktop treatment — steps 2–6 register their tweens inside here.
       mm.add(FULL, () => {
+        buildBlogCurtain(false);
       });
 
       // Mobile: cheap once-reveals only, no scrub / parallax — steps 2,3,5.
       mm.add(MOBILE, () => {
+        buildBlogCurtain(true);
       });
     };
 
