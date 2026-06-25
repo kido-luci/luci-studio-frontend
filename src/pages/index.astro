@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import RepoCard from "../components/RepoCard.astro";
 import TopNav from "../components/TopNav.astro";
+import LabDecor from "../components/LabDecor.astro";
 import SeriesCard from "../components/SeriesCard.astro";
 import PostCard from "../components/PostCard.astro";
 import { postService } from "../services/posts";
@@ -117,6 +118,7 @@ const homepageSchema = {
     <!-- HERO -->
     <section class="relative min-h-screen flex flex-col pt-20">
       <div class="hero-bg-img absolute inset-0 pointer-events-none z-[0]" style="background-size:cover;background-position:center;background-repeat:no-repeat;"></div>
+      <LabDecor />
       <!-- Vanta.js halo is handled in Layout.astro -->
 
       <!-- Floating orbs for depth -->

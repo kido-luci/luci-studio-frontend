@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../../components/TopNav.astro";
+import LabDecor from "../../components/LabDecor.astro";
 import SeriesCard from "../../components/SeriesCard.astro";
 import PostCard from "../../components/PostCard.astro";
 import AffiliateCard from "../../components/AffiliateCard.astro";
@@ -67,7 +68,8 @@ const allTopics = [...topicCounts.keys()].sort(
 
   <TopNav active="blog" />
 
-  <main class="pt-36 pb-24 px-4 md:px-6 min-h-screen bg-[var(--bg-primary)]" data-api-url={API_URL}>
+  <main class="pt-36 pb-24 px-4 md:px-6 min-h-screen bg-[var(--bg-primary)] relative" data-api-url={API_URL}>
+    <LabDecor />
     <div class="max-w-7xl mx-auto tb-root">
 
       <!-- Header -->
@@ -244,6 +246,8 @@ const allTopics = [...topicCounts.keys()].sort(
 
   /* ══ Thoughts Blog (Thoughts Blog.dc design) — theme-aware ══ */
   .tb-root {
+    position: relative;
+    z-index: 1;
     --tb-accent: #8b5cf6;
     --card-bg: #16161d; --card-bd: rgba(255,255,255,0.08);
     --card-shadow: 0 4px 14px -10px rgba(0,0,0,0.6);

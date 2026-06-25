@@ -1,6 +1,7 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
 import TopNav from "../../../components/TopNav.astro";
+import LabDecor from "../../../components/LabDecor.astro";
 import SeriesCard from "../../../components/SeriesCard.astro";
 import AffiliateCard from "../../../components/AffiliateCard.astro";
 import { postService } from "../../../services/posts";
@@ -33,6 +34,7 @@ const SITE_URL = 'https://luci-studio.com';
 
   <main class="series-main pt-36 pb-28 px-5 md:px-8 min-h-screen">
     <div class="series-grid-bg" aria-hidden="true"></div>
+    <LabDecor />
 
     <div class="series-shell">
 
