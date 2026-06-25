@@ -17,6 +17,18 @@ export interface AffiliateLink {
     updated_at?: string;
 }
 
+// View-model shape consumed by AffiliateCard.astro — the props the card needs,
+// already normalized (tracked redirect URL, resolved network name, alt text).
+export interface AffiliateCardVM {
+    url: string;
+    label: string;
+    network: string;
+    cta: string;
+    image: string;
+    logo: string;
+    imageAlt: string;
+}
+
 export const affiliateService = {
     // Active affiliate links for the sponsored card, fetched at build time.
     // Non-critical: any failure (endpoint not yet deployed, network, etc.) returns
@@ -38,5 +50,24 @@ export const affiliateService = {
     trackedUrl(id: string, base: string = BASE_URL): string {
         const b = base.endsWith('/') ? base.slice(0, -1) : base;
         return `${b}/affiliate-links/${id}/go`;
+    },
+
+    // Active links mapped to AffiliateCard props — tracked URL, resolved network
+    // name, and derived alt text. Used by every page that renders a sponsored
+    // card so the mapping lives in one place. Empty list on any failure.
+    async getCards(apiUrl: string = BASE_URL): Promise<AffiliateCardVM[]> {
+        const links = await this.getActive();
+        return links.map((a) => {
+            const network = a.name || a.network || '';
+            return {
+                url: this.trackedUrl(a.id, apiUrl),
+                label: a.label,
+                network,
+                cta: a.cta_text || '',
+                image: a.image_url || '',
+                logo: a.logo_url || '',
+                imageAlt: network ? `${network} — ${a.label}` : a.label,
+            };
+        });
     },
 };
