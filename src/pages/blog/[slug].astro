@@ -2,7 +2,6 @@
 import Layout from "../../layouts/Layout.astro";
 import PostCard from "../../components/PostCard.astro";
 import AffiliateCard from "../../components/AffiliateCard.astro";
-import FooterLinks from "../../components/FooterLinks.astro";
 import { postService } from "../../services/posts";
 import { affiliateService } from "../../services/affiliates";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate, formatMarkdown } from "../../utils/blog";
@@ -389,25 +388,6 @@ const structuredData = [articleSchema, breadcrumbSchema];
           />
         </div>
       )}
-
-      <footer class="mt-20 pt-12 border-t border-white/5">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-8">
-           <div class="flex items-center gap-4">
-             <div class="w-12 h-12 rounded-2xl overflow-hidden border border-white/10">
-               <img src="https://i.pinimg.com/736x/af/92/91/af9291e0307a1002e7ed63878f93ae46.jpg" alt="Author" loading="lazy" class="w-full h-full object-cover" />
-             </div>
-             <div>
-               <p class="text-sm font-bold text-white">Trung Lập (Luci)</p>
-               <p class="text-xs text-gray-500 uppercase tracking-widest">Software Engineer & Founder</p>
-             </div>
-           </div>
-           <div class="flex flex-wrap items-center justify-center gap-6">
-             <button id="share-btn" data-share-trigger style="font-family: inherit;" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Share Post <span>↗</span></button>
-             <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" class="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">Connect <span>↗</span></a>
-             <FooterLinks linkColor="text-gray-400" />
-           </div>
-        </div>
-      </footer>
 
       {relatedPosts.length > 0 && (
         <section class="more-posts mt-20 pt-12 border-t border-white/5">
@@ -2381,16 +2361,6 @@ const structuredData = [articleSchema, breadcrumbSchema];
   }
 
   body.light-mode footer .text-white {
-    color: #111827 !important;
-  }
-
-  body.light-mode footer .text-gray-500,
-  body.light-mode footer .text-gray-400 {
-    color: #6b7280 !important;
-  }
-
-  body.light-mode footer #share-btn:hover,
-  body.light-mode footer a:hover {
     color: #111827 !important;
   }
 
