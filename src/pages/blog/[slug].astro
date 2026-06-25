@@ -1,8 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import PostCard from "../../components/PostCard.astro";
+import AffiliateCard from "../../components/AffiliateCard.astro";
 import FooterLinks from "../../components/FooterLinks.astro";
 import { postService } from "../../services/posts";
+import { affiliateService } from "../../services/affiliates";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate, formatMarkdown } from "../../utils/blog";
 
 export async function getStaticPaths() {
@@ -58,6 +60,40 @@ const readTime = post ? calculateReadTime(post.content) : '';
 const formattedDate = post ? formatDate(post.created_at) : '';
 const contentWithoutTitle = post ? post.content.replace(/^#\s+.*(\r?\n|$)/, '').replace(/^#\s/gm, '## ').trimStart() : '';
 const htmlContent = contentWithoutTitle ? formatMarkdown(contentWithoutTitle) : '';
+
+// Sponsored cards — fetched at build time (active links only; empty on failure).
+// Two distinct slots on the page: one mid-article, one at the end. With ≥2 active
+// links they show different sponsors; with exactly 1 we show it once (end only).
+const affiliateCards = await affiliateService.getCards(API_URL);
+const midCard = affiliateCards.length >= 2 ? affiliateCards[0] : null;
+const endCard = affiliateCards.length >= 2 ? affiliateCards[1] : (affiliateCards[0] ?? null);
+
+// Mid-article injection point: htmlContent is block HTML joined by "\n", and every
+// "<h2>" starts a standalone section block (utils/blog.ts), so splitting immediately
+// before one is a safe boundary. Only inject on long posts (≥4 sections) so the card
+// lands mid-read rather than next to the intro/outro; otherwise render in one piece.
+let articleTop = htmlContent;
+let articleBottom = '';
+if (midCard && htmlContent) {
+  const h2Indices: number[] = [];
+  const h2Re = /<h2>/g;
+  let h2Match: RegExpExecArray | null;
+  while ((h2Match = h2Re.exec(htmlContent)) !== null) h2Indices.push(h2Match.index);
+  if (h2Indices.length >= 4) {
+    const mid = htmlContent.length / 2;
+    // Skip the first heading so an intro stays above the card; pick the remaining
+    // section boundary closest to the character midpoint.
+    const candidates = h2Indices.slice(1);
+    let splitAt = candidates[0];
+    for (const idx of candidates) {
+      if (Math.abs(idx - mid) < Math.abs(splitAt - mid)) splitAt = idx;
+    }
+    articleTop = htmlContent.slice(0, splitAt);
+    articleBottom = htmlContent.slice(splitAt);
+  }
+}
+const showMidCard = !!midCard && articleBottom !== '';
+
 const tags = (post && post.topics && post.topics.length > 0) ? post.topics : ['Engineering'];
 
 const relatedPosts = (related ?? []).map(p => ({
@@ -279,8 +315,29 @@ const structuredData = [articleSchema, breadcrumbSchema];
       </header>
 
       <!-- Content -->
-      <article class="prose-custom markdown-content" set:html={htmlContent}>
+      <article class="prose-custom markdown-content" set:html={articleTop}>
       </article>
+
+      <!-- Mid-article sponsored card (long posts only; distinct from the end-of-article one) -->
+      {showMidCard && midCard && (
+        <div class="my-12">
+          <AffiliateCard
+            label={midCard.label}
+            url={midCard.url}
+            network={midCard.network}
+            badge="Sponsored"
+            cta={midCard.cta || undefined}
+            image={midCard.image}
+            imageAlt={midCard.imageAlt}
+            logo={midCard.logo}
+          />
+        </div>
+      )}
+
+      {articleBottom && (
+        <article class="prose-custom markdown-content" set:html={articleBottom}>
+        </article>
+      )}
 
       <!-- Like + Support card -->
       <div class="support-card mt-24 rounded-3xl border border-white/10 bg-white/[0.02] px-6 py-12 md:px-12 flex flex-col items-center text-center gap-4">
@@ -315,6 +372,22 @@ const structuredData = [articleSchema, breadcrumbSchema];
           <span class="text-[10px] text-gray-600 uppercase tracking-[0.2em]">Scan to pay</span>
         </div>
       </div>
+
+      <!-- End-of-article sponsored card (distinct from the mid-article one) -->
+      {endCard && (
+        <div class="mt-16">
+          <AffiliateCard
+            label={endCard.label}
+            url={endCard.url}
+            network={endCard.network}
+            badge="Sponsored"
+            cta={endCard.cta || undefined}
+            image={endCard.image}
+            imageAlt={endCard.imageAlt}
+            logo={endCard.logo}
+          />
+        </div>
+      )}
 
       <footer class="mt-20 pt-12 border-t border-white/5">
         <div class="flex flex-col md:flex-row items-center justify-between gap-8">
