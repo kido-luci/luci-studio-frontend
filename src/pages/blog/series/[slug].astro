@@ -1,7 +1,9 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
 import TopNav from "../../../components/TopNav.astro";
+import AffiliateCard from "../../../components/AffiliateCard.astro";
 import { playlistService } from "../../../services/playlists";
+import { affiliateService } from "../../../services/affiliates";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../../../utils/blog";
 
 export async function getStaticPaths() {
@@ -58,6 +60,9 @@ const { playlist } = Astro.props;
 if (!playlist) {
   return Astro.redirect('/blog/series');
 }
+
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
+const affiliateCards = await affiliateService.getCards(API_URL);
 
 const SITE_URL = 'https://luci-studio.com';
 const formattedDate = formatDate(playlist.created_at);
@@ -120,6 +125,21 @@ const seoDescription = playlist.description
 
         <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-8 max-w-xs"></div>
       </div>
+
+      {affiliateCards.length > 0 && (
+        <div data-reveal>
+          <AffiliateCard
+            label={affiliateCards[0].label}
+            url={affiliateCards[0].url}
+            network={affiliateCards[0].network}
+            badge="Sponsored"
+            cta={affiliateCards[0].cta || undefined}
+            image={affiliateCards[0].image}
+            imageAlt={affiliateCards[0].imageAlt}
+            logo={affiliateCards[0].logo}
+          />
+        </div>
+      )}
 
       <!-- Empty state -->
       {posts.length === 0 && (
