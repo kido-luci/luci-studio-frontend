@@ -71,16 +71,19 @@ export const affiliateService = {
         });
     },
 
-    // Up to `count` distinct active links, shuffled. The blog is static, so this
-    // runs at BUILD time: each page render reshuffles, so the picks rotate every
-    // deploy (and differ across pages) without any per-request backend cost.
-    // Pages pass their fixed slot count (e.g. blog → 2, series → 1).
+    // Exactly `count` cards to fill a page's fixed sponsor slots, shuffled. The
+    // blog is static, so this runs at BUILD time: each page render reshuffles, so
+    // picks rotate every deploy (and differ across pages) with zero per-request
+    // backend cost. When there are fewer active links than slots the pool is
+    // cycled, so a link repeats ONLY when there aren't enough distinct ones to
+    // fill the slots (e.g. 1 active link + a 2-slot page → that link twice).
     async getCardsRandom(apiUrl: string = BASE_URL, count: number): Promise<AffiliateCardVM[]> {
-        const cards = await this.getCards(apiUrl);
-        for (let i = cards.length - 1; i > 0; i--) {
+        const pool = await this.getCards(apiUrl);
+        if (pool.length === 0) return [];
+        for (let i = pool.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [cards[i], cards[j]] = [cards[j], cards[i]];
+            [pool[i], pool[j]] = [pool[j], pool[i]];
         }
-        return cards.slice(0, count);
+        return Array.from({ length: count }, (_, i) => pool[i % pool.length]);
     },
 };
