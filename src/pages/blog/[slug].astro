@@ -61,10 +61,11 @@ const formattedDate = post ? formatDate(post.created_at) : '';
 const contentWithoutTitle = post ? post.content.replace(/^#\s+.*(\r?\n|$)/, '').replace(/^#\s/gm, '## ').trimStart() : '';
 const htmlContent = contentWithoutTitle ? formatMarkdown(contentWithoutTitle) : '';
 
-// Sponsored cards — fetched at build time (active links only; empty on failure).
-// Two distinct slots on the page: one mid-article, one at the end. With ≥2 active
-// links they show different sponsors; with exactly 1 we show it once (end only).
-const affiliateCards = await affiliateService.getCards(API_URL);
+// Sponsored cards — 2 distinct active links picked at build time (the post page's
+// fixed slot count; empty on failure). Two slots: one mid-article, one at the end.
+// With ≥2 active links they show different sponsors; with exactly 1 we show it
+// once (end only).
+const affiliateCards = await affiliateService.getCardsRandom(API_URL, 2);
 const midCard = affiliateCards.length >= 2 ? affiliateCards[0] : null;
 const endCard = affiliateCards.length >= 2 ? affiliateCards[1] : (affiliateCards[0] ?? null);
 
