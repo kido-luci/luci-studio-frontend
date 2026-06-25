@@ -62,7 +62,8 @@ if (!playlist) {
 }
 
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
-const affiliateCards = await affiliateService.getCards(API_URL);
+// 1 random active link picked at build time (the series page's fixed slot count).
+const affiliateCards = await affiliateService.getCardsRandom(API_URL, 1);
 
 const SITE_URL = 'https://luci-studio.com';
 const formattedDate = formatDate(playlist.created_at);
