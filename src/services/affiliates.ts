@@ -70,4 +70,17 @@ export const affiliateService = {
             };
         });
     },
+
+    // Up to `count` distinct active links, shuffled. The blog is static, so this
+    // runs at BUILD time: each page render reshuffles, so the picks rotate every
+    // deploy (and differ across pages) without any per-request backend cost.
+    // Pages pass their fixed slot count (e.g. blog → 2, series → 1).
+    async getCardsRandom(apiUrl: string = BASE_URL, count: number): Promise<AffiliateCardVM[]> {
+        const cards = await this.getCards(apiUrl);
+        for (let i = cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cards[i], cards[j]] = [cards[j], cards[i]];
+        }
+        return cards.slice(0, count);
+    },
 };
