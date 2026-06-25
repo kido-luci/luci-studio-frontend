@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import TimelineItem from "../components/TimelineItem.astro";
 import TopNav from "../components/TopNav.astro";
+import LabDecor from "../components/LabDecor.astro";
 import { workService } from "../services/work";
 import { profileService } from "../services/profile";
 import { skillsService } from "../services/skills";
@@ -61,8 +62,9 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
   <main class="pt-20">
 
     <!-- MY STORY -->
-    <section id="about" class="py-24 px-4 md:px-6 overflow-hidden">
-      <div class="max-w-7xl mx-auto">
+    <section id="about" class="py-24 px-4 md:px-6 overflow-hidden relative">
+      <LabDecor />
+      <div class="max-w-7xl mx-auto relative z-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <!-- Left: Photo -->
           <div data-story-photo class="relative group">
@@ -262,6 +264,10 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
 [data-story-label].story-visible { animation: storyLabelIn 0.55s cubic-bezier(0.16,1,0.3,1) both; }
 [data-story-para] { opacity: 0; transform: translateY(22px); }
 [data-story-para].story-visible { animation: storyParaIn 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+
+body.light-mode {
+  background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
+}
 
 /* Stats tilt-card light mode */
 body.light-mode .tilt-card {
