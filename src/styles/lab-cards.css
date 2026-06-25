@@ -4,7 +4,7 @@
    .light-mode class. Shared by the /lab page and the homepage LAB section so
    both render identical cards from one place. */
 .lab-palette {
-  --lab-bg: radial-gradient(120% 80% at 80% -10%, #efeae0 0%, #f4f2ec 60%);
+  --lab-bg: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
   --lab-text: #13151d;
   --lab-muted: #5c606b;
   --lab-card-bg: #ffffff;
