@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import TopNav from "../components/TopNav.astro";
+import LabDecor from "../components/LabDecor.astro";
 
 const SITE_URL = 'https://luci-studio.com';
 const lastUpdated = 'June 19, 2026';
@@ -15,7 +16,8 @@ const lastUpdated = 'June 19, 2026';
   <TopNav />
 
   <main class="legal-page pt-36 pb-60 px-4 md:px-6 min-h-screen">
-    <article class="max-w-3xl mx-auto">
+    <LabDecor />
+    <article class="max-w-3xl mx-auto relative z-10">
       <p class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4">Legal</p>
       <h1 class="text-5xl md:text-7xl tracking-tighter mb-4" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">Terms of Use<span class="text-violet-500">.</span></h1>
       <p class="text-sm text-gray-500 mb-12">Last updated: {lastUpdated}</p>
@@ -72,7 +74,7 @@ const lastUpdated = 'June 19, 2026';
         <section>
           <h2>Contact</h2>
           <p>
-            For questions about these terms, contact <a href="mailto:lapl1412.work@gmail.com">lapl1412.work@gmail.com</a>.
+            For questions about these terms, contact <a href="mailto:kidoluci.work@gmail.com">kidoluci.work@gmail.com</a>.
           </p>
         </section>
       </div>
@@ -82,7 +84,12 @@ const lastUpdated = 'June 19, 2026';
 
 <style>
   .legal-page {
+    position: relative;
     background: var(--bg-primary);
+  }
+
+  body.light-mode .legal-page {
+    background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
   }
 
   .legal-copy {

@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import RepoCard from "../components/RepoCard.astro";
 import TopNav from "../components/TopNav.astro";
+import LabDecor from "../components/LabDecor.astro";
 import SeriesCard from "../components/SeriesCard.astro";
 import PostCard from "../components/PostCard.astro";
 import { postService } from "../services/posts";
@@ -117,6 +118,7 @@ const homepageSchema = {
     <!-- HERO -->
     <section class="relative min-h-screen flex flex-col pt-20">
       <div class="hero-bg-img absolute inset-0 pointer-events-none z-[0]" style="background-size:cover;background-position:center;background-repeat:no-repeat;"></div>
+      <LabDecor />
       <!-- Vanta.js halo is handled in Layout.astro -->
 
       <!-- Floating orbs for depth -->
@@ -389,7 +391,7 @@ const homepageSchema = {
             <span class="reveal-word !block" style="transition-delay:300ms"><span class="text-white">REAL</span><span class="text-violet-500">.</span></span>
           </h2>
           <div data-reveal class="flex flex-col sm:flex-row items-center justify-center gap-5">
-            <a href="mailto:lapl1412.work@gmail.com" class="magnetic group relative px-10 py-5 rounded-full hero-cta-primary font-black uppercase tracking-widest overflow-hidden hover:shadow-[0_0_80px_rgba(139,92,246,0.5)] transition-all duration-500">
+            <a href="mailto:kidoluci.work@gmail.com" class="magnetic group relative px-10 py-5 rounded-full hero-cta-primary font-black uppercase tracking-widest overflow-hidden hover:shadow-[0_0_80px_rgba(139,92,246,0.5)] transition-all duration-500">
               <span class="relative z-10">Say Hello</span>
               <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <span class="absolute inset-0 z-10 flex items-center justify-center text-white font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500">Say Hello</span>
@@ -477,6 +479,10 @@ const homepageSchema = {
 }
 
 /* ── Light Mode Overrides ── */
+body.light-mode {
+  background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
+}
+
 body.light-mode nav {
   border-bottom-color: rgba(0, 0, 0, 0.08) !important;
 }
