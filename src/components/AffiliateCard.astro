@@ -26,6 +26,11 @@ const {
   imageAlt = "",
   logo = "",
 } = Astro.props;
+
+// The card always renders its own trailing arrow (.aff-arrow). Strip any arrow
+// the CTA text already carries (e.g. admin typed "Start building →") so it never
+// doubles up to "→ →". Robust for any ad: whatever CTA is entered, one arrow shows.
+const ctaLabel = cta.replace(/\s*(?:→|➔|➜|⟶|⇒|»|›|-+>|>)\s*$/u, '').trim() || cta;
 ---
 
 <a
@@ -53,7 +58,7 @@ const {
     )}
     <p class="aff-label">{label}</p>
   </div>
-  <span class="aff-cta">{cta}<span class="aff-arrow">→</span></span>
+  <span class="aff-cta">{ctaLabel}<span class="aff-arrow">→</span></span>
 </a>
 
 <style>

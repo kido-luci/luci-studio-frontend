@@ -46,17 +46,10 @@ const gridPosts = allPosts;
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 const SITE_URL = 'https://luci-studio.com';
 
-// Sponsored cards — fetched from the backend at build time (active links only).
-// url points at the tracked redirect so admin click counts increment.
-const rawAffiliates = await affiliateService.getActive();
-const affiliates = rawAffiliates.map(a => ({
-  url: affiliateService.trackedUrl(a.id, API_URL),
-  label: a.label,
-  network: a.name || a.network || '',
-  cta: a.cta_text || '',
-  image: a.image_url || '',
-  logo: a.logo_url || '',
-}));
+// Sponsored cards — 2 distinct active links picked at build time (the blog page's
+// fixed slot count). url points at the tracked redirect so admin click counts
+// increment. [0] renders at the top, [1] at the end of the list.
+const affiliates = await affiliateService.getCardsRandom(API_URL, 2);
 // Topics ordered by how many posts carry them (most-used first); ties broken alphabetically.
 const topicCounts = new Map<string, number>();
 for (const p of allPosts) for (const t of p.topics) if (t) topicCounts.set(t, (topicCounts.get(t) || 0) + 1);
@@ -146,21 +139,19 @@ const allTopics = [...topicCounts.keys()].sort(
         </a>
       )}
 
-      <!-- Sponsored / affiliate cards (hidden while filtering/searching, like the featured hero) -->
+      <!-- Sponsored / affiliate card — top slot (1st of the blog page's 2 cards; hidden while filtering/searching, like the featured hero) -->
       {affiliates.length > 0 && (
         <div id="tb-affiliate">
-          {affiliates.map(a => (
-            <AffiliateCard
-              label={a.label}
-              url={a.url}
-              network={a.network}
-              badge="Sponsored"
-              cta={a.cta || undefined}
-              image={a.image}
-              imageAlt={a.network ? `${a.network} — ${a.label}` : a.label}
-              logo={a.logo}
-            />
-          ))}
+          <AffiliateCard
+            label={affiliates[0].label}
+            url={affiliates[0].url}
+            network={affiliates[0].network}
+            badge="Sponsored"
+            cta={affiliates[0].cta || undefined}
+            image={affiliates[0].image}
+            imageAlt={affiliates[0].imageAlt}
+            logo={affiliates[0].logo}
+          />
         </div>
       )}
 
@@ -205,6 +196,22 @@ const allTopics = [...topicCounts.keys()].sort(
         </div>
         <p id="posts-count" class="text-xs text-gray-600 uppercase tracking-widest"></p>
       </div>
+
+      <!-- Sponsored / affiliate card — end of list (2nd of the blog page's 2 cards; distinct from the top; hidden while filtering/searching like the top slot) -->
+      {affiliates.length > 1 && (
+        <div id="tb-affiliate-end" class="mt-16">
+          <AffiliateCard
+            label={affiliates[1].label}
+            url={affiliates[1].url}
+            network={affiliates[1].network}
+            badge="Sponsored"
+            cta={affiliates[1].cta || undefined}
+            image={affiliates[1].image}
+            imageAlt={affiliates[1].imageAlt}
+            logo={affiliates[1].logo}
+          />
+        </div>
+      )}
 
       <!-- Playlists strip (end of page) -->
       {playlists.length > 0 && (
@@ -519,6 +526,7 @@ const allTopics = [...topicCounts.keys()].sort(
   const featuredEl = document.getElementById('tb-featured') as HTMLElement | null;
   const featuredId = featuredEl?.dataset.featuredId;
   const affiliateEl = document.getElementById('tb-affiliate') as HTMLElement | null;
+  const affiliateEndEl = document.getElementById('tb-affiliate-end') as HTMLElement | null;
   let query = '';
 
   function getMatches(): HTMLElement[] {
@@ -539,8 +547,10 @@ const allTopics = [...topicCounts.keys()].sort(
     const gridItems = featuredMode ? matches.filter(it => it.dataset.id !== featuredId) : matches;
     const showFeatured = featuredMode && currentPage === 1;
     if (featuredEl) featuredEl.style.display = showFeatured ? '' : 'none';
-    // Affiliate card mirrors the featured hero: only in the default (unfiltered) view.
-    if (affiliateEl) affiliateEl.style.display = (featuredMode && matches.length > 0) ? '' : 'none';
+    // Affiliate cards mirror the featured hero: only in the default (unfiltered) view.
+    const showAffiliate = featuredMode && matches.length > 0;
+    if (affiliateEl) affiliateEl.style.display = showAffiliate ? '' : 'none';
+    if (affiliateEndEl) affiliateEndEl.style.display = showAffiliate ? '' : 'none';
 
     if (tbCount) tbCount.textContent = String(matches.length);
 
