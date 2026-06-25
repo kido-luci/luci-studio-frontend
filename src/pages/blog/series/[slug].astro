@@ -1,7 +1,9 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
 import TopNav from "../../../components/TopNav.astro";
+import AffiliateCard from "../../../components/AffiliateCard.astro";
 import { playlistService } from "../../../services/playlists";
+import { affiliateService } from "../../../services/affiliates";
 import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../../../utils/blog";
 
 export async function getStaticPaths() {
@@ -58,6 +60,10 @@ const { playlist } = Astro.props;
 if (!playlist) {
   return Astro.redirect('/blog/series');
 }
+
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
+// 1 random active link picked at build time (the series page's fixed slot count).
+const affiliateCards = await affiliateService.getCardsRandom(API_URL, 1);
 
 const SITE_URL = 'https://luci-studio.com';
 const formattedDate = formatDate(playlist.created_at);
@@ -165,6 +171,22 @@ const seoDescription = playlist.description
         </ol>
       )}
 
+      <!-- Sponsored card — end of page -->
+      {affiliateCards.length > 0 && (
+        <div data-reveal class="mt-16">
+          <AffiliateCard
+            label={affiliateCards[0].label}
+            url={affiliateCards[0].url}
+            network={affiliateCards[0].network}
+            badge="Sponsored"
+            cta={affiliateCards[0].cta || undefined}
+            image={affiliateCards[0].image}
+            imageAlt={affiliateCards[0].imageAlt}
+            logo={affiliateCards[0].logo}
+          />
+        </div>
+      )}
+
     </div>
   </main>
 
@@ -184,6 +206,7 @@ const seoDescription = playlist.description
     align-items: center;
     padding: 1rem 1.25rem;
     border: 2px solid rgba(139, 92, 246, 0.18);
+    border-radius: 1.125rem;
     background: rgba(255, 255, 255, 0.02);
     color: inherit;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -210,6 +233,7 @@ const seoDescription = playlist.description
     aspect-ratio: 1 / 1;
     overflow: hidden;
     border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 0.75rem;
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
   }
   .track-thumb img {

@@ -36,8 +36,10 @@ so the ~10 pre-existing legacy hints (implicit-any in inline event handlers,
 - **Always merge with `gh pr merge <n> --merge --delete-branch=false`.** A back-merge PR
   (`head=master`) merged without it once auto-deleted the prod `master` branch — never let
   a merge delete a long-lived branch.
-- After a `dev→master` promotion, **back-merge `master→dev`** (or recreate `master` from
-  `dev`) so the two don't drift apart in merge-commit topology.
+- **No `master→dev` back-merges.** The dev/master merge-commit "desync" is cosmetic
+  (identical content) — don't chase it. A back-merge PR has `head=master`, which the repo's
+  auto-delete-head setting uses to delete the prod `master` branch (it did, twice on
+  2026-06-22). See the workspace CLAUDE.md Git Workflow for the full rationale.
 - **Build green before releasing**: with the local backend running, `npm run build` fetches
   real data and renders every page. (The build is network-gated against the prod API, so
   build against the local backend.)
@@ -56,9 +58,11 @@ PUBLIC_API_URL=http://localhost:3000
 
 **Stack**: Astro (static site generation) → Cloudflare Pages. Zero JS framework — no React/Vue/Svelte. All interactivity is vanilla JS.
 
-**Two routes**:
-- `/` — Portfolio homepage with hardcoded project/experience content + dynamic blog feed fetched from backend API
-- `/blog/[slug].astro` — Pre-generated blog post pages using `getStaticPaths()`. Slug format: `{title-slug}-{id}` (e.g. `my-post-123`).
+**Routes** (`src/pages/`):
+- `/` — Portfolio homepage: hardcoded project/experience content + a dynamic blog feed fetched from the backend at build time
+- `/blog/` (index) and `/blog/[slug]` — post pages via `getStaticPaths()`; slug `{title-slug}-{id}` (e.g. `my-post-123`)
+- `/blog/series/` and `/blog/series/[slug]` — series index + per-series pages
+- `/portfolio`, `/lab`, `/art/[slug]`, `/privacy`, `/terms`, `404`, and `sitemap.xml.ts`
 
 **Data flow**:
 - `src/services/posts.ts` — REST client for the backend API (`getAll()` → `GET /posts`, `getByID(id)` → `GET /posts/{id}`)
@@ -70,7 +74,7 @@ PUBLIC_API_URL=http://localhost:3000
 - All other global CSS lives in `Layout.astro` (`<style is:global>`) — over 600 lines of custom styles
 - Theme system (light default / dark toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
 
-**Animated background**: a lightweight 2D `<canvas>` particle system (~50 particles, capped at 60fps) in `Layout.astro` — NOT Vanta/Three.js/p5.js (those were removed; only a stale `--vanta-bg` CSS var name remains). The canvas loop is skipped on mobile (`max-width: 768px`) and on Windows (`win-perf-mode`).
+**Animated background**: a lightweight 2D `<canvas>` particle system (~50 particles, capped at 60fps) in `Layout.astro` — NOT Vanta/Three.js/p5.js (those were removed; only a stale `--vanta-bg` CSS var name remains). The canvas loop is skipped **only on mobile** (`max-width: 768px`); on Windows, `win-perf-mode` disables CSS effects (backdrop-filter, 3D transforms, heavy animations) but the particles still run.
 
 **Third-party libraries** (via CDN):
 - GSAP + ScrollTrigger + SplitText (jsDelivr, in `Layout.astro`) — scroll reveals, hero/section text animations
