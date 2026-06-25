@@ -127,21 +127,6 @@ const seoDescription = playlist.description
         <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-8 max-w-xs"></div>
       </div>
 
-      {affiliateCards.length > 0 && (
-        <div data-reveal class="mb-16">
-          <AffiliateCard
-            label={affiliateCards[0].label}
-            url={affiliateCards[0].url}
-            network={affiliateCards[0].network}
-            badge="Sponsored"
-            cta={affiliateCards[0].cta || undefined}
-            image={affiliateCards[0].image}
-            imageAlt={affiliateCards[0].imageAlt}
-            logo={affiliateCards[0].logo}
-          />
-        </div>
-      )}
-
       <!-- Empty state -->
       {posts.length === 0 && (
         <div class="text-center py-24">
@@ -184,6 +169,22 @@ const seoDescription = playlist.description
             </li>
           ))}
         </ol>
+      )}
+
+      <!-- Sponsored card — end of page -->
+      {affiliateCards.length > 0 && (
+        <div data-reveal class="mt-16">
+          <AffiliateCard
+            label={affiliateCards[0].label}
+            url={affiliateCards[0].url}
+            network={affiliateCards[0].network}
+            badge="Sponsored"
+            cta={affiliateCards[0].cta || undefined}
+            image={affiliateCards[0].image}
+            imageAlt={affiliateCards[0].imageAlt}
+            logo={affiliateCards[0].logo}
+          />
+        </div>
       )}
 
     </div>
