@@ -6,11 +6,12 @@ import LabDecor from "../LabDecor.astro";
 import { workService } from "../../services/work";
 import { profileService } from "../../services/profile";
 import { skillsService } from "../../services/skills";
-import { getLocaleFromUrl, useTranslations, localizedHref } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, localized } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
-const profile = await profileService.getProfile();
+const rawProfile = await profileService.getProfile();
+const profile = rawProfile ? localized(rawProfile, locale) : null;
 const skills = await skillsService.getAll();
 const work = await workService.getAll();
 
@@ -28,6 +29,8 @@ const skVars = (token: string) => {
   return `--accent:${c.a};--accent-soft:${c.soft};--accent-strong:${c.strong}`;
 };
 const highlightYear = (s?: string) => (s ?? "").replace(/\b(\d{4})\b/, '<span class="sk-year">$1</span>');
+const localizedWork = work.map(w => localized(w, locale));
+const localizedSkills = skills.map(s => localized(s, locale));
 const toTimelineShape = (w: (typeof work)[number]) => ({
   id: w.title,
   year: w.period,
@@ -41,16 +44,16 @@ const toTimelineShape = (w: (typeof work)[number]) => ({
   logo: w.logo_url || undefined,
   links: w.links,
 });
-const experience    = work.filter(w => w.category === 'paid').map(toTimelineShape);
-const indieProjects = work.filter(w => w.category === 'indie').map(toTimelineShape);
+const experience    = localizedWork.filter(w => w.category === 'paid').map(toTimelineShape);
+const indieProjects = localizedWork.filter(w => w.category === 'indie').map(toTimelineShape);
 
 // Skills header stats (computed from the live data)
-const disciplineCount = skills.length;
-const totalItems = skills.reduce((n, c) => n + (c.items?.length ?? 0), 0);
+const disciplineCount = localizedSkills.length;
+const totalItems = localizedSkills.reduce((n, c) => n + (c.items?.length ?? 0), 0);
 const toolsLabel = totalItems >= 5 ? `${Math.floor(totalItems / 5) * 5}+` : String(totalItems);
 
 // Number every category globally (01..0N in sort order), then split wide vs narrow for the grid.
-const numberedSkills = (skills ?? []).map((cat, i) => ({ cat, num: String(i + 1).padStart(2, "0") }));
+const numberedSkills = (localizedSkills ?? []).map((cat, i) => ({ cat, num: String(i + 1).padStart(2, "0") }));
 const narrowSkills = numberedSkills.filter((x) => !x.cat.wide);
 const wideSkills = numberedSkills.filter((x) => x.cat.wide);
 ---

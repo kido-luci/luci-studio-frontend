@@ -8,7 +8,7 @@ import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
 import { affiliateService } from "../../services/affiliates";
 import { buildSeriesViews } from "../../utils/series";
-import { getLocaleFromUrl, useTranslations, localizedHref, format } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -17,7 +17,8 @@ const [rawPosts, rawPlaylists] = await Promise.all([
   playlistService.getAll(),
 ]);
 
-const sorted = buildSeriesViews(rawPlaylists, rawPosts);
+const localizedPlaylists = rawPlaylists.map(pl => localized(pl, locale));
+const sorted = buildSeriesViews(localizedPlaylists, rawPosts);
 
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 // 1 random active link picked at build time (the series list page's slot count).

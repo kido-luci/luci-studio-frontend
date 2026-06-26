@@ -4,7 +4,7 @@ import TopNav from "../TopNav.astro";
 import AffiliateCard from "../AffiliateCard.astro";
 import { affiliateService } from "../../services/affiliates";
 import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref, format } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
 import type { Playlist } from "../../services/playlists";
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
@@ -12,7 +12,8 @@ const t = useTranslations(locale);
 interface Props {
   playlist: Playlist;
 }
-const { playlist } = Astro.props;
+const { playlist: rawPlaylist } = Astro.props;
+const playlist = localized(rawPlaylist, locale);
 
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 // 1 random active link picked at build time (the series page's fixed slot count).
@@ -20,7 +21,9 @@ const affiliateCards = await affiliateService.getCardsRandom(API_URL, 1);
 
 const SITE_URL = 'https://luci-studio.com';
 const formattedDate = formatDate(playlist.created_at, locale);
-const posts = (playlist.posts ?? []).map(p => ({
+const posts = (playlist.posts ?? []).map(rawP => {
+  const p = localized(rawP, locale);
+  return {
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
@@ -31,7 +34,7 @@ const posts = (playlist.posts ?? []).map(p => ({
   img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
   views: p.views ?? 0,
   likes: p.likes ?? 0,
-}));
+}; });
 
 const coverImage = playlist.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1600';
 const canonicalURL = `${SITE_URL}/blog/series/${buildPostSlug(playlist.title, playlist.id)}/`;

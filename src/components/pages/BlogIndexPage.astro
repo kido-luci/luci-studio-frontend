@@ -10,7 +10,7 @@ import { playlistService } from "../../services/playlists";
 import { affiliateService } from "../../services/affiliates";
 import { buildSeriesViews } from "../../utils/series";
 import { buildPostSlug, readTimeFor, formatDate, coverGradient } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref, format } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -23,7 +23,8 @@ const playlists = buildSeriesViews(rawPlaylists, rawPosts);
 
 const allPosts = rawPosts
   .filter(p => !p.topics?.some(t => t.toLowerCase().startsWith('art')))
-  .map(p => {
+  .map(rawP => {
+    const p = localized(rawP, locale);
     const tags = (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'];
     return {
       id: p.id,

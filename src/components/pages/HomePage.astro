@@ -13,7 +13,7 @@ import { projectService } from "../../services/projects";
 import { buildLabCards } from "../../utils/labCards";
 import { profileService } from "../../services/profile";
 import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref, format } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 const heroWords = locale === 'vi' ? ['CÙNG', 'TẠO', 'ĐIỀU', 'TUYỆT'] : ["LET'S", 'SHIP', 'SOMETHING'];
@@ -39,7 +39,9 @@ const [rawPosts, rawPlaylists] = await Promise.all([
 ]);
 const blogPosts = rawPosts
   .filter(p => !p.topics?.some(t => t.toLowerCase().startsWith('art')))
-  .map(p => ({
+  .map(rawP => {
+  const p = localized(rawP, locale);
+  return {
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
@@ -50,7 +52,7 @@ const blogPosts = rawPosts
   img: p.cover_image_url || '',
   likes: p.likes ?? 0,
   views: p.views ?? 0,
-}));
+}; });
 
 const homePlaylists = buildSeriesViews(rawPlaylists, rawPosts).slice(0, 3);
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
@@ -58,7 +60,9 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
 const galleryItems = await galleryService.getAll();
 const artItems: { img: string; label: string; year: string; date: string; topic: string; url?: string; id?: string; likes?: number }[] =
   galleryItems.length > 0
-    ? galleryItems.map(g => ({
+    ? galleryItems.map(rawG => {
+          const g = localized(rawG, locale);
+          return {
           img: g.cover_image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800',
           label: g.title,
           year: new Date(g.created_at).getFullYear().toString(),
@@ -67,7 +71,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
           url: localizedHref(locale, `/art/${buildPostSlug(g.title, g.id)}/`),
           id: g.id,
           likes: g.likes ?? 0,
-        }))
+        }; })
     : [
         { img: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200', label: 'Neon Currents', year: '2024', date: 'Jan 2024', topic: 'Digital Art' },
         { img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800', label: 'Deep Space', year: '2024', date: 'Mar 2024', topic: 'Digital Art' },

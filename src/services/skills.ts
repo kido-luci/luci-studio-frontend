@@ -1,4 +1,5 @@
 import { cachedGetAll } from '../lib/apiClient';
+import type { LocaleOverlay } from '../i18n';
 
 export interface SkillCategory {
     id: string;
@@ -10,6 +11,7 @@ export interface SkillCategory {
     sort_order: number;
     created_at: string;
     updated_at: string;
+    translations?: LocaleOverlay | null;
 }
 
 const _getAll = cachedGetAll<SkillCategory>('/skills');

@@ -48,3 +48,26 @@ export function switchLocalePath(pathname: string, target: Locale): string {
 export function format(template: string, vars: Record<string, string | number>): string {
   return template.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
 }
+
+// Per-language content overlay stored by the backend on each content entity:
+// { vi: { title, content, … } }. Only the translated fields are present.
+export type LocaleOverlay = Record<string, Record<string, unknown>>;
+
+// localized returns the entity with its `translations[locale]` overlay applied
+// over the base fields. English (default) and a missing/empty overlay return the
+// entity unchanged — so untranslated content falls back to the base value. This
+// is the read side of the additive translations model (the backend writes the
+// overlay; see the bilingual i18n design).
+export function localized<T extends { translations?: LocaleOverlay | null }>(entity: T, locale: Locale): T {
+  if (locale === 'en' || !entity.translations) return entity;
+  const overlay = entity.translations[locale];
+  if (!overlay) return entity;
+  // Drop overlay keys whose value is empty so a blank translation falls back.
+  const applied: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(overlay)) {
+    if (v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0)) {
+      applied[k] = v;
+    }
+  }
+  return { ...entity, ...applied };
+}

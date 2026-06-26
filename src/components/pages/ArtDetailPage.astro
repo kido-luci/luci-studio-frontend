@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref, switchLocalePath } from "../../i18n";
+import { getLocaleFromUrl, useTranslations, localizedHref, switchLocalePath, localized } from "../../i18n";
 import type { GalleryItem } from "../../services/gallery";
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
@@ -12,7 +12,8 @@ interface Props {
   item: GalleryItem;
   slug: string;
 }
-const { item, slug } = Astro.props;
+const { item: rawItem, slug } = Astro.props;
+const item = localized(rawItem, locale);
 
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 const SITE_URL = 'https://luci-studio.com';

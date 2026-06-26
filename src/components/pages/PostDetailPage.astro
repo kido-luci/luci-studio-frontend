@@ -4,7 +4,7 @@ import PostCard from "../PostCard.astro";
 import AffiliateCard from "../AffiliateCard.astro";
 import { affiliateService } from "../../services/affiliates";
 import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref, switchLocalePath } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, switchLocalePath, localized } from '../../i18n';
 import type { Post } from "../../services/posts";
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
@@ -18,7 +18,8 @@ interface Props {
   related: Post[];
   slug: string;
 }
-const { post, related, slug } = Astro.props;
+const { post: rawPost, related, slug } = Astro.props;
+const post = localized(rawPost, locale);
 
 const API_URL = import.meta.env.PUBLIC_API_URL || '';
 
@@ -65,7 +66,7 @@ const showMidCard = !!midCard && articleBottom !== '';
 
 const tags = (post && post.topics && post.topics.length > 0) ? post.topics : ['Engineering'];
 
-const relatedPosts = (related ?? []).map(p => ({
+const relatedPosts = (related ?? []).map(rawP => { const p = localized(rawP, locale); return ({
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
@@ -77,7 +78,7 @@ const relatedPosts = (related ?? []).map(p => ({
   img: p.cover_image_url || '',
   views: p.views ?? 0,
   likes: p.likes ?? 0,
-}));
+}); });
 
 // SEO
 const canonicalURL = `${SITE_URL}/blog/${slug}/`;

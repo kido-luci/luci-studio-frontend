@@ -5,13 +5,14 @@ import RepoCard from "../RepoCard.astro";
 import { projectService } from "../../services/projects";
 import { buildLabCards } from "../../utils/labCards";
 import "../../styles/lab-cards.css";
-import { getLocaleFromUrl, useTranslations } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localized } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
 const ACCENT = "#6c4cf1";
 
-const projects = await projectService.getAll();
+const rawProjects = await projectService.getAll();
+const projects = rawProjects.map(p => localized(p, locale));
 const { apps, sources } = buildLabCards(projects);
 const repoCount = String(sources.length).padStart(2, "0");
 ---

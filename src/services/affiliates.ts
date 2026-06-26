@@ -1,4 +1,5 @@
 import { BASE_URL } from '../lib/apiClient';
+import type { LocaleOverlay } from '../i18n';
 
 export interface AffiliateLink {
     id: string;
@@ -14,6 +15,7 @@ export interface AffiliateLink {
     clicks?: number;
     created_at?: string;
     updated_at?: string;
+    translations?: LocaleOverlay | null;
 }
 
 // View-model shape consumed by AffiliateCard.astro — the props the card needs,
