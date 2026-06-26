@@ -1,0 +1,140 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import TopNav from "../TopNav.astro";
+import LabDecor from "../LabDecor.astro";
+import { getLocaleFromUrl, useTranslations } from '../../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+
+const SITE_URL = 'https://luci-studio.com';
+const lastUpdated = 'June 23, 2026';
+---
+
+<Layout
+  title="Privacy Policy | Luci Studio"
+  description="Privacy Policy for Luci Studio, including local storage, comments, AI chat, and Google login."
+  canonical={`${SITE_URL}/privacy/`}
+  keywords="Luci Studio privacy, privacy policy, local storage, Google login"
+>
+  <TopNav />
+
+  <main class="legal-page pt-36 pb-60 px-4 md:px-6 min-h-screen">
+    <LabDecor />
+    <article class="max-w-3xl mx-auto relative z-10">
+      <p class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4">{t('legal.eyebrow')}</p>
+      <h1 class="text-5xl md:text-7xl tracking-tighter mb-4" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{t('legal.privacyTitle')}<span class="text-violet-500">.</span></h1>
+      <p class="text-sm text-gray-500 mb-12">{t('legal.lastUpdated')} {lastUpdated}</p>
+      <!-- i18n: body copy is Phase 5 content -->
+
+      <div class="legal-copy">
+        <section>
+          <h2>Overview</h2>
+          <p>
+            Luci Studio is a creative engineering space. This policy explains how the site handles information from visitors, commenters, AI chat users, and Google sign-in users.
+          </p>
+          <p>
+            This policy is provided for general information and is not legal advice.
+          </p>
+        </section>
+
+        <section>
+          <h2>Information You Provide</h2>
+          <p>
+            If you comment, contact Luci Studio by email, use Google login, or send messages to the AI chat, the site may process the information needed to provide those features. This can include your comment text, display identity from Google, email address if provided, and chat messages.
+          </p>
+        </section>
+
+        <section>
+          <h2>Local Storage and Required Features</h2>
+          <p>
+            The site uses browser local storage for required and user-requested features, including theme preference, liked posts, viewed-post or session markers, Google OAuth user token, chat history, and chat configuration.
+          </p>
+        </section>
+
+        <section>
+          <h2>Third-Party Services and Media</h2>
+          <p>
+            Pages may load content or services from third parties, including Google login, hosted images and media, fonts, and CDNs. These providers may receive technical information such as IP address, browser details, referrer, and requested URLs.
+          </p>
+        </section>
+
+        <section>
+          <h2>Data Retention and Choices</h2>
+          <p>
+            Browser-stored preferences remain until you clear site data or change them in the interface. Comments, login-related records, and server logs may be retained as needed to operate, protect, debug, and improve the site.
+          </p>
+        </section>
+
+        <section>
+          <h2>Affiliate Disclosure</h2>
+          <p>
+            Some posts in the blog and lab may contain affiliate links. If you click such a link and make a purchase, Luci Studio may earn a commission at no additional cost to you. These links are marked as sponsored, and any post containing them carries a disclosure. Recommendations reflect genuine use or research and are never determined by a commission.
+          </p>
+        </section>
+
+        <section>
+          <h2>Contact</h2>
+          <p>
+            For privacy questions, contact <a href="mailto:kidoluci.work@gmail.com">kidoluci.work@gmail.com</a>.
+          </p>
+        </section>
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .legal-page {
+    position: relative;
+    background: var(--bg-primary);
+  }
+
+  body.light-mode .legal-page {
+    background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
+  }
+
+  .legal-copy {
+    display: grid;
+    gap: 2.25rem;
+  }
+
+  .legal-copy h2 {
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .legal-copy p {
+    color: var(--text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.85;
+    margin: 0.75rem 0 0;
+  }
+
+  .legal-copy code {
+    color: var(--text-primary);
+    font-size: 0.9em;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.35rem;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .legal-copy a {
+    color: rgb(167, 139, 250);
+    font-weight: 700;
+  }
+
+  .legal-copy a:hover {
+    color: #fff;
+  }
+
+  body.light-mode .legal-copy code {
+    background: rgba(17, 24, 39, 0.08);
+  }
+
+  body.light-mode .legal-copy a:hover {
+    color: rgb(109, 40, 217);
+  }
+</style>

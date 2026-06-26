@@ -1,0 +1,204 @@
+// English UI-string catalog. Keys are flat and dotted, grouped by surface. Every
+// value is the verbatim string the templates rendered before i18n wiring, so the
+// English site stays byte-identical. New surface keys are appended as each page/
+// component is wired — keep en.ts and vi.ts key-for-key in sync.
+export const en: Record<string, string> = {
+  // nav (TopNav.astro)
+  'nav.home': 'Home',
+  'nav.blog': 'Blog',
+  'nav.series': 'Series',
+  'nav.lab': 'Lab',
+  'nav.cta': "Let's Talk",
+  'nav.toggleTheme': 'Toggle theme',
+
+  // footer (FooterLinks.astro)
+  'footer.portfolio': 'Portfolio',
+  'footer.terms': 'Terms',
+  'footer.privacy': 'Privacy',
+  'footer.cookie': 'Cookie Settings',
+
+  // read-time unit (blog.ts)
+  'readtime.unit': 'min',
+
+  // cookie banner (Layout.astro)
+  'cookie.title': 'Cookie Settings',
+  'cookie.body': 'Luci Studio uses local storage for required features like theme, likes, login, and chat history.',
+  'cookie.privacy': 'Privacy',
+  'cookie.terms': 'Terms',
+  'cookie.reject': 'Reject optional',
+  'cookie.accept': 'Accept optional',
+
+  // blog list (blog/index.astro)
+  'blog.eyebrow': 'Raw Output',
+  'blog.title': 'Thoughts',
+  'blog.countLabel': 'Showing now',
+  'blog.searchPlaceholder': 'Search articles…',
+  'blog.searchAriaLabel': 'Search articles',
+  'blog.filterLabel': 'Filter by topic',
+  'blog.filterAll': 'All',
+  'blog.featuredBadge': '★ Featured',
+  'blog.readArticle': 'Read article',
+  'blog.showAllTags': 'Show all tags',
+  'blog.showFewerTags': 'Show fewer tags',
+  'blog.emptyTitle': 'Nothing here yet',
+  'blog.emptySub': 'No articles match that filter. Try another topic.',
+  'blog.clearFilters': 'Clear filters',
+  'blog.seeAll': 'See all →',
+  'blog.seriesEyebrow': 'Curated Collections',
+  'blog.seriesHeader': 'Series',
+  'blog.prevPage': 'Previous page',
+  'blog.nextPage': 'Next page',
+
+  // post detail (blog/[slug].astro)
+  'post.backToBlog': 'Back to Blog',
+  'post.likeAriaLabel': 'Like this post',
+  'post.shareAriaLabel': 'Share this post',
+  'post.shareText': 'Share',
+  'post.saveAriaLabel': 'Save for later',
+  'post.enjoyedRead': 'Enjoyed this read?',
+  'post.likes': 'likes',
+  'post.foundHelpful': 'Found this helpful?',
+  'post.supportWork': 'Support my work',
+  'post.supportBody': 'If this post saved you time or taught you something, you can buy me a coffee. Every bit keeps me writing and shipping.',
+  'post.supportCta': 'Support via PayPal',
+  'post.scanToPay': 'Scan to pay',
+  'post.continueReading': 'Continue Reading',
+  'post.morePosts': 'More Posts',
+  'post.viewAll': 'View All',
+  'post.commentsSortNewest': 'Newest first',
+  'post.signInWithGoogle': 'Sign in with Google',
+  'post.signOut': 'Sign out',
+  'post.submitComment': 'Submit',
+  'post.addCommentPlaceholder': 'Add comment…',
+  'post.addCommentAria': 'Add comment',
+  'post.commentsLabel': 'Comments',
+  'post.notFoundTitle': 'Post Not Found',
+  'post.notFoundBody': 'The article you are looking for might have been moved or deleted.',
+  'post.notFoundBack': 'Back to Blog',
+  'post.read': 'read',
+  'post.loadMoreComments': 'Load more comments',
+
+  // series list (blog/series/index.astro)
+  'series.backToThoughts': 'Back to Thoughts',
+  'series.eyebrow': 'Curated Collections',
+  'series.title': 'Series',
+  'series.collectionLabel': 'Collection',
+  'series.empty': 'No series yet',
+
+  // series detail (blog/series/[slug].astro)
+  'series.allSeries': 'All Series',
+  'series.curatedSeries': 'Curated Series',
+  'series.curatedLabel': 'curated',
+  'series.seriesEmpty': 'This series is empty',
+
+  // portfolio (portfolio.astro)
+  'portfolio.thePersonEyebrow': 'The Person',
+  'portfolio.myStory': 'My story',
+  'portfolio.theRecord': 'The Record',
+  'portfolio.experience': 'Experience',
+  'portfolio.paidWork': 'Paid Work',
+  'portfolio.ownBets': 'Own Bets',
+  'portfolio.theStack': 'The Stack',
+  'portfolio.skills': 'Skills',
+  'portfolio.disciplines': 'Disciplines',
+  'portfolio.toolsAndCrafts': 'Tools & Crafts',
+  'portfolio.enoughTalking': 'Enough talking.',
+  'portfolio.emailMe': 'Email Me',
+  'portfolio.backHome': 'Back Home',
+  'portfolio.basedIn': 'Based in',
+
+  // lab (lab.astro)
+  'lab.releasedApps': 'Released apps',
+  'lab.publicSource': 'Public source',
+  'lab.labDescription': 'Public source repositories and released apps — mine, and a few others worth a look.',
+  'lab.noRepos': 'No repositories yet.',
+
+  // legal pages (privacy.astro, terms.astro)
+  'legal.eyebrow': 'Legal',
+  'legal.lastUpdated': 'Last updated:',
+
+  // home (index.astro)
+  'home.letsTalk': "Let's Talk",
+  'home.viewWork': 'View Work',
+  'home.seeArt': 'See Art →',
+  'home.scrollLabel': 'SCROLL',
+  'home.artDescription': 'Rigorous aesthetic discipline. Where raw engineering logic meets deliberate visual hierarchy.',
+  'home.scrollDown': 'Scroll down for more',
+  'home.rawOutput': 'Raw Output',
+  'home.thoughts': 'Thoughts',
+  'home.openSourceApps': 'Open Source & Apps',
+  'home.lab': 'Lab',
+  'home.exploreLab': 'Explore the Lab',
+  'home.readingPaths': 'Reading Paths',
+  'home.series': 'SERIES',
+  'home.viewSeries': 'View series',
+  'home.offClock': 'Off-Clock',
+  'home.theArt': 'The art',
+  'home.enoughTalking': 'Enough talking.',
+  'home.sayHello': 'Say Hello',
+  'home.techBlogTitle': 'TECH BLOG',
+  'home.techBlogSub': 'Notes on Flutter, Go & on-device AI',
+  'home.digitalArtTitle': 'DIGITAL ART',
+  'home.digitalArtSub': 'Generative & hand-crafted pieces',
+  'home.appsTitle': 'APPS',
+  'home.appsSub': 'Shipped on 5 platforms',
+  'home.viewAllPosts': 'View all {n} posts',
+
+  // blog list — interpolated / plural
+  'blog.subOne': '{n} article on engineering, architecture, and the craft of building software.',
+  'blog.subOther': '{n} articles on engineering, architecture, and the craft of building software.',
+  'blog.showing': 'Showing {from}–{to} of {total}',
+  'blog.featuredSuffix': ' + featured',
+
+  // series list — interpolated
+  'series.sub': '{n} series — themed, ordered reading lists meant to be followed end-to-end.',
+  'series.postCountOne': '{n} post',
+  'series.postCountOther': '{n} posts',
+
+  // legal page titles
+  'legal.privacyTitle': 'Privacy Policy',
+  'legal.termsTitle': 'Terms of Use',
+
+  // portfolio CTA
+  'portfolio.letsBuild': "LET'S BUILD",
+
+  // comments i18n (read by public/scripts/post-engagement-comments.js via data-*)
+  'comments.noComments': 'No comments yet. Be the first!',
+  'comments.recall': 'Recall',
+  'comments.reply': 'Reply',
+  'comments.replyingTo': 'Replying to',
+  'comments.cancel': 'Cancel',
+  'comments.replySubmit': 'Reply',
+  'comments.signInToReply': 'Sign in with Google',
+  'comments.signInToReplySuffix': ' to reply.',
+  'comments.sortNewest': 'Newest first',
+  'comments.sortOldest': 'Oldest first',
+  'comments.loadMore': 'Load more comments',
+  'comments.loading': 'Loading…',
+  'comments.posting': 'Posting…',
+  'comments.submitBtn': 'Submit',
+  'comments.recallConfirmMsg': 'Recall this comment? It cannot be undone.',
+  'comments.recallConfirmOk': 'Recall',
+  'comments.recallConfirmCancel': 'Cancel',
+  'comments.signOutConfirmMsg': 'Sign out of your account?',
+  'comments.signOutConfirmOk': 'Sign out',
+  'comments.signOutConfirmCancel': 'Cancel',
+  'comments.messageRecalled': 'Message recalled',
+  'comments.failedLoad': 'Failed to load comments.',
+  'comments.timeJustNow': 'just now',
+  'comments.timeMinute': '{n} minute ago',
+  'comments.timeMinutes': '{n} minutes ago',
+  'comments.timeHour': '{n} hour ago',
+  'comments.timeHours': '{n} hours ago',
+  'comments.timeDay': '{n} day ago',
+  'comments.timeDays': '{n} days ago',
+
+  // emoji picker
+  'emoji.searchPlaceholder': '🔍  Search emoji…',
+  'emoji.catSmileys': 'Smileys',
+  'emoji.catGestures': 'Gestures',
+  'emoji.catHearts': 'Hearts',
+  'emoji.catAnimals': 'Animals',
+  'emoji.catFood': 'Food',
+  'emoji.catObjects': 'Objects',
+};

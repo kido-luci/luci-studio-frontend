@@ -5,6 +5,9 @@
 // flex row after its page-specific links. `linkColor` matches the host footer's
 // idle tone (homepage uses gray-600, blog detail uses gray-400).
 import { COOKIE_BANNER_ENABLED } from "../config/features";
+import { getLocaleFromUrl, useTranslations, localizedHref } from '../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 
 interface Props {
   linkColor?: string;
@@ -13,9 +16,9 @@ const { linkColor = "text-gray-600" } = Astro.props;
 const cls = `text-xs font-bold ${linkColor} hover:text-white transition-colors uppercase tracking-widest`;
 ---
 
-<a href="/portfolio" class={cls}>Portfolio</a>
-<a href="/terms" class={cls}>Terms</a>
-<a href="/privacy" class={cls}>Privacy</a>
+<a href={localizedHref(locale, '/portfolio')} class={cls}>{t('footer.portfolio')}</a>
+<a href={localizedHref(locale, '/terms')} class={cls}>{t('footer.terms')}</a>
+<a href={localizedHref(locale, '/privacy')} class={cls}>{t('footer.privacy')}</a>
 {COOKIE_BANNER_ENABLED && (
-  <button type="button" data-cookie-settings style="font-family: inherit;" class={cls}>Cookie Settings</button>
+  <button type="button" data-cookie-settings style="font-family: inherit;" class={cls}>{t('footer.cookie')}</button>
 )}

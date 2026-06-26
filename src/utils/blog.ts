@@ -1,26 +1,29 @@
-export function calculateReadTime(content: string): string {
+import { useTranslations, type Locale } from '../i18n';
+
+export function calculateReadTime(content: string, locale: Locale = 'en'): string {
     const wordsPerMinute = 200;
     const words = content.trim().split(/\s+/).length;
     const minutes = Math.ceil(words / wordsPerMinute);
-    return `${minutes} min`;
+    return `${minutes} ${useTranslations(locale)('readtime.unit')}`;
 }
 
-export function calculateReadTimeFromWordCount(wordCount?: number): string {
-    if (!wordCount || wordCount < 1) return '1 min';
-    return `${Math.ceil(wordCount / 200)} min`;
+export function calculateReadTimeFromWordCount(wordCount?: number, locale: Locale = 'en'): string {
+    const unit = useTranslations(locale)('readtime.unit');
+    if (!wordCount || wordCount < 1) return `1 ${unit}`;
+    return `${Math.ceil(wordCount / 200)} ${unit}`;
 }
 
 // Convenience helper: prefer word_count when available (cheaper), fall back to
 // full-content estimation. Replaces the repeated ternary in post→card mappings.
-export function readTimeFor(p: { word_count?: number; content?: string }): string {
+export function readTimeFor(p: { word_count?: number; content?: string }, locale: Locale = 'en'): string {
     return p.word_count
-        ? calculateReadTimeFromWordCount(p.word_count)
-        : calculateReadTime(p.content || '');
+        ? calculateReadTimeFromWordCount(p.word_count, locale)
+        : calculateReadTime(p.content || '', locale);
 }
 
-export function formatDate(dateStr: string): string {
+export function formatDate(dateStr: string, locale: Locale = 'en'): string {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'

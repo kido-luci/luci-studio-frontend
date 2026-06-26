@@ -1,0 +1,180 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { formatDate } from "../../utils/blog";
+import { getLocaleFromUrl, useTranslations, localizedHref, switchLocalePath, localized } from "../../i18n";
+import type { GalleryItem } from "../../services/gallery";
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+const enHref = switchLocalePath(Astro.url.pathname, 'en');
+const viHref = switchLocalePath(Astro.url.pathname, 'vi');
+
+interface Props {
+  item: GalleryItem;
+  slug: string;
+}
+const { item: rawItem, slug } = Astro.props;
+const item = localized(rawItem, locale);
+
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
+const SITE_URL = 'https://luci-studio.com';
+const formattedDate = formatDate(item.created_at, locale);
+const canonicalURL = `${SITE_URL}/art/${slug}/`;
+const ogImage = item.cover_image_url || `${SITE_URL}/images/og-default.png`;
+const seoDescription = `${item.title} — artwork by Trung Lập (Luci) on Luci Studio.`;
+
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'VisualArtwork',
+    name: item.title,
+    image: { '@type': 'ImageObject', url: ogImage, width: 600 },
+    url: canonicalURL,
+    dateCreated: item.created_at,
+    inLanguage: locale === 'vi' ? 'vi' : 'en',
+    isAccessibleForFree: true,
+    creator: {
+      '@type': 'Person',
+      name: 'Trung Lập (Luci)',
+      url: SITE_URL,
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalURL },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Portfolio', item: `${SITE_URL}/#portfolio` },
+      { '@type': 'ListItem', position: 3, name: item.title, item: canonicalURL },
+    ],
+  },
+];
+---
+
+<Layout
+  title={`${item.title} | Luci Studio`}
+  description={seoDescription}
+  ogImage={ogImage}
+  ogImageAlt={item.title}
+  ogImageWidth={600}
+  ogType="article"
+  canonical={canonicalURL}
+  structuredData={structuredData}
+>
+  <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href={localizedHref(locale, '/')} class="flex items-center gap-3 group">
+        <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
+        <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
+      </a>
+      <div class="flex items-center gap-4">
+        <div class="lang-switch flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
+          <a href={enHref} class={locale === 'en' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="English">EN</a>
+          <span class="text-gray-600" aria-hidden="true">/</span>
+          <a href={viHref} class={locale === 'vi' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="Tiếng Việt">VI</a>
+        </div>
+        <a href="/#portfolio" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em] flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Portfolio
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="min-h-screen bg-black" data-gallery-id={item.id} data-api-url={API_URL}>
+    {item.cover_image_url && (
+      <section class="art-hero">
+        <div class="art-hero-bg" style={`background-image:url('${item.cover_image_url}')`}></div>
+        <img src={item.cover_image_url} alt={item.title} class="art-hero-img" />
+        <div class="art-hero-info">
+          <div class="max-w-5xl mx-auto">
+            <div class="flex items-center gap-3 mb-3 flex-wrap">
+              <span class="text-[10px] text-gray-400">{formattedDate}</span>
+              <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+              <span class="text-xs text-gray-400 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span id="view-count">{item.views ?? '—'}</span>
+              </span>
+              <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+              <span class="text-xs text-gray-400 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span id="like-count">{item.likes ?? '—'}</span>
+              </span>
+            </div>
+            <h1 class="text-3xl md:text-5xl text-white tracking-tighter leading-tight" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{item.title}</h1>
+          </div>
+        </div>
+      </section>
+    )}
+  </main>
+</Layout>
+
+<style is:global>
+  .art-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #000;
+  }
+  .art-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(80px) brightness(0.15) saturate(1.5);
+    transform: scale(1.15);
+  }
+  .art-hero-img {
+    position: relative;
+    z-index: 10;
+    max-width: 100%;
+    max-height: calc(100vh - 80px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8);
+  }
+  .art-hero-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    padding: 5rem 2rem 2rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    const main = document.querySelector('main[data-gallery-id]');
+    if (!main) return;
+    const id = main.dataset.galleryId;
+    const apiUrl = main.dataset.apiUrl;
+    const viewEl = document.getElementById('view-count');
+    const likeEl = document.getElementById('like-count');
+
+    fetch(`${apiUrl}/gallery/${id}`)
+      .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery ${r.status}`)))
+      .then(d => {
+        if (viewEl && d.views != null) viewEl.textContent = d.views;
+        if (likeEl && d.likes != null) likeEl.textContent = d.likes;
+      })
+      .catch(() => {});
+
+    const sessionKey = `viewed_gallery_${id}`;
+    if (!sessionStorage.getItem(sessionKey)) {
+      fetch(`${apiUrl}/gallery/${id}/view`, { method: 'POST' })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery view ${r.status}`)))
+        .then(d => {
+          if (viewEl && d.views != null) viewEl.textContent = d.views;
+          sessionStorage.setItem(sessionKey, '1');
+        })
+        .catch(() => {});
+    }
+  })();
+</script>

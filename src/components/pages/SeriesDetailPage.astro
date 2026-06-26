@@ -1,0 +1,263 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import TopNav from "../TopNav.astro";
+import AffiliateCard from "../AffiliateCard.astro";
+import { affiliateService } from "../../services/affiliates";
+import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
+import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
+import type { Playlist } from "../../services/playlists";
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+
+interface Props {
+  playlist: Playlist;
+}
+const { playlist: rawPlaylist } = Astro.props;
+const playlist = localized(rawPlaylist, locale);
+
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
+// 1 random active link picked at build time (the series page's fixed slot count).
+const affiliateCards = await affiliateService.getCardsRandom(API_URL, 1);
+
+const SITE_URL = 'https://luci-studio.com';
+const formattedDate = formatDate(playlist.created_at, locale);
+const posts = (playlist.posts ?? []).map(rawP => {
+  const p = localized(rawP, locale);
+  return {
+  id: p.id,
+  title: p.title,
+  subtitle: p.subtitle || '',
+  href: localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`),
+  tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
+  date: formatDate(p.created_at, locale),
+  read: readTimeFor(p, locale),
+  img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
+  views: p.views ?? 0,
+  likes: p.likes ?? 0,
+}; });
+
+const coverImage = playlist.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1600';
+const canonicalURL = `${SITE_URL}/blog/series/${buildPostSlug(playlist.title, playlist.id)}/`;
+const seoDescription = playlist.description
+  ? playlist.description.slice(0, 160)
+  : `A curated series of ${posts.length} posts from Luci Studio.`;
+---
+
+<Layout
+  title={`${playlist.title} | Luci Studio`}
+  description={seoDescription}
+  canonical={canonicalURL}
+  ogImage={coverImage}
+>
+
+  <TopNav active="series" />
+
+  <main class="pt-36 pb-24 px-4 md:px-6 min-h-screen bg-[var(--bg-primary)]">
+    <div class="max-w-5xl mx-auto">
+
+      <!-- Hero -->
+      <div data-reveal class="mb-16">
+        <a href={localizedHref(locale, '/blog/series')} class="inline-flex items-center gap-2 mb-6 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-violet-400 transition-colors duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          {t('series.allSeries')}
+        </a>
+
+        <div class="playlist-hero-cover aspect-video overflow-hidden mb-8 border-2 border-violet-500/[0.22] relative">
+          <img src={coverImage} alt={playlist.title} class="w-full h-full object-cover" />
+          <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%);"></div>
+        </div>
+
+        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('series.curatedSeries')}</span>
+        <h1 class="text-5xl md:text-7xl tracking-tighter leading-[1.05]" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{playlist.title}<span class="text-violet-500">.</span></h1>
+
+        {playlist.description && (
+          <p class="text-gray-400 max-w-2xl text-base md:text-lg leading-relaxed mt-6">{playlist.description}</p>
+        )}
+
+        <div class="flex items-center gap-3 mt-6 text-xs text-gray-600 uppercase tracking-widest">
+          <span>{format(t(posts.length === 1 ? 'series.postCountOne' : 'series.postCountOther'), { n: posts.length })}</span>
+          <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+          <span>{t('series.curatedLabel')} {formattedDate}</span>
+        </div>
+
+        <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-8 max-w-xs"></div>
+      </div>
+
+      <!-- Empty state -->
+      {posts.length === 0 && (
+        <div class="text-center py-24">
+          <p class="text-gray-500 text-sm uppercase tracking-widest">{t('series.seriesEmpty')}</p>
+        </div>
+      )}
+
+      <!-- Spotify-style ordered post list -->
+      {posts.length > 0 && (
+        <ol class="playlist-track-list space-y-4 list-none p-0">
+          {posts.map((p, i) => (
+            <li>
+              <a href={p.href} class="track-row no-underline">
+                <span class="track-number">{String(i + 1).padStart(2, '0')}</span>
+                <div class="track-thumb">
+                  <img src={p.img} alt={p.title} loading="lazy" onerror="this.style.opacity='0'" />
+                </div>
+                <div class="track-meta">
+                  <div class="track-tags">
+                    <span class="tag-label text-[10px] font-black text-violet-400 uppercase tracking-widest">{p.tags.join(' · ')}</span>
+                    <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                    <span class="text-[10px] text-gray-600">{p.date}</span>
+                    <span class="w-1 h-1 bg-gray-700 rounded-full hidden sm:inline-block"></span>
+                    <span class="text-[10px] text-gray-600 hidden sm:inline">{p.read} read</span>
+                  </div>
+                  <h3 class="track-title">{p.title}</h3>
+                  {p.subtitle && <p class="track-subtitle">{p.subtitle}</p>}
+                </div>
+                <div class="track-stats">
+                  <span class="stat" title={`${p.views} views`}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    {p.views}
+                  </span>
+                  <span class="stat" title={`${p.likes} likes`}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    {p.likes}
+                  </span>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      <!-- Sponsored card — end of page -->
+      {affiliateCards.length > 0 && (
+        <div data-reveal class="mt-16">
+          <AffiliateCard
+            label={affiliateCards[0].label}
+            url={affiliateCards[0].url}
+            network={affiliateCards[0].network}
+            badge="Sponsored"
+            cta={affiliateCards[0].cta || undefined}
+            image={affiliateCards[0].image}
+            imageAlt={affiliateCards[0].imageAlt}
+            logo={affiliateCards[0].logo}
+          />
+        </div>
+      )}
+
+    </div>
+  </main>
+
+</Layout>
+
+<style>
+  .playlist-hero-cover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
+  }
+
+  .playlist-track-list { margin: 0; padding: 0; }
+
+  .track-row {
+    display: grid;
+    grid-template-columns: 3rem 5rem 1fr auto;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border: 2px solid rgba(139, 92, 246, 0.18);
+    border-radius: 1.125rem;
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .track-row:hover {
+    border-color: rgba(139, 92, 246, 0.6);
+    background: rgba(139, 92, 246, 0.05);
+    transform: translateX(4px);
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+  }
+
+  .track-number {
+    font-family: inherit;
+    font-size: 2rem;
+    font-weight: 900;
+    color: rgba(139, 92, 246, 0.85);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .track-thumb {
+    width: 5rem;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
+  }
+  .track-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .track-row:hover .track-thumb img { transform: scale(1.08); }
+
+  .track-meta { min-width: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+  .track-tags { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .track-title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .track-row:hover .track-title { color: rgb(167, 139, 250); }
+  .track-subtitle {
+    font-size: 0.8rem;
+    color: rgb(107, 114, 128);
+    line-height: 1.4;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+
+  .track-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    color: rgb(107, 114, 128);
+    font-size: 0.75rem;
+  }
+  .track-stats .stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  @media (max-width: 640px) {
+    .track-row {
+      grid-template-columns: 2.25rem 4rem 1fr;
+      gap: 0.875rem;
+      padding: 0.875rem 1rem;
+    }
+    .track-number { font-size: 1.5rem; }
+    .track-thumb { width: 4rem; }
+    .track-stats { display: none; }
+  }
+
+  body.light-mode .track-row {
+    border-color: rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.85);
+  }
+  body.light-mode .track-row:hover {
+    border-color: rgba(139, 92, 246, 0.4);
+    background: rgba(139, 92, 246, 0.05);
+  }
+  body.light-mode .track-title { color: rgb(17, 24, 39); }
+</style>

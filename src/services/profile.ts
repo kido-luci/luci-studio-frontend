@@ -1,4 +1,5 @@
 import { BASE_URL } from '../lib/apiClient';
+import type { LocaleOverlay } from '../i18n';
 
 export interface ProfileFact { label: string; value: string; }
 export interface ProfileStat { number: number; suffix: string; label: string; sub: string; }
@@ -18,6 +19,7 @@ export interface Profile {
     copyright: string;
     social_links: ProfileLink[];
     updated_at: string;
+    translations?: LocaleOverlay | null;
 }
 
 let getProfilePromise: Promise<Profile | null> | null = null;

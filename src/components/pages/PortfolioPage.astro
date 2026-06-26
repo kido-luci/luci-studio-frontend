@@ -1,0 +1,461 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import TimelineItem from "../TimelineItem.astro";
+import TopNav from "../TopNav.astro";
+import LabDecor from "../LabDecor.astro";
+import { workService } from "../../services/work";
+import { profileService } from "../../services/profile";
+import { skillsService } from "../../services/skills";
+import { getLocaleFromUrl, useTranslations, localizedHref, localized } from '../../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+
+const rawProfile = await profileService.getProfile();
+const profile = rawProfile ? localized(rawProfile, locale) : null;
+const skills = await skillsService.getAll();
+const work = await workService.getAll();
+
+// Per-category accent triplet (base / soft tint / strong text) — matches the Skills v3 design.
+const SKILL_ACCENT: Record<string, { a: string; soft: string; strong: string }> = {
+  violet: { a: "#7c5cff", soft: "#f1ecff", strong: "#5a3fd6" },
+  blue:   { a: "#3b73ff", soft: "#e7eeff", strong: "#1d54e0" },
+  cyan:   { a: "#14b8bd", soft: "#ddf5f4", strong: "#0a8f93" },
+  pink:   { a: "#ec4899", soft: "#fce6f0", strong: "#d12a6c" },
+  amber:  { a: "#f59e0b", soft: "#fcf0db", strong: "#b9740a" },
+};
+const skAccent = (token: string) => SKILL_ACCENT[token] ?? SKILL_ACCENT.violet;
+const skVars = (token: string) => {
+  const c = skAccent(token);
+  return `--accent:${c.a};--accent-soft:${c.soft};--accent-strong:${c.strong}`;
+};
+const highlightYear = (s?: string) => (s ?? "").replace(/\b(\d{4})\b/, '<span class="sk-year">$1</span>');
+const localizedWork = work.map(w => localized(w, locale));
+const localizedSkills = skills.map(s => localized(s, locale));
+const toTimelineShape = (w: (typeof work)[number]) => ({
+  id: w.title,
+  year: w.period,
+  role: w.role ?? "",
+  company: w.company ?? "",
+  location: w.location ?? "",
+  desc: w.summary ?? "",
+  details: w.achievements,
+  tech: w.tech,
+  img: w.card_image_url,
+  logo: w.logo_url || undefined,
+  links: w.links,
+});
+const experience    = localizedWork.filter(w => w.category === 'paid').map(toTimelineShape);
+const indieProjects = localizedWork.filter(w => w.category === 'indie').map(toTimelineShape);
+
+// Skills header stats (computed from the live data)
+const disciplineCount = localizedSkills.length;
+const totalItems = localizedSkills.reduce((n, c) => n + (c.items?.length ?? 0), 0);
+const toolsLabel = totalItems >= 5 ? `${Math.floor(totalItems / 5) * 5}+` : String(totalItems);
+
+// Number every category globally (01..0N in sort order), then split wide vs narrow for the grid.
+const numberedSkills = (localizedSkills ?? []).map((cat, i) => ({ cat, num: String(i + 1).padStart(2, "0") }));
+const narrowSkills = numberedSkills.filter((x) => !x.cat.wide);
+const wideSkills = numberedSkills.filter((x) => x.cat.wide);
+---
+
+<Layout
+  title="Portfolio · Luci Studio"
+  description="Trung Lập (Luci) — Full Stack Flutter & Go Developer. My story, experience, and skills."
+>
+
+  <TopNav active="portfolio" />
+
+  <main class="pt-20">
+
+    <!-- MY STORY -->
+    <section id="about" class="py-24 px-4 md:px-6 overflow-hidden relative">
+      <LabDecor />
+      <div class="max-w-7xl mx-auto relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <!-- Left: Photo -->
+          <div data-story-photo class="relative group">
+            <div class="absolute -inset-4 bg-gradient-to-tr from-violet-600/20 to-blue-600/20 rounded-2xl blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
+            <div class="relative aspect-square md:aspect-auto md:h-[600px] rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]">
+              <img src={profile?.story_photo_url} alt="Trung Lap" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
+              <div data-story-badge class="absolute bottom-8 left-8 right-8 p-6 backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl">
+                <p class="text-xs font-black text-violet-400 uppercase tracking-[0.2em] mb-1">{t('portfolio.basedIn')}</p>
+                <p class="text-xl font-bold">{profile?.story_location}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Content -->
+          <div>
+            <span data-story-label class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4 block">{t('portfolio.thePersonEyebrow')}</span>
+            <h2 data-ml9 class="text-5xl md:text-7xl tracking-normal mb-8" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('portfolio.myStory')}<span class="text-violet-500">.</span></h2>
+            <div class="space-y-6 text-gray-400 text-lg leading-relaxed">
+              {(profile?.bio_paragraphs ?? []).map((para, i) => (
+                <p data-story-para={String(i)} class="text-gray-400 text-lg leading-relaxed" set:html={para} />
+              ))}
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-12">
+              {(profile?.story_facts ?? []).map((f, fi) => (
+                <div data-reveal="scale" data-delay={String(fi + 1)} class="p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
+                  <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">{f.label}</p>
+                  <p class="text-sm font-bold text-gray-300">{f.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="flex flex-col items-center py-8 opacity-40">
+      <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+    </div>
+
+    <!-- STATS -->
+    <section class="py-6 px-4 md:px-6">
+      <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-1">
+        {(profile?.portfolio_stats ?? []).map((s, i) => (
+          <div data-reveal data-delay={String(i+1)} class="tilt-card p-5 sm:p-8 border border-white/5 rounded-2xl text-center hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
+            <div class="text-6xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 mb-2">
+              <span class="count-up" data-count={s.number} data-suffix={s.suffix}>0{s.suffix}</span>
+            </div>
+            <div class="text-white font-bold mb-1">{s.label}</div>
+            <div class="text-xs text-gray-400 uppercase tracking-widest">{s.sub}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <div class="flex flex-col items-center py-6 opacity-40">
+      <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+    </div>
+
+    <!-- EXPERIENCE -->
+    <section id="experience" class="py-16 px-4 md:px-6">
+      <div class="max-w-7xl mx-auto">
+        <div data-reveal class="mb-20">
+          <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">{t('portfolio.theRecord')}</span>
+          <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('portfolio.experience')}<span class="text-pink-500">.</span></h2>
+        </div>
+        <div class="mb-12">
+          <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
+            {t('portfolio.paidWork')}
+            <div class="h-px flex-1 bg-white/5"></div>
+          </h3>
+          <div class="space-y-4 timeline-container">
+            {experience.map((j, i) => (
+              <TimelineItem {...j} index={i} />
+            ))}
+          </div>
+        </div>
+        <div>
+          <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
+            {t('portfolio.ownBets')}
+            <div class="h-px flex-1 bg-white/5"></div>
+          </h3>
+          <div class="space-y-4 timeline-container">
+            {indieProjects.map((j, i) => (
+              <TimelineItem {...j} index={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="flex flex-col items-center py-8 opacity-40">
+      <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+    </div>
+
+    <!-- SKILLS -->
+    <section id="skills" class="py-16 px-4 md:px-6">
+      <div class="max-w-7xl mx-auto">
+        <div data-reveal class="sk-header">
+          <div>
+            <span class="sk-eyebrow"><span class="sk-eyebrow-dot"></span>{t('portfolio.theStack')}</span>
+            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('portfolio.skills')}<span class="text-emerald-500">.</span></h2>
+          </div>
+          <div class="sk-stats">
+            <div>
+              <div class="sk-stat-num tabular-nums">{disciplineCount}</div>
+              <div class="sk-stat-label">{t('portfolio.disciplines')}</div>
+            </div>
+            <div>
+              <div class="sk-stat-num tabular-nums">{toolsLabel}</div>
+              <div class="sk-stat-label">{t('portfolio.toolsAndCrafts')}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sk-grid">
+          {narrowSkills.map(({ cat, num }) => (
+            <div data-reveal class="sk-card" style={skVars(cat.accent_color)}>
+              <div class="sk-blob"></div>
+              <div class="sk-head">
+                <div class="sk-head-left">
+                  <span class="sk-dot"></span>
+                  <span class="sk-label">{cat.name}</span>
+                </div>
+                <span class="sk-num">{num}</span>
+              </div>
+              <div class="sk-chips">
+                {cat.items.map((s) => (<span class="sk-chip">{s}</span>))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {wideSkills.map(({ cat, num }) => (
+          <div data-reveal class="sk-card sk-card--wide" style={skVars(cat.accent_color)}>
+            <div class="sk-blob sk-blob--wide"></div>
+            <div class="sk-wide-left">
+              <div class="sk-head">
+                <div class="sk-head-left">
+                  <span class="sk-dot"></span>
+                  <span class="sk-label">{cat.name}</span>
+                </div>
+                <span class="sk-num">{num}</span>
+              </div>
+              {cat.description && <p class="sk-desc" set:html={highlightYear(cat.description)} />}
+            </div>
+            <div class="sk-chips sk-chips--wide">
+              {cat.items.map((s) => (<span class="sk-chip">{s}</span>))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <div class="flex flex-col items-center py-8 opacity-40">
+      <div class="w-0.5 h-12 bg-gradient-to-b from-violet-500 to-transparent"></div>
+    </div>
+
+    <!-- Footer CTA -->
+    <section class="py-24 px-4 md:px-6 text-center">
+      <div class="max-w-2xl mx-auto">
+        <p data-reveal class="text-xs font-black text-gray-600 uppercase tracking-[0.3em] mb-6">{t('portfolio.enoughTalking')}</p>
+        <h2 data-reveal class="text-5xl md:text-7xl font-black tracking-wide mb-10">{t('portfolio.letsBuild')}<span class="text-violet-500">.</span></h2>
+        <div data-reveal class="flex flex-wrap items-center justify-center gap-4">
+          <a href="mailto:kidoluci.work@gmail.com" class="px-8 py-4 bg-white text-black font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest text-sm">{t('portfolio.emailMe')}</a>
+          <a href={localizedHref(locale, '/')} class="px-8 py-4 border border-white/20 font-black rounded-full hover:border-violet-500/60 transition-all duration-300 uppercase tracking-widest text-sm text-gray-400 hover:text-white">{t('portfolio.backHome')}</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</Layout>
+
+<style is:global>
+/* ── MY STORY animations ────────────────────────────────────────── */
+@keyframes storyPhotoIn {
+  from { opacity: 0; transform: translateX(-48px) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes storyLabelIn {
+  from { opacity: 0; transform: translateY(14px); letter-spacing: 0.6em; }
+  to   { opacity: 1; transform: translateY(0); letter-spacing: 0.3em; }
+}
+@keyframes storyParaIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes storyBadgeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+[data-story-photo] { opacity: 0; transform: translateX(-48px) scale(0.97); }
+[data-story-photo].story-visible { animation: storyPhotoIn 0.85s cubic-bezier(0.16,1,0.3,1) both; }
+[data-story-badge] { opacity: 0; transform: translateY(20px); }
+[data-story-badge].story-visible { animation: storyBadgeIn 0.6s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 0.45s; }
+[data-story-label] { opacity: 0; transform: translateY(14px); }
+[data-story-label].story-visible { animation: storyLabelIn 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+[data-story-para] { opacity: 0; transform: translateY(22px); }
+[data-story-para].story-visible { animation: storyParaIn 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+
+body.light-mode {
+  background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
+}
+
+/* Stats tilt-card light mode */
+body.light-mode .tilt-card {
+  background-color: rgba(255,255,255,0.85) !important;
+  border-color: rgba(0,0,0,0.07) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+body.light-mode .tilt-card:hover { border-color: rgba(139,92,246,0.25) !important; }
+body.light-mode .bg-gradient-to-br.from-white.to-gray-500 {
+  background-image: linear-gradient(to bottom right, rgb(17,24,39), rgb(107,114,128)) !important;
+}
+
+/* Light-mode text overrides (mirror what index.astro applies) */
+body.light-mode .text-white { color: rgb(17, 24, 39) !important; }
+body.light-mode .text-gray-400 { color: rgb(75, 85, 99) !important; }
+body.light-mode .text-gray-300 { color: rgb(55, 65, 81) !important; }
+body.light-mode .text-gray-500 { color: rgb(107, 114, 128) !important; }
+body.light-mode .text-gray-600 { color: rgb(107, 114, 128) !important; }
+/* Keep accent colors vivid — must come AFTER the text-white override */
+body.light-mode .text-violet-500 { color: #8b5cf6 !important; }
+body.light-mode .text-violet-400 { color: #a78bfa !important; }
+body.light-mode .text-pink-500   { color: #ec4899 !important; }
+body.light-mode .text-blue-500   { color: #3b82f6 !important; }
+body.light-mode .text-emerald-500{ color: #10b981 !important; }
+body.light-mode .text-amber-500  { color: #f59e0b !important; }
+body.light-mode .text-cyan-500   { color: #06b6d4 !important; }
+
+/* Borders, surfaces, badges */
+body.light-mode .border-white\/10 { border-color: rgba(0, 0, 0, 0.08) !important; }
+body.light-mode .border-white\/5 { border-color: rgba(0, 0, 0, 0.06) !important; }
+body.light-mode .bg-white\/\[0\.02\] { background-color: rgba(255, 255, 255, 0.9) !important; }
+body.light-mode .bg-white\/5 { background-color: rgba(0, 0, 0, 0.04) !important; }
+body.light-mode .bg-black\/40 { background-color: rgba(255, 255, 255, 0.85) !important; }
+body.light-mode .hover\:bg-white\/\[0\.05\]:hover { background-color: rgba(139, 92, 246, 0.05) !important; }
+
+/* ── SKILLS — Skills v3 design (theme-aware: pixel-match in light, adapted in dark) ── */
+.sk-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 32px; flex-wrap: wrap; margin-bottom: clamp(36px, 5vw, 56px);
+}
+.sk-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700; font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase;
+  color: #16a36b;
+}
+.sk-eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #16a36b; }
+.sk-stats { display: flex; gap: 36px; padding-bottom: 14px; }
+.sk-stat-num { font-weight: 800; font-size: 30px; line-height: 1; letter-spacing: -0.02em; color: #f3f4f6; }
+.sk-stat-label {
+  margin-top: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 400; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: #8a92a0;
+}
+
+.sk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+
+.sk-card {
+  position: relative; border-radius: 22px; padding: 26px 24px 28px; overflow: hidden;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 18px 36px -24px rgba(0, 0, 0, 0.7);
+}
+.sk-card--wide {
+  margin-top: 20px; display: grid;
+  grid-template-columns: minmax(240px, 330px) 1fr; gap: clamp(28px, 4vw, 56px); align-items: start;
+}
+.sk-blob {
+  position: absolute; top: -44px; right: -44px; width: 130px; height: 130px;
+  border-radius: 50%; background: var(--accent); opacity: 0.16; pointer-events: none;
+}
+.sk-blob--wide { width: 200px; height: 200px; top: -60px; right: -30px; opacity: 0.12; }
+
+.sk-head {
+  position: relative; display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.sk-head-left { display: flex; align-items: center; gap: 10px; }
+.sk-dot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.sk-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700; font-size: 12.5px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent);
+}
+.sk-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 400; font-size: 13px; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.28);
+}
+
+.sk-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.sk-chips--wide { align-content: flex-start; }
+.sk-chip {
+  display: inline-flex; align-items: center; padding: 9px 15px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(229, 231, 235, 0.92);
+  font-weight: 600; font-size: 13.5px; letter-spacing: -0.01em; cursor: default;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.sk-chip:hover {
+  transform: translateY(-3px);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: var(--accent); color: #fff;
+  box-shadow: 0 10px 22px -10px var(--accent);
+}
+.sk-desc { margin: 0; font-weight: 500; font-size: 16px; line-height: 1.6; color: rgba(255, 255, 255, 0.55); max-width: 34ch; }
+.sk-year { color: var(--accent); font-weight: 700; }
+
+/* Light mode — match the reference exactly */
+body.light-mode .sk-stat-num { color: #0f1420; }
+body.light-mode .sk-card {
+  background: #ffffff; border-color: #ebedf1;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 16px 34px -22px rgba(16, 24, 40, .16);
+}
+body.light-mode .sk-blob { opacity: 0.08; }
+body.light-mode .sk-blob--wide { opacity: 0.06; }
+body.light-mode .sk-head { border-bottom-color: #eef0f3; }
+body.light-mode .sk-dot { box-shadow: 0 0 0 4px var(--accent-soft); }
+body.light-mode .sk-label { color: var(--accent-strong); }
+body.light-mode .sk-num { color: #b6bcc8; }
+body.light-mode .sk-chip {
+  background: #eef0f3; border-color: #e4e7ec; color: #1b2330;
+  box-shadow: 0 1px 1px rgba(16, 24, 40, .03);
+}
+body.light-mode .sk-chip:hover {
+  background: var(--accent-soft); border-color: var(--accent); color: var(--accent-strong);
+  box-shadow: 0 10px 22px -10px var(--accent);
+}
+body.light-mode .sk-desc { color: #5b6472; }
+body.light-mode .sk-year { color: var(--accent-strong); }
+
+@media (max-width: 720px) { .sk-card--wide { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  // EXPERIENCE timeline
+  (function () {
+    const items = document.querySelectorAll<HTMLElement>('[data-timeline-item]');
+    if (!items.length) return;
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (!e.isIntersecting) return; e.target.classList.add('tl-visible'); obs.unobserve(e.target); });
+    }, { threshold: 0.12, rootMargin: '0px 0px -20px 0px' });
+    items.forEach(el => obs.observe(el));
+  })();
+
+  // MY STORY animations
+  (function () {
+    const photo = document.querySelector<HTMLElement>('[data-story-photo]');
+    const badge = document.querySelector<HTMLElement>('[data-story-badge]');
+    const label = document.querySelector<HTMLElement>('[data-story-label]');
+    const paras = Array.from(document.querySelectorAll<HTMLElement>('[data-story-para]'));
+    if (photo) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (!e.isIntersecting) return; photo.classList.add('story-visible'); badge?.classList.add('story-visible'); obs.disconnect(); });
+      }, { threshold: 0.15, rootMargin: '0px 0px -20px 0px' });
+      obs.observe(photo);
+    }
+    if (paras.length) {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (!e.isIntersecting) return; label?.classList.add('story-visible'); paras.forEach((p, i) => { p.style.animationDelay = `${0.08 + i * 0.13}s`; p.classList.add('story-visible'); }); obs.disconnect(); });
+      }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+      obs.observe(paras[0]);
+    }
+  })();
+
+  // Count-up animation for stats
+  setTimeout(() => {
+    document.querySelectorAll<HTMLElement>('.count-up').forEach(el => {
+      const target = parseInt(el.dataset.count ?? '0', 10);
+      const suffix = el.dataset.suffix ?? '';
+      if (isNaN(target) || target === 0) return;
+      const duration = 900;
+      const start = performance.now();
+      const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+      const tick = (now: number) => {
+        const progress = Math.min((now - start) / duration, 1);
+        el.textContent = String(Math.round(easeOut(progress) * target)) + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }, 300);
+</script>
