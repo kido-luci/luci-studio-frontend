@@ -23,3 +23,28 @@ export function useTranslations(locale: Locale) {
   const dict = catalogs[locale] ?? catalogs.en;
   return (key: string): string => dict[key] ?? catalogs.en[key] ?? key;
 }
+
+// localizedHref prefixes an internal path for the given locale. English (default)
+// is un-prefixed; Vietnamese lives under `/vi`. Pass only same-origin paths that
+// start with `/`; anchors (`#…`), `mailto:`, and external URLs are returned as-is.
+export function localizedHref(locale: Locale, path: string): string {
+  if (locale === 'en') return path;
+  if (!path.startsWith('/')) return path; // '#contact', 'mailto:…', 'https://…'
+  if (path === '/') return '/vi/';
+  return `/vi${path}`;
+}
+
+// switchLocalePath maps the current pathname to its counterpart in `target`,
+// preserving the rest of the path so a language switch keeps the reader on the
+// same page (e.g. /blog/x ↔ /vi/blog/x).
+export function switchLocalePath(pathname: string, target: Locale): string {
+  const stripped = pathname.replace(/^\/vi(?=\/|$)/, '') || '/';
+  return target === 'vi' ? localizedHref('vi', stripped) : stripped;
+}
+
+// format interpolates `{name}` placeholders in a catalog template. Used for the
+// strings that embed a count/value (e.g. "{n} articles …"); keeps EN output
+// identical while letting VI phrase the sentence naturally.
+export function format(template: string, vars: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
+}
