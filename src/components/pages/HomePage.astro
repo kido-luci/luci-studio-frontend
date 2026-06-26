@@ -1,0 +1,1238 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import RepoCard from "../RepoCard.astro";
+import TopNav from "../TopNav.astro";
+import LabDecor from "../LabDecor.astro";
+import SeriesCard from "../SeriesCard.astro";
+import PostCard from "../PostCard.astro";
+import { postService } from "../../services/posts";
+import { playlistService } from "../../services/playlists";
+import { buildSeriesViews } from "../../utils/series";
+import { galleryService } from "../../services/gallery";
+import { projectService } from "../../services/projects";
+import { buildLabCards } from "../../utils/labCards";
+import { profileService } from "../../services/profile";
+import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
+import { getLocaleFromUrl, useTranslations } from '../../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+import FooterLinks from "../FooterLinks.astro";
+import "../../styles/lab-cards.css";
+
+const LAB_ACCENT = "#6c4cf1";
+
+const profile = await profileService.getProfile();
+
+// The homepage LAB section reuses the /lab editorial RepoCard, built from the
+// same `projects` entity via the shared buildLabCards mapping. Apps lead with
+// their cover; source repos with the GitHub social-preview (OG) banner.
+const labProjects = await projectService.getAll();
+const { apps: labApps, sources: labSources } = buildLabCards(labProjects);
+// Homepage previews just the first 2 of each group (released apps + public
+// source); the full list lives on /lab via the "Explore the Lab" link.
+const labCards = [...labApps.slice(0, 2), ...labSources.slice(0, 2)];
+
+const [rawPosts, rawPlaylists] = await Promise.all([
+  postService.getAll(),
+  playlistService.getAll(),
+]);
+const blogPosts = rawPosts
+  .filter(p => !p.topics?.some(t => t.toLowerCase().startsWith('art')))
+  .map(p => ({
+  id: p.id,
+  title: p.title,
+  subtitle: p.subtitle || '',
+  date: formatDate(p.created_at, locale),
+  read: readTimeFor(p, locale),
+  tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
+  // empty cover → PostCard renders the gradient + tag-word fallback (same as /blog)
+  img: p.cover_image_url || '',
+  likes: p.likes ?? 0,
+  views: p.views ?? 0,
+}));
+
+const homePlaylists = buildSeriesViews(rawPlaylists, rawPosts).slice(0, 3);
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
+
+const galleryItems = await galleryService.getAll();
+const artItems: { img: string; label: string; year: string; date: string; topic: string; url?: string; id?: string; likes?: number }[] =
+  galleryItems.length > 0
+    ? galleryItems.map(g => ({
+          img: g.cover_image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800',
+          label: g.title,
+          year: new Date(g.created_at).getFullYear().toString(),
+          date: formatDate(g.created_at, locale),
+          topic: 'Art',
+          url: `/art/${buildPostSlug(g.title, g.id)}/`,
+          id: g.id,
+          likes: g.likes ?? 0,
+        }))
+    : [
+        { img: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200', label: 'Neon Currents', year: '2024', date: 'Jan 2024', topic: 'Digital Art' },
+        { img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800', label: 'Deep Space', year: '2024', date: 'Mar 2024', topic: 'Digital Art' },
+        { img: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800', label: 'Bloom', year: '2024', date: 'Jun 2024', topic: 'Illustration' },
+        { img: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800', label: 'Ember', year: '2023', date: 'Nov 2023', topic: 'Digital Art' },
+        { img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800', label: 'Circuit', year: '2023', date: 'Aug 2023', topic: 'Digital Art' },
+      ];
+
+const SITE_URL = 'https://luci-studio.com';
+const homepageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Luci Studio',
+  url: SITE_URL,
+  description: 'A creative engineering studio — technical blog, digital art, and high-performance cross-platform applications.',
+  logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/logo_icon.png` },
+  sameAs: [
+    'https://medium.com/@lapl1412.work',
+    'https://www.linkedin.com/in/kido-luci/',
+  ],
+};
+---
+
+<Layout
+  title="Luci Studio | Creative Engineering — Tech Blog, Digital Art & Cross-Platform Apps"
+  description="Luci Studio is a creative engineering space. Technical blog, digital art, and high-performance cross-platform applications built with rigorous architecture."
+  canonical={`${SITE_URL}/`}
+  keywords="Flutter, Dart, Go, mobile development, tech blog, digital art, cross-platform, clean architecture, Luci Studio"
+  structuredData={homepageSchema}
+>
+
+  <Fragment slot="head">
+    <!-- Preload the LCP hero background. It's a CSS background-image, so the browser
+         can't discover it until the stylesheet parses (~600ms late on mobile). Preloading
+         starts the fetch at HTML parse with high priority. Variants match the .hero-bg-img
+         portrait/landscape media rules so only the needed one is fetched. -->
+    <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-portrait.webp" media="(orientation: portrait)" />
+    <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-landscape.webp" media="(orientation: landscape)" />
+    <!-- Editorial display fonts for the LAB section RepoCards (same as /lab; Space Mono already in Layout). -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap" />
+    <!-- Mark the homepage for the scroll-animation system. Inline + in <head> so it runs
+         BEFORE the body paints: every CSS hidden initial-state below is gated on
+         html.home-anim, so JS-off visitors (class never added) and the GSAP-load failsafe
+         (class removed) both fall back to fully-visible content with zero FOUC. -->
+    <script is:inline>document.documentElement.classList.add('home-anim');</script>
+  </Fragment>
+
+  <TopNav active="home" ctaLabel={t('home.letsTalk')} ctaHref="#contact" />
+
+  <main data-api-url={API_URL}>
+
+    <!-- HERO -->
+    <section class="relative min-h-screen flex flex-col pt-20">
+      <div class="hero-bg-img absolute inset-0 pointer-events-none z-[0]" style="background-size:cover;background-position:center;background-repeat:no-repeat;"></div>
+      <LabDecor />
+      <!-- Vanta.js halo is handled in Layout.astro -->
+
+      <!-- Floating orbs for depth -->
+      <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
+      <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+
+      <!-- Patch-reveal overlay: tiles generated by JS, GSAP staggers them out to reveal the hero -->
+      <div data-hero-patches aria-hidden="true" class="absolute inset-0 pointer-events-none z-30"></div>
+
+      <div class="relative z-10 flex-1 flex flex-col justify-center items-center text-center max-w-6xl mx-auto w-full px-4 md:px-6">
+
+        <!-- Main Headline -->
+        <h1 class="hero-headline" data-word-reveal>
+          <!-- Line 1: LUCI STUDIO -->
+          <span class="hero-line hero-line-top">
+            <span class="reveal-word hero-word-main">
+              <span class="text-white">LUCI</span>
+            </span>
+            <span class="reveal-word hero-word-accent">
+              <span class="text-shimmer">STUDIO</span>
+            </span>
+          </span>
+
+          <!-- Divider line -->
+          <span class="hero-divider" aria-hidden="true">
+            <span class="hero-divider-line"></span>
+            <span class="hero-divider-diamond">◆</span>
+            <span class="hero-divider-line"></span>
+          </span>
+
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="hero-subtitle" style="color: white !important;">{profile?.hero_tagline ?? ''}</p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-5">
+          <a href="#work" class="magnetic group relative px-8 py-4 hero-cta-primary text-sm font-black rounded-full overflow-hidden hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] transition-all duration-500 hover:scale-105">
+            <span class="relative z-10 uppercase tracking-widest">{t('home.viewWork')}</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <span class="absolute inset-0 z-10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 font-black uppercase tracking-widest transition-opacity duration-500">{t('home.viewWork')}</span>
+            <div class="absolute -inset-1 bg-gradient-to-r from-violet-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-20 blur transition-opacity duration-500"></div>
+          </a>
+          <a href="#art" class="magnetic hero-cta-secondary px-8 py-4 border text-sm font-bold rounded-full transition-all duration-300 uppercase tracking-widest hover:scale-105">
+            {t('home.seeArt')}
+          </a>
+        </div>
+      </div>
+
+      <!-- Pillars: full-width bar pinned to the bottom of the hero -->
+      <div class="hero-pillars relative z-10" data-reveal>
+        <a href="/blog" class="hp-card" style="--hp:#a78bfa">
+          <span class="hp-num">01</span>
+          <span class="hp-title">{t('home.techBlogTitle')}</span>
+          <span class="hp-sub">{t('home.techBlogSub')}</span>
+          <span class="hp-arrow" aria-hidden="true">→</span>
+        </a>
+        <a href="#art" class="hp-card" style="--hp:#f472b6">
+          <span class="hp-num">02</span>
+          <span class="hp-title">{t('home.digitalArtTitle')}</span>
+          <span class="hp-sub">{t('home.digitalArtSub')}</span>
+          <span class="hp-arrow" aria-hidden="true">→</span>
+        </a>
+        <a href="#work" class="hp-card" style="--hp:#22d3ee">
+          <span class="hp-num">03</span>
+          <span class="hp-title">{t('home.appsTitle')}</span>
+          <span class="hp-sub">{t('home.appsSub')}</span>
+          <span class="hp-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <!-- Scroll cue floating just above the bar — signals more content below -->
+        <a href="#blog" class="hero-scroll-cue" aria-label="Scroll down for more">
+          <span class="hero-scroll-text">{t('home.scrollLabel')}</span>
+          <svg class="hero-scroll-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- MARQUEE STRIP -->
+    <div class="relative py-6 border-y border-white/5 bg-black/40 overflow-hidden">
+      <div class="flex whitespace-nowrap animate-marquee">
+        {(profile?.tech_marquee ?? []).flatMap((t) => [
+          <span class="mx-8 text-xs font-black uppercase tracking-[0.3em] text-gray-400">{t}</span>,
+          <span class="mx-4 text-gray-700 text-lg">✦</span>,
+        ])}
+        {(profile?.tech_marquee ?? []).flatMap((t) => [
+          <span class="mx-8 text-xs font-black uppercase tracking-[0.3em] text-gray-400">{t}</span>,
+          <span class="mx-4 text-gray-700 text-lg">✦</span>,
+        ])}
+      </div>
+    </div>
+
+
+    <!-- CONTENT WRAPPER FOR SMOOTH TRANSITIONS -->
+    <div class="relative bg-black/60 border-t border-white/5 light-mode:bg-white/80" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+      
+            <!-- BLOG -->
+      <section id="blog" class="py-16 px-4 md:px-6">
+        <div class="max-w-7xl mx-auto">
+          <div data-reveal class="mb-20 text-center">
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('blog.eyebrow')}</span>
+            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.thoughts')}<span class="text-violet-500">.</span></h2>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch md:auto-rows-fr gap-8" id="home-blog-grid">
+            {blogPosts.slice(0, 6).map((p) => (
+              <PostCard
+                href={`/blog/${buildPostSlug(p.title, p.id)}/`}
+                title={p.title}
+                subtitle={p.subtitle}
+                tags={p.tags}
+                date={p.date}
+                read={p.read}
+                img={p.img}
+                id={p.id}
+                views={p.views}
+                likes={p.likes}
+                interactive
+              />
+            ))}
+          </div>
+          {blogPosts.length > 6 && (
+            <div data-reveal class="mt-12 text-center">
+              <a href="/blog" class="magnetic !inline-flex items-center gap-2 px-7 py-3 border border-violet-500/30 text-xs font-black uppercase tracking-widest text-violet-400 rounded-full hover:border-violet-500/70 hover:bg-violet-500/10 hover:text-violet-300 transition-all duration-300">
+                View all {blogPosts.length} posts
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <div class="flex flex-col items-center py-8 opacity-40">
+        <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+      </div>
+
+      <!-- LAB -->
+      <section id="work" class="py-16 px-4 md:px-6">
+        <div class="max-w-7xl mx-auto">
+          <div data-reveal class="mb-20">
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('home.openSourceApps')}</span>
+            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.lab')}<span class="text-violet-500">.</span></h2>
+            <div data-lab-underline class="h-px w-full bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
+          </div>
+          <div class="lab-palette grid grid-cols-1 md:grid-cols-2 gap-7" style="font-family:'Hanken Grotesk',system-ui,sans-serif;">
+            {labCards.map((c) => (
+              <RepoCard {...c} accent={LAB_ACCENT} />
+            ))}
+          </div>
+          {labCards.length > 0 && (
+            <div data-reveal class="mt-12 text-center">
+              <a href="/lab" class="magnetic !inline-flex items-center gap-2 px-7 py-3 border border-violet-500/30 text-xs font-black uppercase tracking-widest text-violet-400 rounded-full hover:border-violet-500/70 hover:bg-violet-500/10 hover:text-violet-300 transition-all duration-300">
+                {t('home.exploreLab')}
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <div class="flex flex-col items-center py-8 opacity-40">
+        <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+      </div>
+
+      <!-- SERIES -->
+      {homePlaylists.length > 0 && (
+        <Fragment>
+          <section id="series" class="py-16 px-4 md:px-6">
+            <div class="max-w-7xl mx-auto">
+              <div class="home-playlists pt-12">
+                <div data-reveal class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">{t('home.readingPaths')}</span>
+                    <h3 class="text-3xl md:text-4xl font-black tracking-normal">{t('home.series')}<span class="text-[#8b5cf6]">.</span></h3>
+                  </div>
+                  <a href="/blog/series" class="playlist-see-all">{t('home.viewSeries')}</a>
+                </div>
+
+                <ol class="series-strip list-none p-0 m-0">
+                  {homePlaylists.map((p) => (
+                    <li><SeriesCard series={p} /></li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </section>
+
+          <div class="flex flex-col items-center py-8 opacity-40">
+            <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+          </div>
+        </Fragment>
+      )}
+
+      <!-- ART GALLERY -->
+      <section id="art" class="py-16 px-4 md:px-6 relative">
+        <div class="absolute inset-0 pointer-events-none" style="clip-path: inset(0);">
+          <div id="art-bg" class="sticky top-0 w-full h-screen" style="background-size:cover;background-position:center;background-repeat:no-repeat"></div>
+        </div>
+        <div class="relative max-w-7xl mx-auto">
+          <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div>
+              <span class="text-xs font-black uppercase tracking-[0.3em] mb-3 block" style="background:linear-gradient(90deg,#f472b6,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{t('home.offClock')}</span>
+              <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="color:white;font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.theArt')}<span style="color:#60a5fa">.</span></h2>
+            </div>
+            <p class="text-white/50 max-w-xs text-sm leading-relaxed">{t('home.artDescription')}</p>
+          </div>
+
+          <div class="masonry-art-grid">
+            {artItems.map((a) => {
+              const infoBar = (
+                <div class="px-3 py-2 flex items-start justify-between gap-2 rounded-xl" style="background:rgba(10,10,20,0.85)">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-bold text-sm leading-snug line-clamp-2" style="color:#fff">{a.label}</p>
+                    <p class="text-[10px] uppercase tracking-widest mt-0.5 truncate" style="color:#93c5fd">{a.topic} · {a.date}</p>
+                  </div>
+                  {a.id != null && (
+                    <span
+                      class="art-like-area flex items-center gap-1 cursor-pointer flex-shrink-0 group/like mt-0.5"
+                      data-id={String(a.id)}
+                      data-likes={String(a.likes ?? 0)}
+                    >
+                      <svg class="art-like-icon w-3.5 h-3.5 group-hover/like:text-rose-400 transition-colors duration-200" style="color:#cbd5e1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                      </svg>
+                      <span class="art-like-count text-[10px] group-hover/like:text-rose-400 transition-colors duration-200" style="color:#cbd5e1">{a.likes ?? 0}</span>
+                    </span>
+                  )}
+                </div>
+              );
+              return a.url ? (
+                <a href={a.url} class="masonry-art-item group block" data-art-card>
+                  <div class="art-img-frame relative rounded-2xl overflow-hidden border-4 border-white/40 hover:border-purple-400/80 transition-all duration-500">
+                    <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                    <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
+                  </div>
+                  {infoBar}
+                </a>
+              ) : (
+                <div class="masonry-art-item group" data-art-card>
+                  <div class="art-img-frame relative rounded-2xl overflow-hidden border-4 border-white/40 hover:border-purple-400/80 transition-all duration-500">
+                    <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                    <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
+                  </div>
+                  {infoBar}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <div class="flex flex-col items-center py-8 opacity-40">
+        <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+      </div>
+
+    </div>
+
+      
+<!-- CTA -->
+      <section id="contact" class="py-40 px-4 md:px-6">
+        <div class="max-w-5xl mx-auto text-center">
+          <div data-reveal class="mb-6">
+            <span class="text-xs font-black text-gray-600 uppercase tracking-[0.3em]">{t('home.enoughTalking')}</span>
+          </div>
+          <h2 data-word-reveal class="text-[clamp(2.5rem,7vw,6rem)] font-black tracking-[0.02em] leading-none mb-12">
+            {["LET'S","SHIP","SOMETHING"].map((w,i) => (
+              <span class="reveal-word !block" style={`transition-delay:${i*100}ms`}>
+                <span class={i===1 ? 'text-shimmer' : 'text-white'}>{w}</span>
+              </span>
+            ))}
+            <span class="reveal-word !block" style="transition-delay:300ms"><span class="text-white">REAL</span><span class="text-violet-500">.</span></span>
+          </h2>
+          <div data-reveal class="flex flex-col sm:flex-row items-center justify-center gap-5">
+            <a href="mailto:kidoluci.work@gmail.com" class="magnetic group relative px-10 py-5 rounded-full hero-cta-primary font-black uppercase tracking-widest overflow-hidden hover:shadow-[0_0_80px_rgba(139,92,246,0.5)] transition-all duration-500">
+              <span class="relative z-10">{t('home.sayHello')}</span>
+              <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <span class="absolute inset-0 z-10 flex items-center justify-center text-white font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500">{t('home.sayHello')}</span>
+            </a>
+            <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" class="magnetic text-sm font-bold text-gray-500 hover:text-white transition-colors duration-300 uppercase tracking-widest !flex items-center gap-2">LinkedIn <span>↗</span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="py-16 border-t border-white/5 px-4 md:px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <a href="/" class="flex items-center gap-3 opacity-80 hover:opacity-100 transition-opacity">
+            <img src="/images/logo_icon.png" alt="Luci Studio Logo" loading="lazy" class="h-8 w-8 rounded-lg" />
+            <span class="text-2xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI-STUDIO<span class="text-violet-500">.</span></span>
+          </a>
+          <div class="flex flex-wrap items-center justify-center gap-6 md:gap-8">
+            {(profile?.social_links ?? []).map((l) => (
+              <a href={l.url} target="_blank" rel="noopener" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">{l.label}</a>
+            ))}
+            <FooterLinks linkColor="text-gray-600" />
+          </div>
+          <div class="flex flex-col items-center md:items-end gap-3">
+            <div class="flex flex-col items-center md:items-end gap-1">
+              <a href={`mailto:${profile?.contact_email}`} class="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">{profile?.contact_email}</a>
+              <a href={`tel:${profile?.contact_phone?.replace(/\s/g, '')}`} class="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">{profile?.contact_phone}</a>
+            </div>
+            <p class="text-xs text-gray-700 uppercase tracking-widest">{profile?.copyright}</p>
+          </div>
+        </div>
+      </footer>
+
+  </main>
+
+</Layout>
+
+<style>
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-24px); }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.97); }
+}
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40% { transform: translate(-35px, 30px) scale(1.08); }
+  70% { transform: translate(25px, -25px) scale(0.95); }
+}
+@keyframes divider-expand {
+  from { width: 0; opacity: 0; }
+  to { width: 100%; opacity: 1; }
+}
+@keyframes diamond-spin {
+  0%  { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.3); }
+  100%{ transform: rotate(360deg) scale(1); }
+}
+
+/* ── Semantic CTA button classes (theme-independent for hero) ── */
+.hero-cta-primary {
+  background: rgb(17, 24, 39) !important;
+  color: white !important;
+}
+.hero-cta-secondary {
+  border-color: rgba(17, 24, 39, 0.45) !important;
+  color: rgb(17, 24, 39) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(4px);
+}
+.hero-cta-secondary:hover {
+  color: rgb(255, 255, 255) !important;
+  border-color: rgb(17, 24, 39) !important;
+  background: rgb(17, 24, 39) !important;
+}
+
+/* ── Light Mode Overrides ── */
+body.light-mode {
+  background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
+}
+
+body.light-mode nav {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Nav links */
+body.light-mode nav a {
+  color: rgb(75, 85, 99);
+}
+body.light-mode nav a:hover {
+  color: rgb(17, 24, 39);
+}
+body.light-mode nav .text-xl {
+  color: rgb(17, 24, 39);
+}
+
+/* Theme toggle button */
+body.light-mode #theme-toggle {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+body.light-mode #theme-toggle svg {
+  color: rgb(107, 114, 128);
+}
+body.light-mode #theme-toggle:hover svg {
+  color: rgb(17, 24, 39);
+}
+
+/* "Let's Talk" button in nav */
+body.light-mode nav .magnetic {
+  background: rgb(17, 24, 39);
+  color: white;
+}
+body.light-mode nav .magnetic:hover {
+  background: #8b5cf6;
+}
+
+/* Hero text — theme-independent, always dark/readable */
+.hero-line-top .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+.hero-line-bottom .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+.hero-line-bottom .text-gray-300 {
+  color: rgb(107, 114, 128) !important;
+}
+.hero-line-bottom .text-gray-400 {
+  color: rgb(107, 114, 128) !important;
+}
+.hero-line-bottom .text-gray-500 {
+  color: rgb(107, 114, 128) !important;
+}
+
+.hero-badge-text {
+  color: rgb(75, 85, 99);
+}
+
+/* Scroll hint */
+body.light-mode .absolute.bottom-10 span {
+  color: rgb(107, 114, 128);
+}
+
+/* Marquee strip */
+body.light-mode .border-y {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+body.light-mode .animate-marquee .text-gray-400 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode .animate-marquee .text-gray-700 {
+  color: rgb(209, 213, 219) !important;
+}
+
+/* Stats section */
+body.light-mode .border-b {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+body.light-mode .tilt-card {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.07) !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+body.light-mode .tilt-card:hover {
+  border-color: rgba(139, 92, 246, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+}
+/* Stats number gradient */
+body.light-mode .bg-gradient-to-br.from-white.to-gray-500 {
+  background-image: linear-gradient(to bottom right, rgb(17, 24, 39), rgb(107, 114, 128)) !important;
+}
+body.light-mode .tilt-card .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode .tilt-card .text-gray-400 {
+  color: rgb(107, 114, 128) !important;
+}
+
+/* Divider lines */
+body.light-mode .opacity-20 .bg-gradient-to-b {
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.15), transparent) !important;
+}
+
+/* Content wrapper */
+body.light-mode .relative.bg-black\/60 {
+  background-color: rgba(248, 248, 252, 0.15) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* About section */
+body.light-mode .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+body.light-mode .bg-white\/\[0\.02\] {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+body.light-mode .bg-black\/40 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+body.light-mode .text-gray-400 {
+  color: rgb(75, 85, 99) !important;
+}
+body.light-mode .text-gray-300 {
+  color: rgb(55, 65, 81) !important;
+}
+body.light-mode .text-gray-500 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode .text-gray-600 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+/* Keep accent colors vivid — must come AFTER the text-white override */
+body.light-mode .text-violet-500 { color: #8b5cf6 !important; }
+body.light-mode .text-violet-400 { color: #a78bfa !important; }
+body.light-mode .text-pink-500   { color: #ec4899 !important; }
+body.light-mode .text-blue-500   { color: #3b82f6 !important; }
+body.light-mode .text-emerald-500{ color: #10b981 !important; }
+body.light-mode .text-amber-500  { color: #f59e0b !important; }
+body.light-mode .text-cyan-500   { color: #06b6d4 !important; }
+
+/* Quick facts grid */
+body.light-mode .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+body.light-mode .hover\:bg-white\/\[0\.05\]:hover {
+  background-color: rgba(139, 92, 246, 0.05) !important;
+}
+
+/* Blog cards */
+body.light-mode article.tilt-card h3 {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode .tile-like-count {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode .text-gray-700 {
+  color: rgb(156, 163, 175) !important;
+}
+
+/* Experience section dividers */
+body.light-mode .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Skills tag pills */
+body.light-mode .bg-white\/5.border-white\/10 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: rgb(75, 85, 99) !important;
+}
+
+/* Now section list items */
+body.light-mode .text-amber-500 {
+  color: #d97706 !important;
+}
+
+/* CTA section */
+body.light-mode #contact h2 .text-white {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode #contact a[href^="mailto"] {
+  background: rgb(17, 24, 39);
+  color: white;
+}
+body.light-mode #contact a[href^="mailto"]:hover {
+  box-shadow: 0 0 80px rgba(139, 92, 246, 0.4);
+}
+
+/* Footer */
+body.light-mode footer {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+body.light-mode footer .text-gray-600 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode footer .text-gray-700 {
+  color: rgb(156, 163, 175) !important;
+}
+body.light-mode footer .text-gray-500 {
+  color: rgb(107, 114, 128) !important;
+}
+body.light-mode footer a:hover {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode footer span.text-xl {
+  color: rgb(17, 24, 39) !important;
+}
+
+/* Timeline active state */
+body.light-mode .timeline-item.active {
+  background: linear-gradient(135deg, rgba(204, 95, 150, 0.12) 0%, rgba(255, 255, 255, 1) 40%, rgba(255, 255, 255, 1) 100%) !important;
+  border-color: rgba(236, 72, 153, 0.4) !important;
+  box-shadow: 0 20px 40px -20px rgba(236, 72, 153, 0.15);
+}
+
+/* Mobile menu */
+body.light-mode #mobile-menu {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(24px);
+}
+body.light-mode .mobile-nav-link {
+  color: rgb(17, 24, 39) !important;
+}
+body.light-mode .mobile-nav-link:hover {
+  color: #8b5cf6 !important;
+}
+body.light-mode #mobile-menu .h-px {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+body.light-mode #mobile-menu a[href="#contact"] {
+  background: rgb(17, 24, 39) !important;
+  color: white !important;
+}
+
+/* ── Floating orbs ── */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  z-index: 0;
+}
+.hero-orb-1 {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
+  top: 5%; left: -10%;
+}
+body.light-mode .hero-orb-1 {
+  background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+}
+.hero-orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(59,130,246,0.14) 0%, transparent 70%);
+  bottom: 10%; right: -8%;
+}
+body.light-mode .hero-orb-2 {
+  background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
+}
+
+/* ── Role Badge ── */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 999px;
+  background: rgba(139,92,246,0.07);
+  backdrop-filter: blur(8px);
+}
+.hero-badge-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34,197,94,0.8);
+  animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.hero-badge-text {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(200,200,200,0.8);
+}
+
+/* ── Main Headline ── */
+.hero-headline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2rem;
+  font-family: 'Limelight', sans-serif;
+}
+.hero-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.25em;
+  line-height: 1.2;
+}
+.hero-line-top {
+  font-family: 'Limelight', sans-serif;
+  font-size: clamp(3.5rem, 11vw, 9.5rem);
+  font-weight: normal;
+  letter-spacing: -0.005em;
+}
+.hero-line-bottom {
+  font-size: clamp(0.85rem, 2.5vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(107, 114, 128);
+}
+.hero-word-main,
+.hero-word-accent,
+.hero-word-sub {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: middle;
+  padding: 0.15em 0.05em; /* Increased vertical and added horizontal padding */
+  margin: -0.15em -0.05em;
+}
+
+/* ── Divider ── */
+.hero-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(480px, 80vw);
+  margin: 0.6rem 0 0.4rem;
+}
+.hero-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139,92,246,0.5), rgba(59,130,246,0.4), transparent);
+  opacity: 0;
+  animation: divider-expand 1.2s cubic-bezier(0.16,1,0.3,1) 0.8s forwards;
+}
+.hero-divider-diamond {
+  font-size: 0.55rem;
+  color: rgba(139,92,246,0.7);
+  animation: diamond-spin 8s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Subtitle ── */
+.hero-subtitle {
+  font-family: 'SN Pro', sans-serif;
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  color: rgb(75, 85, 99) !important;
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  line-height: 1.75;
+  padding: 0 0.5rem;
+  min-height: 6.5em;
+}
+
+/* ── Hero pillars (Tech Blog · Digital Art · Apps) ── */
+.hero-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  margin: 0;
+  border-top: 1px solid rgba(17, 24, 39, 0.12);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 -8px 32px rgba(17, 24, 39, 0.08);
+}
+.hp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 1.35rem 1.5rem 1.5rem;
+  text-align: left;
+  text-decoration: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+  /* Soft dark shadow lifts text off the busy photo without touching the bg */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: background 0.4s ease;
+}
+.hp-card:first-child { border-left: none; }
+.hp-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--hp);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hp-card:hover::before { transform: scaleX(1); }
+.hp-card:hover { background: rgba(255, 255, 255, 0.4); }
+.hp-num {
+  font-family: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--hp);
+  text-shadow: none;
+}
+.hp-title {
+  font-family: 'SN Pro', 'Inter', sans-serif;
+  font-size: clamp(1.15rem, 2.3vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  transition: color 0.3s ease;
+}
+.hp-card:hover .hp-title { color: var(--hp); }
+.hp-sub {
+  font-family: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, monospace;
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+}
+.hp-arrow {
+  position: absolute;
+  top: 1.3rem; right: 1.35rem;
+  font-size: 1rem;
+  color: var(--hp);
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.hp-card:hover .hp-arrow { opacity: 1; transform: translateX(0); }
+
+/* Scroll cue — floats above the bottom bar to signal there is more below */
+.hero-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  animation: heroScrollBounce 2s ease-in-out infinite;
+  transition: opacity 0.3s ease;
+}
+.hero-scroll-cue:hover { opacity: 0.65; }
+.hero-scroll-text {
+  font-family: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, monospace;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+}
+.hero-scroll-chev {
+  width: 18px;
+  height: 18px;
+}
+@keyframes heroScrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(6px); }
+}
+
+body.light-mode .hero-pillars {
+  background: rgba(255, 255, 255, 0.4);
+  border-top-color: rgba(17, 24, 39, 0.10);
+}
+
+@media (max-width: 720px) {
+  /* Keep the 3 cards in one horizontal row; just compact them + drop the desc */
+  .hp-card {
+    padding: 0.85rem 0.6rem 0.95rem;
+    gap: 0.3rem;
+  }
+  .hp-num {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+  }
+  .hp-title {
+    font-size: clamp(0.78rem, 3.2vw, 1.05rem);
+    letter-spacing: 0;
+  }
+  .hp-sub {
+    display: none;
+  }
+}
+
+/* ── Timeline ── */
+.timeline-item.active {
+  background: linear-gradient(135deg, rgba(204, 95, 150, 0.1) 0%, rgba(3, 3, 3, 1) 40%, rgba(3, 3, 3, 1) 100%) !important;
+  border-color: rgba(236, 72, 153, 0.4) !important;
+  box-shadow: 0 20px 40px -20px rgba(236, 72, 153, 0.2);
+}
+
+/* ── Mobile overrides (< 480px) ── */
+@media (max-width: 480px) {
+  .hero-badge {
+    margin-bottom: 1.2rem;
+  }
+  .hero-headline {
+    margin-bottom: 1.2rem;
+  }
+  .hero-line {
+    /* Stack each word on its own line on very small screens */
+    flex-direction: column;
+    align-items: center;
+    gap: 0.05em;
+  }
+  .hero-line-top {
+    /* Each word becomes its own full-width line */
+    font-size: clamp(2.6rem, 18vw, 4.5rem);
+    letter-spacing: -0.03em;
+  }
+  .hero-line-bottom {
+    font-size: clamp(1.1rem, 7vw, 1.6rem);
+    letter-spacing: 0.05em;
+  }
+  .hero-divider {
+    width: 70vw;
+    margin: 0.4rem 0 0.2rem;
+  }
+  .hero-subtitle {
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.65;
+  }
+}
+
+/* ── Tablet overrides (480–768px) ── */
+@media (min-width: 481px) and (max-width: 768px) {
+  .hero-line-top {
+    font-size: clamp(2.4rem, 9vw, 6rem);
+  }
+  .hero-line-bottom {
+    font-size: clamp(1.1rem, 3vw, 1.8rem);
+  }
+}
+
+/* ── Pinterest-style masonry for art section ── */
+.masonry-art-grid {
+  columns: 2;
+  column-gap: 0.75rem;
+}
+@media (min-width: 640px) {
+  .masonry-art-grid {
+    columns: 3;
+    column-gap: 1rem;
+  }
+}
+@media (min-width: 1024px) {
+  .masonry-art-grid {
+    columns: 4;
+    column-gap: 1rem;
+  }
+}
+.masonry-art-item {
+  break-inside: avoid;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+@media (min-width: 640px) {
+  .masonry-art-item {
+    margin-bottom: 1rem;
+  }
+}
+/* Art image frame border */
+.art-img-frame {
+  border-color: rgba(168, 85, 247, 0.35);
+}
+body.light-mode .art-img-frame {
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+/* Blog cards now render via <PostCard> (data-reveal handles their reveal). */
+
+/* ── Home playlists below blog grid ── */
+.home-playlists {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.series-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.playlist-see-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 9999px;
+  color: rgb(149, 128, 255);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.playlist-see-all:hover {
+  border-color: rgba(139, 92, 246, 0.65);
+  background: rgba(139, 92, 246, 0.08);
+  color: rgb(176, 160, 255);
+}
+body.light-mode .home-playlists {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body.light-mode .playlist-see-all {
+  border-color: rgba(139, 92, 246, 0.35);
+  color: rgb(91, 58, 230);
+}
+body.light-mode .playlist-see-all:hover {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.55);
+}
+
+/* ── Art item scroll-triggered reveal ── */
+@keyframes artFadeIn {
+  from { opacity: 0; transform: scale(0.88) translateY(24px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+[data-art-card] {
+  opacity: 0;
+}
+[data-art-card].card-visible {
+  animation: artFadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* Art item glow on hover */
+[data-art-card]:hover .art-img-frame {
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.25);
+}
+
+#art-bg {
+  background-image: url('https://media.luci-studio.com/ChatGPT%20Image%20May%205%2C%202026%2C%2011_03_29%20AM.jpg');
+}
+@media (max-width: 767px) {
+  #art-bg {
+    background-image: url('https://media.luci-studio.com/ef8036c5a8709482e3e4ecc1090cb8ae.jpg') !important;
+  }
+}
+
+.hero-bg-img {
+  background-image: url('https://media.luci-studio.com/hero/luci-hero-portrait.webp');
+}
+@media (orientation: landscape) {
+  .hero-bg-img {
+    background-image: url('https://media.luci-studio.com/hero/luci-hero-landscape.webp');
+  }
+}
+
+/* ── MY STORY section animations ─────────────────────────────────── */
+@keyframes storyPhotoIn {
+  from { opacity: 0; transform: translateX(-48px) scale(0.97); }
+  to   { opacity: 1; transform: translateX(0)     scale(1); }
+}
+@keyframes storyLabelIn {
+  from { opacity: 0; transform: translateY(14px); letter-spacing: 0.6em; }
+  to   { opacity: 1; transform: translateY(0);    letter-spacing: 0.3em; }
+}
+@keyframes storyParaIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes storyBadgeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+[data-story-photo] {
+  opacity: 0;
+  transform: translateX(-48px) scale(0.97);
+}
+[data-story-photo].story-visible {
+  animation: storyPhotoIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-story-badge] {
+  opacity: 0;
+  transform: translateY(20px);
+}
+[data-story-badge].story-visible {
+  animation: storyBadgeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.45s;
+}
+[data-story-label] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+[data-story-label].story-visible {
+  animation: storyLabelIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-story-para] {
+  opacity: 0;
+  transform: translateY(22px);
+}
+[data-story-para].story-visible {
+  animation: storyParaIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+</style>
+
+<!-- ── Home scroll-animation hidden initial-states ──────────────────────────
+  Render-blocking + gated on html.home-anim so they exist before first paint
+  (no FOUC) and vanish when the foundation script drops .home-anim (JS off,
+  GSAP CDN failed, or reduced-motion). GSAP owns the in-motion; this only hides
+  the start. Targets PostCard/RepoCard/SeriesCard roots, which carry their own
+  Astro scope attr — so this MUST be is:global, not the scoped block above. -->
+<style is:global>
+  /* Step 2 — blog grid curtain: cards start invisible, GSAP owns the transform. */
+  html.home-anim #home-blog-grid > .tb-card-link { opacity: 0; }
+
+  /* Step 3 — section connectors draw downward (collapsed from the top). */
+  html.home-anim [data-connector] { transform: scaleY(0); transform-origin: top center; }
+
+  /* Step 5 — Lab + Series cards start invisible (GSAP clip-reveals each);
+     the Lab underline draws left→right from a collapsed scaleX. */
+  html.home-anim .lab-palette > *,
+  html.home-anim .series-strip > li { opacity: 0; }
+  html.home-anim [data-lab-underline] { transform: scaleX(0); transform-origin: left center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.home-anim #home-blog-grid > .tb-card-link { opacity: 1; }
+    html.home-anim [data-connector] { transform: none; }
+    html.home-anim .lab-palette > *,
+    html.home-anim .series-strip > li { opacity: 1; }
+    html.home-anim [data-lab-underline] { transform: none; }
+  }
+</style>
+
+<script>
+  import { initHomeReveals } from '../../scripts/homeReveals';
+  initHomeReveals();
+</script>
+
+<script>
+  import { initHomeHeaderReveals } from '../../scripts/homeHeaderReveals';
+  initHomeHeaderReveals();
+</script>
+
+<script>
+  import { initHomeScrollAnimations } from '../../scripts/homeScrollAnimations';
+  initHomeScrollAnimations();
+</script>
