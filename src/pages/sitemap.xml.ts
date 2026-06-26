@@ -51,18 +51,32 @@ export const GET: APIRoute = async () => {
         ...(item.cover_image_url ? { image: { loc: item.cover_image_url, title: item.title } } : {}),
     }));
 
+    // Every page exists in English (root) and Vietnamese (/vi/). Emit both as
+    // separate <url> entries, each cross-linking its alternates (+ x-default → en).
+    const viOf = (loc: string) => loc.replace(SITE_URL, `${SITE_URL}/vi`);
+
+    const altLinks = (enLoc: string, viLoc: string) =>
+        `\n    <xhtml:link rel="alternate" hreflang="en" href="${escapeXml(enLoc)}"/>` +
+        `\n    <xhtml:link rel="alternate" hreflang="vi" href="${escapeXml(viLoc)}"/>` +
+        `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(enLoc)}"/>`;
+
+    const urlBlock = (loc: string, e: UrlEntry, enLoc: string, viLoc: string) =>
+        `  <url>
+    <loc>${escapeXml(loc)}</loc>${e.lastmod ? `\n    <lastmod>${e.lastmod}</lastmod>` : ''}
+    <changefreq>${e.changefreq}</changefreq>
+    <priority>${e.priority}</priority>${e.image ? `\n    <image:image>\n      <image:loc>${escapeXml(e.image.loc)}</image:loc>\n      <image:title>${escapeXml(e.image.title)}</image:title>\n    </image:image>` : ''}${altLinks(enLoc, viLoc)}
+  </url>`;
+
     const urls = [...staticPages, ...postPages, ...galleryPages]
-        .map(({ loc, lastmod, priority, changefreq, image }) =>
-            `  <url>
-    <loc>${escapeXml(loc)}</loc>${lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''}
-    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>${image ? `\n    <image:image>\n      <image:loc>${escapeXml(image.loc)}</image:loc>\n      <image:title>${escapeXml(image.title)}</image:title>\n    </image:image>` : ''}
-  </url>`
-        )
+        .flatMap((e) => {
+            const enLoc = e.loc;
+            const viLoc = viOf(enLoc);
+            return [urlBlock(enLoc, e, enLoc, viLoc), urlBlock(viLoc, e, enLoc, viLoc)];
+        })
         .join('\n');
 
     return new Response(
-        `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urls}\n</urlset>`,
+        `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>`,
         { headers: { 'Content-Type': 'application/xml; charset=utf-8' } }
     );
 };

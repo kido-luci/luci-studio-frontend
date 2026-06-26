@@ -1,5 +1,6 @@
 ---
 import { buildPostSlug } from "../utils/blog";
+import { getLocaleFromUrl, localizedHref } from "../i18n";
 import type { SeriesView } from "../utils/series";
 
 interface Props {
@@ -7,7 +8,8 @@ interface Props {
 }
 
 const { series: p } = Astro.props;
-const href = `/blog/series/${buildPostSlug(p.title, p.id)}/`;
+const locale = getLocaleFromUrl(Astro.url);
+const href = localizedHref(locale, `/blog/series/${buildPostSlug(p.title, p.id)}/`);
 const count = p.post_ids?.length ?? 0;
 const cover = p.cover_image_url;
 ---

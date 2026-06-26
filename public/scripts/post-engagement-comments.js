@@ -350,6 +350,15 @@
 
   // ── Comments & Google Auth ──────────────────────────────────────────────
   (function() {
+    // Read localized strings injected by PostDetailPage.astro.
+    // Fall back to English literals so behavior never breaks if the block is absent.
+    function _ci18n(key, fallback) {
+      try {
+        const el = document.getElementById('comments-i18n');
+        if (el) { const d = JSON.parse(el.textContent); if (d[key] != null) return d[key]; }
+      } catch (_) {}
+      return fallback;
+    }
     const main = document.querySelector('main');
     const API_URL = main?.dataset.apiUrl || '';
     const postID = main?.dataset.postId || '';
@@ -537,7 +546,7 @@
 
     // --- Sign out ---
     document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
-      const ok = await showConfirm({ message: 'Sign out of your account?', confirmText: 'Sign out', cancelText: 'Cancel' });
+      const ok = await showConfirm({ message: _ci18n('signOutConfirmMsg', 'Sign out of your account?'), confirmText: _ci18n('signOutConfirmOk', 'Sign out'), cancelText: _ci18n('signOutConfirmCancel', 'Cancel') });
       if (!ok) return;
       clearToken();
       renderAuthUI();
@@ -546,10 +555,11 @@
     // --- Relative time ---
     function timeAgo(iso) {
       const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-      if (diff < 60) return 'just now';
-      if (diff < 3600) { const m = Math.floor(diff / 60); return `${m} minute${m !== 1 ? 's' : ''} ago`; }
-      if (diff < 86400) { const h = Math.floor(diff / 3600); return `${h} hour${h !== 1 ? 's' : ''} ago`; }
-      if (diff < 2592000) { const d = Math.floor(diff / 86400); return `${d} day${d !== 1 ? 's' : ''} ago`; }
+      function interp(tpl, n) { return tpl.replace('{n}', n); }
+      if (diff < 60) return _ci18n('timeJustNow', 'just now');
+      if (diff < 3600) { const m = Math.floor(diff / 60); return interp(_ci18n(m !== 1 ? 'timeMinutes' : 'timeMinute', `${m} minute${m !== 1 ? 's' : ''} ago`), m); }
+      if (diff < 86400) { const h = Math.floor(diff / 3600); return interp(_ci18n(h !== 1 ? 'timeHours' : 'timeHour', `${h} hour${h !== 1 ? 's' : ''} ago`), h); }
+      if (diff < 2592000) { const d = Math.floor(diff / 86400); return interp(_ci18n(d !== 1 ? 'timeDays' : 'timeDay', `${d} day${d !== 1 ? 's' : ''} ago`), d); }
       return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
@@ -645,19 +655,19 @@
       const isOwner = payload && String(payload.sub) === String(c.user_id || c.user?.id);
 
       const contentHTML = c.recalled
-        ? `<p style="font-size:0.875rem;font-style:italic;color:var(--text-tertiary);margin:0 0 0.625rem 0;">Message recalled</p>`
+        ? `<p style="font-size:0.875rem;font-style:italic;color:var(--text-tertiary);margin:0 0 0.625rem 0;">${_ci18n('messageRecalled', 'Message recalled')}</p>`
         : `<p style="font-size:${isReply ? '0.875rem' : '0.9rem'};color:var(--text-secondary);line-height:1.65;white-space:pre-wrap;word-break:break-word;margin:0 0 0.625rem 0;">${renderCommentText(c.content)}</p>`;
 
       const recallBtn = isOwner && !c.recalled
         ? `<button class="recall-btn" type="button" data-id="${c.id}" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--text-tertiary)'">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
-              Recall
+              ${_ci18n('recall', 'Recall')}
             </button>`
         : '';
 
       const replyBtnHTML = `<button class="reply-btn" type="button" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='var(--text-secondary)'" onmouseout="this.style.color='var(--text-tertiary)'">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Reply
+              ${_ci18n('reply', 'Reply')}
             </button>`;
 
       const curReaction = reactionState.get(String(c.id)) || '';
@@ -695,7 +705,7 @@
       while (contentWrap.firstChild) wrap.appendChild(contentWrap.firstChild);
 
       wrap.querySelector('.recall-btn')?.addEventListener('click', async () => {
-        const ok = await showConfirm({ message: 'Recall this comment? It cannot be undone.', confirmText: 'Recall', cancelText: 'Cancel', danger: true });
+        const ok = await showConfirm({ message: _ci18n('recallConfirmMsg', 'Recall this comment? It cannot be undone.'), confirmText: _ci18n('recallConfirmOk', 'Recall'), cancelText: _ci18n('recallConfirmCancel', 'Cancel'), danger: true });
         if (!ok) return;
         const t = getToken();
         if (!isTokenValid(t)) return;
@@ -705,7 +715,7 @@
         });
         if (res.ok || res.status === 204) {
           const p = wrap.querySelector('p');
-          if (p) { p.textContent = 'Message recalled'; p.style.fontStyle = 'italic'; p.style.color = 'var(--text-tertiary)'; p.style.fontSize = '0.875rem'; }
+          if (p) { p.textContent = _ci18n('messageRecalled', 'Message recalled'); p.style.fontStyle = 'italic'; p.style.color = 'var(--text-tertiary)'; p.style.fontSize = '0.875rem'; }
           wrap.querySelector('.recall-btn')?.remove();
         }
       });
@@ -807,7 +817,7 @@
 
       if (!isTokenValid(token)) {
         formWrap.innerHTML = `<p style="font-size:0.8rem;color:var(--text-tertiary);margin:0;">
-          <button type="button" id="reply-sign-in" style="color:#7c3aed;font-weight:700;background:none;border:none;cursor:pointer;font-size:0.8rem;padding:0;">Sign in with Google</button> to reply.
+          <button type="button" id="reply-sign-in" style="color:#7c3aed;font-weight:700;background:none;border:none;cursor:pointer;font-size:0.8rem;padding:0;">${_ci18n('signInToReply', 'Sign in with Google')}</button>${_ci18n('signInToReplySuffix', ' to reply.')}
         </p>`;
         parentWrap.querySelector('.comment-actions').after(formWrap);
         formWrap.querySelector('#reply-sign-in')?.addEventListener('click', () => {
@@ -838,7 +848,7 @@
       formWrap.innerHTML = `
         <div class="reply-form-inner" style="display:flex;gap:0.5rem;align-items:flex-start;">
           <div style="flex:1;min-width:0;">
-            <div style="font-size:0.7rem;color:var(--text-tertiary);margin-bottom:0.375rem;">Replying to <span style="color:#818cf8;font-weight:600;">@${escapeHtml(parentUserName)}</span></div>
+            <div style="font-size:0.7rem;color:var(--text-tertiary);margin-bottom:0.375rem;">${_ci18n('replyingTo', 'Replying to')} <span style="color:#818cf8;font-weight:600;">@${escapeHtml(parentUserName)}</span></div>
             <div class="reply-input" contenteditable="true" role="textbox" aria-multiline="true" data-empty="true"
               style="width:100%;padding:0.5rem 0.75rem;font-size:0.875rem;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.08));border-radius:0.5rem;outline:none;color:var(--text-primary);box-sizing:border-box;transition:border-color 0.15s;min-height:2.8rem;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;line-height:1.6;cursor:text;"
               onfocus="this.style.borderColor='rgba(124,58,237,0.4)'" onblur="this.style.borderColor='var(--comment-divider,rgba(255,255,255,0.08))'"></div>
@@ -852,10 +862,10 @@
               <span class="reply-char-count" style="font-size:0.65rem;color:var(--text-tertiary);"></span>
               <button class="reply-cancel" type="button"
                 style="padding:0.375rem 0.875rem;border-radius:0.5rem;font-size:0.78rem;font-weight:600;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.12));color:var(--text-secondary);cursor:pointer;transition:background 0.15s;"
-                onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">Cancel</button>
+                onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">${_ci18n('cancel', 'Cancel')}</button>
               <button class="reply-submit" type="button"
                 style="padding:0.375rem 0.875rem;border-radius:0.5rem;font-size:0.78rem;font-weight:700;background:#7c3aed;color:#fff;border:none;cursor:pointer;transition:background 0.2s;"
-                onmouseover="this.style.background='#6d28d9'" onmouseout="this.style.background='#7c3aed'">Reply</button>
+                onmouseover="this.style.background='#6d28d9'" onmouseout="this.style.background='#7c3aed'">${_ci18n('replySubmit', 'Reply')}</button>
             </div>
           </div>
         </div>
@@ -934,7 +944,7 @@
 
         const submitBtn = formWrap.querySelector('.reply-submit');
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Posting…';
+        submitBtn.textContent = _ci18n('posting', 'Posting…');
 
         try {
           const res = await fetch(`${API_URL}/posts/${postID}/comments`, {
@@ -975,7 +985,7 @@
           updateCountBadge(current + 1);
         } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Reply';
+          submitBtn.textContent = _ci18n('replySubmit', 'Reply');
         }
       });
     }
@@ -1038,12 +1048,12 @@
       if (!btn) return;
       btn.style.display = commentsHasMore ? 'inline-flex' : 'none';
       btn.disabled = commentsLoading;
-      btn.textContent = commentsLoading ? 'Loading…' : 'Load more comments';
+      btn.textContent = commentsLoading ? _ci18n('loading', 'Loading…') : _ci18n('loadMore', 'Load more comments');
     }
 
     function renderComments(all) {
       if (!all.length) {
-        commentList.innerHTML = '<p id="comments-empty" style="padding:2.5rem 0;text-align:center;font-size:0.75rem;color:var(--text-tertiary);">No comments yet. Be the first!</p>';
+        commentList.innerHTML = `<p id="comments-empty" style="padding:2.5rem 0;text-align:center;font-size:0.75rem;color:var(--text-tertiary);">${_ci18n('noComments', 'No comments yet. Be the first!')}</p>`;
         return;
       }
       commentList.innerHTML = '';
@@ -1085,7 +1095,7 @@
         renderComments(cachedComments);
         updateLoadMoreBtn();
       } catch {
-        if (loadingEl) loadingEl.querySelector('p').textContent = 'Failed to load comments.';
+        if (loadingEl) loadingEl.querySelector('p').textContent = _ci18n('failedLoad', 'Failed to load comments.');
       }
     }
 
@@ -1112,7 +1122,7 @@
 
     document.getElementById('sort-toggle')?.addEventListener('click', () => {
       sortOrder = sortOrder === 'newest' ? 'oldest' : 'newest';
-      document.getElementById('sort-label').textContent = sortOrder === 'newest' ? 'Newest first' : 'Oldest first';
+      document.getElementById('sort-label').textContent = sortOrder === 'newest' ? _ci18n('sortNewest', 'Newest first') : _ci18n('sortOldest', 'Oldest first');
       if (cachedComments) renderComments(cachedComments);
     });
 
@@ -1128,7 +1138,7 @@
 
       const submitBtn = commentForm.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Posting…';
+      submitBtn.textContent = _ci18n('posting', 'Posting…');
 
       try {
         const res = await fetch(`${API_URL}/posts/${postID}/comments`, {
@@ -1156,7 +1166,7 @@
         updateCountBadge(current + 1);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit';
+        submitBtn.textContent = _ci18n('submitBtn', 'Submit');
       }
     });
 

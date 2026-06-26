@@ -1,4 +1,5 @@
 import { cachedGetAll } from '../lib/apiClient';
+import type { LocaleOverlay } from '../i18n';
 
 export interface WorkLink {
     label: string;
@@ -24,6 +25,7 @@ export interface WorkItem {
     display_order: number;
     created_at: string;
     updated_at: string;
+    translations?: LocaleOverlay | null;
 }
 
 const _getAll = cachedGetAll<WorkItem>('/work');

@@ -1,8 +1,8 @@
 ---
-// Thin route wrapper. getStaticPaths (shared with the /vi counterpart via
+// VI route wrapper. getStaticPaths (shared with the /en counterpart via
 // seriesPaths) emits one page per playlist; the body lives in SeriesDetailPage.
-import SeriesDetailPage from "../../../components/pages/SeriesDetailPage.astro";
-import { seriesPaths } from "../../../utils/i18nPaths";
+import SeriesDetailPage from "../../../../components/pages/SeriesDetailPage.astro";
+import { seriesPaths } from "../../../../utils/i18nPaths";
 
 export async function getStaticPaths() {
   return seriesPaths();

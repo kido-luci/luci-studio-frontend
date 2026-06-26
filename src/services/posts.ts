@@ -1,4 +1,5 @@
 import { BASE_URL } from '../lib/apiClient';
+import type { LocaleOverlay } from '../i18n';
 
 const failFast = import.meta.env.PROD && import.meta.env.ALLOW_EMPTY_POSTS !== '1';
 
@@ -14,6 +15,7 @@ export interface Post {
     word_count?: number;
     created_at: string;
     updated_at: string;
+    translations?: LocaleOverlay | null;
 }
 
 // Module-scoped cache of the in-flight getAll promise. Astro shares module

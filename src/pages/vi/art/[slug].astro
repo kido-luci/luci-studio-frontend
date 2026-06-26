@@ -1,8 +1,8 @@
 ---
-// Thin route wrapper. getStaticPaths (shared with the /vi counterpart via
+// VI route wrapper. getStaticPaths (shared with the /en counterpart via
 // artPaths) emits one page per gallery item; the body lives in ArtDetailPage.
-import ArtDetailPage from "../../components/pages/ArtDetailPage.astro";
-import { artPaths } from "../../utils/i18nPaths";
+import ArtDetailPage from "../../../components/pages/ArtDetailPage.astro";
+import { artPaths } from "../../../utils/i18nPaths";
 
 export async function getStaticPaths() {
   return artPaths();

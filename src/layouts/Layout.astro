@@ -1,6 +1,9 @@
 ---
 import '../styles/global.css';
 import { COOKIE_BANNER_ENABLED } from '../config/features';
+import { getLocaleFromUrl, useTranslations } from '../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 
 const SITE_URL = 'https://luci-studio.com';
 const SITE_NAME = 'Luci Studio';
@@ -41,10 +44,28 @@ const {
 } = Astro.props;
 
 const canonicalURL = canonical ?? SITE_URL;
+
+// Bilingual SEO. Pages pass the canonical as the English URL regardless of the
+// rendered locale, so derive the Vietnamese variant by inserting `/vi` after the
+// origin. Each page links both alternates (+ x-default → English) and sets its
+// own canonical / og:url / og:locale to the locale it is actually rendered in.
+const enCanonical = canonicalURL;
+const viCanonical = (() => {
+	try {
+		const u = new URL(enCanonical);
+		u.pathname = u.pathname === '/' ? '/vi/' : `/vi${u.pathname}`;
+		return u.toString();
+	} catch {
+		return enCanonical;
+	}
+})();
+const selfCanonical = locale === 'vi' ? viCanonical : enCanonical;
+const ogLocale = locale === 'vi' ? 'vi_VN' : 'en_US';
+const ogLocaleAlt = locale === 'vi' ? 'en_US' : 'vi_VN';
 ---
 
 <!doctype html>
-<html lang="en" data-particle-speed={particleSpeed}>
+<html lang={locale} data-particle-speed={particleSpeed}>
 	<head>
 		<meta charset="UTF-8" />
 		<title>{title}</title>
@@ -57,20 +78,25 @@ const canonicalURL = canonical ?? SITE_URL;
 		{keywords && <meta name="keywords" content={keywords} />}
 		<meta name="author" content="Trung Lập (Luci)" />
 		<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-		<link rel="canonical" href={canonicalURL} />
+		<link rel="canonical" href={selfCanonical} />
+		<!-- hreflang: each page declares its en/vi counterparts + x-default (English). -->
+		<link rel="alternate" hreflang="en" href={enCanonical} />
+		<link rel="alternate" hreflang="vi" href={viCanonical} />
+		<link rel="alternate" hreflang="x-default" href={enCanonical} />
 		{googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
 
 		<!-- Open Graph -->
 		<meta property="og:site_name" content={SITE_NAME} />
 		<meta property="og:type" content={ogType} />
-		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:url" content={selfCanonical} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={ogImage} />
 		{ogImageWidth && <meta property="og:image:width" content={String(ogImageWidth)} />}
 		{ogImageHeight && <meta property="og:image:height" content={String(ogImageHeight)} />}
 		<meta property="og:image:alt" content={ogImageAlt} />
-		<meta property="og:locale" content="en_US" />
+		<meta property="og:locale" content={ogLocale} />
+		<meta property="og:locale:alternate" content={ogLocaleAlt} />
 		{articleMeta?.publishedTime && <meta property="article:published_time" content={articleMeta.publishedTime} />}
 		{articleMeta?.modifiedTime && <meta property="article:modified_time" content={articleMeta.modifiedTime} />}
 		{articleMeta?.author && <meta property="article:author" content={articleMeta.author} />}
@@ -146,18 +172,18 @@ const canonicalURL = canonical ?? SITE_URL;
 			<div class="max-w-3xl mx-auto rounded-lg border-2 border-purple-500/40 bg-black/90 backdrop-blur-2xl shadow-2xl shadow-black/40 p-5 sm:p-6">
 				<div class="flex flex-col sm:flex-row sm:items-end gap-5">
 					<div class="flex-1">
-						<p id="cookie-consent-title" class="text-sm font-black text-white uppercase tracking-[0.18em] mb-2">Cookie Settings</p>
+						<p id="cookie-consent-title" class="text-sm font-black text-white uppercase tracking-[0.18em] mb-2">{t('cookie.title')}</p>
 						<p class="text-sm leading-relaxed text-gray-400">
-							Luci Studio uses local storage for required features like theme, likes, login, and chat history.
+							{t('cookie.body')}
 						</p>
 						<div class="mt-3 flex flex-wrap gap-4 text-xs font-bold uppercase tracking-widest">
-							<a href="/privacy" class="text-gray-500 hover:text-white transition-colors">Privacy</a>
-							<a href="/terms" class="text-gray-500 hover:text-white transition-colors">Terms</a>
+							<a href="/privacy" class="text-gray-500 hover:text-white transition-colors">{t('cookie.privacy')}</a>
+							<a href="/terms" class="text-gray-500 hover:text-white transition-colors">{t('cookie.terms')}</a>
 						</div>
 					</div>
 					<div class="flex flex-col sm:flex-row gap-3 sm:shrink-0">
-						<button type="button" data-cookie-choice="rejected" class="px-4 py-3 rounded-full border border-white/10 text-xs font-black text-gray-300 hover:text-white hover:border-white/30 transition-all uppercase tracking-widest">Reject optional</button>
-						<button type="button" data-cookie-choice="accepted" class="px-4 py-3 rounded-full bg-white text-black text-xs font-black hover:bg-violet-500 hover:text-white transition-all uppercase tracking-widest">Accept optional</button>
+						<button type="button" data-cookie-choice="rejected" class="px-4 py-3 rounded-full border border-white/10 text-xs font-black text-gray-300 hover:text-white hover:border-white/30 transition-all uppercase tracking-widest">{t('cookie.reject')}</button>
+						<button type="button" data-cookie-choice="accepted" class="px-4 py-3 rounded-full bg-white text-black text-xs font-black hover:bg-violet-500 hover:text-white transition-all uppercase tracking-widest">{t('cookie.accept')}</button>
 					</div>
 				</div>
 			</div>
