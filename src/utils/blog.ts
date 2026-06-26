@@ -10,6 +10,14 @@ export function calculateReadTimeFromWordCount(wordCount?: number): string {
     return `${Math.ceil(wordCount / 200)} min`;
 }
 
+// Convenience helper: prefer word_count when available (cheaper), fall back to
+// full-content estimation. Replaces the repeated ternary in post→card mappings.
+export function readTimeFor(p: { word_count?: number; content?: string }): string {
+    return p.word_count
+        ? calculateReadTimeFromWordCount(p.word_count)
+        : calculateReadTime(p.content || '');
+}
+
 export function formatDate(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', {

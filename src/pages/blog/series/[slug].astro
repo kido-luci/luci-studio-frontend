@@ -4,7 +4,7 @@ import TopNav from "../../../components/TopNav.astro";
 import AffiliateCard from "../../../components/AffiliateCard.astro";
 import { playlistService } from "../../../services/playlists";
 import { affiliateService } from "../../../services/affiliates";
-import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../../../utils/blog";
+import { buildPostSlug, readTimeFor, formatDate } from "../../../utils/blog";
 
 export async function getStaticPaths() {
   const playlists = await playlistService.getAll();
@@ -74,7 +74,7 @@ const posts = (playlist.posts ?? []).map(p => ({
   href: `/blog/${buildPostSlug(p.title, p.id)}/`,
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   date: formatDate(p.created_at),
-  read: p.word_count ? calculateReadTimeFromWordCount(p.word_count) : calculateReadTime(p.content || ''),
+  read: readTimeFor(p),
   img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
   views: p.views ?? 0,
   likes: p.likes ?? 0,
