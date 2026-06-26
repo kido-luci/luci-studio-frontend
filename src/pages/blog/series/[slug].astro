@@ -5,6 +5,9 @@ import AffiliateCard from "../../../components/AffiliateCard.astro";
 import { playlistService } from "../../../services/playlists";
 import { affiliateService } from "../../../services/affiliates";
 import { buildPostSlug, readTimeFor, formatDate } from "../../../utils/blog";
+import { getLocaleFromUrl, useTranslations } from '../../../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 
 export async function getStaticPaths() {
   const playlists = await playlistService.getAll();
@@ -66,15 +69,15 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
 const affiliateCards = await affiliateService.getCardsRandom(API_URL, 1);
 
 const SITE_URL = 'https://luci-studio.com';
-const formattedDate = formatDate(playlist.created_at);
+const formattedDate = formatDate(playlist.created_at, locale);
 const posts = (playlist.posts ?? []).map(p => ({
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
   href: `/blog/${buildPostSlug(p.title, p.id)}/`,
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
-  date: formatDate(p.created_at),
-  read: readTimeFor(p),
+  date: formatDate(p.created_at, locale),
+  read: readTimeFor(p, locale),
   img: p.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
   views: p.views ?? 0,
   likes: p.likes ?? 0,
@@ -103,7 +106,7 @@ const seoDescription = playlist.description
       <div data-reveal class="mb-16">
         <a href="/blog/series" class="inline-flex items-center gap-2 mb-6 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-violet-400 transition-colors duration-300">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          All Series
+          {t('series.allSeries')}
         </a>
 
         <div class="playlist-hero-cover aspect-video overflow-hidden mb-8 border-2 border-violet-500/[0.22] relative">
@@ -111,7 +114,7 @@ const seoDescription = playlist.description
           <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%);"></div>
         </div>
 
-        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Curated Series</span>
+        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('series.curatedSeries')}</span>
         <h1 class="text-5xl md:text-7xl tracking-tighter leading-[1.05]" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{playlist.title}<span class="text-violet-500">.</span></h1>
 
         {playlist.description && (
@@ -121,7 +124,7 @@ const seoDescription = playlist.description
         <div class="flex items-center gap-3 mt-6 text-xs text-gray-600 uppercase tracking-widest">
           <span>{posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
           <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-          <span>curated {formattedDate}</span>
+          <span>{t('series.curatedLabel')} {formattedDate}</span>
         </div>
 
         <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-8 max-w-xs"></div>
@@ -130,7 +133,7 @@ const seoDescription = playlist.description
       <!-- Empty state -->
       {posts.length === 0 && (
         <div class="text-center py-24">
-          <p class="text-gray-500 text-sm uppercase tracking-widest">This series is empty</p>
+          <p class="text-gray-500 text-sm uppercase tracking-widest">{t('series.seriesEmpty')}</p>
         </div>
       )}
 

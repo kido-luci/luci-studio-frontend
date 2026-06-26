@@ -6,6 +6,9 @@ import LabDecor from "../components/LabDecor.astro";
 import { workService } from "../services/work";
 import { profileService } from "../services/profile";
 import { skillsService } from "../services/skills";
+import { getLocaleFromUrl, useTranslations } from '../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 
 const profile = await profileService.getProfile();
 const skills = await skillsService.getAll();
@@ -72,7 +75,7 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
             <div class="relative aspect-square md:aspect-auto md:h-[600px] rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]">
               <img src={profile?.story_photo_url} alt="Trung Lap" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
               <div data-story-badge class="absolute bottom-8 left-8 right-8 p-6 backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl">
-                <p class="text-xs font-black text-violet-400 uppercase tracking-[0.2em] mb-1">Based in</p>
+                <p class="text-xs font-black text-violet-400 uppercase tracking-[0.2em] mb-1">{t('portfolio.basedIn')}</p>
                 <p class="text-xl font-bold">{profile?.story_location}</p>
               </div>
             </div>
@@ -80,8 +83,8 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
 
           <!-- Right: Content -->
           <div>
-            <span data-story-label class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4 block">The Person</span>
-            <h2 data-ml9 class="text-5xl md:text-7xl tracking-normal mb-8" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">My story<span class="text-violet-500">.</span></h2>
+            <span data-story-label class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4 block">{t('portfolio.thePersonEyebrow')}</span>
+            <h2 data-ml9 class="text-5xl md:text-7xl tracking-normal mb-8" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('portfolio.myStory')}<span class="text-violet-500">.</span></h2>
             <div class="space-y-6 text-gray-400 text-lg leading-relaxed">
               {(profile?.bio_paragraphs ?? []).map((para, i) => (
                 <p data-story-para={String(i)} class="text-gray-400 text-lg leading-relaxed" set:html={para} />
@@ -127,12 +130,12 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
     <section id="experience" class="py-16 px-4 md:px-6">
       <div class="max-w-7xl mx-auto">
         <div data-reveal class="mb-20">
-          <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">The Record</span>
-          <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">Experience<span class="text-pink-500">.</span></h2>
+          <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">{t('portfolio.theRecord')}</span>
+          <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('portfolio.experience')}<span class="text-pink-500">.</span></h2>
         </div>
         <div class="mb-12">
           <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
-            Paid Work
+            {t('portfolio.paidWork')}
             <div class="h-px flex-1 bg-white/5"></div>
           </h3>
           <div class="space-y-4 timeline-container">
@@ -143,7 +146,7 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
         </div>
         <div>
           <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
-            Own Bets
+            {t('portfolio.ownBets')}
             <div class="h-px flex-1 bg-white/5"></div>
           </h3>
           <div class="space-y-4 timeline-container">
@@ -164,17 +167,17 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
       <div class="max-w-7xl mx-auto">
         <div data-reveal class="sk-header">
           <div>
-            <span class="sk-eyebrow"><span class="sk-eyebrow-dot"></span>The Stack</span>
-            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">Skills<span class="text-emerald-500">.</span></h2>
+            <span class="sk-eyebrow"><span class="sk-eyebrow-dot"></span>{t('portfolio.theStack')}</span>
+            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('portfolio.skills')}<span class="text-emerald-500">.</span></h2>
           </div>
           <div class="sk-stats">
             <div>
               <div class="sk-stat-num tabular-nums">{disciplineCount}</div>
-              <div class="sk-stat-label">Disciplines</div>
+              <div class="sk-stat-label">{t('portfolio.disciplines')}</div>
             </div>
             <div>
               <div class="sk-stat-num tabular-nums">{toolsLabel}</div>
-              <div class="sk-stat-label">Tools &amp; Crafts</div>
+              <div class="sk-stat-label">{t('portfolio.toolsAndCrafts')}</div>
             </div>
           </div>
         </div>
@@ -225,11 +228,11 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
     <!-- Footer CTA -->
     <section class="py-24 px-4 md:px-6 text-center">
       <div class="max-w-2xl mx-auto">
-        <p data-reveal class="text-xs font-black text-gray-600 uppercase tracking-[0.3em] mb-6">Enough talking.</p>
+        <p data-reveal class="text-xs font-black text-gray-600 uppercase tracking-[0.3em] mb-6">{t('portfolio.enoughTalking')}</p>
         <h2 data-reveal class="text-5xl md:text-7xl font-black tracking-wide mb-10">LET'S BUILD<span class="text-violet-500">.</span></h2>
         <div data-reveal class="flex flex-wrap items-center justify-center gap-4">
-          <a href="mailto:kidoluci.work@gmail.com" class="px-8 py-4 bg-white text-black font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest text-sm">Email Me</a>
-          <a href="/" class="px-8 py-4 border border-white/20 font-black rounded-full hover:border-violet-500/60 transition-all duration-300 uppercase tracking-widest text-sm text-gray-400 hover:text-white">Back Home</a>
+          <a href="mailto:kidoluci.work@gmail.com" class="px-8 py-4 bg-white text-black font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest text-sm">{t('portfolio.emailMe')}</a>
+          <a href="/" class="px-8 py-4 border border-white/20 font-black rounded-full hover:border-violet-500/60 transition-all duration-300 uppercase tracking-widest text-sm text-gray-400 hover:text-white">{t('portfolio.backHome')}</a>
         </div>
       </div>
     </section>

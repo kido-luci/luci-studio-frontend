@@ -10,6 +10,9 @@ import { playlistService } from "../../services/playlists";
 import { affiliateService } from "../../services/affiliates";
 import { buildSeriesViews } from "../../utils/series";
 import { buildPostSlug, readTimeFor, formatDate, coverGradient } from "../../utils/blog";
+import { getLocaleFromUrl, useTranslations } from '../../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 
 const rawPosts = await postService.getAll();
 const rawPlaylists = await playlistService.getAll();
@@ -32,8 +35,8 @@ const allPosts = rawPosts
       catLine: tags.join('  ·  '),
       coverWord: tags[0],
       cover: coverGradient(tags[0]),
-      date: formatDate(p.created_at),
-      read: readTimeFor(p),
+      date: formatDate(p.created_at, locale),
+      read: readTimeFor(p, locale),
       likes: p.likes ?? 0,
       views: p.views ?? 0,
       img: p.cover_image_url || '',
@@ -75,15 +78,15 @@ const allTopics = [...topicCounts.keys()].sort(
       <!-- Header -->
       <div data-reveal class="tb-header">
         <div class="tb-head-main">
-          <span class="tb-eyebrow">Raw Output</span>
-          <h1 class="tb-title">Thoughts<span class="tb-dot">.</span></h1>
+          <span class="tb-eyebrow">{t('blog.eyebrow')}</span>
+          <h1 class="tb-title">{t('blog.title')}<span class="tb-dot">.</span></h1>
           <p class="tb-sub">
             {allPosts.length} {allPosts.length === 1 ? 'article' : 'articles'} on engineering, architecture, and the craft of building software.
           </p>
         </div>
         <div class="tb-head-count">
           <div class="tb-count" id="tb-count">{allPosts.length}</div>
-          <div class="tb-count-label">Showing now</div>
+          <div class="tb-count-label">{t('blog.countLabel')}</div>
         </div>
       </div>
 
@@ -91,16 +94,16 @@ const allTopics = [...topicCounts.keys()].sort(
       <div class="tb-controls">
         <div class="tb-search-wrap">
           <svg class="tb-search-ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
-          <input id="tb-search" class="tb-search" type="text" placeholder="Search articles…" autocomplete="off" aria-label="Search articles" />
+          <input id="tb-search" class="tb-search" type="text" placeholder={t('blog.searchPlaceholder')} autocomplete="off" aria-label={t('blog.searchAriaLabel')} />
         </div>
-        {allTopics.length > 0 && <div class="tb-filter-label">Filter by topic</div>}
+        {allTopics.length > 0 && <div class="tb-filter-label">{t('blog.filterLabel')}</div>}
       </div>
 
       <!-- Topic chips -->
       {allTopics.length > 0 && (
         <div class="tb-chips-wrap">
           <div class="tb-chips" id="topic-filters">
-            <button class="topic-btn active-filter" data-topic="all">All</button>
+            <button class="topic-btn active-filter" data-topic="all">{t('blog.filterAll')}</button>
             {allTopics.map(topic => (
               <button class="topic-btn" data-topic={topic}>{topic}</button>
             ))}
@@ -116,7 +119,7 @@ const allTopics = [...topicCounts.keys()].sort(
             {featured.img
               ? <img src={featured.img} alt={featured.title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
               : <span class="tb-cover-word">{featured.coverWord}</span>}
-            <span class="tb-badge tb-badge--feat">★ Featured</span>
+            <span class="tb-badge tb-badge--feat">{t('blog.featuredBadge')}</span>
           </div>
           <div class="tb-feat-body">
             <div class="tb-cat">{featured.catLine}</div>
@@ -125,7 +128,7 @@ const allTopics = [...topicCounts.keys()].sort(
             <div class="tb-spacer"></div>
             <div class="tb-meta"><span>{featured.date}</span><span class="tb-meta-dot">•</span><span>{featured.read} read</span></div>
             <div class="tb-feat-foot">
-              <span class="tb-read">Read article <span class="tb-arrow">→</span></span>
+              <span class="tb-read">{t('blog.readArticle')} <span class="tb-arrow">→</span></span>
               <div class="tb-stats">
                 <span class="tile-view-area tb-stat" data-id={String(featured.id)}>
                   <svg class="tb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -159,9 +162,9 @@ const allTopics = [...topicCounts.keys()].sort(
 
       <!-- Empty state -->
       <div id="empty-state" class="tb-empty hidden">
-        <div class="tb-empty-title">Nothing here yet</div>
-        <p class="tb-empty-sub">No articles match that filter. Try another topic.</p>
-        <button id="tb-clear" class="tb-clear">Clear filters</button>
+        <div class="tb-empty-title">{t('blog.emptyTitle')}</div>
+        <p class="tb-empty-sub">{t('blog.emptySub')}</p>
+        <button id="tb-clear" class="tb-clear">{t('blog.clearFilters')}</button>
       </div>
 
       <!-- Posts Grid -->
@@ -188,11 +191,11 @@ const allTopics = [...topicCounts.keys()].sort(
       <!-- Pagination -->
       <div id="pagination" class="mt-16 hidden flex-col items-center gap-4">
         <div class="flex items-center gap-3">
-          <button id="prev-btn" class="pag-arrow" aria-label="Previous page">
+          <button id="prev-btn" class="pag-arrow" aria-label={t('blog.prevPage')}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <div id="page-numbers" class="flex items-center gap-2"></div>
-          <button id="next-btn" class="pag-arrow" aria-label="Next page">
+          <button id="next-btn" class="pag-arrow" aria-label={t('blog.nextPage')}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
           </button>
         </div>
@@ -220,10 +223,10 @@ const allTopics = [...topicCounts.keys()].sort(
         <section data-reveal class="mt-24">
           <div class="flex items-end justify-between gap-4 mb-6 flex-wrap">
             <div>
-              <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">Curated Collections</span>
-              <h2 class="text-4xl md:text-5xl" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">Series<span class="text-[#8b5cf6]">.</span></h2>
+              <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">{t('blog.seriesEyebrow')}</span>
+              <h2 class="text-4xl md:text-5xl" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{t('blog.seriesHeader')}<span class="text-[#8b5cf6]">.</span></h2>
             </div>
-            <a href="/blog/series" class="see-all-btn">See all →</a>
+            <a href="/blog/series" class="see-all-btn">{t('blog.seeAll')}</a>
           </div>
           <ol class="series-strip list-none p-0 m-0">
             {playlists.slice(0, 3).map((p) => (

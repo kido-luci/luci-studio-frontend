@@ -1,6 +1,9 @@
 ---
 import '../styles/global.css';
 import { COOKIE_BANNER_ENABLED } from '../config/features';
+import { getLocaleFromUrl, useTranslations } from '../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 
 const SITE_URL = 'https://luci-studio.com';
 const SITE_NAME = 'Luci Studio';
@@ -146,18 +149,18 @@ const canonicalURL = canonical ?? SITE_URL;
 			<div class="max-w-3xl mx-auto rounded-lg border-2 border-purple-500/40 bg-black/90 backdrop-blur-2xl shadow-2xl shadow-black/40 p-5 sm:p-6">
 				<div class="flex flex-col sm:flex-row sm:items-end gap-5">
 					<div class="flex-1">
-						<p id="cookie-consent-title" class="text-sm font-black text-white uppercase tracking-[0.18em] mb-2">Cookie Settings</p>
+						<p id="cookie-consent-title" class="text-sm font-black text-white uppercase tracking-[0.18em] mb-2">{t('cookie.title')}</p>
 						<p class="text-sm leading-relaxed text-gray-400">
-							Luci Studio uses local storage for required features like theme, likes, login, and chat history.
+							{t('cookie.body')}
 						</p>
 						<div class="mt-3 flex flex-wrap gap-4 text-xs font-bold uppercase tracking-widest">
-							<a href="/privacy" class="text-gray-500 hover:text-white transition-colors">Privacy</a>
-							<a href="/terms" class="text-gray-500 hover:text-white transition-colors">Terms</a>
+							<a href="/privacy" class="text-gray-500 hover:text-white transition-colors">{t('cookie.privacy')}</a>
+							<a href="/terms" class="text-gray-500 hover:text-white transition-colors">{t('cookie.terms')}</a>
 						</div>
 					</div>
 					<div class="flex flex-col sm:flex-row gap-3 sm:shrink-0">
-						<button type="button" data-cookie-choice="rejected" class="px-4 py-3 rounded-full border border-white/10 text-xs font-black text-gray-300 hover:text-white hover:border-white/30 transition-all uppercase tracking-widest">Reject optional</button>
-						<button type="button" data-cookie-choice="accepted" class="px-4 py-3 rounded-full bg-white text-black text-xs font-black hover:bg-violet-500 hover:text-white transition-all uppercase tracking-widest">Accept optional</button>
+						<button type="button" data-cookie-choice="rejected" class="px-4 py-3 rounded-full border border-white/10 text-xs font-black text-gray-300 hover:text-white hover:border-white/30 transition-all uppercase tracking-widest">{t('cookie.reject')}</button>
+						<button type="button" data-cookie-choice="accepted" class="px-4 py-3 rounded-full bg-white text-black text-xs font-black hover:bg-violet-500 hover:text-white transition-all uppercase tracking-widest">{t('cookie.accept')}</button>
 					</div>
 				</div>
 			</div>

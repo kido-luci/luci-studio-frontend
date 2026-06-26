@@ -1,11 +1,15 @@
 ---
+import { getLocaleFromUrl, useTranslations } from '../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+
 interface Props {
   active?: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | null;
   ctaLabel?: string;
   ctaHref?: string;
 }
 
-const { active = null, ctaLabel = "Let's Talk", ctaHref = '/#contact' } = Astro.props;
+const { active = null, ctaLabel = t('nav.cta'), ctaHref = '/#contact' } = Astro.props;
 
 const linkBase = "topnav-link text-xs font-bold transition-all duration-300 uppercase tracking-[0.2em]";
 const linkIdle = "text-gray-400 hover:text-white";
@@ -30,10 +34,10 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
       <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
     </a>
     <div class="hidden md:flex items-center gap-8">
-      <a href="/" class={cls('home')}>Home</a>
-      <a href="/blog" class={cls('blog')}>Blog</a>
-      <a href="/blog/series" class={cls('series')}>Series</a>
-      <a href="/lab" class={cls('lab')}>Lab</a>
+      <a href="/" class={cls('home')}>{t('nav.home')}</a>
+      <a href="/blog" class={cls('blog')}>{t('nav.blog')}</a>
+      <a href="/blog/series" class={cls('series')}>{t('nav.series')}</a>
+      <a href="/lab" class={cls('lab')}>{t('nav.lab')}</a>
     </div>
 
     <div class="flex items-center gap-4">
@@ -41,7 +45,7 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
         id="theme-toggle"
         onclick="window.toggleTheme()"
         class="topnav-theme-btn w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
-        aria-label="Toggle theme"
+        aria-label={t('nav.toggleTheme')}
       >
         <svg class="topnav-theme-icon w-5 h-5 text-gray-400 group-hover:text-white transition-colors dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
@@ -64,11 +68,11 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
 
 <!-- Mobile Menu Overlay -->
 <div id="mobile-menu" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-all duration-500">
-  <a href="/" class={active === 'home' ? mobileActive : mobileBase}>Home</a>
-  <a href="/blog" class={active === 'blog' ? mobileActive : mobileBase}>Blog</a>
-  <a href="/blog/series" class={active === 'series' ? mobileActive : mobileBase}>Series</a>
+  <a href="/" class={active === 'home' ? mobileActive : mobileBase}>{t('nav.home')}</a>
+  <a href="/blog" class={active === 'blog' ? mobileActive : mobileBase}>{t('nav.blog')}</a>
+  <a href="/blog/series" class={active === 'series' ? mobileActive : mobileBase}>{t('nav.series')}</a>
   <div class="h-px w-12 bg-white/10 my-4"></div>
-  <a href="/lab" class={active === 'lab' ? mobileSmallActive : mobileSmallBase}>Lab</a>
+  <a href="/lab" class={active === 'lab' ? mobileSmallActive : mobileSmallBase}>{t('nav.lab')}</a>
   <a href={ctaHref} class="mobile-nav-link mt-8 px-8 py-4 bg-white text-black font-black rounded-full uppercase tracking-widest">{ctaLabel}</a>
 </div>
 

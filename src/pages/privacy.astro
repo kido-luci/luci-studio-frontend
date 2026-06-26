@@ -2,6 +2,9 @@
 import Layout from "../layouts/Layout.astro";
 import TopNav from "../components/TopNav.astro";
 import LabDecor from "../components/LabDecor.astro";
+import { getLocaleFromUrl, useTranslations } from '../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 
 const SITE_URL = 'https://luci-studio.com';
 const lastUpdated = 'June 23, 2026';
@@ -18,9 +21,10 @@ const lastUpdated = 'June 23, 2026';
   <main class="legal-page pt-36 pb-60 px-4 md:px-6 min-h-screen">
     <LabDecor />
     <article class="max-w-3xl mx-auto relative z-10">
-      <p class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4">Legal</p>
+      <p class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4">{t('legal.eyebrow')}</p>
       <h1 class="text-5xl md:text-7xl tracking-tighter mb-4" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">Privacy Policy<span class="text-violet-500">.</span></h1>
-      <p class="text-sm text-gray-500 mb-12">Last updated: {lastUpdated}</p>
+      <p class="text-sm text-gray-500 mb-12">{t('legal.lastUpdated')} {lastUpdated}</p>
+      <!-- i18n: body copy is Phase 5 content -->
 
       <div class="legal-copy">
         <section>

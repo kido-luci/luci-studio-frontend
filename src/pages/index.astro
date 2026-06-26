@@ -13,6 +13,9 @@ import { projectService } from "../services/projects";
 import { buildLabCards } from "../utils/labCards";
 import { profileService } from "../services/profile";
 import { buildPostSlug, readTimeFor, formatDate } from "../utils/blog";
+import { getLocaleFromUrl, useTranslations } from '../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 import FooterLinks from "../components/FooterLinks.astro";
 import "../styles/lab-cards.css";
 
@@ -39,8 +42,8 @@ const blogPosts = rawPosts
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
-  date: formatDate(p.created_at),
-  read: readTimeFor(p),
+  date: formatDate(p.created_at, locale),
+  read: readTimeFor(p, locale),
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   // empty cover → PostCard renders the gradient + tag-word fallback (same as /blog)
   img: p.cover_image_url || '',
@@ -58,7 +61,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
           img: g.cover_image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800',
           label: g.title,
           year: new Date(g.created_at).getFullYear().toString(),
-          date: formatDate(g.created_at),
+          date: formatDate(g.created_at, locale),
           topic: 'Art',
           url: `/art/${buildPostSlug(g.title, g.id)}/`,
           id: g.id,
@@ -111,7 +114,7 @@ const homepageSchema = {
     <script is:inline>document.documentElement.classList.add('home-anim');</script>
   </Fragment>
 
-  <TopNav active="home" ctaLabel="Let's Talk" ctaHref="#contact" />
+  <TopNav active="home" ctaLabel={t('home.letsTalk')} ctaHref="#contact" />
 
   <main data-api-url={API_URL}>
 
@@ -157,13 +160,13 @@ const homepageSchema = {
         <!-- CTA Buttons -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-5">
           <a href="#work" class="magnetic group relative px-8 py-4 hero-cta-primary text-sm font-black rounded-full overflow-hidden hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] transition-all duration-500 hover:scale-105">
-            <span class="relative z-10 uppercase tracking-widest">View Work</span>
+            <span class="relative z-10 uppercase tracking-widest">{t('home.viewWork')}</span>
             <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <span class="absolute inset-0 z-10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 font-black uppercase tracking-widest transition-opacity duration-500">View Work</span>
+            <span class="absolute inset-0 z-10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 font-black uppercase tracking-widest transition-opacity duration-500">{t('home.viewWork')}</span>
             <div class="absolute -inset-1 bg-gradient-to-r from-violet-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-20 blur transition-opacity duration-500"></div>
           </a>
           <a href="#art" class="magnetic hero-cta-secondary px-8 py-4 border text-sm font-bold rounded-full transition-all duration-300 uppercase tracking-widest hover:scale-105">
-            See Art →
+            {t('home.seeArt')}
           </a>
         </div>
       </div>
@@ -172,26 +175,26 @@ const homepageSchema = {
       <div class="hero-pillars relative z-10" data-reveal>
         <a href="/blog" class="hp-card" style="--hp:#a78bfa">
           <span class="hp-num">01</span>
-          <span class="hp-title">TECH BLOG</span>
-          <span class="hp-sub">Notes on Flutter, Go &amp; on-device AI</span>
+          <span class="hp-title">{t('home.techBlogTitle')}</span>
+          <span class="hp-sub">{t('home.techBlogSub')}</span>
           <span class="hp-arrow" aria-hidden="true">→</span>
         </a>
         <a href="#art" class="hp-card" style="--hp:#f472b6">
           <span class="hp-num">02</span>
-          <span class="hp-title">DIGITAL ART</span>
-          <span class="hp-sub">Generative &amp; hand-crafted pieces</span>
+          <span class="hp-title">{t('home.digitalArtTitle')}</span>
+          <span class="hp-sub">{t('home.digitalArtSub')}</span>
           <span class="hp-arrow" aria-hidden="true">→</span>
         </a>
         <a href="#work" class="hp-card" style="--hp:#22d3ee">
           <span class="hp-num">03</span>
-          <span class="hp-title">APPS</span>
-          <span class="hp-sub">Shipped on 5 platforms</span>
+          <span class="hp-title">{t('home.appsTitle')}</span>
+          <span class="hp-sub">{t('home.appsSub')}</span>
           <span class="hp-arrow" aria-hidden="true">→</span>
         </a>
 
         <!-- Scroll cue floating just above the bar — signals more content below -->
         <a href="#blog" class="hero-scroll-cue" aria-label="Scroll down for more">
-          <span class="hero-scroll-text">SCROLL</span>
+          <span class="hero-scroll-text">{t('home.scrollLabel')}</span>
           <svg class="hero-scroll-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         </a>
       </div>
@@ -219,8 +222,8 @@ const homepageSchema = {
       <section id="blog" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20 text-center">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Raw Output</span>
-            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">Thoughts<span class="text-violet-500">.</span></h2>
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('blog.eyebrow')}</span>
+            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.thoughts')}<span class="text-violet-500">.</span></h2>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch md:auto-rows-fr gap-8" id="home-blog-grid">
             {blogPosts.slice(0, 6).map((p) => (
@@ -258,8 +261,8 @@ const homepageSchema = {
       <section id="work" class="py-16 px-4 md:px-6">
         <div class="max-w-7xl mx-auto">
           <div data-reveal class="mb-20">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">Open Source &amp; Apps</span>
-            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">Lab<span class="text-violet-500">.</span></h2>
+            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('home.openSourceApps')}</span>
+            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.lab')}<span class="text-violet-500">.</span></h2>
             <div data-lab-underline class="h-px w-full bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
           </div>
           <div class="lab-palette grid grid-cols-1 md:grid-cols-2 gap-7" style="font-family:'Hanken Grotesk',system-ui,sans-serif;">
@@ -270,7 +273,7 @@ const homepageSchema = {
           {labCards.length > 0 && (
             <div data-reveal class="mt-12 text-center">
               <a href="/lab" class="magnetic !inline-flex items-center gap-2 px-7 py-3 border border-violet-500/30 text-xs font-black uppercase tracking-widest text-violet-400 rounded-full hover:border-violet-500/70 hover:bg-violet-500/10 hover:text-violet-300 transition-all duration-300">
-                Explore the Lab
+                {t('home.exploreLab')}
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
             </div>
@@ -290,10 +293,10 @@ const homepageSchema = {
               <div class="home-playlists pt-12">
                 <div data-reveal class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">Reading Paths</span>
-                    <h3 class="text-3xl md:text-4xl font-black tracking-normal">SERIES<span class="text-[#8b5cf6]">.</span></h3>
+                    <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">{t('home.readingPaths')}</span>
+                    <h3 class="text-3xl md:text-4xl font-black tracking-normal">{t('home.series')}<span class="text-[#8b5cf6]">.</span></h3>
                   </div>
-                  <a href="/blog/series" class="playlist-see-all">View series</a>
+                  <a href="/blog/series" class="playlist-see-all">{t('home.viewSeries')}</a>
                 </div>
 
                 <ol class="series-strip list-none p-0 m-0">
@@ -319,10 +322,10 @@ const homepageSchema = {
         <div class="relative max-w-7xl mx-auto">
           <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
-              <span class="text-xs font-black uppercase tracking-[0.3em] mb-3 block" style="background:linear-gradient(90deg,#f472b6,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Off-Clock</span>
-              <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="color:white;font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">The art<span style="color:#60a5fa">.</span></h2>
+              <span class="text-xs font-black uppercase tracking-[0.3em] mb-3 block" style="background:linear-gradient(90deg,#f472b6,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{t('home.offClock')}</span>
+              <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="color:white;font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.theArt')}<span style="color:#60a5fa">.</span></h2>
             </div>
-            <p class="text-white/50 max-w-xs text-sm leading-relaxed">Rigorous aesthetic discipline. Where raw engineering logic meets deliberate visual hierarchy.</p>
+            <p class="text-white/50 max-w-xs text-sm leading-relaxed">{t('home.artDescription')}</p>
           </div>
 
           <div class="masonry-art-grid">
@@ -380,7 +383,7 @@ const homepageSchema = {
       <section id="contact" class="py-40 px-4 md:px-6">
         <div class="max-w-5xl mx-auto text-center">
           <div data-reveal class="mb-6">
-            <span class="text-xs font-black text-gray-600 uppercase tracking-[0.3em]">Enough talking.</span>
+            <span class="text-xs font-black text-gray-600 uppercase tracking-[0.3em]">{t('home.enoughTalking')}</span>
           </div>
           <h2 data-word-reveal class="text-[clamp(2.5rem,7vw,6rem)] font-black tracking-[0.02em] leading-none mb-12">
             {["LET'S","SHIP","SOMETHING"].map((w,i) => (
@@ -392,9 +395,9 @@ const homepageSchema = {
           </h2>
           <div data-reveal class="flex flex-col sm:flex-row items-center justify-center gap-5">
             <a href="mailto:kidoluci.work@gmail.com" class="magnetic group relative px-10 py-5 rounded-full hero-cta-primary font-black uppercase tracking-widest overflow-hidden hover:shadow-[0_0_80px_rgba(139,92,246,0.5)] transition-all duration-500">
-              <span class="relative z-10">Say Hello</span>
+              <span class="relative z-10">{t('home.sayHello')}</span>
               <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <span class="absolute inset-0 z-10 flex items-center justify-center text-white font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500">Say Hello</span>
+              <span class="absolute inset-0 z-10 flex items-center justify-center text-white font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500">{t('home.sayHello')}</span>
             </a>
             <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" class="magnetic text-sm font-bold text-gray-500 hover:text-white transition-colors duration-300 uppercase tracking-widest !flex items-center gap-2">LinkedIn <span>↗</span></a>
           </div>

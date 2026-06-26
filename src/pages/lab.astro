@@ -5,6 +5,9 @@ import RepoCard from "../components/RepoCard.astro";
 import { projectService } from "../services/projects";
 import { buildLabCards } from "../utils/labCards";
 import "../styles/lab-cards.css";
+import { getLocaleFromUrl, useTranslations } from '../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 
 const ACCENT = "#6c4cf1";
 
@@ -48,8 +51,8 @@ const repoCount = String(sources.length).padStart(2, "0");
       {apps.length > 0 && (
         <div id="released-apps" style="padding:36px 0 18px; scroll-margin-top:96px;">
           <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {String(apps.length).padStart(2, "0")} apps</div>
-          <h1 style="margin:0; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(40px,6.5vw,78px); line-height:1.1; letter-spacing:-.01em; color:var(--lab-text);">Released apps<span style="color:var(--accent);">.</span></h1>
-          <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Public source repositories and released apps — mine, and a few others worth a look.</p>
+          <h1 style="margin:0; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(40px,6.5vw,78px); line-height:1.1; letter-spacing:-.01em; color:var(--lab-text);">{t('lab.releasedApps')}<span style="color:var(--accent);">.</span></h1>
+          <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">{t('lab.labDescription')}</p>
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr)); gap:28px; margin-top:64px;">
             {apps.map((a) => (
               <RepoCard {...a} accent={ACCENT} />
@@ -61,9 +64,9 @@ const repoCount = String(sources.length).padStart(2, "0");
       <!-- public source -->
       <div id="public-source" style={`padding:${apps.length > 0 ? "96px" : "36px"} 0 18px; scroll-margin-top:96px;`}>
         <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {repoCount} repositories</div>
-        <h2 style="margin:0; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(34px,5vw,60px); line-height:1.1; letter-spacing:-.01em; color:var(--lab-text);">Public source<span style="color:var(--accent);">.</span></h2>
+        <h2 style="margin:0; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(34px,5vw,60px); line-height:1.1; letter-spacing:-.01em; color:var(--lab-text);">{t('lab.publicSource')}<span style="color:var(--accent);">.</span></h2>
         {apps.length === 0 && (
-          <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Public source repositories and released apps — mine, and a few others worth a look.</p>
+          <p style="margin:30px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">{t('lab.labDescription')}</p>
         )}
         {sources.length > 0 ? (
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr)); gap:28px; margin-top:64px;">
@@ -72,7 +75,7 @@ const repoCount = String(sources.length).padStart(2, "0");
             ))}
           </div>
         ) : (
-          <p style="margin-top:64px; font-family:'Space Mono',monospace; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--lab-stat-label);">No repositories yet.</p>
+          <p style="margin-top:64px; font-family:'Space Mono',monospace; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--lab-stat-label);">{t('lab.noRepos')}</p>
         )}
       </div>
 

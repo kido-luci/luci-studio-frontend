@@ -8,6 +8,9 @@ import { postService } from "../../../services/posts";
 import { playlistService } from "../../../services/playlists";
 import { affiliateService } from "../../../services/affiliates";
 import { buildSeriesViews } from "../../../utils/series";
+import { getLocaleFromUrl, useTranslations } from '../../../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
 
 const [rawPosts, rawPlaylists] = await Promise.all([
   postService.getAll(),
@@ -42,10 +45,10 @@ const SITE_URL = 'https://luci-studio.com';
       <header class="series-head" data-reveal>
         <a href="/blog" class="series-back">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back to Thoughts
+          {t('series.backToThoughts')}
         </a>
-        <span class="series-eyebrow">Curated Collections</span>
-        <h1 class="series-display">Series<span class="series-dot">.</span></h1>
+        <span class="series-eyebrow">{t('series.eyebrow')}</span>
+        <h1 class="series-display">{t('series.title')}<span class="series-dot">.</span></h1>
         <p class="series-sub">
           {sorted.length} {sorted.length === 1 ? 'series' : 'series'} — themed, ordered reading
           lists meant to be followed end-to-end.
@@ -55,7 +58,7 @@ const SITE_URL = 'https://luci-studio.com';
       <!-- Empty state -->
       {sorted.length === 0 && (
         <div class="series-empty">
-          <p>No series yet</p>
+          <p>{t('series.empty')}</p>
         </div>
       )}
 
@@ -82,7 +85,7 @@ const SITE_URL = 'https://luci-studio.com';
             <li class="series-item" data-reveal>
               <div class="series-marker">
                 <span class="series-marker-num">{String(i + 1).padStart(2, '0')}</span>
-                <span class="series-marker-label">Collection</span>
+                <span class="series-marker-label">{t('series.collectionLabel')}</span>
                 <span class="series-marker-line"></span>
               </div>
               <SeriesCard series={p} />
