@@ -3,6 +3,9 @@ module.exports = {
   content: ['./src/**/*.{astro,html,js,jsx,ts,tsx,vue,svelte,md,mdx}'],
   theme: {
     extend: {
+      colors: {
+        accent: 'rgb(var(--accent-rgb) / <alpha-value>)',
+      },
       animation: {
         'gradient-xy': 'gradient-xy 15s ease infinite',
         'spin-slow': 'spin 12s linear infinite',

@@ -199,6 +199,14 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 
 		<style is:global>
 			:root {
+				/* accent tokens — default = brand violet. Channels are space-separated
+				   so the Tailwind `accent` color (rgb(var(--accent-rgb) / <alpha-value>))
+				   and the `rgb(var(--accent-rgb) / X)` slash form below both parse. */
+				--accent-rgb: 139 92 246;
+				--accent: rgb(var(--accent-rgb));
+				--accent-strong: color-mix(in srgb, var(--accent), #000 14%);
+				--accent-soft: rgb(var(--accent-rgb) / 0.12);
+				--accent-border: rgb(var(--accent-rgb) / 0.30);
 				--bg-primary: #0a0a0a;
 				--bg-secondary: rgba(10, 10, 10, 0.4);
 				--bg-card: rgba(10, 10, 10, 0.85);
@@ -207,7 +215,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				--text-secondary: rgb(156, 163, 175);
 				--text-tertiary: rgb(107, 114, 128);
 				--border-color: rgba(255, 255, 255, 0.05);
-				--border-hover: rgba(139, 92, 246, 0.2);
+				--border-hover: rgb(var(--accent-rgb) / 0.2);
 				--cursor-color: white;
 				--cursor-ring: rgba(255, 255, 255, 0.4);
 				--dimmer-bg: rgba(0, 0, 0, 0);
@@ -219,14 +227,14 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				--bg-primary: rgba(255, 255, 255, 0.85);
 				--bg-secondary: rgba(255, 255, 255, 0.7);
 				--bg-card: rgba(255, 255, 255, 0.9);
-				--bg-card-hover: rgba(139, 92, 246, 0.05);
+				--bg-card-hover: rgb(var(--accent-rgb) / 0.05);
 				--text-primary: rgb(17, 24, 39);
 				--text-secondary: rgb(75, 85, 99);
 				--text-tertiary: rgb(156, 163, 175);
 				--border-color: rgba(0, 0, 0, 0.08);
-				--border-hover: rgba(139, 92, 246, 0.3);
-				--cursor-color: #8b5cf6;
-				--cursor-ring: rgba(139, 92, 246, 0.5);
+				--border-hover: rgb(var(--accent-rgb) / 0.3);
+				--cursor-color: var(--accent);
+				--cursor-ring: rgb(var(--accent-rgb) / 0.5);
 				--dimmer-bg: rgba(255, 255, 255, 0);
 				--nav-bg: rgba(255, 255, 255, 0.7);
 				--nav-bg-scroll: rgba(255, 255, 255, 0.95);
