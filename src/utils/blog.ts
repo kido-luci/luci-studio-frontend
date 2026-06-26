@@ -21,9 +21,11 @@ export function readTimeFor(p: { word_count?: number; content?: string }, locale
         : calculateReadTime(p.content || '', locale);
 }
 
-export function formatDate(dateStr: string, locale: Locale = 'en'): string {
+export function formatDate(dateStr: string, _locale: Locale = 'en'): string {
+    // Dates are UI chrome → always English format, even on /vi/ pages (only post
+    // title/content is localized). The locale param is kept for call-site compat.
     const date = new Date(dateStr);
-    return date.toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+    return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'

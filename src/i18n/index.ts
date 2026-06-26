@@ -1,13 +1,11 @@
 import { en } from './en';
-import { vi } from './vi';
 
-// Supported locales. English is the default and lives at the un-prefixed root (`/`);
-// Vietnamese lives under `/vi/` (routing added in Phase 3).
+// Supported locales. English is the default at the un-prefixed root (`/`);
+// Vietnamese lives under `/vi/` (blog only). NOTE: the UI is English in both
+// locales — `vi` exists purely as a routing/content-overlay dimension.
 export const LOCALES = ['en', 'vi'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en';
-
-const catalogs: Record<Locale, Record<string, string>> = { en, vi };
 
 // getLocaleFromUrl derives the active locale from the first path segment.
 // `/vi/...` → 'vi'; everything else → 'en'. Today every page is at `/`, so this
@@ -17,11 +15,13 @@ export function getLocaleFromUrl(url: URL): Locale {
   return seg === 'vi' ? 'vi' : 'en';
 }
 
-// useTranslations returns a `t(key)` lookup for the given locale, falling back to
-// the English value, then to the key itself — so a missing string is visible, never blank.
-export function useTranslations(locale: Locale) {
-  const dict = catalogs[locale] ?? catalogs.en;
-  return (key: string): string => dict[key] ?? catalogs.en[key] ?? key;
+// useTranslations returns a `t(key)` lookup for UI-chrome strings. The app UI
+// stays ENGLISH in every locale by design — only POST CONTENT is localized (via
+// `localized()` reading the backend translations overlay). So `t()` always reads
+// the English catalog and ignores the locale; the `locale` param is kept for call-
+// site compatibility. (vi.ts is consequently unused for UI and left as a stub.)
+export function useTranslations(_locale: Locale) {
+  return (key: string): string => en[key] ?? key;
 }
 
 // isBilingualPath reports whether a route is part of the bilingual surface. ONLY
