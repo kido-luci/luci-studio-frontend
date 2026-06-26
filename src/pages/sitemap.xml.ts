@@ -60,18 +60,25 @@ export const GET: APIRoute = async () => {
         `\n    <xhtml:link rel="alternate" hreflang="vi" href="${escapeXml(viLoc)}"/>` +
         `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(enLoc)}"/>`;
 
-    const urlBlock = (loc: string, e: UrlEntry, enLoc: string, viLoc: string) =>
+    // Only the blog section is bilingual; every other URL is English-only.
+    const isBilingualLoc = (loc: string) => loc.replace(SITE_URL, '').startsWith('/blog/');
+
+    const urlBlock = (loc: string, e: UrlEntry, alt: string) =>
         `  <url>
     <loc>${escapeXml(loc)}</loc>${e.lastmod ? `\n    <lastmod>${e.lastmod}</lastmod>` : ''}
     <changefreq>${e.changefreq}</changefreq>
-    <priority>${e.priority}</priority>${e.image ? `\n    <image:image>\n      <image:loc>${escapeXml(e.image.loc)}</image:loc>\n      <image:title>${escapeXml(e.image.title)}</image:title>\n    </image:image>` : ''}${altLinks(enLoc, viLoc)}
+    <priority>${e.priority}</priority>${e.image ? `\n    <image:image>\n      <image:loc>${escapeXml(e.image.loc)}</image:loc>\n      <image:title>${escapeXml(e.image.title)}</image:title>\n    </image:image>` : ''}${alt}
   </url>`;
 
     const urls = [...staticPages, ...postPages, ...galleryPages]
         .flatMap((e) => {
             const enLoc = e.loc;
+            if (!isBilingualLoc(enLoc)) {
+                return [urlBlock(enLoc, e, '')]; // English-only — no vi variant, no alternates
+            }
             const viLoc = viOf(enLoc);
-            return [urlBlock(enLoc, e, enLoc, viLoc), urlBlock(viLoc, e, enLoc, viLoc)];
+            const alt = altLinks(enLoc, viLoc);
+            return [urlBlock(enLoc, e, alt), urlBlock(viLoc, e, alt)];
         })
         .join('\n');
 
