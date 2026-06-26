@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { COOKIE_BANNER_ENABLED } from '../config/features';
-import { getLocaleFromUrl, useTranslations } from '../i18n';
+import { getLocaleFromUrl, useTranslations, isBilingualPath } from '../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -62,6 +62,9 @@ const viCanonical = (() => {
 const selfCanonical = locale === 'vi' ? viCanonical : enCanonical;
 const ogLocale = locale === 'vi' ? 'vi_VN' : 'en_US';
 const ogLocaleAlt = locale === 'vi' ? 'en_US' : 'vi_VN';
+// Only blog pages have a Vietnamese counterpart, so only they emit hreflang
+// alternates + og:locale:alternate. Non-blog routes are English-only.
+const isBilingual = isBilingualPath(Astro.url.pathname);
 ---
 
 <!doctype html>
@@ -79,10 +82,14 @@ const ogLocaleAlt = locale === 'vi' ? 'en_US' : 'vi_VN';
 		<meta name="author" content="Trung Lập (Luci)" />
 		<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 		<link rel="canonical" href={selfCanonical} />
-		<!-- hreflang: each page declares its en/vi counterparts + x-default (English). -->
-		<link rel="alternate" hreflang="en" href={enCanonical} />
-		<link rel="alternate" hreflang="vi" href={viCanonical} />
-		<link rel="alternate" hreflang="x-default" href={enCanonical} />
+		{isBilingual && (
+			<!-- hreflang: blog pages declare their en/vi counterparts + x-default (English). -->
+			<Fragment>
+				<link rel="alternate" hreflang="en" href={enCanonical} />
+				<link rel="alternate" hreflang="vi" href={viCanonical} />
+				<link rel="alternate" hreflang="x-default" href={enCanonical} />
+			</Fragment>
+		)}
 		{googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
 
 		<!-- Open Graph -->
@@ -96,7 +103,7 @@ const ogLocaleAlt = locale === 'vi' ? 'en_US' : 'vi_VN';
 		{ogImageHeight && <meta property="og:image:height" content={String(ogImageHeight)} />}
 		<meta property="og:image:alt" content={ogImageAlt} />
 		<meta property="og:locale" content={ogLocale} />
-		<meta property="og:locale:alternate" content={ogLocaleAlt} />
+		{isBilingual && <meta property="og:locale:alternate" content={ogLocaleAlt} />}
 		{articleMeta?.publishedTime && <meta property="article:published_time" content={articleMeta.publishedTime} />}
 		{articleMeta?.modifiedTime && <meta property="article:modified_time" content={articleMeta.modifiedTime} />}
 		{articleMeta?.author && <meta property="article:author" content={articleMeta.author} />}

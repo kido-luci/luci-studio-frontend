@@ -1,13 +1,11 @@
 import { en } from './en';
-import { vi } from './vi';
 
-// Supported locales. English is the default and lives at the un-prefixed root (`/`);
-// Vietnamese lives under `/vi/` (routing added in Phase 3).
+// Supported locales. English is the default at the un-prefixed root (`/`);
+// Vietnamese lives under `/vi/` (blog only). NOTE: the UI is English in both
+// locales — `vi` exists purely as a routing/content-overlay dimension.
 export const LOCALES = ['en', 'vi'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en';
-
-const catalogs: Record<Locale, Record<string, string>> = { en, vi };
 
 // getLocaleFromUrl derives the active locale from the first path segment.
 // `/vi/...` → 'vi'; everything else → 'en'. Today every page is at `/`, so this
@@ -17,20 +15,32 @@ export function getLocaleFromUrl(url: URL): Locale {
   return seg === 'vi' ? 'vi' : 'en';
 }
 
-// useTranslations returns a `t(key)` lookup for the given locale, falling back to
-// the English value, then to the key itself — so a missing string is visible, never blank.
-export function useTranslations(locale: Locale) {
-  const dict = catalogs[locale] ?? catalogs.en;
-  return (key: string): string => dict[key] ?? catalogs.en[key] ?? key;
+// useTranslations returns a `t(key)` lookup for UI-chrome strings. The app UI
+// stays ENGLISH in every locale by design — only POST CONTENT is localized (via
+// `localized()` reading the backend translations overlay). So `t()` always reads
+// the English catalog and ignores the locale; the `locale` param is kept for call-
+// site compatibility. (vi.ts is consequently unused for UI and left as a stub.)
+export function useTranslations(_locale: Locale) {
+  return (key: string): string => en[key] ?? key;
+}
+
+// isBilingualPath reports whether a route is part of the bilingual surface. ONLY
+// the blog section (`/blog`, `/blog/…`, including series) has a Vietnamese version;
+// every other route (home, portfolio, lab, art, legal) is English-only. Accepts a
+// path with or without the `/vi` prefix.
+export function isBilingualPath(path: string): boolean {
+  const p = path.replace(/^\/vi(?=\/|$)/, '') || '/';
+  return p === '/blog' || p.startsWith('/blog/');
 }
 
 // localizedHref prefixes an internal path for the given locale. English (default)
-// is un-prefixed; Vietnamese lives under `/vi`. Pass only same-origin paths that
-// start with `/`; anchors (`#…`), `mailto:`, and external URLs are returned as-is.
+// is un-prefixed; Vietnamese lives under `/vi` — but ONLY for bilingual (blog)
+// routes. Non-blog paths (and anchors/mailto/external) are returned unchanged, so a
+// VI blog page still links to the English home/lab/etc. instead of a /vi 404.
 export function localizedHref(locale: Locale, path: string): string {
   if (locale === 'en') return path;
   if (!path.startsWith('/')) return path; // '#contact', 'mailto:…', 'https://…'
-  if (path === '/') return '/vi/';
+  if (!isBilingualPath(path)) return path; // home/portfolio/lab/art/legal stay English
   return `/vi${path}`;
 }
 
