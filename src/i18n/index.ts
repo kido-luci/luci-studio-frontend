@@ -24,13 +24,23 @@ export function useTranslations(locale: Locale) {
   return (key: string): string => dict[key] ?? catalogs.en[key] ?? key;
 }
 
+// isBilingualPath reports whether a route is part of the bilingual surface. ONLY
+// the blog section (`/blog`, `/blog/…`, including series) has a Vietnamese version;
+// every other route (home, portfolio, lab, art, legal) is English-only. Accepts a
+// path with or without the `/vi` prefix.
+export function isBilingualPath(path: string): boolean {
+  const p = path.replace(/^\/vi(?=\/|$)/, '') || '/';
+  return p === '/blog' || p.startsWith('/blog/');
+}
+
 // localizedHref prefixes an internal path for the given locale. English (default)
-// is un-prefixed; Vietnamese lives under `/vi`. Pass only same-origin paths that
-// start with `/`; anchors (`#…`), `mailto:`, and external URLs are returned as-is.
+// is un-prefixed; Vietnamese lives under `/vi` — but ONLY for bilingual (blog)
+// routes. Non-blog paths (and anchors/mailto/external) are returned unchanged, so a
+// VI blog page still links to the English home/lab/etc. instead of a /vi 404.
 export function localizedHref(locale: Locale, path: string): string {
   if (locale === 'en') return path;
   if (!path.startsWith('/')) return path; // '#contact', 'mailto:…', 'https://…'
-  if (path === '/') return '/vi/';
+  if (!isBilingualPath(path)) return path; // home/portfolio/lab/art/legal stay English
   return `/vi${path}`;
 }
 
