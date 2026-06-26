@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations } from "../../i18n";
+import { getLocaleFromUrl, useTranslations, localizedHref } from "../../i18n";
 import type { GalleryItem } from "../../services/gallery";
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
@@ -60,7 +60,7 @@ const structuredData = [
 >
   <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3 group">
+      <a href={localizedHref(locale, '/')} class="flex items-center gap-3 group">
         <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
         <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
       </a>

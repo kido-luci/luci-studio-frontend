@@ -10,7 +10,7 @@ import { playlistService } from "../../services/playlists";
 import { affiliateService } from "../../services/affiliates";
 import { buildSeriesViews } from "../../utils/series";
 import { buildPostSlug, readTimeFor, formatDate, coverGradient } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -114,7 +114,7 @@ const allTopics = [...topicCounts.keys()].sort(
 
       <!-- Featured hero (first post; hidden when filtering/searching) -->
       {featured && (
-        <a id="tb-featured" href={`/blog/${featured.slug}/`} class="tb-featured" data-featured-id={String(featured.id)}>
+        <a id="tb-featured" href={localizedHref(locale, `/blog/${featured.slug}/`)} class="tb-featured" data-featured-id={String(featured.id)}>
           <div class="tb-feat-cover" style={!featured.img ? `background:${featured.cover}` : undefined}>
             {featured.img
               ? <img src={featured.img} alt={featured.title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
@@ -172,7 +172,7 @@ const allTopics = [...topicCounts.keys()].sort(
         {gridPosts.map((p) => (
           <div class="post-item" data-id={p.id} data-topics={JSON.stringify(p.topics)} data-search={p.search} style="display:none">
             <PostCard
-              href={`/blog/${p.slug}/`}
+              href={localizedHref(locale, `/blog/${p.slug}/`)}
               title={p.title}
               subtitle={p.subtitle}
               tags={p.tags}
@@ -226,7 +226,7 @@ const allTopics = [...topicCounts.keys()].sort(
               <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">{t('blog.seriesEyebrow')}</span>
               <h2 class="text-4xl md:text-5xl" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{t('blog.seriesHeader')}<span class="text-[#8b5cf6]">.</span></h2>
             </div>
-            <a href="/blog/series" class="see-all-btn">{t('blog.seeAll')}</a>
+            <a href={localizedHref(locale, '/blog/series')} class="see-all-btn">{t('blog.seeAll')}</a>
           </div>
           <ol class="series-strip list-none p-0 m-0">
             {playlists.slice(0, 3).map((p) => (

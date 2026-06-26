@@ -4,7 +4,7 @@ import PostCard from "../PostCard.astro";
 import AffiliateCard from "../AffiliateCard.astro";
 import { affiliateService } from "../../services/affiliates";
 import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref } from '../../i18n';
 import type { Post } from "../../services/posts";
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
@@ -67,7 +67,7 @@ const relatedPosts = (related ?? []).map(p => ({
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
-  href: `/blog/${buildPostSlug(p.title, p.id)}/`,
+  href: localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`),
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   date: formatDate(p.created_at, locale),
   read: readTimeFor(p, locale),
@@ -152,7 +152,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
   <Layout title="Post Not Found">
     <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
       <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-3 group">
+        <a href={localizedHref(locale, '/')} class="flex items-center gap-3 group">
           <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
           <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
         </a>
@@ -161,7 +161,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
     <main class="pt-64 pb-24 px-6 min-h-screen bg-[var(--bg-primary)] text-center">
       <h1 class="text-4xl font-black text-[var(--text-primary)] mb-6">{t('post.notFoundTitle')}</h1>
       <p class="text-gray-400 mb-12 max-w-md mx-auto">{t('post.notFoundBody')}</p>
-      <a href="/blog" class="px-8 py-4 bg-white text-black font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest">{t('post.notFoundBack')}</a>
+      <a href={localizedHref(locale, '/blog')} class="px-8 py-4 bg-white text-black font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest">{t('post.notFoundBack')}</a>
     </main>
   </Layout>
 ) : (
@@ -191,7 +191,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
   <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3 group">
+      <a href={localizedHref(locale, '/')} class="flex items-center gap-3 group">
         <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
         <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
       </a>
@@ -208,7 +208,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
         </button>
-        <a href="/blog" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em] flex items-center gap-2">
+        <a href={localizedHref(locale, '/blog')} class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em] flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           <span class="hidden sm:inline">{t('post.backToBlog')}</span>
         </a>
@@ -363,7 +363,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
               <span class="text-[10px] font-black uppercase tracking-[0.3em]" style="color:var(--text-tertiary);">{t('post.continueReading')}</span>
               <h2 class="text-2xl md:text-3xl font-black tracking-wide mt-2" style="color:var(--text-primary);">{t('post.morePosts')}<span class="text-violet-500">.</span></h2>
             </div>
-            <a href="/blog" class="text-xs font-bold uppercase tracking-widest flex items-center gap-2 group" style="color:var(--text-secondary);">
+            <a href={localizedHref(locale, '/blog')} class="text-xs font-bold uppercase tracking-widest flex items-center gap-2 group" style="color:var(--text-secondary);">
               {t('post.viewAll')}
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>

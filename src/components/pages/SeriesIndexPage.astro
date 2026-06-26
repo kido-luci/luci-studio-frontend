@@ -8,7 +8,7 @@ import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
 import { affiliateService } from "../../services/affiliates";
 import { buildSeriesViews } from "../../utils/series";
-import { getLocaleFromUrl, useTranslations } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -43,7 +43,7 @@ const SITE_URL = 'https://luci-studio.com';
 
       <!-- Header -->
       <header class="series-head" data-reveal>
-        <a href="/blog" class="series-back">
+        <a href={localizedHref(locale, '/blog')} class="series-back">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           {t('series.backToThoughts')}
         </a>

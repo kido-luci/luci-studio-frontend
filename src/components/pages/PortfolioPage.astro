@@ -6,7 +6,7 @@ import LabDecor from "../LabDecor.astro";
 import { workService } from "../../services/work";
 import { profileService } from "../../services/profile";
 import { skillsService } from "../../services/skills";
-import { getLocaleFromUrl, useTranslations } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -232,7 +232,7 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
         <h2 data-reveal class="text-5xl md:text-7xl font-black tracking-wide mb-10">LET'S BUILD<span class="text-violet-500">.</span></h2>
         <div data-reveal class="flex flex-wrap items-center justify-center gap-4">
           <a href="mailto:kidoluci.work@gmail.com" class="px-8 py-4 bg-white text-black font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest text-sm">{t('portfolio.emailMe')}</a>
-          <a href="/" class="px-8 py-4 border border-white/20 font-black rounded-full hover:border-violet-500/60 transition-all duration-300 uppercase tracking-widest text-sm text-gray-400 hover:text-white">{t('portfolio.backHome')}</a>
+          <a href={localizedHref(locale, '/')} class="px-8 py-4 border border-white/20 font-black rounded-full hover:border-violet-500/60 transition-all duration-300 uppercase tracking-widest text-sm text-gray-400 hover:text-white">{t('portfolio.backHome')}</a>
         </div>
       </div>
     </section>
