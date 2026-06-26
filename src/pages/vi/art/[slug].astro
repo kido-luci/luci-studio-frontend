@@ -1,0 +1,16 @@
+---
+// VI route wrapper. getStaticPaths (shared with the /en counterpart via
+// artPaths) emits one page per gallery item; the body lives in ArtDetailPage.
+import ArtDetailPage from "../../../components/pages/ArtDetailPage.astro";
+import { artPaths } from "../../../utils/i18nPaths";
+
+export async function getStaticPaths() {
+  return artPaths();
+}
+
+const { item } = Astro.props;
+const { slug } = Astro.params;
+
+if (!item) return Astro.redirect('/');
+---
+<ArtDetailPage item={item} slug={slug} />

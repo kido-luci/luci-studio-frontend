@@ -1,0 +1,20 @@
+---
+// VI route wrapper. getStaticPaths (shared with the /en counterpart via
+// postPaths) emits one page per post; the body lives in PostDetailPage, which
+// reads the locale from the URL. Paths/props are identical across locales — only
+// the /vi prefix differs.
+import PostDetailPage from "../../../components/pages/PostDetailPage.astro";
+import { postPaths } from "../../../utils/i18nPaths";
+
+export async function getStaticPaths() {
+  return postPaths();
+}
+
+const { post, related } = Astro.props;
+const { slug } = Astro.params;
+
+if (!post) {
+  return Astro.redirect('/');
+}
+---
+<PostDetailPage post={post} related={related} slug={slug} />
