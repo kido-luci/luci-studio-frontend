@@ -141,4 +141,63 @@ export const vi: Record<string, string> = {
   'home.digitalArtSub': 'Tác phẩm sinh thành & thủ công',
   'home.appsTitle': 'ỨNG DỤNG',
   'home.appsSub': 'Phát hành trên 5 nền tảng',
+  'home.viewAllPosts': 'Xem tất cả {n} bài viết',
+
+  // blog list — interpolated / plural (Vietnamese has no plural — one form for both)
+  'blog.subOne': '{n} bài viết về kỹ thuật, kiến trúc, và nghề xây dựng phần mềm.',
+  'blog.subOther': '{n} bài viết về kỹ thuật, kiến trúc, và nghề xây dựng phần mềm.',
+  'blog.showing': 'Hiển thị {from}–{to} trên {total}',
+  'blog.featuredSuffix': ' + nổi bật',
+
+  // series list — interpolated
+  'series.sub': '{n} series — danh sách đọc có chủ đề, theo thứ tự, nên đọc từ đầu đến cuối.',
+  'series.postCountOne': '{n} bài viết',
+  'series.postCountOther': '{n} bài viết',
+
+  // legal page titles
+  'legal.privacyTitle': 'Chính sách bảo mật',
+  'legal.termsTitle': 'Điều khoản sử dụng',
+
+  // portfolio CTA
+  'portfolio.letsBuild': 'CÙNG XÂY DỰNG',
+
+  // comments i18n (read by public/scripts/post-engagement-comments.js via data-*)
+  'comments.noComments': 'Chưa có bình luận nào. Hãy là người đầu tiên!',
+  'comments.recall': 'Thu hồi',
+  'comments.reply': 'Trả lời',
+  'comments.replyingTo': 'Trả lời',
+  'comments.cancel': 'Huỷ',
+  'comments.replySubmit': 'Trả lời',
+  'comments.signInToReply': 'Đăng nhập với Google',
+  'comments.signInToReplySuffix': ' để trả lời.',
+  'comments.sortNewest': 'Mới nhất trước',
+  'comments.sortOldest': 'Cũ nhất trước',
+  'comments.loadMore': 'Tải thêm bình luận',
+  'comments.loading': 'Đang tải…',
+  'comments.posting': 'Đang gửi…',
+  'comments.submitBtn': 'Gửi',
+  'comments.recallConfirmMsg': 'Thu hồi bình luận này? Không thể hoàn tác.',
+  'comments.recallConfirmOk': 'Thu hồi',
+  'comments.recallConfirmCancel': 'Huỷ',
+  'comments.signOutConfirmMsg': 'Đăng xuất khỏi tài khoản của bạn?',
+  'comments.signOutConfirmOk': 'Đăng xuất',
+  'comments.signOutConfirmCancel': 'Huỷ',
+  'comments.messageRecalled': 'Tin nhắn đã thu hồi',
+  'comments.failedLoad': 'Không thể tải bình luận.',
+  'comments.timeJustNow': 'vừa xong',
+  'comments.timeMinute': '{n} phút trước',
+  'comments.timeMinutes': '{n} phút trước',
+  'comments.timeHour': '{n} giờ trước',
+  'comments.timeHours': '{n} giờ trước',
+  'comments.timeDay': '{n} ngày trước',
+  'comments.timeDays': '{n} ngày trước',
+
+  // emoji picker
+  'emoji.searchPlaceholder': '🔍  Tìm emoji…',
+  'emoji.catSmileys': 'Mặt cười',
+  'emoji.catGestures': 'Cử chỉ',
+  'emoji.catHearts': 'Trái tim',
+  'emoji.catAnimals': 'Động vật',
+  'emoji.catFood': 'Đồ ăn',
+  'emoji.catObjects': 'Đồ vật',
 };

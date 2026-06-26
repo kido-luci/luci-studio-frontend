@@ -4,7 +4,7 @@ import TopNav from "../TopNav.astro";
 import AffiliateCard from "../AffiliateCard.astro";
 import { affiliateService } from "../../services/affiliates";
 import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, format } from '../../i18n';
 import type { Playlist } from "../../services/playlists";
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
@@ -72,7 +72,7 @@ const seoDescription = playlist.description
         )}
 
         <div class="flex items-center gap-3 mt-6 text-xs text-gray-600 uppercase tracking-widest">
-          <span>{posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
+          <span>{format(t(posts.length === 1 ? 'series.postCountOne' : 'series.postCountOther'), { n: posts.length })}</span>
           <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
           <span>{t('series.curatedLabel')} {formattedDate}</span>
         </div>

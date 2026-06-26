@@ -142,4 +142,63 @@ export const en: Record<string, string> = {
   'home.digitalArtSub': 'Generative & hand-crafted pieces',
   'home.appsTitle': 'APPS',
   'home.appsSub': 'Shipped on 5 platforms',
+  'home.viewAllPosts': 'View all {n} posts',
+
+  // blog list — interpolated / plural
+  'blog.subOne': '{n} article on engineering, architecture, and the craft of building software.',
+  'blog.subOther': '{n} articles on engineering, architecture, and the craft of building software.',
+  'blog.showing': 'Showing {from}–{to} of {total}',
+  'blog.featuredSuffix': ' + featured',
+
+  // series list — interpolated
+  'series.sub': '{n} series — themed, ordered reading lists meant to be followed end-to-end.',
+  'series.postCountOne': '{n} post',
+  'series.postCountOther': '{n} posts',
+
+  // legal page titles
+  'legal.privacyTitle': 'Privacy Policy',
+  'legal.termsTitle': 'Terms of Use',
+
+  // portfolio CTA
+  'portfolio.letsBuild': "LET'S BUILD",
+
+  // comments i18n (read by public/scripts/post-engagement-comments.js via data-*)
+  'comments.noComments': 'No comments yet. Be the first!',
+  'comments.recall': 'Recall',
+  'comments.reply': 'Reply',
+  'comments.replyingTo': 'Replying to',
+  'comments.cancel': 'Cancel',
+  'comments.replySubmit': 'Reply',
+  'comments.signInToReply': 'Sign in with Google',
+  'comments.signInToReplySuffix': ' to reply.',
+  'comments.sortNewest': 'Newest first',
+  'comments.sortOldest': 'Oldest first',
+  'comments.loadMore': 'Load more comments',
+  'comments.loading': 'Loading…',
+  'comments.posting': 'Posting…',
+  'comments.submitBtn': 'Submit',
+  'comments.recallConfirmMsg': 'Recall this comment? It cannot be undone.',
+  'comments.recallConfirmOk': 'Recall',
+  'comments.recallConfirmCancel': 'Cancel',
+  'comments.signOutConfirmMsg': 'Sign out of your account?',
+  'comments.signOutConfirmOk': 'Sign out',
+  'comments.signOutConfirmCancel': 'Cancel',
+  'comments.messageRecalled': 'Message recalled',
+  'comments.failedLoad': 'Failed to load comments.',
+  'comments.timeJustNow': 'just now',
+  'comments.timeMinute': '{n} minute ago',
+  'comments.timeMinutes': '{n} minutes ago',
+  'comments.timeHour': '{n} hour ago',
+  'comments.timeHours': '{n} hours ago',
+  'comments.timeDay': '{n} day ago',
+  'comments.timeDays': '{n} days ago',
+
+  // emoji picker
+  'emoji.searchPlaceholder': '🔍  Search emoji…',
+  'emoji.catSmileys': 'Smileys',
+  'emoji.catGestures': 'Gestures',
+  'emoji.catHearts': 'Hearts',
+  'emoji.catAnimals': 'Animals',
+  'emoji.catFood': 'Food',
+  'emoji.catObjects': 'Objects',
 };

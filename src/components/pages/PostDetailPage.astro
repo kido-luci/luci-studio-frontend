@@ -394,6 +394,50 @@ const structuredData = [articleSchema, breadcrumbSchema];
         </section>
       )}
 
+      <!-- ── Comments i18n strings (read by post-engagement-comments.js) ── -->
+      <script type="application/json" id="comments-i18n" set:html={JSON.stringify({
+        noComments:           t('comments.noComments'),
+        recall:               t('comments.recall'),
+        reply:                t('comments.reply'),
+        replyingTo:           t('comments.replyingTo'),
+        cancel:               t('comments.cancel'),
+        replySubmit:          t('comments.replySubmit'),
+        signInToReply:        t('comments.signInToReply'),
+        signInToReplySuffix:  t('comments.signInToReplySuffix'),
+        sortNewest:           t('comments.sortNewest'),
+        sortOldest:           t('comments.sortOldest'),
+        loadMore:             t('comments.loadMore'),
+        loading:              t('comments.loading'),
+        posting:              t('comments.posting'),
+        submitBtn:            t('comments.submitBtn'),
+        recallConfirmMsg:     t('comments.recallConfirmMsg'),
+        recallConfirmOk:      t('comments.recallConfirmOk'),
+        recallConfirmCancel:  t('comments.recallConfirmCancel'),
+        signOutConfirmMsg:    t('comments.signOutConfirmMsg'),
+        signOutConfirmOk:     t('comments.signOutConfirmOk'),
+        signOutConfirmCancel: t('comments.signOutConfirmCancel'),
+        messageRecalled:      t('comments.messageRecalled'),
+        failedLoad:           t('comments.failedLoad'),
+        timeJustNow:          t('comments.timeJustNow'),
+        timeMinute:           t('comments.timeMinute'),
+        timeMinutes:          t('comments.timeMinutes'),
+        timeHour:             t('comments.timeHour'),
+        timeHours:            t('comments.timeHours'),
+        timeDay:              t('comments.timeDay'),
+        timeDays:             t('comments.timeDays'),
+      })} />
+
+      <!-- ── Emoji picker i18n strings (read by post-emoji-picker.js) ── -->
+      <script type="application/json" id="emoji-i18n" set:html={JSON.stringify({
+        searchPlaceholder: t('emoji.searchPlaceholder'),
+        catSmileys:        t('emoji.catSmileys'),
+        catGestures:       t('emoji.catGestures'),
+        catHearts:         t('emoji.catHearts'),
+        catAnimals:        t('emoji.catAnimals'),
+        catFood:           t('emoji.catFood'),
+        catObjects:        t('emoji.catObjects'),
+      })} />
+
       <!-- ── Comments ── -->
       <section id="comments-section" class="mt-20">
 
@@ -1013,6 +1057,14 @@ const structuredData = [articleSchema, breadcrumbSchema];
     content: 'Write a reply…';
     color: var(--text-tertiary);
     pointer-events: none;
+  }
+
+  html[lang="vi"] #comment-input[data-empty="true"]::before {
+    content: 'Viết bình luận…';
+  }
+
+  html[lang="vi"] .reply-input[data-empty="true"]::before {
+    content: 'Viết trả lời…';
   }
 
   /* ── Comment box light-mode overrides ── */

@@ -13,9 +13,10 @@ import { projectService } from "../../services/projects";
 import { buildLabCards } from "../../utils/labCards";
 import { profileService } from "../../services/profile";
 import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, format } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
+const heroWords = locale === 'vi' ? ['CÙNG', 'TẠO', 'ĐIỀU', 'TUYỆT'] : ["LET'S", 'SHIP', 'SOMETHING'];
 import FooterLinks from "../FooterLinks.astro";
 import "../../styles/lab-cards.css";
 
@@ -245,7 +246,7 @@ const homepageSchema = {
           {blogPosts.length > 6 && (
             <div data-reveal class="mt-12 text-center">
               <a href={localizedHref(locale, '/blog')} class="magnetic !inline-flex items-center gap-2 px-7 py-3 border border-violet-500/30 text-xs font-black uppercase tracking-widest text-violet-400 rounded-full hover:border-violet-500/70 hover:bg-violet-500/10 hover:text-violet-300 transition-all duration-300">
-                View all {blogPosts.length} posts
+                {format(t('home.viewAllPosts'), { n: blogPosts.length })}
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
             </div>
@@ -386,12 +387,12 @@ const homepageSchema = {
             <span class="text-xs font-black text-gray-600 uppercase tracking-[0.3em]">{t('home.enoughTalking')}</span>
           </div>
           <h2 data-word-reveal class="text-[clamp(2.5rem,7vw,6rem)] font-black tracking-[0.02em] leading-none mb-12">
-            {["LET'S","SHIP","SOMETHING"].map((w,i) => (
+            {heroWords.map((w,i) => (
               <span class="reveal-word !block" style={`transition-delay:${i*100}ms`}>
                 <span class={i===1 ? 'text-shimmer' : 'text-white'}>{w}</span>
               </span>
             ))}
-            <span class="reveal-word !block" style="transition-delay:300ms"><span class="text-white">REAL</span><span class="text-violet-500">.</span></span>
+            <span class="reveal-word !block" style={`transition-delay:${heroWords.length*100}ms`}><span class="text-white">REAL</span><span class="text-violet-500">.</span></span>
           </h2>
           <div data-reveal class="flex flex-col sm:flex-row items-center justify-center gap-5">
             <a href="mailto:kidoluci.work@gmail.com" class="magnetic group relative px-10 py-5 rounded-full hero-cta-primary font-black uppercase tracking-widest overflow-hidden hover:shadow-[0_0_80px_rgba(139,92,246,0.5)] transition-all duration-500">

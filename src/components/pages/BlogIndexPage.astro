@@ -10,7 +10,7 @@ import { playlistService } from "../../services/playlists";
 import { affiliateService } from "../../services/affiliates";
 import { buildSeriesViews } from "../../utils/series";
 import { buildPostSlug, readTimeFor, formatDate, coverGradient } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, format } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -81,7 +81,7 @@ const allTopics = [...topicCounts.keys()].sort(
           <span class="tb-eyebrow">{t('blog.eyebrow')}</span>
           <h1 class="tb-title">{t('blog.title')}<span class="tb-dot">.</span></h1>
           <p class="tb-sub">
-            {allPosts.length} {allPosts.length === 1 ? 'article' : 'articles'} on engineering, architecture, and the craft of building software.
+            {format(t(allPosts.length === 1 ? 'blog.subOne' : 'blog.subOther'), { n: allPosts.length })}
           </p>
         </div>
         <div class="tb-head-count">
@@ -108,7 +108,7 @@ const allTopics = [...topicCounts.keys()].sort(
               <button class="topic-btn" data-topic={topic}>{topic}</button>
             ))}
           </div>
-          <button id="chips-toggle" class="tb-chips-toggle" type="button" hidden>Show all tags</button>
+          <button id="chips-toggle" class="tb-chips-toggle" type="button" hidden data-show-all={t('blog.showAllTags')} data-show-fewer={t('blog.showFewerTags')}>{t('blog.showAllTags')}</button>
         </div>
       )}
 
@@ -189,7 +189,10 @@ const allTopics = [...topicCounts.keys()].sort(
       </div>
 
       <!-- Pagination -->
-      <div id="pagination" class="mt-16 hidden flex-col items-center gap-4">
+      <div id="pagination" class="mt-16 hidden flex-col items-center gap-4"
+        data-showing-tpl={t('blog.showing')}
+        data-featured-suffix={t('blog.featuredSuffix')}
+      >
         <div class="flex items-center gap-3">
           <button id="prev-btn" class="pag-arrow" aria-label={t('blog.prevPage')}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -601,7 +604,13 @@ const allTopics = [...topicCounts.keys()].sort(
       postsCount.textContent = '';
     } else {
       const shownEnd = Math.min(end, gridItems.length);
-      postsCount.textContent = `Showing ${start + 1}–${shownEnd} of ${gridItems.length}${showFeatured ? ' + featured' : ''}`;
+      const showingTpl = paginationEl.dataset.showingTpl || 'Showing {from}–{to} of {total}';
+      const featuredSuffix = paginationEl.dataset.featuredSuffix || ' + featured';
+      const showing = showingTpl
+        .replace('{from}', String(start + 1))
+        .replace('{to}', String(shownEnd))
+        .replace('{total}', String(gridItems.length));
+      postsCount.textContent = showing + (showFeatured ? featuredSuffix : '');
     }
   }
 
@@ -813,7 +822,7 @@ const allTopics = [...topicCounts.keys()].sort(
     chipsEl.style.maxHeight = `${(tops[1] - tops[0]) + chipH + 2}px`;
     chipsEl.classList.add('is-clamped');
     chipsToggle.hidden = false;
-    chipsToggle.textContent = 'Show all tags';
+    chipsToggle.textContent = chipsToggle.dataset.showAll || 'Show all tags';
   }
 
   chipsToggle?.addEventListener('click', () => {
@@ -821,7 +830,7 @@ const allTopics = [...topicCounts.keys()].sort(
     if (chipsExpanded) {
       chipsEl?.classList.remove('is-clamped');
       if (chipsEl) chipsEl.style.maxHeight = '';
-      chipsToggle.textContent = 'Show fewer tags';
+      chipsToggle.textContent = chipsToggle.dataset.showFewer || 'Show fewer tags';
     } else {
       clampChips();
     }

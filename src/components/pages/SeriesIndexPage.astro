@@ -8,7 +8,7 @@ import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
 import { affiliateService } from "../../services/affiliates";
 import { buildSeriesViews } from "../../utils/series";
-import { getLocaleFromUrl, useTranslations, localizedHref } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, format } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -50,8 +50,7 @@ const SITE_URL = 'https://luci-studio.com';
         <span class="series-eyebrow">{t('series.eyebrow')}</span>
         <h1 class="series-display">{t('series.title')}<span class="series-dot">.</span></h1>
         <p class="series-sub">
-          {sorted.length} {sorted.length === 1 ? 'series' : 'series'} — themed, ordered reading
-          lists meant to be followed end-to-end.
+          {format(t('series.sub'), { n: sorted.length })}
         </p>
       </header>
 
