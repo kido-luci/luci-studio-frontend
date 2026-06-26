@@ -1,5 +1,4 @@
-const rawBaseUrl = import.meta.env.PUBLIC_API_URL || '';
-const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+import { cachedGetAll } from '../lib/apiClient';
 
 export interface WorkLink {
     label: string;
@@ -27,23 +26,8 @@ export interface WorkItem {
     updated_at: string;
 }
 
-let getAllPromise: Promise<WorkItem[]> | null = null;
+const _getAll = cachedGetAll<WorkItem>('/work');
 
 export const workService = {
-    async getAll(): Promise<WorkItem[]> {
-        if (getAllPromise) return getAllPromise;
-        getAllPromise = (async () => {
-            try {
-                const response = await fetch(`${BASE_URL}/work`);
-                if (!response.ok) throw new Error(`GET /work failed with ${response.status}`);
-                const data = await response.json();
-                return Array.isArray(data) ? data : (data || []);
-            } catch (error) {
-                console.error('Failed to fetch work items:', error);
-                getAllPromise = null;
-                return [];
-            }
-        })();
-        return getAllPromise;
-    },
+    getAll: _getAll,
 };

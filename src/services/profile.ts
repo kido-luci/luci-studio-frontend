@@ -1,5 +1,4 @@
-const rawBaseUrl = import.meta.env.PUBLIC_API_URL || '';
-const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+import { BASE_URL } from '../lib/apiClient';
 
 export interface ProfileFact { label: string; value: string; }
 export interface ProfileStat { number: number; suffix: string; label: string; sub: string; }
