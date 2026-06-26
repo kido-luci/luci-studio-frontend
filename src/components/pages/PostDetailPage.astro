@@ -98,7 +98,7 @@ const articleSchema = {
     datePublished: post.created_at,
     dateModified: post.updated_at,
     wordCount,
-    inLanguage: 'en',
+    inLanguage: locale === 'vi' ? 'vi' : 'en',
     isAccessibleForFree: true,
     articleSection: post.topics?.[0] ?? 'Engineering',
     author: {

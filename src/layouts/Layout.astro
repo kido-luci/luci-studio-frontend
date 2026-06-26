@@ -44,10 +44,28 @@ const {
 } = Astro.props;
 
 const canonicalURL = canonical ?? SITE_URL;
+
+// Bilingual SEO. Pages pass the canonical as the English URL regardless of the
+// rendered locale, so derive the Vietnamese variant by inserting `/vi` after the
+// origin. Each page links both alternates (+ x-default → English) and sets its
+// own canonical / og:url / og:locale to the locale it is actually rendered in.
+const enCanonical = canonicalURL;
+const viCanonical = (() => {
+	try {
+		const u = new URL(enCanonical);
+		u.pathname = u.pathname === '/' ? '/vi/' : `/vi${u.pathname}`;
+		return u.toString();
+	} catch {
+		return enCanonical;
+	}
+})();
+const selfCanonical = locale === 'vi' ? viCanonical : enCanonical;
+const ogLocale = locale === 'vi' ? 'vi_VN' : 'en_US';
+const ogLocaleAlt = locale === 'vi' ? 'en_US' : 'vi_VN';
 ---
 
 <!doctype html>
-<html lang="en" data-particle-speed={particleSpeed}>
+<html lang={locale} data-particle-speed={particleSpeed}>
 	<head>
 		<meta charset="UTF-8" />
 		<title>{title}</title>
@@ -60,20 +78,25 @@ const canonicalURL = canonical ?? SITE_URL;
 		{keywords && <meta name="keywords" content={keywords} />}
 		<meta name="author" content="Trung Lập (Luci)" />
 		<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-		<link rel="canonical" href={canonicalURL} />
+		<link rel="canonical" href={selfCanonical} />
+		<!-- hreflang: each page declares its en/vi counterparts + x-default (English). -->
+		<link rel="alternate" hreflang="en" href={enCanonical} />
+		<link rel="alternate" hreflang="vi" href={viCanonical} />
+		<link rel="alternate" hreflang="x-default" href={enCanonical} />
 		{googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
 
 		<!-- Open Graph -->
 		<meta property="og:site_name" content={SITE_NAME} />
 		<meta property="og:type" content={ogType} />
-		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:url" content={selfCanonical} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={ogImage} />
 		{ogImageWidth && <meta property="og:image:width" content={String(ogImageWidth)} />}
 		{ogImageHeight && <meta property="og:image:height" content={String(ogImageHeight)} />}
 		<meta property="og:image:alt" content={ogImageAlt} />
-		<meta property="og:locale" content="en_US" />
+		<meta property="og:locale" content={ogLocale} />
+		<meta property="og:locale:alternate" content={ogLocaleAlt} />
 		{articleMeta?.publishedTime && <meta property="article:published_time" content={articleMeta.publishedTime} />}
 		{articleMeta?.modifiedTime && <meta property="article:modified_time" content={articleMeta.modifiedTime} />}
 		{articleMeta?.author && <meta property="article:author" content={articleMeta.author} />}

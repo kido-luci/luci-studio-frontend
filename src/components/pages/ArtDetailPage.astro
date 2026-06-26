@@ -27,7 +27,7 @@ const structuredData = [
     image: { '@type': 'ImageObject', url: ogImage, width: 600 },
     url: canonicalURL,
     dateCreated: item.created_at,
-    inLanguage: 'en',
+    inLanguage: locale === 'vi' ? 'vi' : 'en',
     isAccessibleForFree: true,
     creator: {
       '@type': 'Person',
