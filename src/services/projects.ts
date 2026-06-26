@@ -1,5 +1,4 @@
-const rawBaseUrl = import.meta.env.PUBLIC_API_URL || '';
-const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+import { cachedGetAll } from '../lib/apiClient';
 
 export interface ProjectLink {
     label: string;
@@ -22,23 +21,8 @@ export interface Project {
     updated_at: string;
 }
 
-let getAllPromise: Promise<Project[]> | null = null;
+const _getAll = cachedGetAll<Project>('/projects');
 
 export const projectService = {
-    async getAll(): Promise<Project[]> {
-        if (getAllPromise) return getAllPromise;
-        getAllPromise = (async () => {
-            try {
-                const response = await fetch(`${BASE_URL}/projects`);
-                if (!response.ok) throw new Error(`GET /projects failed with ${response.status}`);
-                const data = await response.json();
-                return Array.isArray(data) ? data : [];
-            } catch (error) {
-                console.error('Failed to fetch projects:', error);
-                getAllPromise = null;
-                return [];
-            }
-        })();
-        return getAllPromise;
-    },
+    getAll: _getAll,
 };

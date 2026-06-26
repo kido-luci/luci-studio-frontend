@@ -1,5 +1,5 @@
-const rawBaseUrl = import.meta.env.PUBLIC_API_URL || '';
-const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+import { BASE_URL } from '../lib/apiClient';
+
 const failFast = import.meta.env.PROD && import.meta.env.ALLOW_EMPTY_POSTS !== '1';
 
 export interface Post {
