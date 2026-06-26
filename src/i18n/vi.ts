@@ -18,12 +18,4 @@ export const vi: Record<string, string> = {
 
   // read-time unit
   'readtime.unit': 'phút',
-
-  // markdown callout labels
-  'callout.note': 'ℹ Ghi chú',
-  'callout.tip': '💡 Mẹo',
-  'callout.important': '⚡ Quan trọng',
-  'callout.warning': '⚠️ Cảnh báo',
-  'callout.caution': '🚫 Thận trọng',
-  'callout.affiliate': '🔗 Tiết lộ liên kết tài trợ',
 };

@@ -19,12 +19,4 @@ export const en: Record<string, string> = {
 
   // read-time unit (blog.ts)
   'readtime.unit': 'min',
-
-  // markdown callout labels (blog.ts)
-  'callout.note': 'ℹ Note',
-  'callout.tip': '💡 Tip',
-  'callout.important': '⚡ Important',
-  'callout.warning': '⚠️ Warning',
-  'callout.caution': '🚫 Caution',
-  'callout.affiliate': '🔗 Affiliate disclosure',
 };
