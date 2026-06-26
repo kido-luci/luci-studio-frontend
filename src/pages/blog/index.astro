@@ -9,7 +9,7 @@ import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
 import { affiliateService } from "../../services/affiliates";
 import { buildSeriesViews } from "../../utils/series";
-import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate, coverGradient } from "../../utils/blog";
+import { buildPostSlug, readTimeFor, formatDate, coverGradient } from "../../utils/blog";
 
 const rawPosts = await postService.getAll();
 const rawPlaylists = await playlistService.getAll();
@@ -33,7 +33,7 @@ const allPosts = rawPosts
       coverWord: tags[0],
       cover: coverGradient(tags[0]),
       date: formatDate(p.created_at),
-      read: p.word_count ? calculateReadTimeFromWordCount(p.word_count) : calculateReadTime(p.content || ''),
+      read: readTimeFor(p),
       likes: p.likes ?? 0,
       views: p.views ?? 0,
       img: p.cover_image_url || '',

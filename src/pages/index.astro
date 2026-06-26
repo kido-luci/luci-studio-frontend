@@ -12,7 +12,7 @@ import { galleryService } from "../services/gallery";
 import { projectService } from "../services/projects";
 import { buildLabCards } from "../utils/labCards";
 import { profileService } from "../services/profile";
-import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate } from "../utils/blog";
+import { buildPostSlug, readTimeFor, formatDate } from "../utils/blog";
 import FooterLinks from "../components/FooterLinks.astro";
 import "../styles/lab-cards.css";
 
@@ -40,7 +40,7 @@ const blogPosts = rawPosts
   title: p.title,
   subtitle: p.subtitle || '',
   date: formatDate(p.created_at),
-  read: p.word_count ? calculateReadTimeFromWordCount(p.word_count) : calculateReadTime(p.content || ''),
+  read: readTimeFor(p),
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   // empty cover → PostCard renders the gradient + tag-word fallback (same as /blog)
   img: p.cover_image_url || '',

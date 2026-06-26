@@ -4,7 +4,7 @@ import PostCard from "../../components/PostCard.astro";
 import AffiliateCard from "../../components/AffiliateCard.astro";
 import { postService } from "../../services/posts";
 import { affiliateService } from "../../services/affiliates";
-import { buildPostSlug, calculateReadTime, calculateReadTimeFromWordCount, formatDate, formatMarkdown } from "../../utils/blog";
+import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown } from "../../utils/blog";
 
 export async function getStaticPaths() {
   const posts = await postService.getAll();
@@ -103,7 +103,7 @@ const relatedPosts = (related ?? []).map(p => ({
   href: `/blog/${buildPostSlug(p.title, p.id)}/`,
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   date: formatDate(p.created_at),
-  read: p.word_count ? calculateReadTimeFromWordCount(p.word_count) : calculateReadTime(p.content || ''),
+  read: readTimeFor(p),
   // empty cover → PostCard renders the gradient + tag-word fallback (same as /blog)
   img: p.cover_image_url || '',
   views: p.views ?? 0,
