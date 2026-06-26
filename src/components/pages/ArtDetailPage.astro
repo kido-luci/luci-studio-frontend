@@ -1,10 +1,12 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref } from "../../i18n";
+import { getLocaleFromUrl, useTranslations, localizedHref, switchLocalePath } from "../../i18n";
 import type { GalleryItem } from "../../services/gallery";
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
+const enHref = switchLocalePath(Astro.url.pathname, 'en');
+const viHref = switchLocalePath(Astro.url.pathname, 'vi');
 
 interface Props {
   item: GalleryItem;
@@ -65,6 +67,11 @@ const structuredData = [
         <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
       </a>
       <div class="flex items-center gap-4">
+        <div class="lang-switch flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
+          <a href={enHref} class={locale === 'en' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="English">EN</a>
+          <span class="text-gray-600" aria-hidden="true">/</span>
+          <a href={viHref} class={locale === 'vi' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="Tiếng Việt">VI</a>
+        </div>
         <a href="/#portfolio" class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em] flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Back to Portfolio

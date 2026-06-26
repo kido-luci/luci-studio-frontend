@@ -1,7 +1,12 @@
 ---
-import { getLocaleFromUrl, useTranslations, localizedHref } from '../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, switchLocalePath } from '../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
+
+// Language switcher targets: the counterpart of the current page in each locale,
+// so switching keeps the reader on the same page.
+const enHref = switchLocalePath(Astro.url.pathname, 'en');
+const viHref = switchLocalePath(Astro.url.pathname, 'vi');
 
 interface Props {
   active?: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | null;
@@ -41,6 +46,11 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
     </div>
 
     <div class="flex items-center gap-4">
+      <div class="lang-switch hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
+        <a href={enHref} class={locale === 'en' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="English">EN</a>
+        <span class="text-gray-600" aria-hidden="true">/</span>
+        <a href={viHref} class={locale === 'vi' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="Tiếng Việt">VI</a>
+      </div>
       <button
         id="theme-toggle"
         onclick="window.toggleTheme()"
@@ -73,6 +83,11 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
   <a href={localizedHref(locale, '/blog/series')} class={active === 'series' ? mobileActive : mobileBase}>{t('nav.series')}</a>
   <div class="h-px w-12 bg-white/10 my-4"></div>
   <a href={localizedHref(locale, '/lab')} class={active === 'lab' ? mobileSmallActive : mobileSmallBase}>{t('nav.lab')}</a>
+  <div class="flex items-center gap-3 mt-4 text-lg font-bold uppercase tracking-widest">
+    <a href={enHref} class={locale === 'en' ? 'text-violet-400' : 'text-gray-300'} aria-label="English">EN</a>
+    <span class="text-gray-600" aria-hidden="true">/</span>
+    <a href={viHref} class={locale === 'vi' ? 'text-violet-400' : 'text-gray-300'} aria-label="Tiếng Việt">VI</a>
+  </div>
   <a href={ctaHref} class="mobile-nav-link mt-8 px-8 py-4 bg-white text-black font-black rounded-full uppercase tracking-widest">{ctaLabel}</a>
 </div>
 
