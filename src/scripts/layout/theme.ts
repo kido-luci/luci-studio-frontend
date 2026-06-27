@@ -26,8 +26,8 @@ const toggleTheme = () => {
 	// Update cursor colors for non-Windows
 	if (!isWindows && dot && ring) {
 		if (isLight) {
-			dot.style.backgroundColor = '#8b5cf6';
-			ring.style.borderColor = 'rgba(139,92,246,0.5)';
+			dot.style.backgroundColor = 'var(--accent)';
+			ring.style.borderColor = 'rgb(var(--accent-rgb) / 0.5)';
 		} else {
 			dot.style.backgroundColor = 'white';
 			ring.style.borderColor = 'rgba(255,255,255,0.4)';

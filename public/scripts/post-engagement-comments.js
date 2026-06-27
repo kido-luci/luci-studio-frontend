@@ -317,7 +317,7 @@
         </div>
         <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
           <button id="confirm-cancel" style="padding:0.5rem 1.1rem;border-radius:0.5rem;font-size:0.8rem;font-weight:600;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.12));color:var(--text-secondary);cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">${cancelText}</button>
-          <button id="confirm-ok" style="padding:0.5rem 1.1rem;border-radius:0.5rem;font-size:0.8rem;font-weight:600;border:none;cursor:pointer;transition:background 0.15s;background:${danger ? '#ef4444' : '#7c3aed'};color:#fff;" onmouseover="this.style.background='${danger ? '#dc2626' : '#6d28d9'}'" onmouseout="this.style.background='${danger ? '#ef4444' : '#7c3aed'}'">${confirmText}</button>
+          <button id="confirm-ok" style="padding:0.5rem 1.1rem;border-radius:0.5rem;font-size:0.8rem;font-weight:600;border:none;cursor:pointer;transition:background 0.15s;background:${danger ? '#ef4444' : 'var(--accent)'};color:#fff;" onmouseover="this.style.background='${danger ? '#dc2626' : 'var(--accent-strong)'}'" onmouseout="this.style.background='${danger ? '#ef4444' : 'var(--accent)'}'">${confirmText}</button>
         </div>
       `;
 
@@ -592,7 +592,7 @@
     }
 
     // Thread line color shared by the ╰ arm and parent connector
-    const THREAD_LINE = '#7c3aed';
+    const THREAD_LINE = 'var(--accent)';
 
     // Tracks the current user's reactions for this page session: commentID → 'like'|'dislike'|''
     const reactionState = new Map();
@@ -674,8 +674,8 @@
       const likeActive = curReaction === 'like';
       const dislikeActive = curReaction === 'dislike';
       const reactBtns = `
-        <button class="react-btn" data-rtype="like" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:${likeActive ? '#7c3aed' : 'var(--text-tertiary)'};background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;font-weight:${likeActive ? '700' : '400'};">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="${likeActive ? '#7c3aed' : 'none'}" stroke="${likeActive ? '#7c3aed' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+        <button class="react-btn" data-rtype="like" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:${likeActive ? 'var(--accent)' : 'var(--text-tertiary)'};background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;font-weight:${likeActive ? '700' : '400'};">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="${likeActive ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
           <span class="like-count">${c.likes || 0}</span>
         </button>
         <button class="react-btn" data-rtype="dislike" style="display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:${dislikeActive ? '#f87171' : 'var(--text-tertiary)'};background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;font-weight:${dislikeActive ? '700' : '400'};">
@@ -735,13 +735,15 @@
         wrap.querySelectorAll('.react-btn').forEach(b => {
           const bt = b.dataset.rtype;
           const active = userReaction === bt;
-          const activeColor = bt === 'like' ? '#7c3aed' : '#f87171';
+          const activeColor = bt === 'like' ? 'var(--accent)' : '#f87171';
           b.style.color = active ? activeColor : 'var(--text-tertiary)';
           b.style.fontWeight = active ? '700' : '400';
           const svg = b.querySelector('svg');
           if (svg) {
-            svg.setAttribute('fill', active ? activeColor : 'none');
-            svg.setAttribute('stroke', active ? activeColor : 'currentColor');
+            // SVG presentation attributes can't take var() — use currentColor so the
+            // icon inherits b.style.color (which is the accent/scheme var when active).
+            svg.setAttribute('fill', active ? 'currentColor' : 'none');
+            svg.setAttribute('stroke', 'currentColor');
           }
           const countEl = b.querySelector(bt === 'like' ? '.like-count' : '.dislike-count');
           if (countEl) countEl.textContent = bt === 'like' ? likes : dislikes;
@@ -817,7 +819,7 @@
 
       if (!isTokenValid(token)) {
         formWrap.innerHTML = `<p style="font-size:0.8rem;color:var(--text-tertiary);margin:0;">
-          <button type="button" id="reply-sign-in" style="color:#7c3aed;font-weight:700;background:none;border:none;cursor:pointer;font-size:0.8rem;padding:0;">${_ci18n('signInToReply', 'Sign in with Google')}</button>${_ci18n('signInToReplySuffix', ' to reply.')}
+          <button type="button" id="reply-sign-in" style="color:var(--accent);font-weight:700;background:none;border:none;cursor:pointer;font-size:0.8rem;padding:0;">${_ci18n('signInToReply', 'Sign in with Google')}</button>${_ci18n('signInToReplySuffix', ' to reply.')}
         </p>`;
         parentWrap.querySelector('.comment-actions').after(formWrap);
         formWrap.querySelector('#reply-sign-in')?.addEventListener('click', () => {
@@ -851,7 +853,7 @@
             <div style="font-size:0.7rem;color:var(--text-tertiary);margin-bottom:0.375rem;">${_ci18n('replyingTo', 'Replying to')} <span style="color:#818cf8;font-weight:600;">@${escapeHtml(parentUserName)}</span></div>
             <div class="reply-input" contenteditable="true" role="textbox" aria-multiline="true" data-empty="true"
               style="width:100%;padding:0.5rem 0.75rem;font-size:0.875rem;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.08));border-radius:0.5rem;outline:none;color:var(--text-primary);box-sizing:border-box;transition:border-color 0.15s;min-height:2.8rem;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;line-height:1.6;cursor:text;"
-              onfocus="this.style.borderColor='rgba(124,58,237,0.4)'" onblur="this.style.borderColor='var(--comment-divider,rgba(255,255,255,0.08))'"></div>
+              onfocus="this.style.borderColor='rgb(var(--accent-rgb) / 0.4)'" onblur="this.style.borderColor='var(--comment-divider,rgba(255,255,255,0.08))'"></div>
             <div style="border-top:1px solid var(--comment-divider,rgba(255,255,255,0.06));display:flex;align-items:center;gap:0.375rem;padding:0.375rem 0.25rem 0;margin-top:0.375rem;">
               <button type="button" class="reply-fmt-bold fmt-btn" title="Bold" style="padding:0.2rem 0.35rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);transition:background 0.15s;" onmouseover="this.style.background='rgba(99,102,241,0.1)'" onmouseout="this.style.background='transparent'"><b>B</b></button>
               <button type="button" class="reply-fmt-italic fmt-btn" title="Italic" style="padding:0.2rem 0.35rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;font-style:italic;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);transition:background 0.15s;" onmouseover="this.style.background='rgba(99,102,241,0.1)'" onmouseout="this.style.background='transparent'">I</button>
@@ -864,8 +866,8 @@
                 style="padding:0.375rem 0.875rem;border-radius:0.5rem;font-size:0.78rem;font-weight:600;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.12));color:var(--text-secondary);cursor:pointer;transition:background 0.15s;"
                 onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">${_ci18n('cancel', 'Cancel')}</button>
               <button class="reply-submit" type="button"
-                style="padding:0.375rem 0.875rem;border-radius:0.5rem;font-size:0.78rem;font-weight:700;background:#7c3aed;color:#fff;border:none;cursor:pointer;transition:background 0.2s;"
-                onmouseover="this.style.background='#6d28d9'" onmouseout="this.style.background='#7c3aed'">${_ci18n('replySubmit', 'Reply')}</button>
+                style="padding:0.375rem 0.875rem;border-radius:0.5rem;font-size:0.78rem;font-weight:700;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:background 0.2s;"
+                onmouseover="this.style.background='var(--accent-strong)'" onmouseout="this.style.background='var(--accent)'">${_ci18n('replySubmit', 'Reply')}</button>
             </div>
           </div>
         </div>

@@ -62,7 +62,7 @@
       img.width = 18; img.height = 18;
       img.style.cssText = 'pointer-events:none;';
       btn.appendChild(img);
-      btn.style.cssText = `flex:1;padding:0.5rem 0;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:${i === activeCat ? 'rgba(124,58,237,0.12)' : 'transparent'};border-bottom:2px solid ${i === activeCat ? '#7c3aed' : 'transparent'};transition:background 0.15s;`;
+      btn.style.cssText = `flex:1;padding:0.5rem 0;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:${i === activeCat ? 'rgb(var(--accent-rgb) / 0.12)' : 'transparent'};border-bottom:2px solid ${i === activeCat ? 'var(--accent)' : 'transparent'};transition:background 0.15s;`;
       btn.addEventListener('click', () => { activeCat = i; buildPicker(); });
       tabs.appendChild(btn);
     });
@@ -95,7 +95,7 @@
         img.width = 24; img.height = 24;
         img.style.cssText = 'pointer-events:none;';
         btn.appendChild(img);
-        btn.addEventListener('mouseover', () => { btn.style.background = 'rgba(124,58,237,0.12)'; });
+        btn.addEventListener('mouseover', () => { btn.style.background = 'rgb(var(--accent-rgb) / 0.12)'; });
         btn.addEventListener('mouseout', () => { btn.style.background = 'transparent'; });
         btn.addEventListener('click', () => insertEmoji(em));
         grid.appendChild(btn);
@@ -118,7 +118,7 @@
     if (!style) {
       const s = document.createElement('style');
       s.id = 'emoji-picker-scroll-style';
-      s.textContent = '#emoji-picker-wrap div[style*="overflow-y"]::-webkit-scrollbar{width:4px}#emoji-picker-wrap div[style*="overflow-y"]::-webkit-scrollbar-track{background:transparent}#emoji-picker-wrap div[style*="overflow-y"]::-webkit-scrollbar-thumb{background:rgba(124,58,237,0.3);border-radius:9999px}';
+      s.textContent = '#emoji-picker-wrap div[style*="overflow-y"]::-webkit-scrollbar{width:4px}#emoji-picker-wrap div[style*="overflow-y"]::-webkit-scrollbar-track{background:transparent}#emoji-picker-wrap div[style*="overflow-y"]::-webkit-scrollbar-thumb{background:rgb(var(--accent-rgb) / 0.3);border-radius:9999px}';
       document.head.appendChild(s);
     }
   }
