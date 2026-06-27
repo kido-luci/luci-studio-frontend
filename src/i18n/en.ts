@@ -10,6 +10,7 @@ export const en: Record<string, string> = {
   'nav.lab': 'Lab',
   'nav.cta': "Let's Talk",
   'nav.toggleTheme': 'Toggle theme',
+  'nav.colorScheme': 'Color scheme',
 
   // footer (FooterLinks.astro)
   'footer.portfolio': 'Portfolio',

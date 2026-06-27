@@ -115,9 +115,9 @@ describe('localizedHref()', () => {
     expect(localizedHref('en', '/')).toBe('/');
   });
 
-  it('vi locale prefixes path with /vi', () => {
+  it('vi locale prefixes bilingual (blog) paths; non-blog paths stay English', () => {
     expect(localizedHref('vi', '/blog')).toBe('/vi/blog');
-    expect(localizedHref('vi', '/')).toBe('/vi/');
+    expect(localizedHref('vi', '/')).toBe('/'); // home is English-only — no /vi/ home route
   });
 
   it('non-root paths not starting with / are returned as-is (external/anchor)', () => {
@@ -139,7 +139,7 @@ describe('switchLocalePath()', () => {
     expect(switchLocalePath('/vi/', 'en')).toBe('/');
   });
 
-  it('/ → vi gives /vi/', () => {
-    expect(switchLocalePath('/', 'vi')).toBe('/vi/');
+  it('/ → vi stays / (home is English-only)', () => {
+    expect(switchLocalePath('/', 'vi')).toBe('/');
   });
 });
