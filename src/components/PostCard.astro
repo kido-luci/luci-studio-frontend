@@ -73,7 +73,7 @@ const statId = interactive && id != null ? String(id) : undefined;
   /* Theme tokens live on the card root so the component renders correctly on any
      page (homepage / post page / blog list), independent of an outer .tb-root. */
   .tb-card-link {
-    --tb-accent: #8b5cf6;
+    --tb-accent: var(--accent);
     --card-bg: #16161d; --card-bd: rgba(255,255,255,0.08);
     --card-shadow: 0 4px 14px -10px rgba(0,0,0,0.6);
     --card-shadow-hover: 0 24px 46px -22px rgba(0,0,0,0.85);

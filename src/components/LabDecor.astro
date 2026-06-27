@@ -4,13 +4,11 @@
 // Sits behind page content (z-index:0); the host page's content layer must be
 // positioned with z-index >= 1. Uses inline styles because the shapes are tiny,
 // one-off, and the floaty animation name must stay un-scoped (see <style is:global>).
-interface Props {
-  accent?: string;
-}
-const { accent = '#6c4cf1' } = Astro.props;
+// The confetti dots use var(--accent), inherited from the global scheme accent so
+// the decor follows the active color scheme. The other dots keep fixed decorative hues.
 ---
 
-<div class="lab-decor" style={`--accent:${accent};`} aria-hidden="true">
+<div class="lab-decor" aria-hidden="true">
   <span style="position:absolute; left:24%; top:9%; width:7px; height:7px; border-radius:50%; background:var(--accent); --r:0deg; animation:lab-floaty 7s ease-in-out infinite;"></span>
   <span style="position:absolute; left:46%; top:6%; width:22px; height:3px; border-radius:3px; background:#ec5a9b; transform:rotate(-32deg); --r:-32deg; animation:lab-floaty 9s ease-in-out .4s infinite;"></span>
   <span style="position:absolute; left:62%; top:13%; width:9px; height:9px; border:2px solid #3aa0ff; border-radius:50%;"></span>

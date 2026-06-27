@@ -142,7 +142,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" integrity="sha384-xb96EMJeax+NLXMC88ZBa1xAeAW+kn+horHh/zFlbMLG2UPWhMJJSlv7fi57hS+Q" crossorigin="anonymous"></script>
 
 		<script is:inline>
-			// Initialize theme immediately to prevent flash
+			// Initialize theme + color scheme immediately to prevent flash
 			(function() {
 				const savedTheme = localStorage.getItem('theme');
 				const theme = savedTheme || 'light';
@@ -153,6 +153,10 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 						document.body.classList.add('light-mode');
 					});
 				}
+				// Apply the saved accent scheme before paint (default = violet/brand).
+				const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'];
+				const savedScheme = localStorage.getItem('scheme');
+				document.documentElement.dataset.scheme = SCHEMES.indexOf(savedScheme) >= 0 ? savedScheme : 'violet';
 			})();
 		</script>
 	</head>
@@ -199,6 +203,17 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 
 		<style is:global>
 			:root {
+				/* accent tokens — default = brand violet. Channels are space-separated
+				   so the Tailwind `accent` color (rgb(var(--accent-rgb) / <alpha-value>))
+				   and the `rgb(var(--accent-rgb) / X)` slash form below both parse. */
+				--accent-rgb: 139 92 246;
+				--accent: rgb(var(--accent-rgb));
+				--accent-strong: color-mix(in srgb, var(--accent), #000 14%);
+				--accent-soft: rgb(var(--accent-rgb) / 0.12);
+				--accent-border: rgb(var(--accent-rgb) / 0.30);
+				/* Foreground color to place ON an --accent fill (buttons/chips). White works
+				   on the darker accents; the light accents (ember/forest/mono) flip to dark ink. */
+				--accent-ink: #fff;
 				--bg-primary: #0a0a0a;
 				--bg-secondary: rgba(10, 10, 10, 0.4);
 				--bg-card: rgba(10, 10, 10, 0.85);
@@ -207,7 +222,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				--text-secondary: rgb(156, 163, 175);
 				--text-tertiary: rgb(107, 114, 128);
 				--border-color: rgba(255, 255, 255, 0.05);
-				--border-hover: rgba(139, 92, 246, 0.2);
+				--border-hover: rgb(var(--accent-rgb) / 0.2);
 				--cursor-color: white;
 				--cursor-ring: rgba(255, 255, 255, 0.4);
 				--dimmer-bg: rgba(0, 0, 0, 0);
@@ -219,18 +234,41 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				--bg-primary: rgba(255, 255, 255, 0.85);
 				--bg-secondary: rgba(255, 255, 255, 0.7);
 				--bg-card: rgba(255, 255, 255, 0.9);
-				--bg-card-hover: rgba(139, 92, 246, 0.05);
+				--bg-card-hover: rgb(var(--accent-rgb) / 0.05);
 				--text-primary: rgb(17, 24, 39);
 				--text-secondary: rgb(75, 85, 99);
 				--text-tertiary: rgb(156, 163, 175);
 				--border-color: rgba(0, 0, 0, 0.08);
-				--border-hover: rgba(139, 92, 246, 0.3);
-				--cursor-color: #8b5cf6;
-				--cursor-ring: rgba(139, 92, 246, 0.5);
+				--border-hover: rgb(var(--accent-rgb) / 0.3);
+				--cursor-color: var(--accent);
+				--cursor-ring: rgb(var(--accent-rgb) / 0.5);
 				--dimmer-bg: rgba(255, 255, 255, 0);
 				--nav-bg: rgba(255, 255, 255, 0.7);
 				--nav-bg-scroll: rgba(255, 255, 255, 0.95);
 			}
+
+			/* Color schemes — orthogonal to light/dark. A preset only swaps the accent
+			   channels; everything accent-driven (--accent / --accent-strong / the
+			   remapped Tailwind violet+purple utilities) follows via the cascade — no
+			   JS re-init needed. Static attribute selectors → no Tailwind safelist. */
+			html[data-scheme="violet"] { --accent-rgb: 139 92 246; }  /* default brand */
+			html[data-scheme="ocean"]  { --accent-rgb: 59 130 246; }
+			/* The bright accents need DARK ink for legible white-less labels on their fill. */
+			html[data-scheme="ember"]  { --accent-rgb: 249 115 22;  --accent-ink: #0a0a0a; }
+			html[data-scheme="forest"] { --accent-rgb: 16 185 129;  --accent-ink: #0a0a0a; }
+			html[data-scheme="rose"]   { --accent-rgb: 244 63 94; }
+			html[data-scheme="mono"]   { --accent-rgb: 161 161 170; --accent-ink: #0a0a0a; }
+
+			/* Light mode: the page background is near-white, so the vivid accents fail WCAG
+			   contrast both as text and as a fill behind white. Darken the accent per scheme
+			   (kept vivid in dark mode) so accent-as-text clears AA on white AND white-on-fill
+			   stays legible; ink returns to white since the fill is now dark enough. Violet is
+			   left unchanged to preserve the default's established look. */
+			html[data-scheme="ocean"].light-mode  { --accent-rgb: 37 99 235; }   /* blue-600 */
+			html[data-scheme="ember"].light-mode  { --accent-rgb: 194 65 12;  --accent-ink: #fff; }  /* orange-700 */
+			html[data-scheme="forest"].light-mode { --accent-rgb: 4 120 87;   --accent-ink: #fff; }  /* emerald-700 */
+			html[data-scheme="rose"].light-mode   { --accent-rgb: 225 29 72; }  /* rose-600 */
+			html[data-scheme="mono"].light-mode   { --accent-rgb: 82 82 91;   --accent-ink: #fff; }  /* zinc-600 */
 
 			html {
 				overflow-x: clip;
@@ -252,7 +290,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			}
 			body.light-mode .cookie-consent > div {
 				background: rgba(255, 255, 255, 0.96);
-				border-color: rgb(138, 92, 246);
+				border-color: var(--accent);
 				box-shadow: 0 20px 60px rgba(17, 24, 39, 0.12);
 			}
 			body.light-mode .cookie-consent p {
@@ -308,8 +346,8 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			body.light-mode h6 {
 				filter: drop-shadow(0 2px 10px rgba(0,0,0,0.1));
 			}
-			::selection { background-color: rgba(139, 92, 246, 0.3); color: white; }
-			body.light-mode ::selection { background-color: rgba(139, 92, 246, 0.2); color: rgb(17, 24, 39); }
+			::selection { background-color: rgb(var(--accent-rgb) / 0.3); color: white; }
+			body.light-mode ::selection { background-color: rgb(var(--accent-rgb) / 0.2); color: rgb(17, 24, 39); }
 			::-webkit-scrollbar { width: 6px; }
 			::-webkit-scrollbar-track { background: var(--bg-primary); }
 			::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }

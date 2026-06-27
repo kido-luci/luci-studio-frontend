@@ -26,8 +26,8 @@ const toggleTheme = () => {
 	// Update cursor colors for non-Windows
 	if (!isWindows && dot && ring) {
 		if (isLight) {
-			dot.style.backgroundColor = '#8b5cf6';
-			ring.style.borderColor = 'rgba(139,92,246,0.5)';
+			dot.style.backgroundColor = 'var(--accent)';
+			ring.style.borderColor = 'rgb(var(--accent-rgb) / 0.5)';
 		} else {
 			dot.style.backgroundColor = 'white';
 			ring.style.borderColor = 'rgba(255,255,255,0.4)';
@@ -35,9 +35,42 @@ const toggleTheme = () => {
 	}
 };
 
+// ── Color Scheme (accent palette) ─────────────────────────────────────────
+// Orthogonal to light/dark. A scheme only swaps the --accent-rgb var on <html>;
+// everything accent-driven follows via the CSS cascade, so no canvas/cursor
+// re-init is needed (unlike toggleTheme, which flips canvas opacity + cursor base).
+const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'] as const;
+type Scheme = (typeof SCHEMES)[number];
+const DEFAULT_SCHEME: Scheme = 'violet';
+
+const isScheme = (v: string | null): v is Scheme =>
+	!!v && (SCHEMES as readonly string[]).includes(v);
+
+// Reflect the active scheme on the picker swatches (.scheme-dot[data-scheme]).
+const syncSchemeUI = (scheme: string) => {
+	document.querySelectorAll<HTMLElement>('.scheme-dot').forEach((d) => {
+		d.setAttribute('aria-checked', String(d.dataset.scheme === scheme));
+	});
+};
+
+const initScheme = (): Scheme => {
+	const saved = localStorage.getItem('scheme');
+	const scheme = isScheme(saved) ? saved : DEFAULT_SCHEME;
+	document.documentElement.dataset.scheme = scheme;
+	return scheme;
+};
+
+const setScheme = (name: string) => {
+	if (!isScheme(name)) return;
+	document.documentElement.dataset.scheme = name;
+	localStorage.setItem('scheme', name);
+	syncSchemeUI(name);
+};
+
 export function initThemeManagement() {
 	// Apply theme immediately to prevent flash
 	const currentTheme = initTheme();
+	const currentScheme = initScheme();
 
 	// Expose toggle function globally for button click
 	(window as any).toggleTheme = () => {
@@ -45,4 +78,6 @@ export function initThemeManagement() {
 		// Re-trigger scroll logic to update nav background immediately
 		window.dispatchEvent(new Event('scroll'));
 	};
+	(window as any).setScheme = setScheme;
+	syncSchemeUI(currentScheme);
 }

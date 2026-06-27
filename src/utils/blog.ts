@@ -50,7 +50,7 @@ export function coverGradient(tag: string): string {
 const CALLOUT_STYLES: Record<string, { color: string; bg: string; label: string }> = {
     NOTE:      { color: '#3b82f6', bg: 'rgba(59,130,246,0.08)',  label: 'ℹ Note' },
     TIP:       { color: '#10b981', bg: 'rgba(16,185,129,0.08)',  label: '💡 Tip' },
-    IMPORTANT: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.08)', label: '⚡ Important' },
+    IMPORTANT: { color: 'var(--accent)', bg: 'rgb(var(--accent-rgb) / 0.08)', label: '⚡ Important' },
     WARNING:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', label: '⚠️ Warning' },
     CAUTION:   { color: '#ef4444', bg: 'rgba(239,68,68,0.08)',  label: '🚫 Caution' },
     AFFILIATE: { color: '#0ea5e9', bg: 'rgba(14,165,233,0.08)', label: '🔗 Affiliate disclosure' },

@@ -102,10 +102,10 @@ const SITE_URL = 'https://luci-studio.com';
 <style>
   /* ====== Series page — header + layout (card lives in SeriesCard.astro) ====== */
   .series-main {
-    --series-accent: #8b5cf6;
+    --series-accent: var(--accent);
     --series-ink: var(--text-primary);
     --series-muted: var(--text-secondary, #6b7280);
-    --series-line: rgba(139, 92, 246, 0.18);
+    --series-line: rgb(var(--accent-rgb) / 0.18);
     position: relative;
     background: var(--bg-primary);
     overflow: hidden;
@@ -116,7 +116,7 @@ const SITE_URL = 'https://luci-studio.com';
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    background-image: radial-gradient(circle, rgba(139, 92, 246, 0.10) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgb(var(--accent-rgb) / 0.10) 1px, transparent 1px);
     background-size: 38px 38px;
     -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
             mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);

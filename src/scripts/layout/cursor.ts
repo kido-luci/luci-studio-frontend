@@ -13,15 +13,15 @@ export function initCursor() {
 		// Windows: remove mix-blend-difference (causes full-page repaints)
 		if (isWindows) {
 			dot.style.mixBlendMode = 'normal';
-			dot.style.backgroundColor = 'rgba(139,92,246,0.9)';
+			dot.style.backgroundColor = 'rgb(var(--accent-rgb) / 0.9)';
 			ring.style.mixBlendMode = 'normal';
-			ring.style.borderColor = 'rgba(139,92,246,0.5)';
+			ring.style.borderColor = 'rgb(var(--accent-rgb) / 0.5)';
 		} else {
 			// Set initial cursor colors based on theme
 			const isLight = document.body.classList.contains('light-mode');
 			if (isLight) {
-				dot.style.backgroundColor = '#8b5cf6';
-				ring.style.borderColor = 'rgba(139,92,246,0.5)';
+				dot.style.backgroundColor = 'var(--accent)';
+				ring.style.borderColor = 'rgb(var(--accent-rgb) / 0.5)';
 			}
 		}
 
@@ -65,18 +65,18 @@ export function initCursor() {
 			el.addEventListener('mouseenter', () => {
 				if (isWindows) ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(2)`;
 				else { targetRingScale = 2; kickRingAnim(); }
-				ring.style.borderColor = 'rgba(139,92,246,0.8)';
-				ring.style.boxShadow = '0 0 20px rgba(139,92,246,0.3)';
+				ring.style.borderColor = 'rgb(var(--accent-rgb) / 0.8)';
+				ring.style.boxShadow = '0 0 20px rgb(var(--accent-rgb) / 0.3)';
 				dot.style.transform = 'scale(1.5)';
-				dot.style.backgroundColor = '#8b5cf6';
+				dot.style.backgroundColor = 'var(--accent)';
 			});
 			el.addEventListener('mouseleave', () => {
 				if (isWindows) ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(1)`;
 				else { targetRingScale = 1; kickRingAnim(); }
-				ring.style.borderColor = isWindows ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.4)';
+				ring.style.borderColor = isWindows ? 'rgb(var(--accent-rgb) / 0.5)' : 'rgba(255,255,255,0.4)';
 				ring.style.boxShadow = 'none';
 				dot.style.transform = 'scale(1)';
-				dot.style.backgroundColor = isWindows ? 'rgba(139,92,246,0.9)' : 'white';
+				dot.style.backgroundColor = isWindows ? 'rgb(var(--accent-rgb) / 0.9)' : 'white';
 			});
 		});
 	}
