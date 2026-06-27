@@ -11,7 +11,7 @@ const enHref = switchLocalePath(Astro.url.pathname, 'en');
 const viHref = switchLocalePath(Astro.url.pathname, 'vi');
 
 interface Props {
-  active?: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | null;
+  active?: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | 'tools' | null;
   ctaLabel?: string;
   ctaHref?: string;
 }
@@ -22,7 +22,7 @@ const linkBase = "topnav-link text-xs font-bold transition-all duration-300 uppe
 const linkIdle = "text-gray-400 hover:text-white";
 const linkActive = "is-active text-violet-400";
 
-const cls = (key: 'home' | 'blog' | 'series' | 'portfolio' | 'lab') => {
+const cls = (key: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | 'tools') => {
   if (active === key) return `${linkBase} ${linkActive}`;
   return `${linkBase} ${linkIdle}`;
 };
@@ -56,6 +56,7 @@ const schemes = [
       <a href={localizedHref(locale, '/blog')} class={cls('blog')}>{t('nav.blog')}</a>
       <a href={localizedHref(locale, '/blog/series')} class={cls('series')}>{t('nav.series')}</a>
       <a href={localizedHref(locale, '/lab')} class={cls('lab')}>{t('nav.lab')}</a>
+      <a href="/tools" class={cls('tools')}>Tools</a>
     </div>
 
     <div class="flex items-center gap-4">
@@ -128,6 +129,7 @@ const schemes = [
   <a href={localizedHref(locale, '/blog/series')} class={active === 'series' ? mobileActive : mobileBase}>{t('nav.series')}</a>
   <div class="h-px w-12 bg-white/10 my-4"></div>
   <a href={localizedHref(locale, '/lab')} class={active === 'lab' ? mobileSmallActive : mobileSmallBase}>{t('nav.lab')}</a>
+  <a href="/tools" class={active === 'tools' ? mobileSmallActive : mobileSmallBase}>Tools</a>
   {showLangSwitch && (
     <div class="flex items-center gap-3 mt-4 text-lg font-bold uppercase tracking-widest">
       <a href={enHref} class={locale === 'en' ? 'text-violet-400' : 'text-gray-300'} aria-label="English">EN</a>
