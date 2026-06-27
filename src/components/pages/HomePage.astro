@@ -20,8 +20,6 @@ const heroWords = locale === 'vi' ? ['CÙNG', 'TẠO', 'ĐIỀU', 'TUYỆT'] : [
 import FooterLinks from "../FooterLinks.astro";
 import "../../styles/lab-cards.css";
 
-const LAB_ACCENT = "#6c4cf1";
-
 const profile = await profileService.getProfile();
 
 // The homepage LAB section reuses the /lab editorial RepoCard, built from the
@@ -272,7 +270,7 @@ const homepageSchema = {
           </div>
           <div class="lab-palette grid grid-cols-1 md:grid-cols-2 gap-7" style="font-family:'Hanken Grotesk',system-ui,sans-serif;">
             {labCards.map((c) => (
-              <RepoCard {...c} accent={LAB_ACCENT} />
+              <RepoCard {...c} />
             ))}
           </div>
           {labCards.length > 0 && (
