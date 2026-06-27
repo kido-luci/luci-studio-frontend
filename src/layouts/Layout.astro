@@ -142,7 +142,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" integrity="sha384-xb96EMJeax+NLXMC88ZBa1xAeAW+kn+horHh/zFlbMLG2UPWhMJJSlv7fi57hS+Q" crossorigin="anonymous"></script>
 
 		<script is:inline>
-			// Initialize theme immediately to prevent flash
+			// Initialize theme + color scheme immediately to prevent flash
 			(function() {
 				const savedTheme = localStorage.getItem('theme');
 				const theme = savedTheme || 'light';
@@ -153,6 +153,10 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 						document.body.classList.add('light-mode');
 					});
 				}
+				// Apply the saved accent scheme before paint (default = violet/brand).
+				const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'];
+				const savedScheme = localStorage.getItem('scheme');
+				document.documentElement.dataset.scheme = SCHEMES.indexOf(savedScheme) >= 0 ? savedScheme : 'violet';
 			})();
 		</script>
 	</head>
