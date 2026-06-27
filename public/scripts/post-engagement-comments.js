@@ -317,7 +317,7 @@
         </div>
         <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
           <button id="confirm-cancel" style="padding:0.5rem 1.1rem;border-radius:0.5rem;font-size:0.8rem;font-weight:600;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.12));color:var(--text-secondary);cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">${cancelText}</button>
-          <button id="confirm-ok" style="padding:0.5rem 1.1rem;border-radius:0.5rem;font-size:0.8rem;font-weight:600;border:none;cursor:pointer;transition:background 0.15s;background:${danger ? '#ef4444' : 'var(--accent)'};color:#fff;" onmouseover="this.style.background='${danger ? '#dc2626' : 'var(--accent-strong)'}'" onmouseout="this.style.background='${danger ? '#ef4444' : 'var(--accent)'}'">${confirmText}</button>
+          <button id="confirm-ok" style="padding:0.5rem 1.1rem;border-radius:0.5rem;font-size:0.8rem;font-weight:600;border:none;cursor:pointer;transition:background 0.15s;background:${danger ? '#ef4444' : 'var(--accent)'};color:${danger ? '#fff' : 'var(--accent-ink)'};" onmouseover="this.style.background='${danger ? '#dc2626' : 'var(--accent-strong)'}'" onmouseout="this.style.background='${danger ? '#ef4444' : 'var(--accent)'}'">${confirmText}</button>
         </div>
       `;
 
@@ -866,7 +866,7 @@
                 style="padding:0.375rem 0.875rem;border-radius:0.5rem;font-size:0.78rem;font-weight:600;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.12));color:var(--text-secondary);cursor:pointer;transition:background 0.15s;"
                 onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">${_ci18n('cancel', 'Cancel')}</button>
               <button class="reply-submit" type="button"
-                style="padding:0.375rem 0.875rem;border-radius:0.5rem;font-size:0.78rem;font-weight:700;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:background 0.2s;"
+                style="padding:0.375rem 0.875rem;border-radius:0.5rem;font-size:0.78rem;font-weight:700;background:var(--accent);color:var(--accent-ink);border:none;cursor:pointer;transition:background 0.2s;"
                 onmouseover="this.style.background='var(--accent-strong)'" onmouseout="this.style.background='var(--accent)'">${_ci18n('replySubmit', 'Reply')}</button>
             </div>
           </div>
