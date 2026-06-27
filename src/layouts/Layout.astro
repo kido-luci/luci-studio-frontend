@@ -316,8 +316,8 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			body.light-mode h6 {
 				filter: drop-shadow(0 2px 10px rgba(0,0,0,0.1));
 			}
-			::selection { background-color: rgba(139, 92, 246, 0.3); color: white; }
-			body.light-mode ::selection { background-color: rgba(139, 92, 246, 0.2); color: rgb(17, 24, 39); }
+			::selection { background-color: rgb(var(--accent-rgb) / 0.3); color: white; }
+			body.light-mode ::selection { background-color: rgb(var(--accent-rgb) / 0.2); color: rgb(17, 24, 39); }
 			::-webkit-scrollbar { width: 6px; }
 			::-webkit-scrollbar-track { background: var(--bg-primary); }
 			::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }

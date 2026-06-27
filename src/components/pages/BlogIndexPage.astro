@@ -227,8 +227,8 @@ const allTopics = [...topicCounts.keys()].sort(
         <section data-reveal class="mt-24">
           <div class="flex items-end justify-between gap-4 mb-6 flex-wrap">
             <div>
-              <span class="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-2 block">{t('blog.seriesEyebrow')}</span>
-              <h2 class="text-4xl md:text-5xl" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{t('blog.seriesHeader')}<span class="text-[#8b5cf6]">.</span></h2>
+              <span class="text-xs font-black text-[color:var(--accent)] uppercase tracking-[0.3em] mb-2 block">{t('blog.seriesEyebrow')}</span>
+              <h2 class="text-4xl md:text-5xl" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{t('blog.seriesHeader')}<span class="text-[color:var(--accent)]">.</span></h2>
             </div>
             <a href={localizedHref(locale, '/blog/series')} class="see-all-btn">{t('blog.seeAll')}</a>
           </div>
@@ -255,7 +255,7 @@ const allTopics = [...topicCounts.keys()].sort(
   .tb-root {
     position: relative;
     z-index: 1;
-    --tb-accent: #8b5cf6;
+    --tb-accent: var(--accent);
     --card-bg: #16161d; --card-bd: rgba(255,255,255,0.08);
     --card-shadow: 0 4px 14px -10px rgba(0,0,0,0.6);
     --card-shadow-hover: 0 24px 46px -22px rgba(0,0,0,0.85);
@@ -387,17 +387,17 @@ const allTopics = [...topicCounts.keys()].sort(
     animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   .blog-card:hover {
-    border-color: rgba(139, 92, 246, 0.75) !important;
-    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25),
-                0 12px 48px rgba(139, 92, 246, 0.18);
+    border-color: rgb(var(--accent-rgb) / 0.75) !important;
+    box-shadow: 0 0 0 1px rgb(var(--accent-rgb) / 0.25),
+                0 12px 48px rgb(var(--accent-rgb) / 0.18);
   }
   .blog-img-container {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
+    background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
   }
 
   /* Light mode */
   body.light-mode .blog-img-container {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
+    background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
   }
   body.light-mode .tilt-card {
     background-color: rgba(255, 255, 255, 0.85) !important;
@@ -408,8 +408,8 @@ const allTopics = [...topicCounts.keys()].sort(
     border-color: rgba(0, 0, 0, 0.3) !important;
   }
   body.light-mode .tilt-card:hover {
-    border-color: rgba(139, 92, 246, 0.25) !important;
-    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+    border-color: rgb(var(--accent-rgb) / 0.25) !important;
+    box-shadow: 0 8px 32px rgb(var(--accent-rgb) / 0.1);
   }
   body.light-mode article.tilt-card h3 {
     color: rgb(17, 24, 39) !important;
@@ -428,24 +428,24 @@ const allTopics = [...topicCounts.keys()].sort(
     text-transform: uppercase;
     letter-spacing: 0.18em;
     border-radius: 9999px;
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    color: rgb(149, 128, 255);
+    border: 1px solid rgb(var(--accent-rgb) / 0.4);
+    color: var(--accent);
     background: transparent;
     text-decoration: none;
     transition: all 0.2s;
     white-space: nowrap;
   }
   .see-all-btn:hover {
-    background: rgba(139, 92, 246, 0.12);
-    border-color: rgba(139, 92, 246, 0.7);
+    background: rgb(var(--accent-rgb) / 0.12);
+    border-color: rgb(var(--accent-rgb) / 0.7);
   }
   body.light-mode .see-all-btn {
-    border-color: rgba(139, 92, 246, 0.35);
-    color: rgb(91, 58, 230);
+    border-color: rgb(var(--accent-rgb) / 0.35);
+    color: var(--accent-strong);
   }
   body.light-mode .see-all-btn:hover {
-    background: rgba(139, 92, 246, 0.08);
-    border-color: rgba(139, 92, 246, 0.55);
+    background: rgb(var(--accent-rgb) / 0.08);
+    border-color: rgb(var(--accent-rgb) / 0.55);
   }
 
   /* Topic filter buttons */
@@ -487,7 +487,7 @@ const allTopics = [...topicCounts.keys()].sort(
     transition: all 0.2s;
   }
   .pag-arrow:hover:not(:disabled) {
-    border-color: rgba(139, 92, 246, 0.5);
+    border-color: rgb(var(--accent-rgb) / 0.5);
     color: white;
   }
   .pag-arrow:disabled {
@@ -499,8 +499,8 @@ const allTopics = [...topicCounts.keys()].sort(
     color: rgb(107, 114, 128);
   }
   body.light-mode .pag-arrow:hover:not(:disabled) {
-    border-color: rgba(139, 92, 246, 0.4);
-    color: rgb(109, 40, 217);
+    border-color: rgb(var(--accent-rgb) / 0.4);
+    color: var(--accent-strong);
   }
 </style>
 
@@ -659,9 +659,9 @@ const allTopics = [...topicCounts.keys()].sort(
       'width:2.25rem',
       'height:2.25rem',
       'border-radius:9999px',
-      `border:1px solid ${active ? 'rgba(139,92,246,0.8)' : 'rgba(255,255,255,0.1)'}`,
-      `background:${active ? 'rgba(139,92,246,0.15)' : 'transparent'}`,
-      `color:${active ? 'rgb(167,139,250)' : 'rgb(107,114,128)'}`,
+      `border:1px solid ${active ? 'rgb(var(--accent-rgb) / 0.8)' : 'rgba(255,255,255,0.1)'}`,
+      `background:${active ? 'rgb(var(--accent-rgb) / 0.15)' : 'transparent'}`,
+      `color:${active ? 'var(--accent)' : 'rgb(107,114,128)'}`,
       'font-size:0.7rem',
       'font-weight:800',
       'cursor:pointer',
@@ -672,7 +672,7 @@ const allTopics = [...topicCounts.keys()].sort(
     ].join(';'));
     if (!active) {
       btn.addEventListener('mouseenter', () => {
-        btn.style.borderColor = 'rgba(139,92,246,0.5)';
+        btn.style.borderColor = 'rgb(var(--accent-rgb) / 0.5)';
         btn.style.color = 'white';
       });
       btn.addEventListener('mouseleave', () => {

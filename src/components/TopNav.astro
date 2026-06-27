@@ -146,7 +146,7 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
     color: #ffffff !important;
   }
   body:not(.light-mode) nav .topnav-link.is-active {
-    color: #a78bfa !important; /* violet-400 keeps active state */
+    color: var(--accent) !important; /* violet-400 keeps active state */
   }
 
   /* Theme toggle button — light-mode contrast fix */
@@ -154,14 +154,14 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
     border-color: rgba(17, 24, 39, 0.2) !important;
   }
   body.light-mode .topnav-theme-btn:hover {
-    border-color: rgba(139, 92, 246, 0.6) !important;
-    background-color: rgba(139, 92, 246, 0.08) !important;
+    border-color: rgb(var(--accent-rgb) / 0.6) !important;
+    background-color: rgb(var(--accent-rgb) / 0.08) !important;
   }
   body.light-mode .topnav-theme-icon {
     color: rgb(31, 41, 55) !important;
   }
   body.light-mode .topnav-theme-btn:hover .topnav-theme-icon {
-    color: rgb(139, 92, 246) !important;
+    color: var(--accent) !important;
   }
 
   /* Mobile menu overlay — always dark regardless of theme */
@@ -172,11 +172,11 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
     color: white !important;
   }
   body.light-mode #mobile-menu .mobile-nav-link:hover {
-    color: #8b5cf6 !important;
+    color: var(--accent) !important;
   }
   body.light-mode #mobile-menu a.text-violet-400,
   body.light-mode #mobile-menu .mobile-nav-link.text-violet-400 {
-    color: #a78bfa !important;
+    color: var(--accent) !important;
   }
   /* "Let's Talk" button in mobile menu stays white bg / black text */
   body.light-mode #mobile-menu a[class*="bg-white"][class*="text-black"] {

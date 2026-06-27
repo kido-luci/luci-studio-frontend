@@ -63,7 +63,7 @@ const ctaLabel = cta.replace(/\s*(?:→|➔|➜|⟶|⇒|»|›|-+>|>)\s*$/u, '')
 
 <style>
   .aff-card {
-    --aff-accent: #8b5cf6;
+    --aff-accent: var(--accent);
     --aff-accent-2: #3b82f6;
     --card-bg: #16161d;
     --card-bd: rgba(255,255,255,0.08);
@@ -108,14 +108,14 @@ const ctaLabel = cta.replace(/\s*(?:→|➔|➜|⟶|⇒|»|›|-+>|>)\s*$/u, '')
     transform: translateY(-50%);
     background:
       radial-gradient(circle at 24% 50%, rgba(59,130,246,0.22) 0%, rgba(59,130,246,0) 60%),
-      radial-gradient(circle at 58% 50%, rgba(139,92,246,0.22) 0%, rgba(139,92,246,0) 64%);
+      radial-gradient(circle at 58% 50%, rgb(var(--accent-rgb) / 0.22) 0%, rgb(var(--accent-rgb) / 0) 64%);
     pointer-events: none;
   }
   /* Light mode: white card washes the glow out — push it stronger */
   :global(body.light-mode) .aff-glow {
     background:
       radial-gradient(circle at 24% 50%, rgba(59,130,246,0.45) 0%, rgba(59,130,246,0) 62%),
-      radial-gradient(circle at 58% 50%, rgba(139,92,246,0.45) 0%, rgba(139,92,246,0) 66%);
+      radial-gradient(circle at 58% 50%, rgb(var(--accent-rgb) / 0.45) 0%, rgb(var(--accent-rgb) / 0) 66%);
   }
 
   .aff-icon {
@@ -137,7 +137,7 @@ const ctaLabel = cta.replace(/\s*(?:→|➔|➜|⟶|⇒|»|›|-+>|>)\s*$/u, '')
     width: 210px; height: 118px;
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(139,92,246,0.10);
+    background: rgb(var(--accent-rgb) / 0.10);
     box-shadow: 0 6px 18px -12px rgba(0,0,0,0.6);
   }
   .aff-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
