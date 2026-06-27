@@ -240,6 +240,17 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				--nav-bg-scroll: rgba(255, 255, 255, 0.95);
 			}
 
+			/* Color schemes — orthogonal to light/dark. A preset only swaps the accent
+			   channels; everything accent-driven (--accent / --accent-strong / the
+			   remapped Tailwind violet+purple utilities) follows via the cascade — no
+			   JS re-init needed. Static attribute selectors → no Tailwind safelist. */
+			html[data-scheme="violet"] { --accent-rgb: 139 92 246; }  /* default brand */
+			html[data-scheme="ocean"]  { --accent-rgb: 59 130 246; }
+			html[data-scheme="ember"]  { --accent-rgb: 249 115 22; }
+			html[data-scheme="forest"] { --accent-rgb: 16 185 129; }
+			html[data-scheme="rose"]   { --accent-rgb: 244 63 94; }
+			html[data-scheme="mono"]   { --accent-rgb: 161 161 170; }
+
 			html {
 				overflow-x: clip;
 			}
