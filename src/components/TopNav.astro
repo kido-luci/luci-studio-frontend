@@ -31,6 +31,17 @@ const mobileBase = "mobile-nav-link text-4xl font-black tracking-tighter text-wh
 const mobileActive = "mobile-nav-link text-4xl font-black tracking-tighter text-violet-400";
 const mobileSmallBase = "mobile-nav-link text-xl font-bold text-gray-300 uppercase tracking-widest";
 const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 uppercase tracking-widest";
+
+// Color-scheme picker presets. The swatch shows each scheme's accent; `id` maps to
+// the html[data-scheme=…] palette blocks in Layout.astro and to window.setScheme.
+const schemes = [
+  { id: 'violet', hex: '#8b5cf6', label: 'Violet' },
+  { id: 'ocean',  hex: '#3b82f6', label: 'Ocean'  },
+  { id: 'ember',  hex: '#f97316', label: 'Ember'  },
+  { id: 'forest', hex: '#10b981', label: 'Forest' },
+  { id: 'rose',   hex: '#f43f5e', label: 'Rose'   },
+  { id: 'mono',   hex: '#a1a1aa', label: 'Mono'   },
+];
 ---
 
 <!-- NAV -->
@@ -68,6 +79,36 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
         </svg>
       </button>
+
+      <!-- Color-scheme picker: palette button + popover of accent swatches -->
+      <div class="scheme-picker relative">
+        <button
+          id="scheme-toggle"
+          type="button"
+          class="topnav-theme-btn w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
+          aria-label={t('nav.colorScheme')}
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          <svg class="topnav-theme-icon w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.88 2.88M6.75 17.25h.008v.008H6.75v-.008Z" />
+          </svg>
+        </button>
+        <div id="scheme-popover" role="menu" aria-label={t('nav.colorScheme')} class="scheme-popover" hidden>
+          {schemes.map((s) => (
+            <button
+              type="button"
+              class="scheme-dot"
+              role="menuitemradio"
+              data-scheme={s.id}
+              aria-checked="false"
+              aria-label={s.label}
+              title={s.label}
+              style={`background:${s.hex}`}
+            ></button>
+          ))}
+        </div>
+      </div>
 
       <a href={ctaHref} class="magnetic hidden sm:block px-5 py-2.5 bg-white text-black text-xs font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest">{ctaLabel}</a>
 
@@ -135,6 +176,39 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
   };
   syncTheme();
   document.getElementById('theme-toggle')?.addEventListener('click', () => requestAnimationFrame(syncTheme));
+
+  // Color-scheme picker popover
+  const schemeToggle = document.getElementById('scheme-toggle');
+  const schemePopover = document.getElementById('scheme-popover');
+  if (schemeToggle && schemePopover) {
+    const closeSchemePopover = () => {
+      schemePopover.hidden = true;
+      schemeToggle.setAttribute('aria-expanded', 'false');
+    };
+    schemeToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = schemePopover.hidden;
+      schemePopover.hidden = !willOpen;
+      schemeToggle.setAttribute('aria-expanded', String(willOpen));
+    });
+    schemePopover.querySelectorAll('.scheme-dot').forEach((d) => {
+      d.addEventListener('click', () => {
+        const name = (d as HTMLElement).dataset.scheme;
+        const setScheme = (window as any).setScheme;
+        if (name && typeof setScheme === 'function') setScheme(name);
+        closeSchemePopover();
+      });
+    });
+    document.addEventListener('click', (e) => {
+      const target = e.target as Node;
+      if (!schemePopover.hidden && !schemePopover.contains(target) && !schemeToggle.contains(target)) {
+        closeSchemePopover();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !schemePopover.hidden) closeSchemePopover();
+    });
+  }
 </script>
 
 <style is:global>
@@ -162,6 +236,37 @@ const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 upp
   }
   body.light-mode .topnav-theme-btn:hover .topnav-theme-icon {
     color: var(--accent) !important;
+  }
+
+  /* Color-scheme picker */
+  .scheme-popover {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.55rem;
+    padding: 0.6rem;
+    border-radius: 0.85rem;
+    background: var(--nav-bg-scroll);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    z-index: 110;
+  }
+  .scheme-popover[hidden] { display: none; }
+  .scheme-dot {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+    transition: transform 0.15s ease;
+  }
+  .scheme-dot:hover { transform: scale(1.18); }
+  .scheme-dot[aria-checked="true"] {
+    box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--text-primary);
   }
 
   /* Mobile menu overlay — always dark regardless of theme */
