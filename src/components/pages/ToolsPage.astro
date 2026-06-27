@@ -1,0 +1,220 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import TopNav from "../TopNav.astro";
+import "../../styles/lab-cards.css";
+
+const TOOLS_HUB = 'https://tools.luci-studio.com';
+
+const ENGINES = [
+  {
+    prefix: 'image',
+    name: 'Image',
+    glyph: '⇄',
+    bar: '#3aa0ff',
+    blurb: 'Convert images right in your browser — no upload, nothing stored.',
+    tools: [
+      { slug: 'heic-to-jpg', title: 'HEIC to JPG', description: 'Convert iPhone HEIC photos to JPG, 100% on your device.' },
+      { slug: 'png-to-jpg',  title: 'PNG to JPG',  description: 'Turn PNG images into smaller JPG files instantly.' },
+    ],
+  },
+  {
+    prefix: 'fancy-text',
+    name: 'Fancy Text',
+    glyph: '✦',
+    bar: '#ec5a9b',
+    blurb: 'Generate copy-paste Unicode text styles for bios and captions.',
+    tools: [
+      { slug: 'bold-text-generator',          title: 'Bold Text Generator',          description: 'Make 𝗯𝗼𝗹𝗱 Unicode text for social bios.' },
+      { slug: 'italic-text-generator',        title: 'Italic Text Generator',        description: 'Create 𝘪𝘵𝘢𝘭𝘪𝘤 text that pastes anywhere.' },
+      { slug: 'strikethrough-text-generator', title: 'Strikethrough Text Generator', description: 'Add a s̶t̶r̶i̶k̶e̶ line through your text.' },
+    ],
+  },
+  {
+    prefix: 'json',
+    name: 'JSON',
+    glyph: '{ }',
+    bar: '#16a394',
+    blurb: 'Format, validate and minify JSON privately in your browser.',
+    tools: [
+      { slug: 'json-formatter', title: 'JSON Formatter', description: 'Pretty-print and validate messy JSON.' },
+      { slug: 'json-minifier',  title: 'JSON Minifier',  description: 'Strip whitespace to the smallest valid JSON.' },
+    ],
+  },
+  {
+    prefix: 'qr',
+    name: 'QR Code',
+    glyph: 'QR',
+    bar: '#8b5cf6',
+    blurb: 'Generate QR codes for links and WiFi — download PNG or SVG.',
+    tools: [
+      { slug: 'qr-code-generator',      title: 'QR Code Generator', description: 'Make a QR code from any text or URL.' },
+      { slug: 'wifi-qr-code-generator', title: 'WiFi QR Code',      description: 'Let guests join your WiFi by scanning.' },
+    ],
+  },
+  {
+    prefix: 'pdf',
+    name: 'PDF',
+    glyph: 'PDF',
+    bar: '#f97316',
+    blurb: 'Merge and build PDFs in your browser — nothing is uploaded.',
+    tools: [
+      { slug: 'merge-pdf',  title: 'Merge PDF',  description: 'Combine several PDF files into one.' },
+      { slug: 'jpg-to-pdf', title: 'JPG to PDF', description: 'Turn JPG/PNG images into a single PDF.' },
+    ],
+  },
+] as const;
+
+const totalTools = ENGINES.reduce((n, e) => n + e.tools.length, 0);
+---
+
+<Layout
+  title="Tools · Luci Studio"
+  description="Free browser-native web tools for images, PDFs, QR codes, JSON, and text — nothing uploaded to a server."
+>
+  <link
+    slot="head"
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap"
+  />
+
+  <TopNav active="tools" />
+
+  <div class="lab-root lab-palette">
+
+    <!-- decorative confetti (same style as LabPage) -->
+    <div style="position:absolute; inset:0; pointer-events:none; z-index:0;">
+      <span style="position:absolute; left:18%; top:8%; width:7px; height:7px; border-radius:50%; background:var(--accent); animation:lab-floaty 7s ease-in-out infinite;"></span>
+      <span style="position:absolute; left:42%; top:5%; width:20px; height:3px; border-radius:3px; background:#ec5a9b; transform:rotate(-32deg); --r:-32deg; animation:lab-floaty 9s ease-in-out .4s infinite;"></span>
+      <span style="position:absolute; left:60%; top:12%; width:9px; height:9px; border:2px solid #3aa0ff; border-radius:50%;"></span>
+      <span style="position:absolute; left:76%; top:6%; width:6px; height:6px; border-radius:50%; background:#16a394;"></span>
+      <span style="position:absolute; left:86%; top:18%; width:18px; height:3px; border-radius:3px; background:#f97316; transform:rotate(40deg); --r:40deg; animation:lab-floaty 8s ease-in-out 1s infinite;"></span>
+      <span style="position:absolute; left:10%; top:32%; width:8px; height:8px; border:2px solid var(--accent); border-radius:50%;"></span>
+      <span style="position:absolute; left:92%; top:44%; width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
+    </div>
+
+    <div style="position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 40px;">
+
+      <!-- page header -->
+      <div style="padding:36px 0 18px;">
+        <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {String(totalTools).padStart(2, "0")} tools</div>
+        <h1 style="margin:0; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(40px,6.5vw,78px); line-height:1.1; letter-spacing:-.01em; color:var(--lab-text);">All your tools<span style="color:var(--accent);">.</span></h1>
+        <p style="margin:24px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Free browser-native tools for images, PDFs, QR codes, JSON and text. Nothing is uploaded to a server.</p>
+        <a
+          href={TOOLS_HUB}
+          target="_blank"
+          rel="noopener noreferrer"
+          style="display:inline-flex; align-items:center; gap:8px; margin-top:32px; padding:12px 24px; background:var(--accent); color:#fff; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.15em; text-transform:uppercase; text-decoration:none; border-radius:999px; transition:opacity .2s;"
+          onmouseover="this.style.opacity='.85'"
+          onmouseout="this.style.opacity='1'"
+        >
+          tools.luci-studio.com ↗
+        </a>
+      </div>
+
+      <!-- engine sections -->
+      {ENGINES.map((engine) => (
+        <div style="padding:72px 0 0;">
+          <!-- engine header -->
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
+            <span style={`display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:13px; background:${engine.bar}22; font-family:'Space Mono',monospace; font-size:13px; font-weight:700; color:${engine.bar}; flex-shrink:0;`}>{engine.glyph}</span>
+            <h2 style="margin:0; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(28px,3.5vw,42px); line-height:1.1; color:var(--lab-text);">{engine.name}<span style={`color:${engine.bar};`}>.</span></h2>
+            <a
+              href={`${TOOLS_HUB}/${engine.prefix}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); text-decoration:none; margin-top:4px;"
+            >View all →</a>
+          </div>
+          <p style="margin:0 0 32px; font-size:16px; color:var(--lab-muted); max-width:600px;">{engine.blurb}</p>
+
+          <!-- tool cards -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:22px;">
+            {engine.tools.map((tool) => (
+              <a
+                href={`${TOOLS_HUB}/${engine.prefix}/${tool.slug}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="tool-card"
+              >
+                <div class="tool-card-bar" style={`background:linear-gradient(90deg, ${engine.bar} 0%, var(--accent) 100%);`}></div>
+                <div class="tool-card-body">
+                  <div class="tool-card-title">{tool.title}</div>
+                  <div class="tool-card-desc">{tool.description}</div>
+                </div>
+                <div class="tool-card-footer">
+                  <span class="tool-card-host"><span class="tool-card-dot"></span>tools.luci-studio.com</span>
+                  <span class="tool-card-arrow">↗</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div style="height:100px;"></div>
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  .lab-root {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--lab-bg);
+    overflow: hidden;
+    padding: 96px 0 100px;
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    color: var(--lab-text);
+  }
+
+  /* Tool cards */
+  .tool-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    background: var(--lab-card-bg, #ffffff);
+    border: 1px solid var(--lab-card-border, rgba(19,21,29,0.08));
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--lab-card-shadow, 0 1px 2px rgba(19,21,29,0.04));
+    transition: transform 0.25s cubic-bezier(0.2,0.7,0.3,1), box-shadow 0.25s, border-color 0.25s;
+  }
+  .tool-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--lab-card-shadow-hover, 0 22px 50px -18px rgba(19,21,29,0.28));
+    border-color: var(--lab-card-border-hover, rgba(19,21,29,0.16));
+  }
+  .tool-card-bar { height: 4px; }
+  .tool-card-body { padding: 24px 28px 20px; flex: 1; }
+  .tool-card-title {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--lab-name, #13151d);
+  }
+  .tool-card-desc {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--lab-desc, #5c606b);
+  }
+  .tool-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-top: 1px solid var(--lab-footer-border, rgba(19,21,29,0.07));
+    background: var(--lab-footer-bg, #fbfaf7);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--lab-footer-text, #13151d);
+  }
+  .tool-card-host { display: flex; align-items: center; gap: 8px; }
+  .tool-card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lab-dot, #13151d); }
+  .tool-card-arrow { font-size: 14px; }
+</style>
