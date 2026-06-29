@@ -119,6 +119,7 @@ export const en: Record<string, string> = {
   'legal.lastUpdated': 'Last updated:',
 
   // home (index.astro)
+  'home.heroTagline': 'A creative engineering studio — we craft <span style="background:linear-gradient(90deg,#34d399,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent">cross-platform apps</span>, <span style="background:linear-gradient(90deg,#22d3ee,#6366f1);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent">browser tools &amp; games</span>, <span style="background:linear-gradient(90deg,#a78bfa,#7c3aed);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent">technical writing</span>, and <span style="background:linear-gradient(90deg,#f472b6,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent">digital art</span>, turning hard problems into shipped products.',
   'home.letsTalk': "Let's Talk",
   'home.viewWork': 'View Work',
   'home.seeArt': 'See Art →',
@@ -137,12 +138,16 @@ export const en: Record<string, string> = {
   'home.theArt': 'The art',
   'home.enoughTalking': 'Enough talking.',
   'home.sayHello': 'Say Hello',
-  'home.techBlogTitle': 'TECH BLOG',
-  'home.techBlogSub': 'Notes on Flutter, Go & on-device AI',
-  'home.digitalArtTitle': 'DIGITAL ART',
-  'home.digitalArtSub': 'Generative & hand-crafted pieces',
+  'home.blogTitle': 'BLOG',
+  'home.blogSub': 'Engineering notes & deep-dives',
+  'home.toolsTitle': 'TOOLS',
+  'home.toolsSub': 'Free browser micro-tools',
+  'home.gamesTitle': 'GAMES',
+  'home.gamesSub': 'Browser games',
   'home.appsTitle': 'APPS',
-  'home.appsSub': 'Shipped on 5 platforms',
+  'home.appsSub': 'Cross-platform apps & open source',
+  'home.artTitle': 'ART',
+  'home.artSub': 'Generative & hand-crafted pieces',
   'home.viewAllPosts': 'View all {n} posts',
 
   // blog list — interpolated / plural
