@@ -19,7 +19,10 @@ const toggleTheme = () => {
 	document.documentElement.classList.toggle('light-mode', isLight);
 	localStorage.setItem('theme', isLight ? 'light' : 'dark');
 
-	if (!isMobile) {
+	// The home page gates the particle canvas to the bottom CTA zone (see
+	// navDimmer); forcing it visible here would make the "-"/"o" particles
+	// reappear at the top after a theme toggle. Other pages keep it always-on.
+	if (!isMobile && !document.getElementById('contact')) {
 		document.getElementById('canvas-bg')!.style.opacity = '1';
 		initCanvasParticles();
 	}
