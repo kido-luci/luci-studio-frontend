@@ -162,7 +162,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 	</head>
 	<body class="bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-clip max-w-full">
 		<!-- Background Animation -->
-		<canvas id="canvas-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2] opacity-0 bg-transparent"></canvas>
+		<canvas id="canvas-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-2] opacity-0 bg-transparent" style="transition:opacity .6s ease"></canvas>
 
 		<!-- Scroll-based Background Dimmer -->
 		<div id="bg-dimmer" class="fixed inset-0 w-full h-full pointer-events-none z-[-1] bg-black/0"></div>
