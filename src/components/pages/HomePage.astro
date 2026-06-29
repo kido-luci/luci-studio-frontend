@@ -84,7 +84,7 @@ const homepageSchema = {
   '@type': 'Organization',
   name: 'Luci Studio',
   url: SITE_URL,
-  description: 'A creative engineering studio — technical blog, digital art, and high-performance cross-platform applications.',
+  description: 'A creative engineering studio — technical blog, browser tools & games, digital art, and high-performance cross-platform applications.',
   logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/logo_icon.png` },
   sameAs: [
     'https://medium.com/@lapl1412.work',
@@ -95,7 +95,7 @@ const homepageSchema = {
 
 <Layout
   title="Luci Studio | Creative Engineering — Tech Blog, Digital Art & Cross-Platform Apps"
-  description="Luci Studio is a creative engineering space. Technical blog, digital art, and high-performance cross-platform applications built with rigorous architecture."
+  description="Luci Studio is a creative engineering studio — a technical blog, browser tools & games, digital art, and high-performance cross-platform apps built with rigorous architecture."
   canonical={`${SITE_URL}/`}
   keywords="Flutter, Dart, Go, mobile development, tech blog, digital art, cross-platform, clean architecture, Luci Studio"
   structuredData={homepageSchema}
@@ -178,20 +178,32 @@ const homepageSchema = {
       <div class="hero-pillars relative z-10" data-reveal>
         <a href={localizedHref(locale, '/blog')} class="hp-card" style="--hp:var(--accent)">
           <span class="hp-num">01</span>
-          <span class="hp-title">{t('home.techBlogTitle')}</span>
-          <span class="hp-sub">{t('home.techBlogSub')}</span>
+          <span class="hp-title">{t('home.blogTitle')}</span>
+          <span class="hp-sub">{t('home.blogSub')}</span>
+          <span class="hp-arrow" aria-hidden="true">→</span>
+        </a>
+        <a href="/tools" class="hp-card" style="--hp:#22d3ee">
+          <span class="hp-num">02</span>
+          <span class="hp-title">{t('home.toolsTitle')}</span>
+          <span class="hp-sub">{t('home.toolsSub')}</span>
+          <span class="hp-arrow" aria-hidden="true">→</span>
+        </a>
+        <a href="https://games.luci-studio.com" target="_blank" rel="noopener noreferrer" class="hp-card" style="--hp:#f59e0b">
+          <span class="hp-num">03</span>
+          <span class="hp-title">{t('home.gamesTitle')}</span>
+          <span class="hp-sub">{t('home.gamesSub')}</span>
+          <span class="hp-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a href="#work" class="hp-card" style="--hp:#34d399">
+          <span class="hp-num">04</span>
+          <span class="hp-title">{t('home.appsTitle')}</span>
+          <span class="hp-sub">{t('home.appsSub')}</span>
           <span class="hp-arrow" aria-hidden="true">→</span>
         </a>
         <a href="#art" class="hp-card" style="--hp:#f472b6">
-          <span class="hp-num">02</span>
-          <span class="hp-title">{t('home.digitalArtTitle')}</span>
-          <span class="hp-sub">{t('home.digitalArtSub')}</span>
-          <span class="hp-arrow" aria-hidden="true">→</span>
-        </a>
-        <a href="#work" class="hp-card" style="--hp:#22d3ee">
-          <span class="hp-num">03</span>
-          <span class="hp-title">{t('home.appsTitle')}</span>
-          <span class="hp-sub">{t('home.appsSub')}</span>
+          <span class="hp-num">05</span>
+          <span class="hp-title">{t('home.artTitle')}</span>
+          <span class="hp-sub">{t('home.artSub')}</span>
           <span class="hp-arrow" aria-hidden="true">→</span>
         </a>
 
@@ -898,10 +910,12 @@ body.light-mode .hero-orb-2 {
   min-height: 6.5em;
 }
 
-/* ── Hero pillars (Tech Blog · Digital Art · Apps) ── */
+/* ── Hero pillars: studio products (Blog · Tools · Games · Apps · Art) ── */
 .hero-pillars {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* auto-fit so the 5 products fill one row on wide screens and wrap gracefully
+     as the viewport narrows (5 → 4 → … → 2 columns) without per-breakpoint rules. */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   width: 100%;
   margin: 0;
   border-top: 1px solid rgba(17, 24, 39, 0.12);
@@ -1011,7 +1025,8 @@ body.light-mode .hero-pillars {
 }
 
 @media (max-width: 720px) {
-  /* Keep the 3 cards in one horizontal row; just compact them + drop the desc */
+  /* Compact the product cards + drop the sub-line; the auto-fit grid wraps them
+     across rows so only num + title show on small screens. */
   .hp-card {
     padding: 0.85rem 0.6rem 0.95rem;
     gap: 0.3rem;
