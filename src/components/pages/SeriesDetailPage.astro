@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import AffiliateCard from "../AffiliateCard.astro";
 import { affiliateService } from "../../services/affiliates";
-import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
+import { buildPostSlug, readTimeFor, formatDate, needsVietnameseSerif } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
 import type { Playlist } from "../../services/playlists";
 const locale = getLocaleFromUrl(Astro.url);
@@ -27,7 +27,7 @@ const posts = (playlist.posts ?? []).map(rawP => {
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
-  href: localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`),
+  href: localizedHref(locale, `/blog/${buildPostSlug(rawP.title, rawP.id)}/`),
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   date: formatDate(p.created_at, locale),
   read: readTimeFor(p, locale),
@@ -68,7 +68,7 @@ const seoDescription = playlist.description
         </div>
 
         <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('series.curatedSeries')}</span>
-        <h1 class="text-5xl md:text-7xl tracking-tighter leading-[1.05]" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{playlist.title}<span class="text-violet-500">.</span></h1>
+        <h1 class="text-5xl md:text-7xl tracking-tighter leading-[1.05]" style={`font-family:${needsVietnameseSerif(playlist.title) ? "'Playfair Display'" : "'DM Serif Display'"},Georgia,serif;font-weight:400;`}>{playlist.title}<span class="text-violet-500">.</span></h1>
 
         {playlist.description && (
           <p class="text-gray-400 max-w-2xl text-base md:text-lg leading-relaxed mt-6">{playlist.description}</p>

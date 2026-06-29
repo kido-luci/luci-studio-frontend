@@ -1,5 +1,5 @@
 ---
-import { buildPostSlug } from "../utils/blog";
+import { buildPostSlug, needsVietnameseSerif } from "../utils/blog";
 import { getLocaleFromUrl, localizedHref } from "../i18n";
 import type { SeriesView } from "../utils/series";
 
@@ -12,6 +12,7 @@ const locale = getLocaleFromUrl(Astro.url);
 const href = localizedHref(locale, `/blog/series/${buildPostSlug(p.title, p.id)}/`);
 const count = p.post_ids?.length ?? 0;
 const cover = p.cover_image_url;
+const titleSerif = needsVietnameseSerif(p.title) ? "font-family:'Playfair Display',Georgia,serif" : undefined;
 ---
 
 <a
@@ -31,7 +32,7 @@ const cover = p.cover_image_url;
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
         </span>
         <div class="thumb-center">
-          <h3 class="thumb-title">{p.title}</h3>
+          <h3 class="thumb-title" style={titleSerif}>{p.title}</h3>
           <span class="thumb-caption">Curated guides · tips</span>
         </div>
       </>
@@ -56,7 +57,7 @@ const cover = p.cover_image_url;
       </span>
     </div>
 
-    <h2 class="series-title">{p.title}</h2>
+    <h2 class="series-title" style={titleSerif}>{p.title}</h2>
     {p.description && <p class="series-desc">{p.description}</p>}
 
     {p.topics.length > 0 && (

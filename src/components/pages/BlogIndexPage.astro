@@ -30,7 +30,9 @@ const allPosts = rawPosts
       id: p.id,
       title: p.title,
       subtitle: p.subtitle || '',
-      slug: buildPostSlug(p.title, p.id),
+      // Slug must use the canonical (English) title so it matches the page emitted by
+      // postPaths(); the localized VI title would build a slug that doesn't exist → 404.
+      slug: buildPostSlug(rawP.title, rawP.id),
       tags,
       topics: p.topics || [],
       catLine: tags.join('  ·  '),
