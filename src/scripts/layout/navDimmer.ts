@@ -1,4 +1,4 @@
-import { isWindows } from './env';
+import { isWindows, isMobile } from './env';
 import { pauseCanvasParticles, resumeCanvasParticles } from './particles';
 
 // ── Nav Scroll & Background Dimmer ──────────────────────────────────────
@@ -12,6 +12,12 @@ export const getIsBgPaused = () => isBgPaused;
 export function initNavDimmer() {
 	const nav = document.querySelector('nav') as HTMLElement;
 	const bgDimmer = document.getElementById('bg-dimmer') as HTMLElement;
+	const canvasBg = document.getElementById('canvas-bg') as HTMLElement | null;
+	// Home page (the only page with the bottom "LET'S SHIP SOMETHING REAL"
+	// CTA): the particles run ONLY behind that section, hidden everywhere
+	// above it. Mirror the paused-on-load state set by startCanvasBackground.
+	const isHome = !!document.getElementById('contact');
+	if (isHome) isBgPaused = true;
 
 	// Windows: disable dynamic backdrop-filter on bg-dimmer (very expensive).
 	// Also clear the nav's initial inline style backdrop-filter.
@@ -69,16 +75,29 @@ export function initNavDimmer() {
 			const ctaThreshold = cachedScrollHeight - windowHeight * 1.5;
 			const HYSTERESIS = 80;
 
-			const shouldPause = isBgPaused
-				? scrollY > animationPauseThreshold - HYSTERESIS && scrollY < ctaThreshold + HYSTERESIS
-				: scrollY > animationPauseThreshold + HYSTERESIS && scrollY < ctaThreshold - HYSTERESIS;
+			let shouldPause = isBgPaused;
+			if (isHome) {
+				// Run only inside the bottom CTA zone; paused above it. (Mobile
+				// hides the canvas entirely, so leave the loop asleep there.)
+				if (!isMobile) {
+					shouldPause = isBgPaused
+						? scrollY < ctaThreshold + HYSTERESIS
+						: scrollY < ctaThreshold - HYSTERESIS;
+				}
+			} else {
+				shouldPause = isBgPaused
+					? scrollY > animationPauseThreshold - HYSTERESIS && scrollY < ctaThreshold + HYSTERESIS
+					: scrollY > animationPauseThreshold + HYSTERESIS && scrollY < ctaThreshold - HYSTERESIS;
+			}
 
 			if (shouldPause !== isBgPaused) {
 				isBgPaused = shouldPause;
 				if (shouldPause) {
 					pauseCanvasParticles();
+					if (isHome && canvasBg) canvasBg.style.opacity = '0';
 				} else {
 					resumeCanvasParticles();
+					if (isHome && canvasBg) canvasBg.style.opacity = '1';
 				}
 			}
 		});
