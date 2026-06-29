@@ -262,8 +262,12 @@ export function initHomeReveals() {
     const likesEl = lightbox.querySelector<HTMLElement>('[data-art-cap-likes]');
     const closeBtn = lightbox.querySelector<HTMLElement>('[data-art-close]');
     let lastFocused: HTMLElement | null = null;
+    // Bumped on every open/close so a slow GET/POST from a previously shown
+    // artwork can't overwrite the caption counts of the one now on screen.
+    let openToken = 0;
 
     function open(trigger: HTMLElement) {
+      const token = ++openToken;
       lastFocused = document.activeElement as HTMLElement | null;
       const { img, title, date, views, likes, id } = trigger.dataset;
       if (imgEl) { imgEl.src = img || ''; imgEl.alt = title || ''; }
@@ -290,6 +294,7 @@ export function initHomeReveals() {
       fetch(`${API_URL}/gallery/${id}`)
         .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery ${r.status}`)))
         .then(d => {
+          if (token !== openToken) return; // a newer artwork is showing now
           if (likesEl && d.likes != null) likesEl.textContent = d.likes;
           if (alreadyViewed && viewsEl && d.views != null) viewsEl.textContent = d.views;
         })
@@ -301,12 +306,16 @@ export function initHomeReveals() {
         sessionStorage.setItem(sessionKey, '1');
         fetch(`${API_URL}/gallery/${id}/view`, { method: 'POST' })
           .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery view ${r.status}`)))
-          .then(d => { if (viewsEl && d.views != null) viewsEl.textContent = d.views; })
+          .then(d => {
+            if (token !== openToken) return; // stale response, ignore
+            if (viewsEl && d.views != null) viewsEl.textContent = d.views;
+          })
           .catch(() => { sessionStorage.removeItem(sessionKey); });
       }
     }
 
     function close() {
+      openToken++; // invalidate any in-flight responses for the artwork being closed
       lightbox!.classList.remove('is-open');
       lightbox!.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
