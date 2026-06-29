@@ -260,9 +260,12 @@ export function initHomeReveals() {
     const dateEl = lightbox.querySelector<HTMLElement>('[data-art-cap-date]');
     const viewsEl = lightbox.querySelector<HTMLElement>('[data-art-cap-views]');
     const likesEl = lightbox.querySelector<HTMLElement>('[data-art-cap-likes]');
+    const closeBtn = lightbox.querySelector<HTMLElement>('[data-art-close]');
+    let lastFocused: HTMLElement | null = null;
 
-    function open(card: HTMLElement) {
-      const { img, title, date, views, likes, id } = card.dataset;
+    function open(trigger: HTMLElement) {
+      lastFocused = document.activeElement as HTMLElement | null;
+      const { img, title, date, views, likes, id } = trigger.dataset;
       if (imgEl) { imgEl.src = img || ''; imgEl.alt = title || ''; }
       if (bgEl) bgEl.style.backgroundImage = img ? `url('${img}')` : 'none';
       if (titleEl) titleEl.textContent = title || '';
@@ -273,26 +276,33 @@ export function initHomeReveals() {
       lightbox!.classList.add('is-open');
       lightbox!.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      // visibility flips to visible instantly (0s) on open, so the dialog is
+      // focusable right away — move focus to the close button.
+      closeBtn?.focus();
 
       if (!id || !API_URL) return;
-      // Refresh live counts, and register a view once per session.
+      const sessionKey = `viewed_gallery_${id}`;
+      const alreadyViewed = !!sessionStorage.getItem(sessionKey);
+
+      // Likes always come from the GET; views come from the GET only when no
+      // /view POST will run, so the POST's incremented count is never clobbered
+      // by a stale GET that resolves after it.
       fetch(`${API_URL}/gallery/${id}`)
         .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery ${r.status}`)))
         .then(d => {
-          if (viewsEl && d.views != null) viewsEl.textContent = d.views;
           if (likesEl && d.likes != null) likesEl.textContent = d.likes;
+          if (alreadyViewed && viewsEl && d.views != null) viewsEl.textContent = d.views;
         })
         .catch(() => {});
 
-      const sessionKey = `viewed_gallery_${id}`;
-      if (!sessionStorage.getItem(sessionKey)) {
+      if (!alreadyViewed) {
+        // Guard BEFORE posting so a rapid re-open in the same session can't
+        // fire a second view POST; release the guard if the POST actually fails.
+        sessionStorage.setItem(sessionKey, '1');
         fetch(`${API_URL}/gallery/${id}/view`, { method: 'POST' })
           .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery view ${r.status}`)))
-          .then(d => {
-            if (viewsEl && d.views != null) viewsEl.textContent = d.views;
-            sessionStorage.setItem(sessionKey, '1');
-          })
-          .catch(() => {});
+          .then(d => { if (viewsEl && d.views != null) viewsEl.textContent = d.views; })
+          .catch(() => { sessionStorage.removeItem(sessionKey); });
       }
     }
 
@@ -301,27 +311,33 @@ export function initHomeReveals() {
       lightbox!.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
       if (imgEl) imgEl.src = '';
+      if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+      lastFocused = null;
     }
 
-    document.querySelectorAll<HTMLElement>('[data-art-open]').forEach(card => {
-      card.addEventListener('click', (e) => {
-        // The like button lives inside the card and stops propagation itself,
-        // but guard anyway so a like never opens the popup.
-        if ((e.target as HTMLElement).closest('.art-like-area')) return;
-        open(card);
-      });
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(card); }
-      });
+    document.querySelectorAll<HTMLElement>('[data-art-open]').forEach(btn => {
+      btn.addEventListener('click', () => open(btn));
     });
 
-    lightbox.querySelector('[data-art-close]')?.addEventListener('click', close);
+    closeBtn?.addEventListener('click', close);
     lightbox.addEventListener('click', (e) => {
       // Backdrop click (anywhere outside the figure) closes.
       if (!(e.target as HTMLElement).closest('.art-lightbox-figure')) close();
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && lightbox!.classList.contains('is-open')) close();
+    });
+    // Trap Tab within the open dialog so focus can't drift to background controls.
+    lightbox.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab' || !lightbox!.classList.contains('is-open')) return;
+      const focusables = lightbox!.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
   })();
 
