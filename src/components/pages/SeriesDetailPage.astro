@@ -27,7 +27,7 @@ const posts = (playlist.posts ?? []).map(rawP => {
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
-  href: localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`),
+  href: localizedHref(locale, `/blog/${buildPostSlug(rawP.title, rawP.id)}/`),
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   date: formatDate(p.created_at, locale),
   read: readTimeFor(p, locale),
