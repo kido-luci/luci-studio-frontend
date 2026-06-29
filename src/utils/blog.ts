@@ -276,3 +276,9 @@ export function shortId(id: string): string {
 export function buildPostSlug(title: string, id: string): string {
     return `${slugify(title)}-${shortId(id)}`;
 }
+
+// DM Serif Display has no glyphs for the Vietnamese block U+1EA0–U+1EF1 (ạ ả ấ ẫ ế ệ ớ ợ …),
+// so those letters fall back to Georgia mid-word. Titles containing them need a VN-capable serif.
+export function needsVietnameseSerif(text: string): boolean {
+    return /[Ạ-ự]/.test(text);
+}
