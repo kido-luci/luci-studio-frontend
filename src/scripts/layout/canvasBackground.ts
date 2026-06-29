@@ -5,8 +5,15 @@ import { getIsBgPaused } from './navDimmer';
 // ── Canvas Particles Background (desktop only — skipped on mobile) ──────
 export function startCanvasBackground() {
 	if (!isMobile) {
-		document.getElementById('canvas-bg')!.style.opacity = '1';
 		initCanvasParticles();
+		// On the home page the particles live ONLY behind the bottom CTA
+		// ("LET'S SHIP SOMETHING REAL") section — navDimmer fades them in on
+		// scroll, so start hidden + paused. Other pages fade in immediately.
+		if (document.getElementById('contact')) {
+			pauseCanvasParticles();
+		} else {
+			document.getElementById('canvas-bg')!.style.opacity = '1';
+		}
 	}
 }
 
