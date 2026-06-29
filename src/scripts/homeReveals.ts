@@ -248,6 +248,83 @@ export function initHomeReveals() {
     });
   })();
 
+  // Art lightbox — clicking an art tile opens it as a popup (replaces the old
+  // /art/[slug] detail page). Tracks a view on open, like the detail page did.
+  (function() {
+    const lightbox = document.getElementById('art-lightbox');
+    if (!lightbox) return;
+    const API_URL = lightbox.dataset.apiUrl || '';
+    const bgEl = lightbox.querySelector<HTMLElement>('[data-art-bgimg]');
+    const imgEl = lightbox.querySelector<HTMLImageElement>('[data-art-img]');
+    const titleEl = lightbox.querySelector<HTMLElement>('[data-art-cap-title]');
+    const dateEl = lightbox.querySelector<HTMLElement>('[data-art-cap-date]');
+    const viewsEl = lightbox.querySelector<HTMLElement>('[data-art-cap-views]');
+    const likesEl = lightbox.querySelector<HTMLElement>('[data-art-cap-likes]');
+
+    function open(card: HTMLElement) {
+      const { img, title, date, views, likes, id } = card.dataset;
+      if (imgEl) { imgEl.src = img || ''; imgEl.alt = title || ''; }
+      if (bgEl) bgEl.style.backgroundImage = img ? `url('${img}')` : 'none';
+      if (titleEl) titleEl.textContent = title || '';
+      if (dateEl) dateEl.textContent = date || '';
+      if (viewsEl) viewsEl.textContent = views ?? '—';
+      if (likesEl) likesEl.textContent = likes ?? '—';
+
+      lightbox!.classList.add('is-open');
+      lightbox!.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+
+      if (!id || !API_URL) return;
+      // Refresh live counts, and register a view once per session.
+      fetch(`${API_URL}/gallery/${id}`)
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery ${r.status}`)))
+        .then(d => {
+          if (viewsEl && d.views != null) viewsEl.textContent = d.views;
+          if (likesEl && d.likes != null) likesEl.textContent = d.likes;
+        })
+        .catch(() => {});
+
+      const sessionKey = `viewed_gallery_${id}`;
+      if (!sessionStorage.getItem(sessionKey)) {
+        fetch(`${API_URL}/gallery/${id}/view`, { method: 'POST' })
+          .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery view ${r.status}`)))
+          .then(d => {
+            if (viewsEl && d.views != null) viewsEl.textContent = d.views;
+            sessionStorage.setItem(sessionKey, '1');
+          })
+          .catch(() => {});
+      }
+    }
+
+    function close() {
+      lightbox!.classList.remove('is-open');
+      lightbox!.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (imgEl) imgEl.src = '';
+    }
+
+    document.querySelectorAll<HTMLElement>('[data-art-open]').forEach(card => {
+      card.addEventListener('click', (e) => {
+        // The like button lives inside the card and stops propagation itself,
+        // but guard anyway so a like never opens the popup.
+        if ((e.target as HTMLElement).closest('.art-like-area')) return;
+        open(card);
+      });
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(card); }
+      });
+    });
+
+    lightbox.querySelector('[data-art-close]')?.addEventListener('click', close);
+    lightbox.addEventListener('click', (e) => {
+      // Backdrop click (anywhere outside the figure) closes.
+      if (!(e.target as HTMLElement).closest('.art-lightbox-figure')) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox!.classList.contains('is-open')) close();
+    });
+  })();
+
   // HERO PATCH REVEAL — overlay starts as an opaque grid of dark tiles obscuring the hero,
   // then tiles scale + fade out in a random order so the underlying content is revealed in patches.
   (function () {
