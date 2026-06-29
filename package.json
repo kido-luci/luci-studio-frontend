@@ -1,6 +1,6 @@
 {
   "name": "luci_web_blog",
-  "version": "1.0.0",
+  "version": "1.26.0",
   "description": "",
   "main": "index.js",
   "scripts": {
