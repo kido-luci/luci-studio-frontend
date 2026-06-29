@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
 import { postService } from '../services/posts';
-import { galleryService } from '../services/gallery';
 import { buildPostSlug } from '../utils/blog';
 
 const SITE_URL = 'https://luci-studio.com';
@@ -23,10 +22,7 @@ interface UrlEntry {
 }
 
 export const GET: APIRoute = async () => {
-    const [posts, gallery] = await Promise.all([
-        postService.getAll(),
-        galleryService.getAll(),
-    ]);
+    const posts = await postService.getAll();
 
     const staticPages: UrlEntry[] = [
         { loc: `${SITE_URL}/`, lastmod: new Date().toISOString().split('T')[0], priority: '1.0', changefreq: 'weekly' },
@@ -41,14 +37,6 @@ export const GET: APIRoute = async () => {
         priority: '0.8',
         changefreq: 'monthly',
         ...(post.cover_image_url ? { image: { loc: post.cover_image_url, title: post.title } } : {}),
-    }));
-
-    const galleryPages: UrlEntry[] = gallery.map(item => ({
-        loc: `${SITE_URL}/art/${buildPostSlug(item.title, item.id)}/`,
-        lastmod: new Date(item.updated_at).toISOString().split('T')[0],
-        priority: '0.7',
-        changefreq: 'monthly',
-        ...(item.cover_image_url ? { image: { loc: item.cover_image_url, title: item.title } } : {}),
     }));
 
     // Every page exists in English (root) and Vietnamese (/vi/). Emit both as
@@ -70,7 +58,7 @@ export const GET: APIRoute = async () => {
     <priority>${e.priority}</priority>${e.image ? `\n    <image:image>\n      <image:loc>${escapeXml(e.image.loc)}</image:loc>\n      <image:title>${escapeXml(e.image.title)}</image:title>\n    </image:image>` : ''}${alt}
   </url>`;
 
-    const urls = [...staticPages, ...postPages, ...galleryPages]
+    const urls = [...staticPages, ...postPages]
         .flatMap((e) => {
             const enLoc = e.loc;
             if (!isBilingualLoc(enLoc)) {
