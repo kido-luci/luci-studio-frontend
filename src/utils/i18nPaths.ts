@@ -5,7 +5,6 @@
 // route files call the same builder.
 import { postService } from "../services/posts";
 import { playlistService } from "../services/playlists";
-import { galleryService } from "../services/gallery";
 import { buildPostSlug } from "./blog";
 
 // postPaths: one path per post, props { post, related } — mirrors the original
@@ -90,35 +89,5 @@ export async function seriesPaths() {
       props: { playlist },
     };
   });
-  return results.filter((r): r is NonNullable<typeof r> => r !== null);
-}
-
-// artPaths: one path per gallery item, props { item } — mirrors the original
-// art/[slug] getStaticPaths, including the cold-start retry.
-export async function artPaths() {
-  const items = await galleryService.getAll();
-
-  async function fetchItemWithRetry(id: string) {
-    let lastErr: unknown;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        return await galleryService.getByID(id);
-      } catch (err) {
-        lastErr = err;
-        console.error(`[getStaticPaths] gallery ${id} attempt ${attempt + 1}/3 failed:`, err);
-        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
-      }
-    }
-    throw lastErr;
-  }
-
-  const results = await Promise.all(items.map(async (summary) => {
-    const item = await fetchItemWithRetry(summary.id);
-    if (!item) return null;
-    return {
-      params: { slug: buildPostSlug(summary.title, summary.id) },
-      props: { item },
-    };
-  }));
   return results.filter((r): r is NonNullable<typeof r> => r !== null);
 }
