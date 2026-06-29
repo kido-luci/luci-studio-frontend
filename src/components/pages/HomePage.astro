@@ -912,14 +912,6 @@ body.light-mode .hero-orb-2 {
      Applied before SplitText reads the wrap, so the animated lines inherit it too. */
   text-wrap: balance;
 }
-/* Accent the product list + "shipped products" so they pop against the white
-   subtitle. var(--accent) follows the active colour scheme. :global() is required
-   because the spans come from set:html (and SplitText re-wraps them), so they never
-   receive Astro's scoped data-cid attribute that a normal selector would demand. */
-:global(.hero-tag-accent) {
-  color: var(--accent) !important;
-  font-weight: 600;
-}
 
 /* ── Hero pillars: studio products (Blog · Tools · Games · Apps · Art) ── */
 .hero-pillars {

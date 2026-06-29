@@ -119,7 +119,7 @@ export const en: Record<string, string> = {
   'legal.lastUpdated': 'Last updated:',
 
   // home (index.astro)
-  'home.heroTagline': 'A creative engineering studio — we craft <span class="hero-tag-accent">cross-platform apps, browser tools &amp; games, technical writing, and digital art</span>, turning hard problems into <span class="hero-tag-accent">shipped products</span>.',
+  'home.heroTagline': 'A creative engineering studio — we craft <span style="color:#34d399">cross-platform apps</span>, <span style="color:#22d3ee">browser tools &amp; games</span>, <span style="color:var(--accent)">technical writing</span>, and <span style="color:#f472b6">digital art</span>, turning hard problems into <span style="color:#f59e0b">shipped products</span>.',
   'home.letsTalk': "Let's Talk",
   'home.viewWork': 'View Work',
   'home.seeArt': 'See Art →',
