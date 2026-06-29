@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import PostCard from "../PostCard.astro";
 import AffiliateCard from "../AffiliateCard.astro";
 import { affiliateService } from "../../services/affiliates";
-import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown } from "../../utils/blog";
+import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown, needsVietnameseSerif } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, switchLocalePath, localized } from '../../i18n';
 import type { Post } from "../../services/posts";
 const locale = getLocaleFromUrl(Astro.url);
@@ -70,7 +70,7 @@ const relatedPosts = (related ?? []).map(rawP => { const p = localized(rawP, loc
   id: p.id,
   title: p.title,
   subtitle: p.subtitle || '',
-  href: localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`),
+  href: localizedHref(locale, `/blog/${buildPostSlug(rawP.title, rawP.id)}/`),
   tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
   date: formatDate(p.created_at, locale),
   read: readTimeFor(p, locale),
@@ -248,7 +248,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
         </div>
 
         <!-- Title -->
-        <h1 class="bd-title">{post.title}</h1>
+        <h1 class="bd-title" style={needsVietnameseSerif(post.title) ? "font-family:'Playfair Display',Georgia,serif" : undefined}>{post.title}</h1>
 
         <div class="bd-rule"></div>
 
