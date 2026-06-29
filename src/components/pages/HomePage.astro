@@ -908,6 +908,9 @@ body.light-mode .hero-orb-2 {
   line-height: 1.75;
   padding: 0 0.5rem;
   min-height: 6.5em;
+  /* Balance line lengths so the last line isn't a lone orphan word ("products.").
+     Applied before SplitText reads the wrap, so the animated lines inherit it too. */
+  text-wrap: balance;
 }
 
 /* ── Hero pillars: studio products (Blog · Tools · Games · Apps · Art) ── */
