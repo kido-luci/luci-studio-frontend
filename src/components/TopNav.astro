@@ -11,7 +11,7 @@ const enHref = switchLocalePath(Astro.url.pathname, 'en');
 const viHref = switchLocalePath(Astro.url.pathname, 'vi');
 
 interface Props {
-  active?: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | 'tools' | null;
+  active?: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | 'tools' | 'games' | null;
   ctaLabel?: string;
   ctaHref?: string;
 }
@@ -22,7 +22,7 @@ const linkBase = "topnav-link text-xs font-bold transition-all duration-300 uppe
 const linkIdle = "text-gray-400 hover:text-white";
 const linkActive = "is-active text-violet-400";
 
-const cls = (key: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | 'tools') => {
+const cls = (key: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | 'tools' | 'games') => {
   if (active === key) return `${linkBase} ${linkActive}`;
   return `${linkBase} ${linkIdle}`;
 };
@@ -51,12 +51,13 @@ const schemes = [
       <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
       <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
     </a>
-    <div class="hidden md:flex items-center gap-8">
+    <div class="hidden lg:flex items-center gap-6 xl:gap-8">
       <a href={localizedHref(locale, '/')} class={cls('home')}>{t('nav.home')}</a>
       <a href={localizedHref(locale, '/blog')} class={cls('blog')}>{t('nav.blog')}</a>
       <a href={localizedHref(locale, '/blog/series')} class={cls('series')}>{t('nav.series')}</a>
       <a href={localizedHref(locale, '/lab')} class={cls('lab')}>{t('nav.lab')}</a>
       <a href="/tools" class={cls('tools')}>Tools</a>
+      <a href="/games" class={cls('games')}>Games</a>
     </div>
 
     <div class="flex items-center gap-4">
@@ -111,9 +112,9 @@ const schemes = [
         </div>
       </div>
 
-      <span class="hidden md:block"><a href={ctaHref} class="magnetic px-5 py-2.5 bg-white text-black text-xs font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest">{ctaLabel}</a></span>
+      <span class="hidden lg:block"><a href={ctaHref} class="magnetic px-5 py-2.5 bg-white text-black text-xs font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest">{ctaLabel}</a></span>
 
-      <button id="mobile-menu-toggle" class="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[100] group">
+      <button id="mobile-menu-toggle" class="lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[100] group">
         <span class="w-6 h-0.5 transition-transform duration-300 group-[.active]:rotate-45 group-[.active]:translate-y-2" style="background-color: var(--text-primary);"></span>
         <span class="w-6 h-0.5 transition-opacity duration-300 group-[.active]:opacity-0" style="background-color: var(--text-primary);"></span>
         <span class="w-6 h-0.5 transition-transform duration-300 group-[.active]:-rotate-45 group-[.active]:-translate-y-2" style="background-color: var(--text-primary);"></span>
@@ -130,6 +131,7 @@ const schemes = [
   <div class="h-px w-12 bg-white/10 my-4"></div>
   <a href={localizedHref(locale, '/lab')} class={active === 'lab' ? mobileSmallActive : mobileSmallBase}>{t('nav.lab')}</a>
   <a href="/tools" class={active === 'tools' ? mobileSmallActive : mobileSmallBase}>Tools</a>
+  <a href="/games" class={active === 'games' ? mobileSmallActive : mobileSmallBase}>Games</a>
   {showLangSwitch && (
     <div class="flex items-center gap-3 mt-4 text-lg font-bold uppercase tracking-widest">
       <a href={enHref} class={locale === 'en' ? 'text-violet-400' : 'text-gray-300'} aria-label="English">EN</a>

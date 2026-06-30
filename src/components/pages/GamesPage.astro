@@ -1,0 +1,267 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import TopNav from "../TopNav.astro";
+import "../../styles/lab-cards.css";
+
+// Games are hosted as standalone deploys and linked out from here (same model
+// as ToolsPage). Faldrop is the first game; add more entries to grow the grid.
+const GAMES = [
+  {
+    slug: 'faldrop',
+    title: 'Faldrop',
+    tagline: '2.5D isometric block-stacker',
+    blurb: 'Rotate and drop extruded isometric blocks, clear full levels, and chase your high score. Runs entirely in your browser — nothing to install.',
+    image: 'https://faldrop.luci-studio.com/og-image.png',
+    href: 'https://faldrop.luci-studio.com',
+    host: 'faldrop.luci-studio.com',
+    tags: ['Arcade', 'Browser', 'No install'],
+  },
+] as const;
+
+const totalGames = GAMES.length;
+const featured = GAMES[0];
+const rest = GAMES.slice(1);
+---
+
+<Layout
+  title="Games · Luci Studio"
+  description="Browser-native games you can play instantly — no install, no account. Built from scratch at Luci Studio."
+>
+  <link
+    slot="head"
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap"
+  />
+
+  <TopNav active="games" />
+
+  <div class="lab-root lab-palette">
+
+    <!-- decorative confetti (same style as ToolsPage) -->
+    <div style="position:absolute; inset:0; pointer-events:none; z-index:0;">
+      <span style="position:absolute; left:18%; top:8%; width:7px; height:7px; border-radius:50%; background:var(--accent); animation:lab-floaty 7s ease-in-out infinite;"></span>
+      <span style="position:absolute; left:42%; top:5%; width:20px; height:3px; border-radius:3px; background:#ec5a9b; transform:rotate(-32deg); --r:-32deg; animation:lab-floaty 9s ease-in-out .4s infinite;"></span>
+      <span style="position:absolute; left:60%; top:12%; width:9px; height:9px; border:2px solid #3aa0ff; border-radius:50%;"></span>
+      <span style="position:absolute; left:76%; top:6%; width:6px; height:6px; border-radius:50%; background:#16a394;"></span>
+      <span style="position:absolute; left:86%; top:18%; width:18px; height:3px; border-radius:3px; background:#f97316; transform:rotate(40deg); --r:40deg; animation:lab-floaty 8s ease-in-out 1s infinite;"></span>
+      <span style="position:absolute; left:10%; top:32%; width:8px; height:8px; border:2px solid var(--accent); border-radius:50%;"></span>
+      <span style="position:absolute; left:92%; top:44%; width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
+    </div>
+
+    <div style="position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 40px;">
+
+      <!-- page header -->
+      <div style="padding:36px 0 18px;">
+        <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {String(totalGames).padStart(2, "0")} game{totalGames === 1 ? "" : "s"}</div>
+        <h1 style="margin:0; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(40px,6.5vw,78px); line-height:1.1; letter-spacing:-.01em; color:var(--lab-text);">Play a game<span style="color:var(--accent);">.</span></h1>
+        <p style="margin:24px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Browser-native games built from scratch — instant play, no install, no account. Just open and go.</p>
+      </div>
+
+      <!-- featured game -->
+      <div style="padding:48px 0 0;">
+        <a href={featured.href} target="_blank" rel="noopener noreferrer" class="game-feature">
+          <div class="game-feature-media">
+            <img src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
+          </div>
+          <div class="game-feature-body">
+            <div class="game-feature-eyebrow">{featured.tagline}</div>
+            <h2 class="game-feature-title">{featured.title}</h2>
+            <p class="game-feature-blurb">{featured.blurb}</p>
+            <div class="game-feature-tags">
+              {featured.tags.map((tag) => (<span class="game-tag">{tag}</span>))}
+            </div>
+            <span class="game-feature-cta">Play now ↗</span>
+            <span class="game-feature-host"><span class="game-feature-dot"></span>{featured.host}</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- more games (grid grows as games are added) -->
+      {rest.length > 0 && (
+        <div style="padding:64px 0 0;">
+          <h2 style="margin:0 0 28px; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(24px,3vw,34px); line-height:1.1; color:var(--lab-text);">More games<span style="color:var(--accent);">.</span></h2>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:22px;">
+            {rest.map((game) => (
+              <a href={game.href} target="_blank" rel="noopener noreferrer" class="game-card">
+                <div class="game-card-media"><img src={game.image} alt={`${game.title} — ${game.tagline}`} loading="lazy" width="1200" height="630" /></div>
+                <div class="game-card-body">
+                  <div class="game-card-title">{game.title}</div>
+                  <div class="game-card-desc">{game.blurb}</div>
+                </div>
+                <div class="game-card-footer">
+                  <span class="game-card-host"><span class="game-card-dot"></span>{game.host}</span>
+                  <span class="game-card-arrow">↗</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style="height:100px;"></div>
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  .lab-root {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--lab-bg);
+    overflow: hidden;
+    padding: 96px 0 100px;
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    color: var(--lab-text);
+  }
+
+  /* Featured game card */
+  .game-feature {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    text-decoration: none;
+    color: inherit;
+    background: var(--lab-card-bg, #ffffff);
+    border: 1px solid var(--lab-card-border, rgba(19,21,29,0.08));
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: var(--lab-card-shadow, 0 1px 2px rgba(19,21,29,0.04));
+    transition: transform 0.25s cubic-bezier(0.2,0.7,0.3,1), box-shadow 0.25s, border-color 0.25s;
+  }
+  .game-feature:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--lab-card-shadow-hover, 0 22px 50px -18px rgba(19,21,29,0.28));
+    border-color: var(--lab-card-border-hover, rgba(19,21,29,0.16));
+  }
+  .game-feature-media {
+    position: relative;
+    overflow: hidden;
+    background: var(--lab-tile-grad, radial-gradient(120% 120% at 30% 20%, #2a2d3a 0%, #0c0d12 70%));
+  }
+  .game-feature-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.2,0.7,0.3,1);
+  }
+  .game-feature:hover .game-feature-media img { transform: scale(1.04); }
+  .game-feature-body {
+    padding: 38px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .game-feature-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .game-feature-title {
+    margin: 14px 0 0;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(32px, 4vw, 46px);
+    line-height: 1.05;
+    color: var(--lab-name, #13151d);
+  }
+  .game-feature-blurb {
+    margin: 16px 0 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--lab-desc, #5c606b);
+  }
+  .game-feature-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .game-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--lab-tag-bg, #f7f5f0);
+    border: 1px solid var(--lab-tag-border, rgba(19,21,29,0.1));
+    color: var(--lab-tag-text, #41454f);
+  }
+  .game-feature-cta {
+    margin-top: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    transition: opacity 0.2s;
+  }
+  .game-feature:hover .game-feature-cta { opacity: 0.85; }
+  .game-feature-host {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--lab-footer-text, #13151d);
+  }
+  .game-feature-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lab-dot, #13151d); }
+
+  @media (max-width: 760px) {
+    .game-feature { grid-template-columns: 1fr; }
+    .game-feature-media { aspect-ratio: 1200 / 630; }
+    .game-feature-body { padding: 30px 26px; }
+  }
+
+  /* Secondary game cards (the grid below the feature) */
+  .game-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    background: var(--lab-card-bg, #ffffff);
+    border: 1px solid var(--lab-card-border, rgba(19,21,29,0.08));
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--lab-card-shadow, 0 1px 2px rgba(19,21,29,0.04));
+    transition: transform 0.25s cubic-bezier(0.2,0.7,0.3,1), box-shadow 0.25s, border-color 0.25s;
+  }
+  .game-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--lab-card-shadow-hover, 0 22px 50px -18px rgba(19,21,29,0.28));
+    border-color: var(--lab-card-border-hover, rgba(19,21,29,0.16));
+  }
+  .game-card-media { aspect-ratio: 1200 / 630; overflow: hidden; background: var(--lab-tile-grad); }
+  .game-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .game-card-body { padding: 22px 26px 18px; flex: 1; }
+  .game-card-title {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--lab-name, #13151d);
+  }
+  .game-card-desc { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--lab-desc, #5c606b); }
+  .game-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 26px;
+    border-top: 1px solid var(--lab-footer-border, rgba(19,21,29,0.07));
+    background: var(--lab-footer-bg, #fbfaf7);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--lab-footer-text, #13151d);
+  }
+  .game-card-host { display: flex; align-items: center; gap: 8px; }
+  .game-card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lab-dot, #13151d); }
+  .game-card-arrow { font-size: 14px; }
+</style>

@@ -16,6 +16,7 @@ export const en: Record<string, string> = {
   'footer.portfolio': 'Portfolio',
   'footer.terms': 'Terms',
   'footer.privacy': 'Privacy',
+  'footer.license': 'License',
   'footer.cookie': 'Cookie Settings',
 
   // read-time unit (blog.ts)
@@ -164,6 +165,7 @@ export const en: Record<string, string> = {
   // legal page titles
   'legal.privacyTitle': 'Privacy Policy',
   'legal.termsTitle': 'Terms of Use',
+  'legal.licenseTitle': 'License',
 
   // portfolio CTA
   'portfolio.letsBuild': "LET'S BUILD",
