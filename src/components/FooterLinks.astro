@@ -1,7 +1,7 @@
 ---
 // Shared footer nav/legal links — the one cluster the homepage footer and the
-// blog-detail footer have in common (Portfolio · Terms · Privacy · Cookie
-// Settings). Rendered as a fragment so each page drops it inside its own footer
+// blog-detail footer have in common (Portfolio · Terms · Privacy · License ·
+// Cookie Settings). Rendered as a fragment so each page drops it inside its own footer
 // flex row after its page-specific links. `linkColor` matches the host footer's
 // idle tone (homepage uses gray-600, blog detail uses gray-400).
 import { COOKIE_BANNER_ENABLED } from "../config/features";
@@ -19,6 +19,7 @@ const cls = `text-xs font-bold ${linkColor} hover:text-white transition-colors u
 <a href={localizedHref(locale, '/portfolio')} class={cls}>{t('footer.portfolio')}</a>
 <a href={localizedHref(locale, '/terms')} class={cls}>{t('footer.terms')}</a>
 <a href={localizedHref(locale, '/privacy')} class={cls}>{t('footer.privacy')}</a>
+<a href={localizedHref(locale, '/license')} class={cls}>{t('footer.license')}</a>
 {COOKIE_BANNER_ENABLED && (
   <button type="button" data-cookie-settings style="font-family: inherit;" class={cls}>{t('footer.cookie')}</button>
 )}

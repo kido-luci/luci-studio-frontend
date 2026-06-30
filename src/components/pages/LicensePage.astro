@@ -1,0 +1,141 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import TopNav from "../TopNav.astro";
+import LabDecor from "../LabDecor.astro";
+import { getLocaleFromUrl, useTranslations } from '../../i18n';
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+
+const SITE_URL = 'https://luci-studio.com';
+const lastUpdated = 'June 30, 2026';
+---
+
+<Layout
+  title="License | Luci Studio"
+  description="Copyright and usage license for the content, code samples, and games on Luci Studio."
+  canonical={`${SITE_URL}/license/`}
+  keywords="Luci Studio license, content license, copyright, usage rights"
+>
+  <TopNav />
+
+  <main class="legal-page pt-36 pb-60 px-4 md:px-6 min-h-screen">
+    <LabDecor />
+    <article class="max-w-3xl mx-auto relative z-10">
+      <p class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4">{t('legal.eyebrow')}</p>
+      <h1 class="text-5xl md:text-7xl tracking-tighter mb-4" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{t('legal.licenseTitle')}<span class="text-violet-500">.</span></h1>
+      <p class="text-sm text-gray-500 mb-12">{t('legal.lastUpdated')} {lastUpdated}</p>
+
+      <div class="legal-copy">
+        <section>
+          <h2>Overview</h2>
+          <p>
+            This page explains who owns the material on Luci Studio and how you may use it. It covers articles, artwork, designs, code samples, and the games and tools published or linked from this site. It is provided for general information and is not legal advice.
+          </p>
+          <p>
+            Unless a specific item says otherwise, everything here is &copy; Luci Studio. Where an item carries its own license, that license governs it.
+          </p>
+        </section>
+
+        <section>
+          <h2>Content and Copyright</h2>
+          <p>
+            Articles, portfolio materials, artwork, images, written copy, and visual designs on this site are owned by Luci Studio or used with permission. You may link to public pages and quote brief excerpts with clear attribution, but you may not copy, republish, sell, redistribute, or imply endorsement without prior written permission.
+          </p>
+        </section>
+
+        <section>
+          <h2>Code Samples</h2>
+          <p>
+            Code snippets shown inside articles are shared so you can learn from and adapt them in your own projects, including commercial ones. Attribution is appreciated but not required for short snippets. The code is provided as-is, without warranty of any kind; you are responsible for testing and using it safely.
+          </p>
+        </section>
+
+        <section>
+          <h2>Games and Interactive Content</h2>
+          <p>
+            The games and interactive experiences published or linked from this site &mdash; including Faldrop &mdash; are owned by Luci Studio. They are free to play in your browser for personal, non-commercial enjoyment. You may not redistribute, rehost, sell, decompile, reverse-engineer, or create derivative works from them without permission. Any third-party libraries they bundle remain under their own licenses (see below).
+          </p>
+        </section>
+
+        <section>
+          <h2>Trademarks</h2>
+          <p>
+            "Luci Studio", the Luci Studio logo, and product names such as "Faldrop" are marks of Luci Studio. Please do not use them in a way that suggests affiliation or endorsement without permission.
+          </p>
+        </section>
+
+        <section>
+          <h2>Third-Party Open-Source Licenses</h2>
+          <p>
+            This site, its games, and its tools rely on open-source software and web fonts &mdash; for example PixiJS, GSAP, and Prism.js &mdash; each distributed under its own license by its respective authors. Those licenses govern that software, not this page, and all rights in those works remain with their owners.
+          </p>
+        </section>
+
+        <section>
+          <h2>Requesting Permission</h2>
+          <p>
+            Want to reuse something beyond what is allowed above? Reach out and describe what you have in mind. Permission is often granted for non-commercial, educational, and community use.
+          </p>
+        </section>
+
+        <section>
+          <h2>Changes</h2>
+          <p>
+            This license may be updated as the site and its projects change. The date above indicates the latest revision.
+          </p>
+        </section>
+
+        <section>
+          <h2>Contact</h2>
+          <p>
+            For licensing questions or permission requests, contact <a href="mailto:kidoluci.work@gmail.com">kidoluci.work@gmail.com</a>.
+          </p>
+        </section>
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .legal-page {
+    position: relative;
+    background: var(--bg-primary);
+  }
+
+  body.light-mode .legal-page {
+    background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
+  }
+
+  .legal-copy {
+    display: grid;
+    gap: 2.25rem;
+  }
+
+  .legal-copy h2 {
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .legal-copy p {
+    color: var(--text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.85;
+    margin: 0.75rem 0 0;
+  }
+
+  .legal-copy a {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .legal-copy a:hover {
+    color: #fff;
+  }
+
+  body.light-mode .legal-copy a:hover {
+    color: var(--accent-strong);
+  }
+</style>
