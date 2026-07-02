@@ -63,6 +63,7 @@ export const en: Record<string, string> = {
   'post.supportWork': 'Support my work',
   'post.supportBody': 'If this post saved you time or taught you something, you can buy me a coffee. Every bit keeps me writing and shipping.',
   'post.supportCta': 'Support via PayPal',
+  'post.sponsorCta': 'Sponsor on GitHub',
   'post.scanToPay': 'Scan to pay',
   'post.continueReading': 'Continue Reading',
   'post.morePosts': 'More Posts',
