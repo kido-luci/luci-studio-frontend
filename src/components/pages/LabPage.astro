@@ -44,7 +44,7 @@ const repoCount = String(sources.length).padStart(2, "0");
       <span style="position:absolute; left:95%; top:58%; width:18px; height:3px; border-radius:3px; background:#16a394; transform:rotate(-24deg); --r:-24deg; animation:lab-floaty 9s ease-in-out .6s infinite;"></span>
     </div>
 
-    <div style="position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 40px;">
+    <div style="position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 clamp(20px, 5vw, 40px);">
 
       <!-- released apps (top) -->
       {apps.length > 0 && (
