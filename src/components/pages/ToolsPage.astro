@@ -15,6 +15,11 @@ const ENGINES = [
     tools: [
       { slug: 'heic-to-jpg', title: 'HEIC to JPG', description: 'Convert iPhone HEIC photos to JPG, 100% on your device.' },
       { slug: 'png-to-jpg',  title: 'PNG to JPG',  description: 'Turn PNG images into smaller JPG files instantly.' },
+      { slug: 'webp-to-jpg', title: 'WebP to JPG', description: 'Convert WebP images to universally-supported JPG.' },
+      { slug: 'jpg-to-png',  title: 'JPG to PNG',  description: 'Convert JPG photos to lossless PNG.' },
+      { slug: 'png-to-webp', title: 'PNG to WebP', description: 'Shrink PNG images down to smaller WebP files.' },
+      { slug: 'jpg-to-webp', title: 'JPG to WebP', description: 'Compress JPG photos into modern WebP.' },
+      { slug: 'heic-to-png', title: 'HEIC to PNG', description: 'Convert iPhone HEIC photos to lossless PNG.' },
     ],
   },
   {
@@ -27,6 +32,11 @@ const ENGINES = [
       { slug: 'bold-text-generator',          title: 'Bold Text Generator',          description: 'Make 𝗯𝗼𝗹𝗱 Unicode text for social bios.' },
       { slug: 'italic-text-generator',        title: 'Italic Text Generator',        description: 'Create 𝘪𝘵𝘢𝘭𝘪𝘤 text that pastes anywhere.' },
       { slug: 'strikethrough-text-generator', title: 'Strikethrough Text Generator', description: 'Add a s̶t̶r̶i̶k̶e̶ line through your text.' },
+      { slug: 'cursive-text-generator',     title: 'Cursive Text Generator',     description: 'Turn text into flowing cursive script for bios.' },
+      { slug: 'bubble-text-generator',      title: 'Bubble Text Generator',      description: 'Wrap letters in bubbles for cute captions.' },
+      { slug: 'wide-text-generator',        title: 'Wide Text Generator',        description: 'Make wide full-width vaporwave text.' },
+      { slug: 'monospace-text-generator',   title: 'Monospace Text Generator',   description: 'Type in fixed-width monospace letters.' },
+      { slug: 'underline-text-generator',   title: 'Underline Text Generator',   description: 'Add an underline under any text in one click.' },
     ],
   },
   {
@@ -38,6 +48,7 @@ const ENGINES = [
     tools: [
       { slug: 'json-formatter', title: 'JSON Formatter', description: 'Pretty-print and validate messy JSON.' },
       { slug: 'json-minifier',  title: 'JSON Minifier',  description: 'Strip whitespace to the smallest valid JSON.' },
+      { slug: 'json-validator', title: 'JSON Validator', description: 'Check JSON for syntax errors instantly.' },
     ],
   },
   {
@@ -49,6 +60,9 @@ const ENGINES = [
     tools: [
       { slug: 'qr-code-generator',      title: 'QR Code Generator', description: 'Make a QR code from any text or URL.' },
       { slug: 'wifi-qr-code-generator', title: 'WiFi QR Code',      description: 'Let guests join your WiFi by scanning.' },
+      { slug: 'vcard-qr-code', title: 'vCard QR Code', description: 'Share your contact card as a scannable QR.' },
+      { slug: 'email-qr-code', title: 'Email QR Code', description: 'Make a QR that opens a pre-filled email.' },
+      { slug: 'url-qr-code',   title: 'URL QR Code',   description: 'Turn any link into a scannable QR code.' },
     ],
   },
   {
@@ -60,6 +74,7 @@ const ENGINES = [
     tools: [
       { slug: 'merge-pdf',  title: 'Merge PDF',  description: 'Combine several PDF files into one.' },
       { slug: 'jpg-to-pdf', title: 'JPG to PDF', description: 'Turn JPG/PNG images into a single PDF.' },
+      { slug: 'png-to-pdf', title: 'PNG to PDF', description: 'Turn PNG images into a single PDF.' },
     ],
   },
 ] as const;
