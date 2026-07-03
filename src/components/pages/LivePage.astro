@@ -1,0 +1,157 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import TopNav from "../TopNav.astro";
+import "../../styles/lab-cards.css";
+
+// Live-data portfolio hosted as a standalone deploy and linked out from here
+// (same model as ToolsPage / GamesPage). One card per widget.
+const HUB = 'https://live.luci-studio.com';
+
+const WIDGETS = [
+  { slug: 'quakes',    title: 'Live Earthquakes',    bar: '#f97316', blurb: 'Every magnitude 2.5+ quake from the last 24 hours, plotted live from the USGS feed.' },
+  { slug: 'iss',       title: 'ISS Right Now',       bar: '#3aa0ff', blurb: 'Track the International Space Station’s position over Earth, updating every second.' },
+  { slug: 'currency',  title: 'Currency Converter',  bar: '#16a394', blurb: 'Convert any two currencies with live ECB reference rates and a 30-day trend.' },
+  { slug: 'weather',   title: 'Weather',             bar: '#0891b2', blurb: 'Current conditions, a short forecast and air quality for any city.' },
+  { slug: 'crypto',    title: 'Crypto Prices',       bar: '#d97706', blurb: 'The top-10 cryptocurrencies by market cap, with live prices and 24h change.' },
+  { slug: 'onthisday', title: 'On This Day',         bar: '#8b5cf6', blurb: 'Notable events that happened on today’s date, from Wikipedia.' },
+  { slug: 'holidays',  title: 'Public Holidays',     bar: '#ec5a9b', blurb: 'Upcoming public holidays for Vietnam — or any country you pick.' },
+] as const;
+
+const totalWidgets: number = WIDGETS.length;
+---
+
+<Layout
+  title="Live · Luci Studio"
+  description="A portfolio of live-data widgets powered by free public APIs — earthquakes, the ISS, currencies, weather, crypto and more. Nothing to install."
+>
+  <link
+    slot="head"
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap"
+  />
+
+  <TopNav active="live" />
+
+  <div class="lab-root lab-palette">
+
+    <!-- decorative confetti (same style as ToolsPage / GamesPage) -->
+    <div style="position:absolute; inset:0; pointer-events:none; z-index:0;">
+      <span style="position:absolute; left:18%; top:8%; width:7px; height:7px; border-radius:50%; background:var(--accent); animation:lab-floaty 7s ease-in-out infinite;"></span>
+      <span style="position:absolute; left:42%; top:5%; width:20px; height:3px; border-radius:3px; background:#ec5a9b; transform:rotate(-32deg); --r:-32deg; animation:lab-floaty 9s ease-in-out .4s infinite;"></span>
+      <span style="position:absolute; left:60%; top:12%; width:9px; height:9px; border:2px solid #3aa0ff; border-radius:50%;"></span>
+      <span style="position:absolute; left:76%; top:6%; width:6px; height:6px; border-radius:50%; background:#16a394;"></span>
+      <span style="position:absolute; left:86%; top:18%; width:18px; height:3px; border-radius:3px; background:#f97316; transform:rotate(40deg); --r:40deg; animation:lab-floaty 8s ease-in-out 1s infinite;"></span>
+      <span style="position:absolute; left:10%; top:32%; width:8px; height:8px; border:2px solid var(--accent); border-radius:50%;"></span>
+      <span style="position:absolute; left:92%; top:44%; width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
+    </div>
+
+    <div style="position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 clamp(20px, 5vw, 40px);">
+
+      <!-- page header -->
+      <div style="padding:36px 0 18px;">
+        <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {String(totalWidgets).padStart(2, "0")} live widgets</div>
+        <h1 style="margin:0; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(40px,6.5vw,78px); line-height:1.1; letter-spacing:-.01em; color:var(--lab-text);">The world right now<span style="color:var(--accent);">.</span></h1>
+        <p style="margin:24px 0 0; max-width:560px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Small pages that read free public APIs and show the data live — earthquakes, the ISS, currencies and more. Open and go, nothing to install.</p>
+        <a
+          href={HUB}
+          target="_blank"
+          rel="noopener noreferrer"
+          style="display:inline-flex; align-items:center; gap:8px; margin-top:32px; padding:12px 24px; background:var(--accent); color:#fff; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.15em; text-transform:uppercase; text-decoration:none; border-radius:999px; transition:opacity .2s;"
+          onmouseover="this.style.opacity='.85'"
+          onmouseout="this.style.opacity='1'"
+        >
+          live.luci-studio.com ↗
+        </a>
+      </div>
+
+      <!-- widget cards -->
+      <div style="padding:56px 0 0;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:22px;">
+          {WIDGETS.map((w) => (
+            <a
+              href={`${HUB}/${w.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="live-card"
+            >
+              <div class="live-card-bar" style={`background:linear-gradient(90deg, ${w.bar} 0%, var(--accent) 100%);`}></div>
+              <div class="live-card-body">
+                <div class="live-card-title">{w.title}</div>
+                <div class="live-card-desc">{w.blurb}</div>
+              </div>
+              <div class="live-card-footer">
+                <span class="live-card-host"><span class="live-card-dot"></span>live.luci-studio.com</span>
+                <span class="live-card-arrow">↗</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div style="height:100px;"></div>
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  .lab-root {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--lab-bg);
+    overflow: hidden;
+    padding: 96px 0 100px;
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    color: var(--lab-text);
+  }
+
+  /* Live widget cards (same shape as ToolsPage's .tool-card) */
+  .live-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    background: var(--lab-card-bg, #ffffff);
+    border: 1px solid var(--lab-card-border, rgba(19,21,29,0.08));
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--lab-card-shadow, 0 1px 2px rgba(19,21,29,0.04));
+    transition: transform 0.25s cubic-bezier(0.2,0.7,0.3,1), box-shadow 0.25s, border-color 0.25s;
+  }
+  .live-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--lab-card-shadow-hover, 0 22px 50px -18px rgba(19,21,29,0.28));
+    border-color: var(--lab-card-border-hover, rgba(19,21,29,0.16));
+  }
+  .live-card-bar { height: 4px; }
+  .live-card-body { padding: 24px 28px 20px; flex: 1; }
+  .live-card-title {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--lab-name, #13151d);
+  }
+  .live-card-desc {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--lab-desc, #5c606b);
+  }
+  .live-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-top: 1px solid var(--lab-footer-border, rgba(19,21,29,0.07));
+    background: var(--lab-footer-bg, #fbfaf7);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--lab-footer-text, #13151d);
+  }
+  .live-card-host { display: flex; align-items: center; gap: 8px; }
+  .live-card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lab-dot, #13151d); }
+  .live-card-arrow { font-size: 14px; }
+</style>
