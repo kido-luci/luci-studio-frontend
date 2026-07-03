@@ -20,6 +20,8 @@ const ENGINES = [
       { slug: 'png-to-webp', title: 'PNG to WebP', description: 'Shrink PNG images down to smaller WebP files.' },
       { slug: 'jpg-to-webp', title: 'JPG to WebP', description: 'Compress JPG photos into modern WebP.' },
       { slug: 'heic-to-png', title: 'HEIC to PNG', description: 'Convert iPhone HEIC photos to lossless PNG.' },
+      { slug: 'avif-to-jpg', title: 'AVIF to JPG', description: 'Convert modern AVIF images to widely-supported JPG.' },
+      { slug: 'svg-to-png',  title: 'SVG to PNG',  description: 'Rasterize SVG vector files into PNG images.' },
     ],
   },
   {
@@ -49,6 +51,8 @@ const ENGINES = [
       { slug: 'json-formatter', title: 'JSON Formatter', description: 'Pretty-print and validate messy JSON.' },
       { slug: 'json-minifier',  title: 'JSON Minifier',  description: 'Strip whitespace to the smallest valid JSON.' },
       { slug: 'json-validator', title: 'JSON Validator', description: 'Check JSON for syntax errors instantly.' },
+      { slug: 'json-to-csv',   title: 'JSON to CSV',   description: 'Convert a JSON array into CSV rows.' },
+      { slug: 'csv-to-json',   title: 'CSV to JSON',   description: 'Turn CSV data into a JSON array.' },
     ],
   },
   {
@@ -63,6 +67,7 @@ const ENGINES = [
       { slug: 'vcard-qr-code', title: 'vCard QR Code', description: 'Share your contact card as a scannable QR.' },
       { slug: 'email-qr-code', title: 'Email QR Code', description: 'Make a QR that opens a pre-filled email.' },
       { slug: 'url-qr-code',   title: 'URL QR Code',   description: 'Turn any link into a scannable QR code.' },
+      { slug: 'qr-code-with-logo', title: 'QR Code with Logo', description: 'Put your logo in the center of a QR code.' },
     ],
   },
   {
@@ -75,6 +80,8 @@ const ENGINES = [
       { slug: 'merge-pdf',  title: 'Merge PDF',  description: 'Combine several PDF files into one.' },
       { slug: 'jpg-to-pdf', title: 'JPG to PDF', description: 'Turn JPG/PNG images into a single PDF.' },
       { slug: 'png-to-pdf', title: 'PNG to PDF', description: 'Turn PNG images into a single PDF.' },
+      { slug: 'rotate-pdf', title: 'Rotate PDF', description: 'Rotate PDF pages by 90, 180 or 270°.' },
+      { slug: 'split-pdf',  title: 'Split PDF',  description: 'Split a PDF into one file per page.' },
     ],
   },
 ] as const;
