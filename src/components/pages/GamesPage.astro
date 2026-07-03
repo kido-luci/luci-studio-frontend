@@ -23,7 +23,7 @@ const GAMES = [
     title: 'Stakrise',
     tagline: '2.5D isometric stack-tower',
     blurb: 'One tap: drop the sliding slab on the tower. Overhangs slice away, perfect drops grow it back — how high can you stack?',
-    image: 'https://stakrise.luci-studio.com/og-image.png',
+    image: 'https://stakrise.luci-studio.com/og-image.png?v=2',
     href: 'https://stakrise.luci-studio.com',
     host: 'stakrise.luci-studio.com',
     tags: ['Arcade', 'Browser', 'No install'],
@@ -34,7 +34,7 @@ const GAMES = [
     title: 'Sumfall',
     tagline: '2.5D isometric merge-drop puzzle',
     blurb: 'Drop numbered cubes and merge equal neighbours — chain the cascades and climb the values before the columns overflow.',
-    image: 'https://sumfall.luci-studio.com/og-image.png',
+    image: 'https://sumfall.luci-studio.com/og-image.png?v=2',
     href: 'https://sumfall.luci-studio.com',
     host: 'sumfall.luci-studio.com',
     tags: ['Puzzle', 'Browser', 'No install'],
@@ -45,7 +45,7 @@ const GAMES = [
     title: 'Huefall',
     tagline: '2.5D isometric falling match-3',
     blurb: 'Steer falling three-cube bars and line up colours in any direction — clears cascade, chains double, and the well keeps speeding up.',
-    image: 'https://huefall.luci-studio.com/og-image.png',
+    image: 'https://huefall.luci-studio.com/og-image.png?v=2',
     href: 'https://huefall.luci-studio.com',
     host: 'huefall.luci-studio.com',
     tags: ['Puzzle', 'Browser', 'No install'],
@@ -56,7 +56,7 @@ const GAMES = [
     title: 'Slithgrid',
     tagline: 'Snake on a deep isometric grid',
     blurb: 'Classic snake, re-cut in 2.5D — eat, grow, and thread an ever-faster snake around a full 10×10 isometric board.',
-    image: 'https://slithgrid.luci-studio.com/og-image.png',
+    image: 'https://slithgrid.luci-studio.com/og-image.png?v=2',
     href: 'https://slithgrid.luci-studio.com',
     host: 'slithgrid.luci-studio.com',
     tags: ['Arcade', 'Browser', 'No install'],
@@ -64,7 +64,7 @@ const GAMES = [
   },
 ] as const;
 
-const totalGames = GAMES.length;
+const totalGames: number = GAMES.length;
 const featured = GAMES[0];
 const rest = GAMES.slice(1);
 ---
