@@ -15,6 +15,7 @@ const GAMES = [
     href: 'https://faldrop.luci-studio.com',
     host: 'faldrop.luci-studio.com',
     tags: ['Arcade', 'Browser', 'No install'],
+    beta: false,
   },
   {
     slug: 'stakrise',
@@ -25,6 +26,7 @@ const GAMES = [
     href: 'https://stakrise.luci-studio.com',
     host: 'stakrise.luci-studio.com',
     tags: ['Arcade', 'Browser', 'No install'],
+    beta: true,
   },
   {
     slug: 'sumfall',
@@ -35,6 +37,7 @@ const GAMES = [
     href: 'https://sumfall.luci-studio.com',
     host: 'sumfall.luci-studio.com',
     tags: ['Puzzle', 'Browser', 'No install'],
+    beta: true,
   },
   {
     slug: 'huefall',
@@ -45,6 +48,7 @@ const GAMES = [
     href: 'https://huefall.luci-studio.com',
     host: 'huefall.luci-studio.com',
     tags: ['Puzzle', 'Browser', 'No install'],
+    beta: true,
   },
   {
     slug: 'slithgrid',
@@ -55,6 +59,7 @@ const GAMES = [
     href: 'https://slithgrid.luci-studio.com',
     host: 'slithgrid.luci-studio.com',
     tags: ['Arcade', 'Browser', 'No install'],
+    beta: true,
   },
 ] as const;
 
@@ -101,6 +106,7 @@ const rest = GAMES.slice(1);
       <div style="padding:48px 0 0;">
         <a href={featured.href} target="_blank" rel="noopener noreferrer" class="game-feature">
           <div class="game-feature-media">
+            {featured.beta && <span class="game-beta">Beta</span>}
             <img src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
           </div>
           <div class="game-feature-body">
@@ -123,7 +129,7 @@ const rest = GAMES.slice(1);
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:22px;">
             {rest.map((game) => (
               <a href={game.href} target="_blank" rel="noopener noreferrer" class="game-card">
-                <div class="game-card-media"><img src={game.image} alt={`${game.title} — ${game.tagline}`} loading="lazy" width="1200" height="630" /></div>
+                <div class="game-card-media">{game.beta && <span class="game-beta">Beta</span>}<img src={game.image} alt={`${game.title} — ${game.tagline}`} loading="lazy" width="1200" height="630" /></div>
                 <div class="game-card-body">
                   <div class="game-card-title">{game.title}</div>
                   <div class="game-card-desc">{game.blurb}</div>
@@ -277,7 +283,7 @@ const rest = GAMES.slice(1);
     box-shadow: var(--lab-card-shadow-hover, 0 22px 50px -18px rgba(19,21,29,0.28));
     border-color: var(--lab-card-border-hover, rgba(19,21,29,0.16));
   }
-  .game-card-media { aspect-ratio: 1200 / 630; overflow: hidden; background: var(--lab-tile-grad); }
+  .game-card-media { position: relative; aspect-ratio: 1200 / 630; overflow: hidden; background: var(--lab-tile-grad); }
   .game-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .game-card-body { padding: 22px 26px 18px; flex: 1; }
   .game-card-title {
@@ -304,4 +310,22 @@ const rest = GAMES.slice(1);
   .game-card-host { display: flex; align-items: center; gap: 8px; }
   .game-card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lab-dot, #13151d); }
   .game-card-arrow { font-size: 14px; }
+
+  /* BETA status badge overlaid on a game's media (beta games only) */
+  .game-beta {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 999px;
+    color: #fff;
+    background: var(--accent);
+    box-shadow: 0 2px 8px rgba(19,21,29,0.22);
+  }
 </style>
