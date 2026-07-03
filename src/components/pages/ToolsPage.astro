@@ -104,6 +104,71 @@ const ENGINES = [
       { slug: 'fahrenheit-to-celsius', title: 'Fahrenheit to Celsius', description: 'Convert °F to °C.' },
     ],
   },
+  {
+    prefix: 'hash',
+    name: 'Hash Generator',
+    glyph: '#',
+    bar: '#6366f1',
+    blurb: 'Generate MD5, SHA-1, SHA-256 and SHA-512 hashes in your browser.',
+    tools: [
+      { slug: 'md5-hash-generator',    title: 'MD5 Hash',    description: 'Generate an MD5 hash from any text.' },
+      { slug: 'sha256-hash-generator', title: 'SHA-256 Hash', description: 'Generate a SHA-256 hash from text.' },
+      { slug: 'sha1-hash-generator',   title: 'SHA-1 Hash',   description: 'Generate a SHA-1 hash from text.' },
+      { slug: 'sha512-hash-generator', title: 'SHA-512 Hash', description: 'Generate a SHA-512 hash from text.' },
+    ],
+  },
+  {
+    prefix: 'time',
+    name: 'Timestamp',
+    glyph: '⏱',
+    bar: '#0891b2',
+    blurb: 'Convert between Unix timestamps and human-readable dates.',
+    tools: [
+      { slug: 'unix-timestamp-converter', title: 'Unix Timestamp Converter', description: 'Convert Unix timestamps to dates and back.' },
+      { slug: 'epoch-to-date',            title: 'Epoch to Date',            description: 'Convert an epoch to a readable date.' },
+      { slug: 'date-to-unix-timestamp',   title: 'Date to Unix Timestamp',   description: 'Convert a date to a Unix timestamp.' },
+    ],
+  },
+  {
+    prefix: 'encode',
+    name: 'Encode / Decode',
+    glyph: '</>',
+    bar: '#7c3aed',
+    blurb: 'Base64, URL and HTML entity encoders, plus a JWT decoder.',
+    tools: [
+      { slug: 'base64-encode',       title: 'Base64 Encode',       description: 'Encode text to Base64.' },
+      { slug: 'base64-decode',       title: 'Base64 Decode',       description: 'Decode Base64 back to text.' },
+      { slug: 'url-encode',          title: 'URL Encode',          description: 'Percent-encode text for URLs.' },
+      { slug: 'url-decode',          title: 'URL Decode',          description: 'Decode percent-encoded URLs.' },
+      { slug: 'html-entity-encoder', title: 'HTML Entity Encoder', description: 'Encode and decode HTML entities.' },
+      { slug: 'jwt-decoder',         title: 'JWT Decoder',         description: 'Decode a JWT header and payload.' },
+    ],
+  },
+  {
+    prefix: 'color',
+    name: 'Color Tools',
+    glyph: '◑',
+    bar: '#db2777',
+    blurb: 'Convert HEX, RGB and HSL colors and check WCAG contrast.',
+    tools: [
+      { slug: 'hex-to-rgb',             title: 'HEX to RGB',        description: 'Convert HEX colors to RGB.' },
+      { slug: 'rgb-to-hex',             title: 'RGB to HEX',        description: 'Convert RGB colors to HEX.' },
+      { slug: 'hex-to-hsl',             title: 'HEX to HSL',        description: 'Convert HEX colors to HSL.' },
+      { slug: 'color-contrast-checker', title: 'Contrast Checker',  description: 'Check WCAG contrast ratios.' },
+    ],
+  },
+  {
+    prefix: 'password',
+    name: 'Password Tools',
+    glyph: '🔑',
+    bar: '#16a34a',
+    blurb: 'Generate strong passwords and passphrases, 100% in your browser.',
+    tools: [
+      { slug: 'password-generator',        title: 'Password Generator',        description: 'Generate strong random passwords.' },
+      { slug: 'strong-password-generator', title: 'Strong Password Generator', description: 'Create long, high-entropy passwords.' },
+      { slug: 'passphrase-generator',      title: 'Passphrase Generator',      description: 'Generate memorable word passphrases.' },
+    ],
+  },
 ] as const;
 
 const totalTools = ENGINES.reduce((n, e) => n + e.tools.length, 0);
