@@ -15,191 +15,238 @@ interface Props {
 }
 
 const { id, year, role, company, location, desc, details, tech, links, index, img, logo } = Astro.props;
+const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
 ---
 
 <!--
-  Layout:  [dot + line] | [year label + card]
-  The line extends -1rem below each wrapper to bridge the space-y-4 gap.
+  Layout:  [rail: dot + line] | [period label + card]
+  The rail line extends -16px below to bridge the .space-y-4 gap between items.
+  All content is always visible (no accordion); the scroll-reveal is driven by
+  `.tl-visible` on this wrapper, added by the IntersectionObserver in PortfolioPage.
 -->
-<div id={id} data-timeline-item={String(index)} class="timeline-item-wrapper flex flex-col md:flex-row gap-5">
+<div id={id} data-timeline-item={String(index)} class="tl-item">
 
-  {/* ── Rail: horizontal (dot + line) on mobile, vertical on desktop ── */}
-  <div class="flex items-center md:flex-none md:flex-col md:pt-[3px]">
-    <div class="tl-dot w-3 h-3 rounded-full bg-gray-300"></div>
-    <div class="tl-line flex-1 h-px md:w-px md:h-auto md:mt-2 bg-gradient-to-r md:bg-gradient-to-b from-gray-400/70 via-gray-500/30 to-transparent md:-mb-4"></div>
+  {/* ── Rail ── */}
+  <div class="tl-rail">
+    <div class="tl-dot"></div>
+    <div class="tl-line"></div>
   </div>
 
-  {/* ── Right side: year label + card ── */}
-  <div class="flex-1 min-w-0 pb-4">
+  {/* ── Period label + card ── */}
+  <div class="tl-body">
+    <div class="tl-period">{year}</div>
 
-    {/* Year label row */}
-    <div class="tl-year flex items-center gap-3 mb-3 h-[18px]">
-      <span class="tag-label text-xs font-black text-gray-400 uppercase tracking-widest leading-none">{year}</span>
-    </div>
+    <div class="tl-card-reveal">
+      <div class="tl-card">
 
-    {/* ── Card ── */}
-    <div class="tl-card timeline-item group cursor-pointer p-5 sm:p-8 border-2 border-black hover:border-pink-500/30 bg-[#151515]/60 group-[.active]:bg-[#1a1a1a]/70 backdrop-blur-md transition-all duration-500 overflow-hidden shadow-2xl">
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-
-        {/* Content */}
-        <div class="md:col-span-8">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-4">
-            <div class="flex items-center gap-4">
-              {logo && (
-                <div class="w-12 h-12 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-lg group-hover:border-pink-500/30 transition-colors">
-                  <img src={logo} alt={`${company} Logo`} loading="lazy" class="w-full h-full object-cover" />
-                </div>
-              )}
-              <h3 class="text-2xl font-black drop-shadow-xl flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
-                <span style="color: var(--text-primary)">{role}</span>
-                <span class="text-pink-400 font-medium text-lg whitespace-nowrap">— {company}</span>
-              </h3>
-            </div>
+        {/* Header */}
+        <div class="tl-head">
+          <div class="tl-icon">
+            {logo
+              ? <img src={logo} alt={`${company} logo`} loading="lazy" />
+              : <span>{monogram}</span>}
           </div>
-          <p class="text-xs text-pink-500/70 uppercase tracking-widest mb-4">{location}</p>
-          <p class="text-gray-400 text-sm leading-relaxed mb-0 group-[.active]:mb-6 transition-all duration-500">{desc}</p>
-
-          {/* Preview (collapsed) */}
-          <div class="group-[.active]:opacity-0 group-[.active]:h-0 mt-4 transition-all duration-500 overflow-hidden">
-            <div class="grid grid-cols-2 gap-4 opacity-50">
-              <div>
-                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Key Achievements</h4>
-                <ul class="space-y-1">
-                  {details.slice(0, 3).map(item => (
-                    <li class="flex items-start gap-1 text-[10px] leading-tight text-gray-300">
-                      <span class="text-pink-500/50">▹</span>
-                      <span class="truncate">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Stack</h4>
-                <div class="flex flex-wrap gap-1">
-                  {tech.slice(0, 3).map(t => (
-                    <span class="tag-label px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[8px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Expand indicator arrow */}
-          <div class="group-[.active]:hidden flex justify-center mt-3 opacity-50 group-hover:opacity-100 transition-all duration-500">
-            <svg class="w-4 h-4 text-pink-500/80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </div>
-
-          {/* Expanded details */}
-          <div class="timeline-details h-0 opacity-0 group-[.active]:h-auto group-[.active]:opacity-100 transition-all duration-500">
-            <div class="pt-6 border-t border-white/5">
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Key Achievements</h4>
-                  <ul class="space-y-3">
-                    {details.map(item => (
-                      <li class="flex items-start gap-3 text-sm text-gray-300 leading-snug">
-                        <span class="text-pink-500 mt-1">▹</span>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Stack</h4>
-                  <div class="flex flex-wrap gap-2 mb-8">
-                    {tech.map(t => (
-                      <span class="tag-label px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black text-gray-300 uppercase tracking-wider">{t}</span>
-                    ))}
-                  </div>
-                  <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Links</h4>
-                  <div class="flex flex-wrap gap-3">
-                    {links.map(l => (
-                      <a href={l.url} target="_blank" class="magnetic px-3.5 py-1.5 bg-pink-500/10 border border-pink-500/20 rounded-full text-[8.5px] font-black text-pink-500 uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all duration-300">
-                        {l.label} ↗
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="tl-headtext">
+            <h3 class="tl-role">{role}</h3>
+            <div class="tl-company">— {company}</div>
+            <div class="tl-loc">{location}</div>
           </div>
         </div>
 
-        <div class="md:col-span-4 flex flex-col items-center md:items-end justify-center order-first md:order-last mb-8 md:mb-0">
-          {img && (
-            <div class="relative group/preview overflow-hidden border border-white/5 shadow-2xl w-full bg-white/5 transition-all duration-700 group-hover:border-pink-500/30 group-hover:shadow-pink-500/10">
-              <img src={img} alt={`${company} Preview`} loading="lazy" class="w-full h-auto block transition-all duration-700 group-hover/preview:scale-110" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/preview:opacity-100 transition-opacity duration-500"></div>
+        <p class="tl-summary">{desc}</p>
+
+        <div class="tl-divider"></div>
+
+        {/* Two-column: achievements | media + stack + links */}
+        <div class="tl-grid">
+          <div class="tl-col-ach">
+            <div class="tl-label">Key achievements</div>
+            <ul class="tl-achlist">
+              {details.map(item => (
+                <li class="tl-ach">
+                  <span class="tl-bullet"></span>
+                  <span class="tl-ach-text">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="tl-col-side">
+            {img
+              ? <div class="tl-media"><img src={img} alt={`${company} preview`} loading="lazy" /></div>
+              : <div class="tl-media tl-media--empty"><span>▦</span></div>}
+
+            <div class="tl-label">Stack</div>
+            <div class="tl-chips">
+              {tech.map(t => (<span class="tl-chip">{t}</span>))}
             </div>
-          )}
+
+            {links.length > 0 && (
+              <div class="tl-links-block">
+                <div class="tl-label">Links</div>
+                <div class="tl-links">
+                  {links.map(l => (
+                    <a href={l.url} target="_blank" rel="noopener" class="tl-link">{l.label} ↗</a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
       </div>
     </div>
-
   </div>
 </div>
 
 <style>
-  @keyframes tlDotPop {
-    from { opacity: 0; transform: scale(0); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-  @keyframes tlLineFade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  @keyframes tlYearSlide {
-    from { opacity: 0; transform: translateX(14px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-  @keyframes tlCardIn {
-    from { opacity: 0; transform: translateX(36px) translateY(10px); }
-    to   { opacity: 1; transform: translateX(0)    translateY(0); }
+  /* ── Layout ── */
+  .tl-item { display: flex; gap: 20px; }
+  .tl-rail { flex: none; width: 16px; display: flex; flex-direction: column; align-items: center; padding-top: 1px; }
+  .tl-body { flex: 1; min-width: 0; padding-bottom: 6px; }
+  .tl-period {
+    font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 2px;
+    color: var(--text-primary); margin-bottom: 13px;
   }
 
-  /* ── Initial hidden states ── */
-  .tl-dot  { opacity: 0; transform: scale(0); }
-  .tl-line { opacity: 0; }
-  .tl-year { opacity: 0; transform: translateX(14px); }
-  .tl-card { opacity: 0; transform: translateX(36px) translateY(10px); }
-
-  /* ── Triggered by .tl-visible on the wrapper ── */
-  .tl-visible .tl-dot {
-    animation: tlDotPop  0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0s    both;
+  /* ── Rail: dot + connecting line ── */
+  .tl-dot {
+    width: 16px; height: 16px; border-radius: 50%; background: #ec4899;
+    border: 3px solid #0a0a0a; box-shadow: 0 0 0 1px rgba(236, 72, 153, 0.35);
   }
-  .tl-visible .tl-line {
-    animation: tlLineFade 0.5s  cubic-bezier(0.16, 1, 0.3, 1)    0.22s  both;
-  }
-  .tl-visible .tl-year {
-    animation: tlYearSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1)    0.12s  both;
-  }
-  .tl-visible .tl-card {
-    animation: tlCardIn  0.65s cubic-bezier(0.16, 1, 0.3, 1)     0.18s  both;
+  .tl-line {
+    flex: 1; width: 2px; margin-top: 8px; margin-bottom: -16px;
+    background: linear-gradient(to bottom, rgba(236, 72, 153, 0.35), rgba(255, 255, 255, 0.06) 42%, transparent);
   }
 
-  /* ── Card hover glow ── */
+  /* ── Card ── */
+  .tl-card {
+    background: #151515; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px;
+    padding: 30px 32px; box-shadow: 0 10px 30px -20px rgba(0, 0, 0, 0.8);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
   .tl-card:hover {
-    box-shadow: 0 16px 48px rgba(236, 72, 153, 0.12),
-                0 0 0 1px rgba(236, 72, 153, 0.1);
+    transform: translateY(-2px); border-color: rgba(236, 72, 153, 0.3);
+    box-shadow: 0 18px 44px -24px rgba(236, 72, 153, 0.28);
   }
 
-  /* ── Light mode ──
-     The dark surface utilities (bg-[#151515]/60 and the expanded
-     group-[.active]:bg-[#1a1a1a]/70) are non-!important, so an !important
-     background here wins in both collapsed and expanded states without
-     needing to know how `.active` is toggled. */
-  :global(body.light-mode) .tl-card {
-    background: #ffffff !important;
-    border-color: var(--border-color) !important;
+  /* ── Header ── */
+  .tl-head { display: flex; align-items: flex-start; gap: 16px; }
+  .tl-icon {
+    flex: none; width: 54px; height: 54px; border-radius: 15px; overflow: hidden;
+    background: rgba(236, 72, 153, 0.12); display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px; color: #ec4899;
   }
-  /* Stack chips: white/5 fill + gray-300 text are invisible/low-contrast on
-     a light card — give them a readable light treatment (pink accent stays). */
-  :global(body.light-mode) .tl-card .tag-label {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: var(--border-color);
-    color: var(--text-secondary);
+  .tl-icon img { width: 100%; height: 100%; object-fit: cover; }
+  .tl-headtext { flex: 1; min-width: 0; }
+  .tl-role {
+    font-weight: 800; font-size: 26px; line-height: 1.12; letter-spacing: -0.015em;
+    color: var(--text-primary); margin: 0;
+  }
+  .tl-company { font-weight: 700; font-size: 17px; color: #ec4899; margin-top: 5px; }
+  .tl-loc {
+    font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: #ec4899; margin-top: 9px;
+  }
+
+  /* ── Summary + divider ── */
+  .tl-summary { font-size: 16px; line-height: 1.55; color: var(--text-secondary); margin: 20px 0 0; max-width: 62ch; }
+  .tl-divider { height: 1px; background: rgba(255, 255, 255, 0.08); margin: 24px 0; }
+
+  /* ── Two-column grid ── */
+  .tl-grid { display: grid; grid-template-columns: 1.32fr 1fr; gap: 40px; }
+  .tl-col-ach, .tl-col-side { min-width: 0; }
+
+  .tl-label {
+    font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: rgba(255, 255, 255, 0.4);
+  }
+  .tl-col-ach .tl-label { margin-bottom: 14px; }
+  .tl-col-side .tl-label { margin-bottom: 11px; }
+
+  /* Achievements */
+  .tl-achlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .tl-ach { display: flex; gap: 12px; }
+  .tl-bullet { flex: none; width: 7px; height: 7px; background: #ec4899; transform: rotate(45deg); margin-top: 7px; }
+  .tl-ach-text { font-size: 14.5px; line-height: 1.5; color: #d1d5db; }
+
+  /* Media */
+  .tl-media {
+    height: 188px; border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 20px;
+  }
+  .tl-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tl-media--empty {
+    display: flex; align-items: center; justify-content: center;
+    background-color: #101314; color: rgba(255, 255, 255, 0.28); font-size: 20px;
+    background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0 10px, transparent 10px 20px);
+  }
+
+  /* Stack chips */
+  .tl-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .tl-chip {
+    font-family: 'Space Mono', monospace; font-size: 11.5px; letter-spacing: 0.3px; color: #d1d5db;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px; padding: 6px 12px;
+  }
+
+  /* Links */
+  .tl-links-block { margin-top: 20px; }
+  .tl-links { display: flex; flex-wrap: wrap; gap: 7px; }
+  .tl-link {
+    font-family: 'Space Mono', monospace; font-weight: 700; font-size: 11.5px; letter-spacing: 0.3px;
+    color: #ec4899; background: rgba(236, 72, 153, 0.12); border-radius: 999px; padding: 7px 14px;
+    text-decoration: none; transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease, color 0.14s ease;
+  }
+  .tl-link:hover {
+    transform: translateY(-1px); background: #ec4899; color: #fff;
+    box-shadow: 0 7px 16px -8px rgba(236, 72, 153, 0.6);
+  }
+
+  /* ── Scroll reveal (triggered by .tl-visible on the wrapper) ── */
+  @keyframes tlDotPop    { from { opacity: 0; transform: scale(0); }                       to { opacity: 1; transform: scale(1); } }
+  @keyframes tlLineFade  { from { opacity: 0; }                                             to { opacity: 1; } }
+  @keyframes tlPeriodIn  { from { opacity: 0; transform: translateX(14px); }               to { opacity: 1; transform: translateX(0); } }
+  @keyframes tlCardIn    { from { opacity: 0; transform: translateX(36px) translateY(10px); } to { opacity: 1; transform: translateX(0) translateY(0); } }
+
+  .tl-dot         { opacity: 0; transform: scale(0); }
+  .tl-line        { opacity: 0; }
+  .tl-period      { opacity: 0; transform: translateX(14px); }
+  .tl-card-reveal { opacity: 0; transform: translateX(36px) translateY(10px); }
+
+  .tl-visible .tl-dot         { animation: tlDotPop   0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0s    both; }
+  .tl-visible .tl-line        { animation: tlLineFade 0.5s  cubic-bezier(0.16, 1, 0.3, 1)     0.22s both; }
+  .tl-visible .tl-period      { animation: tlPeriodIn 0.4s  cubic-bezier(0.16, 1, 0.3, 1)     0.12s both; }
+  .tl-visible .tl-card-reveal { animation: tlCardIn   0.65s cubic-bezier(0.16, 1, 0.3, 1)     0.18s both; }
+
+  /* ── Light mode (POLISHED POP palette) ── */
+  :global(body.light-mode) .tl-dot { border-color: #fbfaf7; box-shadow: 0 0 0 1px rgba(236, 72, 153, 0.25); }
+  :global(body.light-mode) .tl-line {
+    background: linear-gradient(to bottom, rgba(236, 72, 153, 0.4), #e4decf 42%, transparent);
+  }
+  :global(body.light-mode) .tl-period { color: #19160f; }
+  :global(body.light-mode) .tl-card { background: #ffffff; border-color: #ece7db; box-shadow: 0 10px 30px -20px rgba(60, 40, 20, 0.22); }
+  :global(body.light-mode) .tl-card:hover { border-color: rgba(236, 72, 153, 0.3); box-shadow: 0 18px 44px -24px rgba(60, 40, 20, 0.32); }
+  :global(body.light-mode) .tl-icon { background: #fce3ef; color: #ec4899; }
+  :global(body.light-mode) .tl-role { color: #19160f; }
+  :global(body.light-mode) .tl-summary { color: #403a2e; }
+  :global(body.light-mode) .tl-divider { background: #ece7db; }
+  :global(body.light-mode) .tl-label { color: #a89f8c; }
+  :global(body.light-mode) .tl-ach-text { color: #2c281f; }
+  :global(body.light-mode) .tl-chip { background: #ffffff; border-color: #ded8ca; color: #4a4639; }
+  :global(body.light-mode) .tl-link { background: #fce3ef; color: #ec4899; }
+  :global(body.light-mode) .tl-link:hover { background: #ec4899; color: #ffffff; }
+  :global(body.light-mode) .tl-media { border-color: #ece7db; }
+  :global(body.light-mode) .tl-media--empty {
+    background-color: #f1ede3; color: rgba(25, 22, 15, 0.42);
+    background-image: repeating-linear-gradient(135deg, rgba(25, 22, 15, 0.05) 0 10px, transparent 10px 20px);
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    .tl-item { gap: 14px; }
+    .tl-card { padding: 24px 22px; border-radius: 16px; }
+    .tl-role { font-size: 22px; }
+    .tl-grid { grid-template-columns: 1fr; gap: 28px; }
   }
 </style>
