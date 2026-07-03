@@ -13,7 +13,6 @@ const GAMES = [
     blurb: 'Rotate and drop extruded isometric blocks, clear full levels, and chase your high score. Runs entirely in your browser — nothing to install.',
     image: 'https://faldrop.luci-studio.com/og-image.png',
     video: '/videos/faldrop-demo.mp4',
-    poster: '/videos/faldrop-demo-poster.jpg',
     href: 'https://faldrop.luci-studio.com',
     host: 'faldrop.luci-studio.com',
     tags: ['Arcade', 'Browser', 'No install'],
@@ -107,23 +106,28 @@ const rest = GAMES.slice(1);
       <!-- featured game -->
       <div style="padding:48px 0 0;">
         <a href={featured.href} target="_blank" rel="noopener noreferrer" class="game-feature">
-          <div class={`game-feature-media${featured.video ? " game-feature-media--portrait" : ""}`}>
+          <div class={`game-feature-media${featured.video ? " game-feature-media--demo" : ""}`}>
             {featured.beta && <span class="game-beta">Beta</span>}
             {featured.video ? (
-              <video
-                class="game-feature-video"
-                poster={featured.poster}
-                autoplay
-                muted
-                loop
-                playsinline
-                preload="metadata"
-                width="1056"
-                height="1844"
-                aria-label={`${featured.title} gameplay demo`}
-              >
-                <source src={featured.video} type="video/mp4" />
-              </video>
+              <Fragment>
+                <img class="game-feature-cover" src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
+                <video
+                  class="game-feature-video"
+                  muted
+                  loop
+                  playsinline
+                  preload="none"
+                  width="1056"
+                  height="1844"
+                  aria-label={`${featured.title} gameplay demo`}
+                >
+                  <source src={featured.video} type="video/mp4" />
+                </video>
+                <div class="game-feature-toggle" role="group" aria-label="Media view">
+                  <span class="game-feature-toggle-btn is-active" role="button" tabindex="0" data-demo="off">Cover</span>
+                  <span class="game-feature-toggle-btn" role="button" tabindex="0" data-demo="on">Demo</span>
+                </div>
+              </Fragment>
             ) : (
               <img src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
             )}
@@ -167,12 +171,32 @@ const rest = GAMES.slice(1);
     </div>
   </div>
 
-  <!-- The featured gameplay demo autoplays muted; honour reduced-motion (poster only) -->
+  <!-- Cover / Demo toggle on the featured card. The pills live inside the
+       card's <a>, so cancel the click/keydown to stop it opening the game. -->
   <script is:inline>
     (function () {
-      if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
-      var v = document.querySelector('.game-feature-video');
-      if (v) { v.removeAttribute('autoplay'); v.pause(); }
+      var media = document.querySelector('.game-feature-media--demo');
+      if (!media) return;
+      var video = media.querySelector('.game-feature-video');
+      var btns = media.querySelectorAll('.game-feature-toggle-btn');
+      function setDemo(on) {
+        media.classList.toggle('is-demo', on);
+        btns.forEach(function (b) {
+          b.classList.toggle('is-active', (b.getAttribute('data-demo') === 'on') === on);
+        });
+        if (on) { video.play().catch(function () {}); } else { video.pause(); }
+      }
+      btns.forEach(function (b) {
+        function handle(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          setDemo(b.getAttribute('data-demo') === 'on');
+        }
+        b.addEventListener('click', handle);
+        b.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { handle(e); }
+        });
+      });
     })();
   </script>
 </Layout>
@@ -221,33 +245,58 @@ const rest = GAMES.slice(1);
   }
   .game-feature:hover .game-feature-media img { transform: scale(1.04); }
 
-  /* Portrait gameplay video shown in the featured card (Faldrop) */
-  .game-feature-media--portrait {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 28px;
-    min-height: 380px;
+  /* Featured card with a Cover ⇄ Demo toggle (Faldrop): the branded cover
+     and the gameplay video are stacked layers that cross-fade. Both share a
+     dark background so the fade across their aspect ratios is seamless. */
+  .game-feature-media--demo { min-height: 340px; }
+  .game-feature-media--demo .game-feature-cover,
+  .game-feature-media--demo .game-feature-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.45s ease, transform 0.4s cubic-bezier(0.2,0.7,0.3,1);
   }
-  .game-feature-video {
-    display: block;
-    height: min(460px, 70vh);
-    width: auto;
-    aspect-ratio: 1056 / 1844;
-    max-width: 100%;
-    object-fit: cover;
-    border-radius: 16px;
-    box-shadow: 0 18px 40px -22px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
-    transition: transform 0.4s cubic-bezier(0.2,0.7,0.3,1);
+  .game-feature-media--demo .game-feature-cover { object-fit: cover; opacity: 1; }
+  .game-feature-media--demo .game-feature-video { object-fit: contain; opacity: 0; }
+  .game-feature-media--demo.is-demo .game-feature-cover { opacity: 0; }
+  .game-feature-media--demo.is-demo .game-feature-video { opacity: 1; }
+
+  /* Cover / Demo toggle pills overlaid on the media */
+  .game-feature-toggle {
+    position: absolute;
+    z-index: 3;
+    left: 14px;
+    bottom: 14px;
+    display: inline-flex;
+    gap: 3px;
+    padding: 3px;
+    border-radius: 999px;
+    background: rgba(12,13,18,0.55);
+    border: 1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
-  .game-feature:hover .game-feature-video { transform: scale(1.03); }
+  .game-feature-toggle-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 13px;
+    border-radius: 999px;
+    color: rgba(255,255,255,0.72);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s, color 0.2s;
+  }
+  .game-feature-toggle-btn:hover { color: #fff; }
+  .game-feature-toggle-btn.is-active { background: var(--accent); color: #fff; }
 
   .game-feature-body {
     padding: 38px 40px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: center;
   }
   .game-feature-eyebrow {
     font-family: 'Space Mono', monospace;
@@ -313,7 +362,7 @@ const rest = GAMES.slice(1);
   @media (max-width: 760px) {
     .game-feature { grid-template-columns: 1fr; }
     .game-feature-media { aspect-ratio: 1200 / 630; }
-    .game-feature-media--portrait { aspect-ratio: auto; min-height: 0; padding: 24px; }
+    .game-feature-media--demo { aspect-ratio: 4 / 3; min-height: 0; }
     .game-feature-body { padding: 30px 26px; }
   }
 
