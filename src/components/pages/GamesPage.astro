@@ -172,13 +172,17 @@ const rest = GAMES.slice(1);
   </div>
 
   <!-- Cover / Demo toggle on the featured card. The pills live inside the
-       card's <a>, so cancel the click/keydown to stop it opening the game. -->
+       card's <a>, so cancel the click/keydown to stop it opening the game.
+       Once the card scrolls into view it auto-switches Cover -> Demo after a
+       short delay (skipped on reduced-motion, or if the user toggles first). -->
   <script is:inline>
     (function () {
       var media = document.querySelector('.game-feature-media--demo');
       if (!media) return;
       var video = media.querySelector('.game-feature-video');
       var btns = media.querySelectorAll('.game-feature-toggle-btn');
+      var userActed = false;
+      var autoTimer = null;
       function setDemo(on) {
         media.classList.toggle('is-demo', on);
         btns.forEach(function (b) {
@@ -190,6 +194,8 @@ const rest = GAMES.slice(1);
         function handle(e) {
           e.preventDefault();
           e.stopPropagation();
+          userActed = true;
+          if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
           setDemo(b.getAttribute('data-demo') === 'on');
         }
         b.addEventListener('click', handle);
@@ -197,6 +203,21 @@ const rest = GAMES.slice(1);
           if (e.key === 'Enter' || e.key === ' ') { handle(e); }
         });
       });
+
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && 'IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries, obs) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            obs.disconnect();
+            video.preload = 'auto';   // start buffering once it's in view
+            autoTimer = setTimeout(function () {
+              if (!userActed) setDemo(true);
+            }, 2000);
+          });
+        }, { threshold: 0.5 });
+        io.observe(media);
+      }
     })();
   </script>
 </Layout>
