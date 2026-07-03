@@ -12,6 +12,8 @@ const GAMES = [
     tagline: '2.5D isometric block-stacker',
     blurb: 'Rotate and drop extruded isometric blocks, clear full levels, and chase your high score. Runs entirely in your browser — nothing to install.',
     image: 'https://faldrop.luci-studio.com/og-image.png',
+    video: '/videos/faldrop-demo.mp4',
+    poster: '/videos/faldrop-demo-poster.jpg',
     href: 'https://faldrop.luci-studio.com',
     host: 'faldrop.luci-studio.com',
     tags: ['Arcade', 'Browser', 'No install'],
@@ -105,9 +107,26 @@ const rest = GAMES.slice(1);
       <!-- featured game -->
       <div style="padding:48px 0 0;">
         <a href={featured.href} target="_blank" rel="noopener noreferrer" class="game-feature">
-          <div class="game-feature-media">
+          <div class={`game-feature-media${featured.video ? " game-feature-media--portrait" : ""}`}>
             {featured.beta && <span class="game-beta">Beta</span>}
-            <img src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
+            {featured.video ? (
+              <video
+                class="game-feature-video"
+                poster={featured.poster}
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                width="1056"
+                height="1844"
+                aria-label={`${featured.title} gameplay demo`}
+              >
+                <source src={featured.video} type="video/mp4" />
+              </video>
+            ) : (
+              <img src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
+            )}
           </div>
           <div class="game-feature-body">
             <div class="game-feature-eyebrow">{featured.tagline}</div>
@@ -147,6 +166,15 @@ const rest = GAMES.slice(1);
       <div style="height:100px;"></div>
     </div>
   </div>
+
+  <!-- The featured gameplay demo autoplays muted; honour reduced-motion (poster only) -->
+  <script is:inline>
+    (function () {
+      if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+      var v = document.querySelector('.game-feature-video');
+      if (v) { v.removeAttribute('autoplay'); v.pause(); }
+    })();
+  </script>
 </Layout>
 
 <style is:global>
@@ -192,11 +220,34 @@ const rest = GAMES.slice(1);
     transition: transform 0.4s cubic-bezier(0.2,0.7,0.3,1);
   }
   .game-feature:hover .game-feature-media img { transform: scale(1.04); }
+
+  /* Portrait gameplay video shown in the featured card (Faldrop) */
+  .game-feature-media--portrait {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    min-height: 380px;
+  }
+  .game-feature-video {
+    display: block;
+    height: min(460px, 70vh);
+    width: auto;
+    aspect-ratio: 1056 / 1844;
+    max-width: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 18px 40px -22px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+    transition: transform 0.4s cubic-bezier(0.2,0.7,0.3,1);
+  }
+  .game-feature:hover .game-feature-video { transform: scale(1.03); }
+
   .game-feature-body {
     padding: 38px 40px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    justify-content: center;
   }
   .game-feature-eyebrow {
     font-family: 'Space Mono', monospace;
@@ -262,6 +313,7 @@ const rest = GAMES.slice(1);
   @media (max-width: 760px) {
     .game-feature { grid-template-columns: 1fr; }
     .game-feature-media { aspect-ratio: 1200 / 630; }
+    .game-feature-media--portrait { aspect-ratio: auto; min-height: 0; padding: 24px; }
     .game-feature-body { padding: 30px 26px; }
   }
 
