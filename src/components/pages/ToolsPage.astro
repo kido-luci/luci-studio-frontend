@@ -84,6 +84,26 @@ const ENGINES = [
       { slug: 'split-pdf',  title: 'Split PDF',  description: 'Split a PDF into one file per page.' },
     ],
   },
+  {
+    prefix: 'unit',
+    name: 'Unit Converter',
+    glyph: '↔',
+    bar: '#d97706',
+    blurb: 'Convert length, weight and temperature units instantly.',
+    tools: [
+      { slug: 'cm-to-inches',          title: 'CM to Inches',          description: 'Convert centimetres to inches.' },
+      { slug: 'inches-to-cm',          title: 'Inches to CM',          description: 'Convert inches to centimetres.' },
+      { slug: 'mm-to-inches',          title: 'MM to Inches',          description: 'Convert millimetres to inches.' },
+      { slug: 'meters-to-feet',        title: 'Meters to Feet',        description: 'Convert metres to feet.' },
+      { slug: 'feet-to-meters',        title: 'Feet to Meters',        description: 'Convert feet to metres.' },
+      { slug: 'km-to-miles',           title: 'KM to Miles',           description: 'Convert kilometres to miles.' },
+      { slug: 'miles-to-km',           title: 'Miles to KM',           description: 'Convert miles to kilometres.' },
+      { slug: 'kg-to-lbs',             title: 'KG to Lbs',             description: 'Convert kilograms to pounds.' },
+      { slug: 'lbs-to-kg',             title: 'Lbs to KG',             description: 'Convert pounds to kilograms.' },
+      { slug: 'celsius-to-fahrenheit', title: 'Celsius to Fahrenheit', description: 'Convert °C to °F.' },
+      { slug: 'fahrenheit-to-celsius', title: 'Fahrenheit to Celsius', description: 'Convert °F to °C.' },
+    ],
+  },
 ] as const;
 
 const totalTools = ENGINES.reduce((n, e) => n + e.tools.length, 0);
