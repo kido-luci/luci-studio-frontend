@@ -74,13 +74,13 @@ PUBLIC_API_URL=http://localhost:3000
 - All other global CSS lives in `Layout.astro` (`<style is:global>`) — over 600 lines of custom styles
 - Theme system (light default / dark toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
 
-**Animated background**: a lightweight 2D `<canvas>` particle system (~50 particles, capped at 60fps) in `Layout.astro` — NOT Vanta/Three.js/p5.js (those were removed; only a stale `--vanta-bg` CSS var name remains). The canvas loop is skipped **only on mobile** (`max-width: 768px`); on Windows, `win-perf-mode` disables CSS effects (backdrop-filter, 3D transforms, heavy animations) but the particles still run.
+**Background**: none. Each page draws its own "blueprint" drafting-grid background in its component CSS. A 2D `<canvas>` particle field used to run site-wide (the drifting `-`/`o` shapes) but was **retired** in v1.45.0 — `particles.ts` / `canvasBackground.ts` and the `#canvas-bg` / `#bg-dimmer` elements are gone; `navDimmer.ts` now only styles the nav on scroll (glass bg + hide-on-scroll). (Also removed earlier: Vanta/Three.js/p5.js — only a stale `--vanta-bg` CSS var name remains.)
 
 **Third-party libraries** (via CDN):
 - GSAP + ScrollTrigger + SplitText (jsDelivr, in `Layout.astro`) — scroll reveals, hero/section text animations
 - Prism.js (cdnjs, in `blog/[slug].astro` only) — code syntax highlighting (Dart, Go, JS, TS)
 
-**Windows performance mode** (`win-perf-mode`): runtime Windows detection disables backdrop-filter, 3D transforms, and heavy animations. A parallel `max-width: 768px` rule drops backdrop-filter on fixed elements (nav, dimmer, mobile menu) to cut mobile scroll jank.
+**Windows performance mode** (`win-perf-mode`): runtime Windows detection disables backdrop-filter, 3D transforms, and heavy animations. A parallel `max-width: 768px` rule drops backdrop-filter on fixed elements (nav, mobile menu) to cut mobile scroll jank.
 
 ## Key Files
 
