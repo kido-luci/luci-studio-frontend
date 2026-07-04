@@ -1,95 +1,166 @@
 ---
+// LUCI STUDIO — "Blueprint" homepage.
+// A technical drafting-sheet redesign, adapted to the site's existing design
+// tokens so it keeps dark/light mode, the 6 accent color-schemes, the shared
+// TopNav and the GSAP reveal system. Every content slot is wired to the live API
+// (projects / posts / gallery / profile); the blueprint's placeholder copy was
+// mapped onto real work. The homepage is English-only (there is no /vi/ route).
 import Layout from "../../layouts/Layout.astro";
-import RepoCard from "../RepoCard.astro";
-import TopNav from "../TopNav.astro";
-import LabDecor from "../LabDecor.astro";
-import SeriesCard from "../SeriesCard.astro";
-import PostCard from "../PostCard.astro";
+import FooterLinks from "../FooterLinks.astro";
 import { postService } from "../../services/posts";
-import { playlistService } from "../../services/playlists";
-import { buildSeriesViews } from "../../utils/series";
 import { galleryService } from "../../services/gallery";
-import { projectService } from "../../services/projects";
-import { buildLabCards } from "../../utils/labCards";
 import { profileService } from "../../services/profile";
 import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
+import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
+
 const locale = getLocaleFromUrl(Astro.url);
-const t = useTranslations(locale);
-const heroWords = locale === 'vi' ? ['CÙNG', 'TẠO', 'ĐIỀU', 'TUYỆT'] : ["LET'S", 'SHIP', 'SOMETHING'];
-import FooterLinks from "../FooterLinks.astro";
-import "../../styles/lab-cards.css";
+const API_URL = import.meta.env.PUBLIC_API_URL || "";
 
 const profile = await profileService.getProfile();
+const stats = profile?.portfolio_stats ?? [];
 
-// The homepage LAB section reuses the /lab editorial RepoCard, built from the
-// same `projects` entity via the shared buildLabCards mapping. Apps lead with
-// their cover; source repos with the GitHub social-preview (OG) banner.
-const labProjects = await projectService.getAll();
-const { apps: labApps, sources: labSources } = buildLabCards(labProjects);
-// Homepage previews just the first 2 of each group (released apps + public
-// source); the full list lives on /lab via the "Explore the Lab" link.
-const labCards = [...labApps.slice(0, 2), ...labSources.slice(0, 2)];
+// Color-scheme picker presets — mirror the site's TopNav so the nav's palette
+// button drives the same window.setScheme + html[data-scheme=…] system site-wide.
+const schemes = [
+  { id: "violet", hex: "#8b5cf6", label: "Violet" },
+  { id: "ocean", hex: "#3b82f6", label: "Ocean" },
+  { id: "ember", hex: "#f97316", label: "Ember" },
+  { id: "forest", hex: "#10b981", label: "Forest" },
+  { id: "rose", hex: "#f43f5e", label: "Rose" },
+  { id: "mono", hex: "#a1a1aa", label: "Mono" },
+];
 
-const [rawPosts, rawPlaylists] = await Promise.all([
-  postService.getAll(),
-  playlistService.getAll(),
-]);
-const blogPosts = rawPosts
-  .filter(p => !p.topics?.some(t => t.toLowerCase().startsWith('art')))
-  .map(rawP => {
-  const p = localized(rawP, locale);
-  return {
-  id: p.id,
-  title: p.title,
-  subtitle: p.subtitle || '',
-  date: formatDate(p.created_at, locale),
-  read: readTimeFor(p, locale),
-  tags: (p.topics && p.topics.length > 0) ? p.topics : ['Engineering'],
-  // empty cover → PostCard renders the gradient + tag-word fallback (same as /blog)
-  img: p.cover_image_url || '',
-  likes: p.likes ?? 0,
-  views: p.views ?? 0,
-}; });
+// §01 SELECTED WORK — a hand-picked set (app · game · open source · writing series).
+// Cover-less items fall back to the striped drafting-fig pattern. `ext` opens
+// external links in a new tab; the series link stays in-tab.
+const selectedWork = [
+  {
+    n: "01",
+    title: "MemoirMe",
+    badge: "APP",
+    year: "2024",
+    desc: "Zero-knowledge RSA/AES encrypted diary with geolocation mapping, AI features, and cross-platform sync.",
+    img: "https://media.luci-studio.com/MEMOIRME.webp",
+    href: "https://memoirme.app/",
+    fig: "app screenshot",
+    ext: true,
+    demo: "",
+  },
+  {
+    n: "02",
+    title: "Faldrop",
+    badge: "GAME",
+    year: "2026",
+    desc: "A 2.5D block-stacker — extruded-cube pieces, combos and a global leaderboard, at 60fps on one canvas.",
+    img: "https://faldrop.luci-studio.com/og-image.png",
+    href: "https://faldrop.luci-studio.com",
+    fig: "game capture",
+    ext: true,
+    demo: "/videos/faldrop-demo.mp4",
+  },
+  {
+    n: "03",
+    title: "Flutter Starter Template",
+    badge: "OPEN SOURCE",
+    year: "2026",
+    desc: "A production-ready Flutter foundation: modular Clean Architecture, offline-first sync, JWT auth, Firebase, and a Go reference backend.",
+    img: "/images/flutter-starter-template.webp",
+    href: "https://github.com/kido-luci/flutter-starter-template",
+    fig: "repo preview",
+    ext: true,
+    demo: "",
+  },
+  {
+    n: "04",
+    title: "Flutter & Dart",
+    badge: "SERIES",
+    year: "2026",
+    desc: "A written series — Flutter architecture, state management, testing, DI and advanced Dart concepts.",
+    img: "https://media.luci-studio.com/posts/covers/1779710466887355000.jpg",
+    href: localizedHref(locale, "/blog/series/flutter-dart-1b6c8568/"),
+    fig: "series cover",
+    ext: false,
+    demo: "",
+  },
+];
 
-const homePlaylists = buildSeriesViews(rawPlaylists, rawPosts).slice(0, 3);
-const API_URL = import.meta.env.PUBLIC_API_URL || '';
+// §03 WRITING — latest 5 posts (art-topic posts excluded, same rule as before).
+const rawPosts = await postService.getAll();
+const writing = rawPosts
+  .filter((p) => !p.topics?.some((tp) => tp.toLowerCase().startsWith("art")))
+  .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
+  .slice(0, 5)
+  .map((rawP) => {
+    const p = localized(rawP, locale);
+    return {
+      id: p.id,
+      title: p.title,
+      ym: (p.created_at || "").slice(0, 7),
+      read: readTimeFor(p, locale),
+      topic: p.topics && p.topics.length > 0 ? p.topics[0] : "Engineering",
+    };
+  });
 
+// §04 ART — live gallery (kept masonry + lightbox subsystem). Fallback keeps the
+// section populated if the gallery API is empty at build time.
 const galleryItems = await galleryService.getAll();
 const artItems: { img: string; label: string; year: string; date: string; topic: string; id?: string; likes?: number; views?: number }[] =
   galleryItems.length > 0
-    ? galleryItems.map(rawG => {
-          const g = localized(rawG, locale);
-          return {
-          img: g.cover_image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800',
+    ? galleryItems.map((rawG) => {
+        const g = localized(rawG, locale);
+        return {
+          img: g.cover_image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800",
           label: g.title,
           year: new Date(g.created_at).getFullYear().toString(),
           date: formatDate(g.created_at, locale),
-          topic: 'Art',
+          topic: "Art",
           id: g.id,
           likes: g.likes ?? 0,
           views: g.views ?? 0,
-        }; })
+        };
+      })
     : [
-        { img: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200', label: 'Neon Currents', year: '2024', date: 'Jan 2024', topic: 'Digital Art' },
-        { img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800', label: 'Deep Space', year: '2024', date: 'Mar 2024', topic: 'Digital Art' },
-        { img: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800', label: 'Bloom', year: '2024', date: 'Jun 2024', topic: 'Illustration' },
-        { img: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800', label: 'Ember', year: '2023', date: 'Nov 2023', topic: 'Digital Art' },
-        { img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=800', label: 'Circuit', year: '2023', date: 'Aug 2023', topic: 'Digital Art' },
+        { img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200", label: "Neon Currents", year: "2024", date: "Jan 2024", topic: "Digital Art" },
+        { img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800", label: "Deep Space", year: "2024", date: "Mar 2024", topic: "Digital Art" },
+        { img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800", label: "Bloom", year: "2024", date: "Jun 2024", topic: "Illustration" },
       ];
 
-const SITE_URL = 'https://luci-studio.com';
+// Static blueprint copy — kept as data so the JSX stays free of raw "&" text nodes.
+const directory = [
+  { n: "01", label: "BLOG", desc: "Engineering notes & deep-dives", href: localizedHref(locale, "/blog"), ext: false, orange: false },
+  { n: "02", label: "TOOLS", desc: "Free browser micro-tools", href: "/tools", ext: false, orange: false },
+  { n: "03", label: "GAMES", desc: "Browser games, 60fps", href: "https://games.luci-studio.com", ext: true, orange: false },
+  { n: "04", label: "APPS", desc: "Cross-platform & open source", href: "#work", ext: false, orange: false },
+  { n: "05", label: "ART", desc: "Pen, pencil & digital", href: "#art", ext: false, orange: true },
+];
+const capabilities = [
+  { n: "01", title: "Cross-platform apps", desc: "One Flutter codebase → Android, iOS, macOS, Windows & Web. Local-first, offline-ready.", tag: "Flutter · Dart · BLoC", orange: false },
+  { n: "02", title: "Browser tools & games", desc: "Fast, offline-capable micro-tools and games — zero install, all client-side.", tag: "Canvas · TS · WASM", orange: false },
+  { n: "03", title: "Technical writing", desc: "Deep-dives and engineering notes on Flutter, Dart and systems that people actually read.", tag: "Blog · Series", orange: false },
+  { n: "04", title: "Digital art", desc: "Hand-drawn and digital pieces — portraits, manga studies, ink.", tag: "Pen · Pencil · Digital", orange: true },
+];
+const sitemapLinks = [
+  { label: "Home", href: localizedHref(locale, "/") },
+  { label: "Blog", href: localizedHref(locale, "/blog") },
+  { label: "Series", href: localizedHref(locale, "/blog/series") },
+  { label: "Lab", href: localizedHref(locale, "/lab") },
+];
+const makeLinks = [
+  { label: "Tools", href: "/tools", ext: false },
+  { label: "Games", href: "https://games.luci-studio.com", ext: true },
+  { label: "Apps", href: "#work", ext: false },
+  { label: "Art", href: "#art", ext: false },
+];
+
+const SITE_URL = "https://luci-studio.com";
 const homepageSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'Luci Studio',
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Luci Studio",
   url: SITE_URL,
-  description: 'A creative engineering studio — technical blog, browser tools & games, digital art, and high-performance cross-platform applications.',
-  logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/logo_icon.png` },
-  sameAs: [
-    'https://medium.com/@lapl1412.work',
-    'https://www.linkedin.com/in/kido-luci/',
-  ],
+  description: "A creative engineering studio — technical blog, browser tools & games, digital art, and high-performance cross-platform applications.",
+  logo: { "@type": "ImageObject", url: `${SITE_URL}/images/logo_icon.png` },
+  sameAs: ["https://medium.com/@lapl1412.work", "https://www.linkedin.com/in/kido-luci/"],
 };
 ---
 
@@ -100,1287 +171,1113 @@ const homepageSchema = {
   keywords="Flutter, Dart, Go, mobile development, tech blog, digital art, cross-platform, clean architecture, Luci Studio"
   structuredData={homepageSchema}
 >
-
   <Fragment slot="head">
-    <!-- Preload the LCP hero background. It's a CSS background-image, so the browser
-         can't discover it until the stylesheet parses (~600ms late on mobile). Preloading
-         starts the fetch at HTML parse with high priority. Variants match the .hero-bg-img
-         portrait/landscape media rules so only the needed one is fetched. -->
-    <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-portrait.webp" media="(orientation: portrait)" />
-    <link rel="preload" as="image" fetchpriority="high" href="https://media.luci-studio.com/hero/luci-hero-landscape.webp" media="(orientation: landscape)" />
-    <!-- Editorial display fonts for the LAB section RepoCards (same as /lab; Space Mono already in Layout). -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap" />
-    <!-- Mark the homepage for the scroll-animation system. Inline + in <head> so it runs
-         BEFORE the body paints: every CSS hidden initial-state below is gated on
-         html.home-anim, so JS-off visitors (class never added) and the GSAP-load failsafe
-         (class removed) both fall back to fully-visible content with zero FOUC. -->
-    <script is:inline>document.documentElement.classList.add('home-anim');</script>
+    <!-- Mark the homepage: (1) home-anim gates the scroll-reveal hidden states so
+         JS-off / GSAP-fail / reduced-motion all fall back to visible content; (2)
+         bp-home suppresses the shared particle canvas (the blueprint grid is the bg).
+         Inline + in <head> so both land before first paint. -->
+    <script is:inline>document.documentElement.classList.add('home-anim');document.documentElement.classList.add('bp-home');</script>
   </Fragment>
 
-  <TopNav active="home" ctaLabel={t('home.letsTalk')} ctaHref="#contact" />
+  <nav class="bp-nav" data-bp-nav>
+    <div class="bp-wrap bp-nav-inner">
+      <a href={localizedHref(locale, "/")} class="bp-nav-logo">
+        <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="bp-nav-logo-img" />
+        <span class="bp-nav-name">LUCI <span class="text-shimmer">STUDIO</span><span class="bp-nav-name-dot">.</span></span>
+      </a>
+      <div class="bp-nav-links bp-mono">
+        <a href={localizedHref(locale, "/")} class="is-active">HOME</a>
+        <a href={localizedHref(locale, "/blog")}>BLOG</a>
+        <a href={localizedHref(locale, "/blog/series")}>SERIES</a>
+        <a href={localizedHref(locale, "/lab")}>LAB</a>
+        <a href="/tools">TOOLS</a>
+        <a href="/games">GAMES</a>
+      </div>
+      <div class="bp-nav-actions">
+        <button type="button" id="theme-toggle" class="bp-nav-icon" aria-label="Toggle theme" onclick="window.toggleTheme && window.toggleTheme()">
+          <svg class="bp-nav-svg dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+          <svg class="bp-nav-svg light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </button>
+        <div class="bp-scheme">
+          <button type="button" id="scheme-toggle" class="bp-nav-icon" aria-label="Color scheme" aria-controls="scheme-popover" aria-expanded="false">
+            <svg class="bp-nav-svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.88 2.88M6.75 17.25h.008v.008H6.75v-.008Z" /></svg>
+          </button>
+          <div id="scheme-popover" role="radiogroup" aria-label="Color scheme" class="bp-scheme-popover" hidden>
+            {schemes.map((s) => (
+              <button type="button" class="scheme-dot" role="radio" data-scheme={s.id} aria-checked="false" aria-label={s.label} title={s.label} style={`background:${s.hex}`}></button>
+            ))}
+          </div>
+        </div>
+        <a href="#contact" class="bp-nav-cta bp-mono">LET'S TALK</a>
+        <button type="button" class="bp-nav-burger" aria-label="Menu" aria-expanded="false" onclick="var n=document.querySelector('[data-bp-nav]');var o=n.classList.toggle('menu-open');this.setAttribute('aria-expanded',String(o))">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <div class="bp-nav-mobile bp-mono">
+      <a href={localizedHref(locale, "/")}>HOME</a>
+      <a href={localizedHref(locale, "/blog")}>BLOG</a>
+      <a href={localizedHref(locale, "/blog/series")}>SERIES</a>
+      <a href={localizedHref(locale, "/lab")}>LAB</a>
+      <a href="/tools">TOOLS</a>
+      <a href="/games">GAMES</a>
+      <a href="#contact" class="bp-nav-mobile-cta">LET'S TALK</a>
+    </div>
+  </nav>
 
-  <main data-api-url={API_URL}>
+  <main class="bp" data-api-url={API_URL}>
+    <div class="bp-grid" aria-hidden="true"></div>
 
-    <!-- HERO -->
-    <section class="relative min-h-screen flex flex-col pt-20">
-      <div class="hero-bg-img absolute inset-0 pointer-events-none z-[0]" style="background-size:cover;background-position:center;background-repeat:no-repeat;"></div>
-      <LabDecor />
-      <!-- Vanta.js halo is handled in Layout.astro -->
+    <!-- ===================== HERO ===================== -->
+    <header class="bp-wrap bp-hero">
+      <div class="bp-hero-left">
+        <div class="bp-coord" data-reveal>
+          <span class="bp-coord-dot" aria-hidden="true"></span>
+          <span class="bp-mono">N 10°49′ · CREATIVE ENGINEERING STUDIO</span>
+        </div>
 
-      <!-- Floating orbs for depth -->
-      <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
-      <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
-
-      <!-- Patch-reveal overlay: tiles generated by JS, GSAP staggers them out to reveal the hero -->
-      <div data-hero-patches aria-hidden="true" class="absolute inset-0 pointer-events-none z-30"></div>
-
-      <div class="relative z-10 flex-1 flex flex-col justify-center items-center text-center max-w-6xl mx-auto w-full px-4 md:px-6">
-
-        <!-- Main Headline -->
-        <h1 class="hero-headline" data-word-reveal>
-          <!-- Line 1: LUCI STUDIO -->
-          <span class="hero-line hero-line-top">
-            <span class="reveal-word hero-word-main">
-              <span class="text-white">LUCI</span>
-            </span>
-            <span class="reveal-word hero-word-accent">
-              <span class="text-shimmer">STUDIO</span>
-            </span>
-          </span>
-
-          <!-- Divider line -->
-          <span class="hero-divider" aria-hidden="true">
-            <span class="hero-divider-line"></span>
-            <span class="hero-divider-diamond">◆</span>
-            <span class="hero-divider-line"></span>
-          </span>
-
+        <h1 class="bp-display bp-hero-title" data-word-reveal>
+          <span class="reveal-word"><span>LUCI</span></span>
+          <span class="reveal-word"><span>STUDIO<em class="bp-acc-dot">.</em></span></span>
         </h1>
 
-        <!-- Subtitle -->
-        <p class="hero-subtitle" style="color: white !important;" set:html={t('home.heroTagline')}></p>
+        <div class="bp-hero-note bp-mono" data-reveal aria-hidden="true">
+          <span class="bp-dim-tick"></span>
+          <span class="bp-dim-txt">Δ 1440 × 8-COL BASELINE GRID · REV 1.0</span>
+          <span class="bp-dim-rule"></span>
+          <span class="bp-dim-tick"></span>
+        </div>
 
-        <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-5">
-          <a href="#work" class="magnetic group relative px-8 py-4 hero-cta-primary text-sm font-black rounded-full overflow-hidden transition-all duration-500 hover:scale-105">
-            <span class="relative z-10 uppercase tracking-widest">{t('home.viewWork')}</span>
-            <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <span class="absolute inset-0 z-10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 font-black uppercase tracking-widest transition-opacity duration-500">{t('home.viewWork')}</span>
-            <div class="absolute -inset-1 bg-gradient-to-r from-violet-600 to-blue-600 rounded-full opacity-0 group-hover:opacity-20 blur transition-opacity duration-500"></div>
-          </a>
-          <a href="#art" class="magnetic hero-cta-secondary px-8 py-4 border text-sm font-bold rounded-full transition-all duration-300 uppercase tracking-widest hover:scale-105">
-            {t('home.seeArt')}
-          </a>
+        <p class="bp-tagline" data-reveal>
+          A creative engineering studio — we craft <span class="bp-u">cross-platform apps</span>, <span class="bp-u">browser tools &amp; games</span>, <span class="bp-u">technical writing</span>, and <span class="bp-u bp-u--o">digital art</span>, turning hard problems into shipped products.
+        </p>
+
+        <div class="bp-hero-cta" data-reveal>
+          <a href="#work" class="bp-btn bp-btn--solid">View work</a>
+          <a href="#art" class="bp-btn bp-btn--ghost">See art →</a>
         </div>
       </div>
 
-      <!-- Pillars: full-width bar pinned to the bottom of the hero -->
-      <div class="hero-pillars relative z-10" data-reveal>
-        <a href={localizedHref(locale, '/blog')} class="hp-card" style="--hp:var(--accent)">
-          <span class="hp-num">01</span>
-          <span class="hp-title">{t('home.blogTitle')}</span>
-          <span class="hp-sub">{t('home.blogSub')}</span>
-          <span class="hp-arrow" aria-hidden="true">→</span>
-        </a>
-        <a href="/tools" class="hp-card" style="--hp:#22d3ee">
-          <span class="hp-num">02</span>
-          <span class="hp-title">{t('home.toolsTitle')}</span>
-          <span class="hp-sub">{t('home.toolsSub')}</span>
-          <span class="hp-arrow" aria-hidden="true">→</span>
-        </a>
-        <a href="https://games.luci-studio.com" target="_blank" rel="noopener noreferrer" class="hp-card" style="--hp:#f59e0b">
-          <span class="hp-num">03</span>
-          <span class="hp-title">{t('home.gamesTitle')}</span>
-          <span class="hp-sub">{t('home.gamesSub')}</span>
-          <span class="hp-arrow" aria-hidden="true">↗</span>
-        </a>
-        <a href="#work" class="hp-card" style="--hp:#34d399">
-          <span class="hp-num">04</span>
-          <span class="hp-title">{t('home.appsTitle')}</span>
-          <span class="hp-sub">{t('home.appsSub')}</span>
-          <span class="hp-arrow" aria-hidden="true">→</span>
-        </a>
-        <a href="#art" class="hp-card" style="--hp:#f472b6">
-          <span class="hp-num">05</span>
-          <span class="hp-title">{t('home.artTitle')}</span>
-          <span class="hp-sub">{t('home.artSub')}</span>
-          <span class="hp-arrow" aria-hidden="true">→</span>
-        </a>
+      <div class="bp-hero-right" data-reveal="scale" aria-hidden="true">
+        <div class="bp-diagram">
+          <svg class="bp-hero-svg" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" stroke="currentColor">
+              <circle cx="210" cy="210" r="200" stroke-opacity="0.10"></circle>
+              <circle cx="210" cy="210" r="150" stroke-opacity="0.16"></circle>
+              <circle cx="210" cy="210" r="96" class="bp-svg-acc" stroke-width="2.5" stroke-opacity="0.8"></circle>
+              <line x1="8" y1="210" x2="412" y2="210" stroke-opacity="0.10"></line>
+              <line x1="210" y1="8" x2="210" y2="412" stroke-opacity="0.10"></line>
+              <line x1="68" y1="68" x2="352" y2="352" stroke-opacity="0.06"></line>
+              <line x1="352" y1="68" x2="68" y2="352" stroke-opacity="0.06"></line>
+              <circle cx="210" cy="210" r="200" class="bp-svg-acc bp-svg-spin" stroke-opacity="0.5" stroke-dasharray="2 9"></circle>
+              <rect x="280" y="256" width="12" height="12" stroke-opacity="0.22"></rect>
+            </g>
+            <circle cx="210" cy="210" r="5" class="bp-svg-orange-fill"></circle>
+            <circle cx="306" cy="114" r="4" class="bp-svg-acc-fill"></circle>
+            <circle cx="138" cy="300" r="3" class="bp-svg-orange-fill"></circle>
+          </svg>
+          <span class="bp-mono bp-diagram-ann bp-diagram-ann--tr">R = 96px<br />◦ node.02</span>
+          <span class="bp-mono bp-diagram-ann bp-diagram-ann--bl">Ø 400<br />tol ±0.5</span>
+        </div>
+      </div>
 
-        <!-- Scroll cue floating just above the bar — signals more content below -->
-        <a href="#blog" class="hero-scroll-cue" aria-label="Scroll down for more">
-          <span class="hero-scroll-text">{t('home.scrollLabel')}</span>
-          <svg class="hero-scroll-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-        </a>
+      <a href="#directory" class="bp-scroll bp-mono" aria-label="Scroll down">
+        <span>SCROLL</span>
+        <svg class="bp-scroll-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+      </a>
+    </header>
+
+    <!-- ===================== DIRECTORY ===================== -->
+    <section class="bp-wrap bp-section" id="directory">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">DIRECTORY</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-count">05 SECTIONS</span>
+      </div>
+      <div class="bp-dir">
+        {directory.map((d, i) => (
+          <a
+            href={d.href}
+            class={`bp-dir-item${d.orange ? " is-orange" : ""}`}
+            data-reveal
+            data-delay={String((i % 6) + 1)}
+            {...(d.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            <span class="bp-mono bp-dir-num">{d.n}</span>
+            <span class="bp-display bp-dir-title">{d.label}</span>
+            <span class="bp-mono bp-dir-desc">{d.desc}</span>
+          </a>
+        ))}
       </div>
     </section>
 
-    <!-- MARQUEE STRIP -->
-    <div class="relative py-6 border-y border-white/5 bg-black/40 overflow-hidden">
-      <div class="flex whitespace-nowrap animate-marquee">
-        {(profile?.tech_marquee ?? []).flatMap((t) => [
-          <span class="mx-8 text-xs font-black uppercase tracking-[0.3em] text-gray-400">{t}</span>,
-          <span class="mx-4 text-gray-700 text-lg">✦</span>,
-        ])}
-        {(profile?.tech_marquee ?? []).flatMap((t) => [
-          <span class="mx-8 text-xs font-black uppercase tracking-[0.3em] text-gray-400">{t}</span>,
-          <span class="mx-4 text-gray-700 text-lg">✦</span>,
-        ])}
+    <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
+
+    <!-- ===================== §01 SELECTED WORK ===================== -->
+    <section class="bp-wrap bp-section" id="work">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">§01 — SELECTED WORK</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-count">{String(selectedWork.length).padStart(2, "0")} PROJECTS</span>
       </div>
-    </div>
-
-
-    <!-- CONTENT WRAPPER FOR SMOOTH TRANSITIONS -->
-    <div class="relative bg-black/60 border-t border-white/5 light-mode:bg-white/80" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-      
-            <!-- BLOG -->
-      <section id="blog" class="py-16 px-4 md:px-6">
-        <div class="max-w-7xl mx-auto">
-          <div data-reveal class="mb-20 text-center">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('blog.eyebrow')}</span>
-            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.thoughts')}<span class="text-violet-500">.</span></h2>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch md:auto-rows-fr gap-8" id="home-blog-grid">
-            {blogPosts.slice(0, 6).map((p) => (
-              <PostCard
-                href={localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`)}
-                title={p.title}
-                subtitle={p.subtitle}
-                tags={p.tags}
-                date={p.date}
-                read={p.read}
-                img={p.img}
-                id={p.id}
-                views={p.views}
-                likes={p.likes}
-                interactive
-              />
-            ))}
-          </div>
-          {blogPosts.length > 6 && (
-            <div data-reveal class="mt-12 text-center">
-              <a href={localizedHref(locale, '/blog')} class="magnetic !inline-flex items-center gap-2 px-7 py-3 border border-violet-500/30 text-xs font-black uppercase tracking-widest text-violet-400 rounded-full hover:border-violet-500/70 hover:bg-violet-500/10 hover:text-violet-300 transition-all duration-300">
-                {format(t('home.viewAllPosts'), { n: blogPosts.length })}
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </a>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <div class="flex flex-col items-center py-8 opacity-40">
-        <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+      <div class="bp-sec-title-row" data-reveal>
+        <h2 class="bp-display bp-h2" data-ml9>Things I've shipped.</h2>
+        <a href={localizedHref(locale, "/lab")} class="bp-mono bp-more">ALL WORK →</a>
       </div>
-
-      <!-- LAB -->
-      <section id="work" class="py-16 px-4 md:px-6">
-        <div class="max-w-7xl mx-auto">
-          <div data-reveal class="mb-20">
-            <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('home.openSourceApps')}</span>
-            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.lab')}<span class="text-violet-500">.</span></h2>
-            <div data-lab-underline class="h-px w-full bg-gradient-to-r from-violet-500 to-transparent mt-6 max-w-xs"></div>
-          </div>
-          <div class="lab-palette grid grid-cols-1 md:grid-cols-2 gap-7" style="font-family:'Hanken Grotesk',system-ui,sans-serif;">
-            {labCards.map((c) => (
-              <RepoCard {...c} />
-            ))}
-          </div>
-          {labCards.length > 0 && (
-            <div data-reveal class="mt-12 text-center">
-              <a href={localizedHref(locale, '/lab')} class="magnetic !inline-flex items-center gap-2 px-7 py-3 border border-violet-500/30 text-xs font-black uppercase tracking-widest text-violet-400 rounded-full hover:border-violet-500/70 hover:bg-violet-500/10 hover:text-violet-300 transition-all duration-300">
-                {t('home.exploreLab')}
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </a>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <div class="flex flex-col items-center py-8 opacity-40">
-        <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
-      </div>
-
-      <!-- SERIES -->
-      {homePlaylists.length > 0 && (
-        <Fragment>
-          <section id="series" class="py-16 px-4 md:px-6">
-            <div class="max-w-7xl mx-auto">
-              <div class="home-playlists pt-12">
-                <div data-reveal class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <span class="text-xs font-black text-[color:var(--accent)] uppercase tracking-[0.3em] mb-2 block">{t('home.readingPaths')}</span>
-                    <h3 class="text-3xl md:text-4xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.series')}<span class="text-[color:var(--accent)]">.</span></h3>
-                  </div>
-                  <a href={localizedHref(locale, '/blog/series')} class="playlist-see-all">{t('home.viewSeries')}</a>
-                </div>
-
-                <ol class="series-strip list-none p-0 m-0">
-                  {homePlaylists.map((p) => (
-                    <li><SeriesCard series={p} /></li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          </section>
-
-          <div class="flex flex-col items-center py-8 opacity-40">
-            <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
-          </div>
-        </Fragment>
-      )}
-
-      <!-- ART GALLERY -->
-      <section id="art" class="py-16 px-4 md:px-6 relative">
-        <div class="absolute inset-0 pointer-events-none" style="clip-path: inset(0);">
-          <div id="art-bg" class="sticky top-0 w-full h-screen" style="background-size:cover;background-position:center;background-repeat:no-repeat"></div>
-        </div>
-        <div class="relative max-w-7xl mx-auto">
-          <div data-reveal class="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div>
-              <span class="text-xs font-black uppercase tracking-[0.3em] mb-3 block" style="background:linear-gradient(90deg,#f472b6,var(--accent),#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">{t('home.offClock')}</span>
-              <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="color:white;font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('home.theArt')}<span style="color:#60a5fa">.</span></h2>
-            </div>
-            <p class="text-white/50 max-w-xs text-sm leading-relaxed">{t('home.artDescription')}</p>
-          </div>
-
-          <div class="masonry-art-grid">
-            {artItems.map((a) => {
-              const infoBar = (
-                <div class="px-3 py-2 flex items-start justify-between gap-2 rounded-xl" style="background:rgba(10,10,20,0.85)">
-                  <div class="flex-1 min-w-0">
-                    <p class="font-bold text-sm leading-snug line-clamp-2" style="color:#fff">{a.label}</p>
-                    <p class="text-[10px] uppercase tracking-widest mt-0.5 truncate" style="color:#93c5fd">{a.topic} · {a.date}</p>
-                  </div>
-                  {a.id != null && (
-                    <button
-                      type="button"
-                      class="art-like-area flex items-center gap-1 cursor-pointer flex-shrink-0 group/like mt-0.5 bg-transparent border-0 p-0"
-                      data-id={String(a.id)}
-                      data-likes={String(a.likes ?? 0)}
-                      aria-label={`Like ${a.label}`}
-                    >
-                      <svg class="art-like-icon w-3.5 h-3.5 group-hover/like:text-rose-400 transition-colors duration-200" style="color:#cbd5e1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                      </svg>
-                      <span class="art-like-count text-[10px] group-hover/like:text-rose-400 transition-colors duration-200" style="color:#cbd5e1">{a.likes ?? 0}</span>
-                    </button>
-                  )}
-                </div>
-              );
-              const openable = a.id != null;
-              const frameClass = "art-img-frame relative block w-full rounded-2xl overflow-hidden border-4 border-white/40 hover:border-purple-400/80 transition-all duration-500";
-              const frameInner = (
+      <div class="bp-work-grid">
+        {selectedWork.map((w) => (
+          <a
+            href={w.href || "#work"}
+            class={`bp-work-card${w.demo ? " bp-work-card--demo" : ""}`}
+            data-reveal
+            {...(w.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            <div class={`bp-fig${w.img || w.demo ? "" : " bp-fig--striped"}`}>
+              {w.demo ? (
                 <Fragment>
-                  <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                  <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
+                  <div class="bp-fig-toggle bp-mono" role="group" aria-label="Preview mode">
+                    <span class="is-active" role="button" tabindex="0" data-fmode="cover">COVER</span>
+                    <span role="button" tabindex="0" data-fmode="demo">DEMO</span>
+                  </div>
+                  <img class="bp-fig-cover-img" src={w.img} alt={w.title} loading="lazy" />
+                  <video class="bp-fig-video" muted loop playsinline preload="none" aria-label={`${w.title} gameplay demo`}>
+                    <source src={w.demo} type="video/mp4" />
+                  </video>
                 </Fragment>
-              );
-              return (
-                <div class="masonry-art-item group" data-art-card>
-                  {openable ? (
-                    <button
-                      type="button"
-                      class={`${frameClass} cursor-pointer p-0 bg-transparent text-left`}
-                      data-art-open
-                      data-img={a.img}
-                      data-title={a.label}
-                      data-date={a.date}
-                      data-views={String(a.views ?? 0)}
-                      data-likes={String(a.likes ?? 0)}
-                      data-id={String(a.id)}
-                      aria-label={`View ${a.label}`}
-                    >
-                      {frameInner}
-                    </button>
-                  ) : (
-                    <div class={frameClass}>{frameInner}</div>
-                  )}
-                  {infoBar}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <!-- ART LIGHTBOX (popup) -->
-      <div id="art-lightbox" class="art-lightbox" data-api-url={API_URL} aria-hidden="true" role="dialog" aria-modal="true" aria-label="Artwork viewer">
-        <div class="art-lightbox-bg" data-art-bgimg></div>
-        <button type="button" class="art-lightbox-close" data-art-close aria-label="Close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
-        <figure class="art-lightbox-figure">
-          <img class="art-lightbox-img" data-art-img src="" alt="" />
-          <figcaption class="art-lightbox-caption">
-            <div class="flex items-center gap-3 mb-2 flex-wrap">
-              <span class="text-[10px] text-gray-400" data-art-cap-date></span>
-              <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
-              <span class="text-xs text-gray-400 flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                <span data-art-cap-views>—</span>
-              </span>
-              <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
-              <span class="text-xs text-gray-400 flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                <span data-art-cap-likes>—</span>
-              </span>
+              ) : (
+                w.img && <img src={w.img} alt={w.title} loading="lazy" />
+              )}
+              <span class="bp-mono bp-callout">fig.{w.n} — {w.fig} · 16:10</span>
+              <span class="bp-mono bp-node">◦</span>
             </div>
-            <h3 class="text-xl md:text-3xl text-white leading-tight" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;" data-art-cap-title></h3>
-          </figcaption>
-        </figure>
+            <div class="bp-work-meta">
+              <span class="bp-display bp-work-title">{w.title}</span>
+              <span class="bp-mono bp-badge">{w.badge}</span>
+              {w.year && <span class="bp-mono bp-work-year">{w.year}</span>}
+            </div>
+            {w.desc && <p class="bp-work-desc">{w.desc}</p>}
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
+
+    <!-- ===================== §02 CAPABILITIES ===================== -->
+    <section class="bp-wrap bp-section" id="capabilities">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">§02 — CAPABILITIES</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-count">04 DISCIPLINES</span>
+      </div>
+      <div class="bp-sec-title-row" data-reveal>
+        <h2 class="bp-display bp-h2" data-ml9>What I build.</h2>
+      </div>
+      <div class="bp-cap-list">
+        {capabilities.map((c) => (
+          <div class={`bp-cap-row${c.orange ? " is-orange" : ""}`} data-reveal>
+            <span class="bp-mono bp-cap-num">{c.n}</span>
+            <span class="bp-display bp-cap-title">{c.title}</span>
+            <p class="bp-cap-desc">{c.desc}</p>
+            <span class="bp-mono bp-cap-tag">{c.tag}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
+
+    <!-- ===================== §03 WRITING ===================== -->
+    <section class="bp-wrap bp-section" id="blog">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">§03 — WRITING</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-count">LATEST</span>
+      </div>
+      <div class="bp-sec-title-row" data-reveal>
+        <h2 class="bp-display bp-h2" data-ml9>From the blog.</h2>
+        <a href={localizedHref(locale, "/blog")} class="bp-mono bp-more">ALL POSTS →</a>
+      </div>
+      <div class="bp-write-list">
+        {writing.map((p) => (
+          <a href={localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`)} class="bp-write-row" data-reveal>
+            <span class="bp-mono bp-write-date">{p.ym}</span>
+            <span class="bp-write-title">{p.title}</span>
+            <span class="bp-mono bp-badge bp-write-topic">{p.topic}</span>
+            <span class="bp-mono bp-write-read">{p.read}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
+
+    <!-- ===================== §04 ART ===================== -->
+    <section class="bp-section bp-art" id="art">
+      <div class="bp-art-bg-wrap" aria-hidden="true"><div id="art-bg" class="bp-art-bg"></div></div>
+      <div class="bp-wrap bp-art-inner">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot is-orange" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label is-orange">§04 — ART</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-count">{String(artItems.length).padStart(2, "0")} PIECES</span>
+      </div>
+      <div class="bp-sec-title-row" data-reveal>
+        <h2 class="bp-display bp-h2" data-ml9>Hand-drawn & digital.</h2>
+        <p class="bp-art-note">Off-clock studies — pen, pencil and pixels.</p>
       </div>
 
-      <div class="flex flex-col items-center py-8 opacity-40">
-        <div data-connector class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
+      <div class="masonry-art-grid">
+        {artItems.map((a) => {
+          const infoBar = (
+            <div class="px-3 py-2 flex items-start justify-between gap-2 bp-art-bar">
+              <div class="flex-1 min-w-0">
+                <p class="bp-art-bar-title line-clamp-2">{a.label}</p>
+                <p class="bp-mono bp-art-bar-meta truncate">{a.topic} · {a.date}</p>
+              </div>
+              {a.id != null && (
+                <button
+                  type="button"
+                  class="art-like-area flex items-center gap-1 cursor-pointer flex-shrink-0 group/like mt-0.5 bg-transparent border-0 p-0"
+                  data-id={String(a.id)}
+                  data-likes={String(a.likes ?? 0)}
+                  aria-label={`Like ${a.label}`}
+                >
+                  <svg class="art-like-icon w-3.5 h-3.5 group-hover/like:text-rose-400 transition-colors duration-200" style="color:var(--bp-muted)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  <span class="art-like-count bp-mono text-[10px] group-hover/like:text-rose-400 transition-colors duration-200" style="color:var(--bp-muted)">{a.likes ?? 0}</span>
+                </button>
+              )}
+            </div>
+          );
+          const openable = a.id != null;
+          const frameClass = "art-img-frame relative block w-full overflow-hidden";
+          const frameInner = (
+            <Fragment>
+              <img src={a.img} alt={a.label} class="w-full h-auto block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+            </Fragment>
+          );
+          return (
+            <div class="masonry-art-item group" data-art-card>
+              {openable ? (
+                <button
+                  type="button"
+                  class={`${frameClass} cursor-pointer p-0 bg-transparent text-left`}
+                  data-art-open
+                  data-img={a.img}
+                  data-title={a.label}
+                  data-date={a.date}
+                  data-views={String(a.views ?? 0)}
+                  data-likes={String(a.likes ?? 0)}
+                  data-id={String(a.id)}
+                  aria-label={`View ${a.label}`}
+                >
+                  {frameInner}
+                </button>
+              ) : (
+                <div class={frameClass}>{frameInner}</div>
+              )}
+              {infoBar}
+            </div>
+          );
+        })}
       </div>
+      </div>
+    </section>
 
+    <!-- ART LIGHTBOX (popup) -->
+    <div id="art-lightbox" class="art-lightbox" data-api-url={API_URL} aria-hidden="true" role="dialog" aria-modal="true" aria-label="Artwork viewer">
+      <div class="art-lightbox-bg" data-art-bgimg></div>
+      <button type="button" class="art-lightbox-close" data-art-close aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+      </button>
+      <figure class="art-lightbox-figure">
+        <img class="art-lightbox-img" data-art-img src="" alt="" />
+        <figcaption class="art-lightbox-caption">
+          <div class="flex items-center gap-3 mb-2 flex-wrap">
+            <span class="bp-mono text-[10px] text-gray-400" data-art-cap-date></span>
+            <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+            <span class="bp-mono text-xs text-gray-400 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+              <span data-art-cap-views>—</span>
+            </span>
+            <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+            <span class="bp-mono text-xs text-gray-400 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+              <span data-art-cap-likes>—</span>
+            </span>
+          </div>
+          <h3 class="bp-display text-xl md:text-3xl leading-tight" data-art-cap-title></h3>
+        </figcaption>
+      </figure>
     </div>
 
-      
-<!-- CTA -->
-      <section id="contact" class="py-40 px-4 md:px-6">
-        <div class="max-w-5xl mx-auto text-center">
-          <div data-reveal class="mb-6">
-            <span class="text-xs font-black text-gray-600 uppercase tracking-[0.3em]">{t('home.enoughTalking')}</span>
-          </div>
-          <h2 data-word-reveal class="text-[clamp(2.5rem,7vw,6rem)] font-black tracking-[0.02em] leading-none mb-12">
-            {heroWords.map((w,i) => (
-              <span class="reveal-word !block" style={`transition-delay:${i*100}ms`}>
-                <span class={i===1 ? 'text-shimmer' : 'text-white'}>{w}</span>
-              </span>
-            ))}
-            <span class="reveal-word !block" style={`transition-delay:${heroWords.length*100}ms`}><span class="text-white">REAL</span><span class="text-violet-500">.</span></span>
-          </h2>
-          <div data-reveal class="flex flex-col sm:flex-row items-center justify-center gap-5">
-            <a href="mailto:kidoluci.work@gmail.com" class="magnetic group relative px-10 py-5 rounded-full hero-cta-primary font-black uppercase tracking-widest overflow-hidden transition-all duration-500">
-              <span class="relative z-10">{t('home.sayHello')}</span>
-              <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <span class="absolute inset-0 z-10 flex items-center justify-center text-white font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500">{t('home.sayHello')}</span>
-            </a>
-            <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" class="magnetic text-sm font-bold text-gray-500 hover:text-white transition-colors duration-300 uppercase tracking-widest !flex items-center gap-2">LinkedIn <span>↗</span></a>
-          </div>
-        </div>
-      </section>
+    <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-      <!-- FOOTER -->
-      <footer class="py-16 border-t border-white/5 px-4 md:px-6">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          <a href={localizedHref(locale, '/')} class="flex items-center gap-3 opacity-80 hover:opacity-100 transition-opacity">
-            <img src="/images/logo_icon.png" alt="Luci Studio Logo" loading="lazy" class="h-8 w-8 rounded-lg" />
-            <span class="text-2xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI-STUDIO<span class="text-violet-500">.</span></span>
+    <!-- ===================== §05 STUDIO ===================== -->
+    <section class="bp-wrap bp-section" id="studio">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">§05 — STUDIO</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+      </div>
+      <div class="bp-studio">
+        <p class="bp-display bp-studio-statement" data-reveal>
+          I treat engineering as a craft — measure twice, ship once, and write down what I learn along the way. Small scope, production-grade standards, no deferred debt.
+        </p>
+        {stats.length > 0 && (
+          <div class="bp-stats" data-reveal>
+            {stats.map((s) => (
+              <div class="bp-stat-row">
+                <span class="bp-display bp-stat-num">{s.number}<em>{s.suffix}</em></span>
+                <span class="bp-stat-meta">
+                  <span class="bp-mono bp-stat-label">{s.label}</span>
+                  {s.sub && <span class="bp-mono bp-stat-sub">{s.sub}</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- ===================== CTA ===================== -->
+    <section class="bp-cta" id="contact">
+      <div class="bp-cta-inner bp-wrap">
+        <div class="bp-cta-label" data-reveal>
+          <span class="bp-coord-dot" aria-hidden="true"></span>
+          <span class="bp-mono">END OF SHEET — LET'S BUILD</span>
+        </div>
+        <h2 class="bp-display bp-cta-title" data-reveal>Got a hard problem? Let's talk.</h2>
+        <div class="bp-cta-actions" data-reveal>
+          <a href="mailto:kidoluci.work@gmail.com" class="bp-btn bp-cta-btn">Let's talk →</a>
+          <a href="mailto:kidoluci.work@gmail.com" class="bp-mono bp-cta-mail">kidoluci.work@gmail.com</a>
+          <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" rel="noopener noreferrer" class="bp-mono bp-cta-mail">LinkedIn ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer class="bp-footer">
+      <div class="bp-wrap bp-footer-cols">
+        <div class="bp-footer-brand">
+          <a href={localizedHref(locale, "/")} class="bp-footer-logo">
+            <img src="/images/logo_icon.png" alt="Luci Studio Logo" loading="lazy" />
+            <span class="bp-display">LUCI STUDIO<em class="bp-acc-dot">.</em></span>
           </a>
-          <div class="flex flex-wrap items-center justify-center gap-6 md:gap-8">
-            {(profile?.social_links ?? []).map((l) => (
-              <a href={l.url} target="_blank" rel="noopener" class="text-xs font-bold text-gray-600 hover:text-white transition-colors uppercase tracking-widest">{l.label}</a>
-            ))}
-            <FooterLinks linkColor="text-gray-600" />
-          </div>
-          <div class="flex flex-col items-center md:items-end gap-3">
-            <div class="flex flex-col items-center md:items-end gap-1">
-              <a href={`mailto:${profile?.contact_email}`} class="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">{profile?.contact_email}</a>
-            </div>
-            <p class="text-xs text-gray-700 uppercase tracking-widest">{profile?.copyright}</p>
-          </div>
+          <p class="bp-footer-blurb">A creative engineering studio turning hard problems into shipped products.</p>
         </div>
-      </footer>
-
+        <div class="bp-footer-col">
+          <span class="bp-mono bp-footer-head">SITEMAP</span>
+          {sitemapLinks.map((l) => <a href={l.href} class="bp-footer-link">{l.label}</a>)}
+        </div>
+        <div class="bp-footer-col">
+          <span class="bp-mono bp-footer-head">MAKE</span>
+          {makeLinks.map((l) => (
+            <a href={l.href} class="bp-footer-link" {...(l.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{l.label}</a>
+          ))}
+        </div>
+        <div class="bp-footer-col">
+          <span class="bp-mono bp-footer-head">ELSEWHERE</span>
+          {(profile?.social_links ?? []).map((l) => (
+            <a href={l.url} target="_blank" rel="noopener" class="bp-footer-link">{l.label}</a>
+          ))}
+        </div>
+      </div>
+      <div class="bp-wrap bp-footer-base">
+        <span class="bp-mono bp-footer-copy">{profile?.copyright ?? "© 2026 LUCI STUDIO — ALL RIGHTS RESERVED"}</span>
+        <span class="bp-footer-legal"><FooterLinks linkColor="bp-footer-link" /></span>
+        <span class="bp-mono bp-footer-rev" aria-hidden="true">REV 1.0 / SHEET 6 OF 6 / ✛ N10°49′</span>
+      </div>
+    </footer>
   </main>
-
 </Layout>
 
 <style>
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-24px); }
-}
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.7); }
-}
-@keyframes orb-float-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -40px) scale(1.05); }
-  66% { transform: translate(-20px, 20px) scale(0.97); }
-}
-@keyframes orb-float-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  40% { transform: translate(-35px, 30px) scale(1.08); }
-  70% { transform: translate(25px, -25px) scale(0.95); }
-}
-@keyframes divider-expand {
-  from { width: 0; opacity: 0; }
-  to { width: 100%; opacity: 1; }
-}
-@keyframes diamond-spin {
-  0%  { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.3); }
-  100%{ transform: rotate(360deg) scale(1); }
-}
-
-/* ── Semantic CTA button classes (theme-independent for hero) ── */
-.hero-cta-primary {
-  background: rgb(17, 24, 39) !important;
-  color: white !important;
-}
-/* Accent hover-glow (was a Tailwind shadow-[…] arbitrary value; moved to scoped CSS
-   so it can reference the --accent-rgb scheme var, which Tailwind arbitrary values
-   with var()+/-alpha don't emit reliably). */
-.hero-cta-primary:hover { box-shadow: 0 0 70px rgb(var(--accent-rgb) / 0.45); }
-.hero-cta-secondary {
-  border-color: rgba(17, 24, 39, 0.45) !important;
-  color: rgb(17, 24, 39) !important;
-  background: rgba(255, 255, 255, 0.55) !important;
-  backdrop-filter: blur(4px);
-}
-.hero-cta-secondary:hover {
-  color: rgb(255, 255, 255) !important;
-  border-color: rgb(17, 24, 39) !important;
-  background: rgb(17, 24, 39) !important;
-}
-
-/* ── Light Mode Overrides ── */
-body.light-mode {
-  background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
-}
-
-body.light-mode nav {
-  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-/* Nav links */
-body.light-mode nav a {
-  color: rgb(75, 85, 99);
-}
-body.light-mode nav a:hover {
-  color: rgb(17, 24, 39);
-}
-body.light-mode nav .text-xl {
-  color: rgb(17, 24, 39);
-}
-
-/* Theme toggle button */
-body.light-mode #theme-toggle {
-  border-color: rgba(0, 0, 0, 0.1);
-}
-body.light-mode #theme-toggle svg {
-  color: rgb(107, 114, 128);
-}
-body.light-mode #theme-toggle:hover svg {
-  color: rgb(17, 24, 39);
-}
-
-/* "Let's Talk" button in nav */
-body.light-mode nav .magnetic {
-  background: rgb(17, 24, 39);
-  color: white;
-}
-body.light-mode nav .magnetic:hover {
-  background: var(--accent);
-}
-
-/* Hero text — theme-independent, always dark/readable */
-.hero-line-top .text-white {
-  color: rgb(17, 24, 39) !important;
-}
-.hero-line-bottom .text-white {
-  color: rgb(17, 24, 39) !important;
-}
-.hero-line-bottom .text-gray-300 {
-  color: rgb(107, 114, 128) !important;
-}
-.hero-line-bottom .text-gray-400 {
-  color: rgb(107, 114, 128) !important;
-}
-.hero-line-bottom .text-gray-500 {
-  color: rgb(107, 114, 128) !important;
-}
-
-.hero-badge-text {
-  color: rgb(75, 85, 99);
-}
-
-/* Scroll hint */
-body.light-mode .absolute.bottom-10 span {
-  color: rgb(107, 114, 128);
-}
-
-/* Marquee strip */
-body.light-mode .border-y {
-  border-color: rgba(0, 0, 0, 0.06) !important;
-  background: rgba(0, 0, 0, 0.02) !important;
-}
-body.light-mode .animate-marquee .text-gray-400 {
-  color: rgb(107, 114, 128) !important;
-}
-body.light-mode .animate-marquee .text-gray-700 {
-  color: rgb(209, 213, 219) !important;
-}
-
-/* Stats section */
-body.light-mode .border-b {
-  border-color: rgba(0, 0, 0, 0.06) !important;
-}
-body.light-mode .tilt-card {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  border-color: rgba(0, 0, 0, 0.07) !important;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-}
-body.light-mode .tilt-card:hover {
-  border-color: rgb(var(--accent-rgb) / 0.25) !important;
-  box-shadow: 0 8px 32px rgb(var(--accent-rgb) / 0.1);
-}
-/* Stats number gradient */
-body.light-mode .bg-gradient-to-br.from-white.to-gray-500 {
-  background-image: linear-gradient(to bottom right, rgb(17, 24, 39), rgb(107, 114, 128)) !important;
-}
-body.light-mode .tilt-card .text-white {
-  color: rgb(17, 24, 39) !important;
-}
-body.light-mode .tilt-card .text-gray-400 {
-  color: rgb(107, 114, 128) !important;
-}
-
-/* Divider lines */
-body.light-mode .opacity-20 .bg-gradient-to-b {
-  background-image: linear-gradient(to bottom, rgba(0,0,0,0.15), transparent) !important;
-}
-
-/* Content wrapper */
-body.light-mode .relative.bg-black\/60 {
-  background-color: rgba(248, 248, 252, 0.15) !important;
-  border-color: rgba(0, 0, 0, 0.06) !important;
-}
-
-/* About section */
-body.light-mode .border-white\/10 {
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-body.light-mode .bg-white\/\[0\.02\] {
-  background-color: rgba(255, 255, 255, 0.9) !important;
-}
-body.light-mode .bg-black\/40 {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-}
-body.light-mode .text-gray-400 {
-  color: rgb(75, 85, 99) !important;
-}
-body.light-mode .text-gray-300 {
-  color: rgb(55, 65, 81) !important;
-}
-body.light-mode .text-gray-500 {
-  color: rgb(107, 114, 128) !important;
-}
-body.light-mode .text-gray-600 {
-  color: rgb(107, 114, 128) !important;
-}
-body.light-mode .text-white {
-  color: rgb(17, 24, 39) !important;
-}
-/* Keep accent colors vivid — must come AFTER the text-white override */
-body.light-mode .text-violet-500 { color: var(--accent) !important; }
-body.light-mode .text-violet-400 { color: var(--accent) !important; }
-body.light-mode .text-pink-500   { color: #ec4899 !important; }
-body.light-mode .text-blue-500   { color: #3b82f6 !important; }
-body.light-mode .text-emerald-500{ color: #10b981 !important; }
-body.light-mode .text-amber-500  { color: #f59e0b !important; }
-body.light-mode .text-cyan-500   { color: #06b6d4 !important; }
-
-/* Quick facts grid */
-body.light-mode .border-white\/5 {
-  border-color: rgba(0, 0, 0, 0.06) !important;
-}
-body.light-mode .hover\:bg-white\/\[0\.05\]:hover {
-  background-color: rgb(var(--accent-rgb) / 0.05) !important;
-}
-
-/* Blog cards */
-body.light-mode article.tilt-card h3 {
-  color: rgb(17, 24, 39) !important;
-}
-body.light-mode .tile-like-count {
-  color: rgb(107, 114, 128) !important;
-}
-body.light-mode .text-gray-700 {
-  color: rgb(156, 163, 175) !important;
-}
-
-/* Experience section dividers */
-body.light-mode .bg-white\/5 {
-  background-color: rgba(0, 0, 0, 0.06) !important;
-}
-
-/* Skills tag pills */
-body.light-mode .bg-white\/5.border-white\/10 {
-  background-color: rgba(0, 0, 0, 0.03) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-  color: rgb(75, 85, 99) !important;
-}
-
-/* Now section list items */
-body.light-mode .text-amber-500 {
-  color: #d97706 !important;
-}
-
-/* CTA section */
-body.light-mode #contact h2 .text-white {
-  color: rgb(17, 24, 39) !important;
-}
-body.light-mode #contact a[href^="mailto"] {
-  background: rgb(17, 24, 39);
-  color: white;
-}
-body.light-mode #contact a[href^="mailto"]:hover {
-  box-shadow: 0 0 80px rgb(var(--accent-rgb) / 0.4);
-}
-
-/* Footer */
-body.light-mode footer {
-  border-color: rgba(0, 0, 0, 0.06) !important;
-}
-body.light-mode footer .text-gray-600 {
-  color: rgb(107, 114, 128) !important;
-}
-body.light-mode footer .text-gray-700 {
-  color: rgb(156, 163, 175) !important;
-}
-body.light-mode footer .text-gray-500 {
-  color: rgb(107, 114, 128) !important;
-}
-body.light-mode footer a:hover {
-  color: rgb(17, 24, 39) !important;
-}
-body.light-mode footer span.text-xl {
-  color: rgb(17, 24, 39) !important;
-}
-
-/* Timeline active state */
-body.light-mode .timeline-item.active {
-  background: linear-gradient(135deg, rgba(204, 95, 150, 0.12) 0%, rgba(255, 255, 255, 1) 40%, rgba(255, 255, 255, 1) 100%) !important;
-  border-color: rgba(236, 72, 153, 0.4) !important;
-  box-shadow: 0 20px 40px -20px rgba(236, 72, 153, 0.15);
-}
-
-/* Mobile menu */
-body.light-mode #mobile-menu {
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(24px);
-}
-body.light-mode .mobile-nav-link {
-  color: rgb(17, 24, 39) !important;
-}
-body.light-mode .mobile-nav-link:hover {
-  color: var(--accent) !important;
-}
-body.light-mode #mobile-menu .h-px {
-  background-color: rgba(0, 0, 0, 0.08) !important;
-}
-body.light-mode #mobile-menu a[href="#contact"] {
-  background: rgb(17, 24, 39) !important;
-  color: white !important;
-}
-
-/* ── Floating orbs ── */
-.hero-orb {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(80px);
-  z-index: 0;
-}
-.hero-orb-1 {
-  width: 520px; height: 520px;
-  background: radial-gradient(circle, rgb(var(--accent-rgb) / 0.18) 0%, transparent 70%);
-  top: 5%; left: -10%;
-}
-body.light-mode .hero-orb-1 {
-  background: radial-gradient(circle, rgb(var(--accent-rgb) / 0.12) 0%, transparent 70%);
-}
-.hero-orb-2 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(59,130,246,0.14) 0%, transparent 70%);
-  bottom: 10%; right: -8%;
-}
-body.light-mode .hero-orb-2 {
-  background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
-}
-
-/* ── Role Badge ── */
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 18px;
-  margin-bottom: 2rem;
-  border: 1px solid rgb(var(--accent-rgb) / 0.3);
-  border-radius: 999px;
-  background: rgb(var(--accent-rgb) / 0.07);
-  backdrop-filter: blur(8px);
-}
-.hero-badge-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34,197,94,0.8);
-  animation: pulse-dot 2s ease-in-out infinite;
-  flex-shrink: 0;
-}
-.hero-badge-text {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(200,200,200,0.8);
-}
-
-/* ── Main Headline ── */
-.hero-headline {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  margin-bottom: 2rem;
-  font-family: 'Limelight', sans-serif;
-}
-.hero-line {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.25em;
-  line-height: 1.2;
-}
-.hero-line-top {
-  font-family: 'Limelight', sans-serif;
-  font-size: clamp(3.5rem, 11vw, 9.5rem);
-  font-weight: normal;
-  letter-spacing: -0.005em;
-}
-.hero-line-bottom {
-  font-size: clamp(0.85rem, 2.5vw, 2.2rem);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgb(107, 114, 128);
-}
-.hero-word-main,
-.hero-word-accent,
-.hero-word-sub {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: middle;
-  padding: 0.15em 0.05em; /* Increased vertical and added horizontal padding */
-  margin: -0.15em -0.05em;
-}
-
-/* ── Divider ── */
-.hero-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: min(480px, 80vw);
-  margin: 0.6rem 0 0.4rem;
-}
-.hero-divider-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgb(var(--accent-rgb) / 0.5), rgba(59,130,246,0.4), transparent);
-  opacity: 0;
-  animation: divider-expand 1.2s cubic-bezier(0.16,1,0.3,1) 0.8s forwards;
-}
-.hero-divider-diamond {
-  font-size: 0.55rem;
-  color: rgb(var(--accent-rgb) / 0.7);
-  animation: diamond-spin 8s linear infinite;
-  flex-shrink: 0;
-}
-
-/* ── Subtitle ── */
-.hero-subtitle {
-  font-family: 'SN Pro', sans-serif;
-  font-size: clamp(0.95rem, 2vw, 1.25rem);
-  color: rgb(75, 85, 99) !important;
-  max-width: 720px;
-  margin: 0 auto 2rem;
-  line-height: 1.75;
-  padding: 0 0.5rem;
-  min-height: 6.5em;
-  /* Balance line lengths so the last line isn't a lone orphan word ("products.").
-     Applied before SplitText reads the wrap, so the animated lines inherit it too. */
-  text-wrap: balance;
-}
-
-/* ── Hero pillars: studio products (Blog · Tools · Games · Apps · Art) ── */
-.hero-pillars {
-  display: grid;
-  /* auto-fit so the 5 products fill one row on wide screens and wrap gracefully
-     as the viewport narrows (5 → 4 → … → 2 columns) without per-breakpoint rules. */
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  width: 100%;
-  margin: 0;
-  border-top: 1px solid rgba(17, 24, 39, 0.12);
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 -8px 32px rgba(17, 24, 39, 0.08);
-}
-.hp-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.55rem;
-  padding: 1.35rem 1.5rem 1.5rem;
-  text-align: left;
-  text-decoration: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.22);
-  /* Soft dark shadow lifts text off the busy photo without touching the bg */
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-  transition: background 0.4s ease;
-}
-.hp-card:first-child { border-left: none; }
-.hp-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--hp);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.hp-card:hover::before { transform: scaleX(1); }
-.hp-card:hover { background: rgba(255, 255, 255, 0.4); }
-.hp-num {
-  font-family: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, monospace;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  color: var(--hp);
-  text-shadow: none;
-}
-.hp-title {
-  font-family: 'SN Pro', 'Inter', sans-serif;
-  font-size: clamp(1.15rem, 2.3vw, 1.7rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: #ffffff;
-  transition: color 0.3s ease;
-}
-.hp-card:hover .hp-title { color: var(--hp); }
-.hp-sub {
-  font-family: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, monospace;
-  font-size: 0.74rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.5;
-}
-.hp-arrow {
-  position: absolute;
-  top: 1.3rem; right: 1.35rem;
-  font-size: 1rem;
-  color: var(--hp);
-  opacity: 0;
-  transform: translateX(-5px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.hp-card:hover .hp-arrow { opacity: 1; transform: translateX(0); }
-
-/* Scroll cue — floats above the bottom bar to signal there is more below */
-.hero-scroll-cue {
-  position: absolute;
-  left: 50%;
-  bottom: 100%;
-  transform: translateX(-50%);
-  margin-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
-  animation: heroScrollBounce 2s ease-in-out infinite;
-  transition: opacity 0.3s ease;
-}
-.hero-scroll-cue:hover { opacity: 0.65; }
-.hero-scroll-text {
-  font-family: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, monospace;
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.28em;
-  text-indent: 0.28em;
-}
-.hero-scroll-chev {
-  width: 18px;
-  height: 18px;
-}
-@keyframes heroScrollBounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50%      { transform: translateX(-50%) translateY(6px); }
-}
-
-body.light-mode .hero-pillars {
-  background: rgba(255, 255, 255, 0.4);
-  border-top-color: rgba(17, 24, 39, 0.10);
-}
-
-@media (max-width: 720px) {
-  /* Compact the product cards + drop the sub-line; the auto-fit grid wraps them
-     across rows so only num + title show on small screens. */
-  .hp-card {
-    padding: 0.85rem 0.6rem 0.95rem;
-    gap: 0.3rem;
+  /* ══════════════════════════════════════════════════════════════════════
+     LUCI STUDIO — Blueprint homepage. Scoped styles.
+     Cream drafting-sheet in light mode, dark blueprint in dark mode; the blue
+     accent follows the active color-scheme (--accent). Orange is a fixed
+     decorative secondary (art + coordinate markers), like the site's other
+     intentionally-fixed accents.
+     ══════════════════════════════════════════════════════════════════════ */
+  /* Blueprint tokens live on html.bp-home so BOTH the sticky nav and <main.bp>
+     inherit them (the nav is a sibling of main, not a child). Dark by default;
+     the .light-mode variant paints the cream sheet. --bp-acc is a fixed blueprint
+     blue (matches the mockup), independent of the site's accent schemes; orange is
+     the fixed decorative secondary. The --nav-bg / --nav-bg-scroll overrides retune
+     the glass the shared navDimmer toggles between on scroll. */
+  :global(html.bp-home) {
+    --bp-bg: #0a0e14;
+    --bp-ink: var(--text-primary);
+    --bp-acc: #1b56ff;
+    --bp-orange: #ff5b1a;
+    --bp-line: rgba(255, 255, 255, 0.05);
+    --bp-line2: rgba(255, 255, 255, 0.08);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-card: rgba(255, 255, 255, 0.035);
+    --bp-muted: color-mix(in srgb, var(--bp-ink) 58%, transparent);
+    --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
+    --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
   }
-  .hp-num {
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
+  :global(html.bp-home.light-mode) {
+    --bp-bg: #f4f2ec;
+    --bp-line: rgba(22, 32, 43, 0.05);
+    --bp-line2: rgba(22, 32, 43, 0.08);
+    --bp-hair: rgba(22, 32, 43, 0.16);
+    --bp-card: #e8e6df;
   }
-  .hp-title {
-    font-size: clamp(0.78rem, 3.2vw, 1.05rem);
-    letter-spacing: 0;
+  .bp {
+    position: relative;
+    background: var(--bp-bg);
+    color: var(--bp-ink);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    /* overflow-x only (not `overflow: clip`) so it never becomes a scroll container
+       that would trap the §04 sticky background. Matches the old layout, where only
+       html had overflow-x: clip. */
+    overflow-x: clip;
   }
-  .hp-sub {
-    display: none;
-  }
-}
+  /* Crisp blueprint headings — cancel the site's light-mode heading drop-shadow filter. */
+  :global(body.light-mode) .bp-display { filter: none !important; }
 
-/* ── Timeline ── */
-.timeline-item.active {
-  background: linear-gradient(135deg, rgba(204, 95, 150, 0.1) 0%, rgba(3, 3, 3, 1) 40%, rgba(3, 3, 3, 1) 100%) !important;
-  border-color: rgba(236, 72, 153, 0.4) !important;
-  box-shadow: 0 20px 40px -20px rgba(236, 72, 153, 0.2);
-}
+  /* Drafting grid: fine 36px + major 180px, spanning the whole sheet. */
+  .bp-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--bp-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
+      linear-gradient(var(--bp-line2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+  }
 
-/* ── Mobile overrides (< 480px) ── */
-@media (max-width: 480px) {
-  .hero-badge {
-    margin-bottom: 1.2rem;
+  .bp-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: clamp(20px, 5vw, 48px);
+    padding-right: clamp(20px, 5vw, 48px);
   }
-  .hero-headline {
-    margin-bottom: 1.2rem;
+  .bp-section {
+    padding-top: clamp(52px, 8vw, 88px);
+    padding-bottom: clamp(52px, 8vw, 88px);
   }
-  .hero-line {
-    /* Stack each word on its own line on very small screens */
+
+  /* ── shared motif atoms ── */
+  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .bp-display {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em !important;
+    color: var(--bp-ink);
+  }
+  .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
+
+  .bp-sec-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: clamp(22px, 3vw, 34px);
+  }
+  .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
+  .bp-dot.is-orange { background: var(--bp-orange); }
+  .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; color: var(--bp-acc); white-space: nowrap; }
+  .bp-sec-label.is-orange { color: var(--bp-orange); }
+  .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
+
+  .bp-sec-title-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: clamp(26px, 4vw, 44px);
+  }
+  .bp-h2 {
+    font-size: clamp(2.1rem, 6vw, 3.75rem);
+    line-height: 1.0;
+  }
+  .bp-more {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--bp-ink);
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--bp-ink);
+    padding-bottom: 3px;
+    white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .bp-more:hover { color: var(--bp-acc); border-color: var(--bp-acc); }
+
+  .bp-badge {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--bp-acc);
+    border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent);
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* ── NAV (the blueprint's own sticky drafting nav; replaces the shared TopNav) ── */
+  .bp-nav {
+    /* Define the nav-glass vars ON the nav element (navDimmer resolves
+       var(--nav-bg-scroll) here on scroll). Set on .bp-nav rather than an ancestor
+       because body.light-mode is a closer ancestor and would otherwise win. */
+    --nav-bg: rgba(10, 14, 20, 0.78);
+    --nav-bg-scroll: rgba(10, 14, 20, 0.92);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--bp-hair);
+  }
+  :global(body.light-mode) .bp-nav { --nav-bg: rgba(244, 242, 236, 0.82); --nav-bg-scroll: rgba(244, 242, 236, 0.94); }
+  .bp-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 15px; padding-bottom: 15px; }
+  .bp-nav-logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+  .bp-nav-logo-img { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; }
+  .bp-nav-name { font-family: "Limelight", sans-serif; font-weight: normal; font-size: 20px; letter-spacing: 0.02em; color: var(--bp-ink); white-space: nowrap; }
+  .bp-nav-name-dot { color: var(--bp-acc); }
+  .bp-nav-links { display: flex; align-items: center; gap: 30px; }
+  .bp-nav-links a { position: relative; font-size: 12px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
+  .bp-nav-links a:hover, .bp-nav-links a.is-active { color: var(--bp-ink); }
+  .bp-nav-links a.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px; background: var(--bp-acc); }
+  .bp-nav-actions { display: flex; align-items: center; gap: 11px; }
+  .bp-nav-icon { width: 36px; height: 36px; border: 1.5px solid var(--bp-hair); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--bp-muted); background: transparent; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+  .bp-nav-icon:hover { border-color: var(--bp-ink); color: var(--bp-ink); }
+  .bp-nav-svg { width: 18px; height: 18px; }
+  /* Color-scheme picker (ported from TopNav; the global window.setScheme +
+     theme.ts syncSchemeUI drive it, this only styles + opens the popover). */
+  .bp-scheme { position: relative; }
+  .bp-scheme-popover {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.55rem;
+    padding: 0.6rem;
+    border-radius: 0.85rem;
+    background: var(--nav-bg-scroll);
+    border: 1px solid var(--bp-hair);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+    z-index: 110;
+  }
+  .bp-scheme-popover[hidden] { display: none; }
+  .scheme-dot {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    box-shadow: 0 0 0 1px rgba(120, 120, 120, 0.45);
+    transition: transform 0.15s ease;
+  }
+  .scheme-dot:hover { transform: scale(1.18); }
+  .scheme-dot:focus-visible { outline: 2px solid var(--bp-ink); outline-offset: 2px; }
+  .scheme-dot[aria-checked="true"] { box-shadow: 0 0 0 2px var(--nav-bg-scroll), 0 0 0 4px var(--bp-ink); }
+  .bp-nav-cta { padding: 10px 20px; background: var(--bp-ink); color: var(--bp-bg); border-radius: 24px; font-size: 12px; letter-spacing: 0.1em; text-decoration: none; white-space: nowrap; transition: background 0.2s ease, color 0.2s ease; }
+  .bp-nav-cta:hover { background: var(--bp-acc); color: #fff; }
+  .bp-nav-burger { display: none; width: 40px; height: 40px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: transparent; border: 1.5px solid var(--bp-hair); border-radius: 9px; cursor: pointer; }
+  .bp-nav-burger span { display: block; width: 16px; height: 1.5px; background: var(--bp-ink); }
+  .bp-nav-mobile { display: none; flex-direction: column; padding: 4px 0 14px; }
+  .bp-nav-mobile a { padding: 12px clamp(20px, 5vw, 48px); font-size: 13px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; }
+  .bp-nav-mobile a:hover { color: var(--bp-ink); }
+  .bp-nav-mobile-cta { color: var(--bp-acc) !important; }
+  @media (max-width: 860px) {
+    .bp-nav-links, .bp-nav-cta { display: none; }
+    .bp-nav-burger { display: flex; }
+    .bp-nav.menu-open .bp-nav-mobile { display: flex; }
+    .bp-nav.menu-open { border-bottom-color: var(--bp-line2); }
+  }
+
+  /* ── underlined tagline phrases ── */
+  .bp-u { border-bottom: 2px solid var(--bp-acc); font-weight: 600; color: var(--bp-ink); }
+  .bp-u--o { border-bottom-color: var(--bp-orange); }
+
+  /* ── HERO ── */
+  .bp-hero {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 40px;
+    align-items: center;
+    padding-top: clamp(40px, 6vw, 76px);
+    padding-bottom: clamp(40px, 6vw, 64px);
+    position: relative;
+  }
+  .bp-coord { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; font-size: 12px; letter-spacing: 0.14em; color: var(--bp-acc); }
+  .bp-coord-dot { width: 7px; height: 7px; background: var(--bp-orange); flex-shrink: 0; }
+  .bp-hero-title {
+    font-size: clamp(3.2rem, 11vw, 7.5rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em !important;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.28em;
+  }
+  .bp-hero-title .reveal-word { vertical-align: bottom; }
+  .bp-hero-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--bp-faint);
+  }
+  .bp-dim-txt { white-space: nowrap; }
+  .bp-dim-tick { width: 1px; height: 9px; background: var(--bp-faint); flex-shrink: 0; }
+  .bp-dim-rule { flex: 1; height: 1px; background: var(--bp-faint); min-width: 24px; }
+  .bp-tagline {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: clamp(1rem, 1.6vw, 1.2rem);
+    line-height: 1.55;
+    color: var(--bp-muted);
+    max-width: 560px;
+    margin: 22px 0 30px;
+  }
+  .bp-hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
+
+  .bp-btn {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 13px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+  }
+  .bp-btn--solid { background: var(--bp-ink); color: var(--bp-bg); }
+  .bp-btn--solid:hover { background: var(--bp-acc); color: #fff; }
+  .bp-btn--ghost { border-color: var(--bp-ink); color: var(--bp-ink); }
+  .bp-btn--ghost:hover { background: var(--bp-ink); color: var(--bp-bg); }
+
+  .bp-hero-right { display: flex; justify-content: center; }
+  .bp-diagram { position: relative; width: min(100%, 460px); aspect-ratio: 1; }
+  .bp-hero-svg { width: 100%; height: 100%; color: var(--bp-ink); display: block; }
+  .bp-svg-acc { stroke: var(--bp-acc); }
+  .bp-svg-acc-fill { fill: var(--bp-acc); }
+  .bp-svg-orange-fill { fill: var(--bp-orange); }
+  .bp-svg-spin { transform-box: fill-box; transform-origin: center; animation: lu-spin 44s linear infinite; }
+  .bp-diagram-ann { position: absolute; font-size: 10px; line-height: 1.35; letter-spacing: 0.04em; color: var(--bp-faint); }
+  .bp-diagram-ann--tr { top: 12%; right: -2%; text-align: left; }
+  .bp-diagram-ann--bl { bottom: 12%; left: -2%; text-align: right; }
+
+  .bp-scroll {
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    transform: translateX(-50%);
+    display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.05em;
+    gap: 5px;
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-indent: 0.24em;
+    color: var(--bp-faint);
+    text-decoration: none;
   }
-  .hero-line-top {
-    /* Each word becomes its own full-width line */
-    font-size: clamp(2.6rem, 18vw, 4.5rem);
-    letter-spacing: -0.03em;
-  }
-  .hero-line-bottom {
-    font-size: clamp(1.1rem, 7vw, 1.6rem);
-    letter-spacing: 0.05em;
-  }
-  .hero-divider {
-    width: 70vw;
-    margin: 0.4rem 0 0.2rem;
-  }
-  .hero-subtitle {
-    font-size: 0.88rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.65;
-  }
-}
+  .bp-scroll-arrow { width: 16px; height: 16px; animation: lu-bob 1.8s ease-in-out infinite; }
 
-/* ── Tablet overrides (480–768px) ── */
-@media (min-width: 481px) and (max-width: 768px) {
-  .hero-line-top {
-    font-size: clamp(2.4rem, 9vw, 6rem);
+  /* ── DIRECTORY ── */
+  .bp-dir {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1.5px solid var(--bp-hair);
+    border-bottom: 1.5px solid var(--bp-hair);
   }
-  .hero-line-bottom {
-    font-size: clamp(1.1rem, 3vw, 1.8rem);
+  .bp-dir-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 22px 24px;
+    text-decoration: none;
+    border-left: 1px solid var(--bp-line2);
+    transition: background 0.25s ease;
   }
-}
+  .bp-dir-item:first-child { border-left: none; }
+  .bp-dir-item:hover { background: var(--bp-hover); }
+  .bp-dir-item.is-orange:hover { background: color-mix(in srgb, var(--bp-orange) 8%, transparent); }
+  .bp-dir-num { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); }
+  .bp-dir-item.is-orange .bp-dir-num { color: var(--bp-orange); }
+  .bp-dir-title { font-size: clamp(1.05rem, 2.2vw, 1.4rem); }
+  .bp-dir-desc { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-muted); line-height: 1.5; }
 
-/* ── Pinterest-style masonry for art section ── */
-.masonry-art-grid {
-  columns: 2;
-  column-gap: 0.75rem;
-}
-@media (min-width: 640px) {
-  .masonry-art-grid {
-    columns: 3;
-    column-gap: 1rem;
+  /* ── §01 SELECTED WORK ── */
+  .bp-work-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(20px, 3vw, 30px); }
+  .bp-work-card { text-decoration: none; display: block; }
+  .bp-fig {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--bp-card);
+    border: 1px solid var(--bp-hair);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease;
   }
-}
-@media (min-width: 1024px) {
-  .masonry-art-grid {
-    columns: 4;
-    column-gap: 1rem;
+  .bp-fig img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bp-fig--striped {
+    background-image: repeating-linear-gradient(45deg, var(--bp-line2) 0, var(--bp-line2) 1px, transparent 1px, transparent 12px);
   }
-}
-.masonry-art-item {
-  break-inside: avoid;
-  margin-bottom: 0.75rem;
-  display: block;
-}
-@media (min-width: 640px) {
-  .masonry-art-item {
-    margin-bottom: 1rem;
+  .bp-work-card:hover .bp-fig { transform: translateY(-4px); border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent); }
+  .bp-callout { position: absolute; left: 14px; bottom: 12px; font-size: 10px; letter-spacing: 0.06em; color: var(--bp-muted); }
+  .bp-node { position: absolute; top: 10px; right: 14px; font-size: 12px; color: var(--bp-acc); }
+  .bp-work-meta { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+  .bp-work-title { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
+  .bp-work-year { font-size: 11px; color: var(--bp-faint); margin-left: auto; }
+  .bp-work-desc { margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
+
+  /* §01 demo card — COVER/DEMO toggle (Faldrop): the cover image crossfades to an
+     autoplaying, muted, looping gameplay <video> (same treatment as /games). */
+  .bp-fig-cover-img,
+  .bp-fig-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transition: opacity 0.3s ease;
   }
-}
-/* Art image frame border */
-.art-img-frame {
-  border-color: rgb(var(--accent-rgb) / 0.35);
-}
-body.light-mode .art-img-frame {
-  border-color: rgb(var(--accent-rgb) / 0.25);
-}
-
-/* Blog cards now render via <PostCard> (data-reveal handles their reveal). */
-
-/* ── Home playlists below blog grid ── */
-.home-playlists {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-.series-strip {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-.playlist-see-all {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.5rem;
-  padding: 0.55rem 1rem;
-  border: 1px solid rgb(var(--accent-rgb) / 0.35);
-  border-radius: 9999px;
-  color: var(--accent);
-  font-size: 0.7rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
-}
-.playlist-see-all:hover {
-  border-color: rgb(var(--accent-rgb) / 0.65);
-  background: rgb(var(--accent-rgb) / 0.08);
-  color: rgb(176, 160, 255);
-}
-body.light-mode .home-playlists {
-  border-color: rgba(0, 0, 0, 0.08);
-}
-body.light-mode .playlist-see-all {
-  border-color: rgb(var(--accent-rgb) / 0.35);
-  color: var(--accent-strong);
-}
-body.light-mode .playlist-see-all:hover {
-  background: rgb(var(--accent-rgb) / 0.08);
-  border-color: rgb(var(--accent-rgb) / 0.55);
-}
-
-/* ── Art item scroll-triggered reveal ── */
-@keyframes artFadeIn {
-  from { opacity: 0; transform: scale(0.88) translateY(24px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0); }
-}
-[data-art-card] {
-  opacity: 0;
-}
-[data-art-card].card-visible {
-  animation: artFadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-/* Art item glow on hover */
-[data-art-card]:hover .art-img-frame {
-  box-shadow: 0 8px 32px rgb(var(--accent-rgb) / 0.25);
-}
-
-/* Art lightbox (popup) — replaces the old /art/[slug] detail page */
-.art-lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4vh 4vw;
-  background: rgba(0, 0, 0, 0.92);
-  opacity: 0;
-  visibility: hidden;
-  /* Fade opacity, but flip visibility instantly on show (0s) and only delay it
-     on hide (0s ease 0.3s) — so the dialog is immediately focusable on open. */
-  transition: opacity 0.3s ease, visibility 0s ease 0.3s;
-}
-.art-lightbox.is-open {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.3s ease, visibility 0s ease 0s;
-}
-.art-lightbox-bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  filter: blur(80px) brightness(0.18) saturate(1.5);
-  transform: scale(1.15);
-  pointer-events: none;
-}
-.art-lightbox-figure {
-  position: relative;
-  z-index: 10;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 100%;
-  max-height: 92vh;
-  transform: scale(0.96);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.art-lightbox.is-open .art-lightbox-figure {
-  transform: scale(1);
-}
-.art-lightbox-img {
-  max-width: 100%;
-  max-height: 78vh;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  border-radius: 0.5rem;
-  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8);
-}
-.art-lightbox-caption {
-  width: 100%;
-  max-width: 64rem;
-  padding: 1.25rem 0.25rem 0;
-  text-align: left;
-}
-.art-lightbox-close {
-  position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 9999px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  transition: background 0.2s ease;
-}
-.art-lightbox-close:hover {
-  background: rgba(255, 255, 255, 0.22);
-}
-
-#art-bg {
-  background-image: url('https://media.luci-studio.com/ChatGPT%20Image%20May%205%2C%202026%2C%2011_03_29%20AM.jpg');
-}
-@media (max-width: 767px) {
-  #art-bg {
-    background-image: url('https://media.luci-studio.com/ef8036c5a8709482e3e4ecc1090cb8ae.jpg') !important;
+  .bp-fig-cover-img { object-fit: cover; opacity: 1; }
+  .bp-fig-video { object-fit: contain; opacity: 0; background: #0a0e14; }
+  .bp-work-card--demo.is-demo .bp-fig-cover-img { opacity: 0; }
+  .bp-work-card--demo.is-demo .bp-fig-video { opacity: 1; }
+  /* Don't lift the card while the demo is playing. */
+  .bp-work-card--demo.is-demo:hover .bp-fig { transform: none; }
+  .bp-fig-toggle {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    z-index: 4;
+    display: inline-flex;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(10, 14, 20, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
-}
-
-.hero-bg-img {
-  background-image: url('https://media.luci-studio.com/hero/luci-hero-portrait.webp');
-}
-@media (orientation: landscape) {
-  .hero-bg-img {
-    background-image: url('https://media.luci-studio.com/hero/luci-hero-landscape.webp');
+  .bp-fig-toggle span {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 5px 10px;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, color 0.15s ease;
   }
-}
+  .bp-fig-toggle span.is-active { background: var(--bp-acc); color: #fff; }
+  .bp-fig-toggle span:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
 
-/* ── MY STORY section animations ─────────────────────────────────── */
-@keyframes storyPhotoIn {
-  from { opacity: 0; transform: translateX(-48px) scale(0.97); }
-  to   { opacity: 1; transform: translateX(0)     scale(1); }
-}
-@keyframes storyLabelIn {
-  from { opacity: 0; transform: translateY(14px); letter-spacing: 0.6em; }
-  to   { opacity: 1; transform: translateY(0);    letter-spacing: 0.3em; }
-}
-@keyframes storyParaIn {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes storyBadgeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  /* ── §02 CAPABILITIES ── */
+  .bp-cap-list { border-top: 1px solid var(--bp-hair); }
+  .bp-cap-row {
+    display: grid;
+    grid-template-columns: 44px minmax(180px, 1.1fr) 2fr auto;
+    align-items: baseline;
+    gap: 18px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--bp-line2);
+    transition: padding-left 0.25s ease;
+  }
+  .bp-cap-row:hover { padding-left: 10px; }
+  .bp-cap-num { font-size: 13px; color: var(--bp-acc); }
+  .bp-cap-row.is-orange .bp-cap-num { color: var(--bp-orange); }
+  .bp-cap-title { font-size: clamp(1.35rem, 2.6vw, 2rem); }
+  .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
+  .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-faint); white-space: nowrap; }
 
-[data-story-photo] {
-  opacity: 0;
-  transform: translateX(-48px) scale(0.97);
-}
-[data-story-photo].story-visible {
-  animation: storyPhotoIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-[data-story-badge] {
-  opacity: 0;
-  transform: translateY(20px);
-}
-[data-story-badge].story-visible {
-  animation: storyBadgeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: 0.45s;
-}
-[data-story-label] {
-  opacity: 0;
-  transform: translateY(14px);
-}
-[data-story-label].story-visible {
-  animation: storyLabelIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-[data-story-para] {
-  opacity: 0;
-  transform: translateY(22px);
-}
-[data-story-para].story-visible {
-  animation: storyParaIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+  /* ── §03 WRITING ── */
+  .bp-write-list { border-top: 1px solid var(--bp-hair); }
+  .bp-write-row {
+    display: grid;
+    grid-template-columns: 82px 1fr auto 56px;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--bp-line2);
+    text-decoration: none;
+    transition: padding-left 0.25s ease;
+  }
+  .bp-write-row:hover { padding-left: 10px; }
+  .bp-write-date { font-size: 12px; color: var(--bp-faint); }
+  .bp-write-title { font-size: clamp(1rem, 2vw, 1.35rem); font-weight: 600; color: var(--bp-ink); letter-spacing: -0.01em; }
+  .bp-write-row:hover .bp-write-title { color: var(--bp-acc); }
+  .bp-write-topic { justify-self: start; }
+  .bp-write-read { font-size: 11px; color: var(--bp-faint); text-align: right; white-space: nowrap; }
+
+  /* ── §04 ART (masonry + lightbox subsystem) ── */
+  /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
+     homeScrollAnimations.ts drifts #art-bg's background-position on scroll (same
+     mechanism as the old homepage). Section text flips light over the dark photo. */
+  /* No overflow:hidden here — it would create a scroll container and break the
+     child #art-bg's position:sticky. Clipping is handled by the wrapper's clip-path,
+     exactly like the old homepage. */
+  .bp-art { position: relative; }
+  .bp-art-bg-wrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; clip-path: inset(0); }
+  .bp-art-bg {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background-image: url("https://media.luci-studio.com/ChatGPT%20Image%20May%205%2C%202026%2C%2011_03_29%20AM.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .bp-art-bg::after { content: ""; position: absolute; inset: 0; background: rgba(6, 9, 14, 0.46); }
+  @media (max-width: 767px) {
+    .bp-art-bg { background-image: url("https://media.luci-studio.com/ef8036c5a8709482e3e4ecc1090cb8ae.jpg"); }
+  }
+  .bp-art-inner { position: relative; z-index: 1; }
+  .bp-art .bp-h2 { color: #fff; }
+  .bp-art .bp-sec-count,
+  .bp-art .bp-art-note { color: rgba(255, 255, 255, 0.62); }
+  .bp-art .bp-rule { background: rgba(255, 255, 255, 0.22); }
+  .bp-art-note { font-size: 13px; color: var(--bp-muted); max-width: 280px; }
+  .masonry-art-grid { columns: 2; column-gap: 0.85rem; }
+  @media (min-width: 640px) { .masonry-art-grid { columns: 3; column-gap: 1rem; } }
+  @media (min-width: 1024px) { .masonry-art-grid { columns: 4; column-gap: 1rem; } }
+  .masonry-art-item { break-inside: avoid; margin-bottom: 0.85rem; display: block; }
+  @media (min-width: 640px) { .masonry-art-item { margin-bottom: 1rem; } }
+  .art-img-frame {
+    border: 1px solid color-mix(in srgb, var(--bp-acc) 35%, transparent);
+    border-radius: 10px;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  [data-art-card]:hover .art-img-frame { border-color: var(--bp-orange); box-shadow: 0 10px 30px color-mix(in srgb, var(--bp-ink) 14%, transparent); }
+  .bp-art-bar { background: var(--bp-card); border: 1px solid var(--bp-line2); border-top: none; border-radius: 0 0 10px 10px; margin-top: -1px; }
+  .bp-art-bar-title { font-weight: 700; font-size: 13px; line-height: 1.3; color: var(--bp-ink); }
+  .bp-art-bar-meta { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--bp-faint); margin-top: 3px; }
+
+  @keyframes artFadeIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  [data-art-card] { opacity: 0; }
+  [data-art-card].card-visible { animation: artFadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  .art-lightbox { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 4vh 4vw; background: rgba(6, 9, 14, 0.94); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s ease 0.3s; }
+  .art-lightbox.is-open { opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0s ease 0s; }
+  .art-lightbox-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: blur(80px) brightness(0.2) saturate(1.4); transform: scale(1.15); pointer-events: none; }
+  .art-lightbox-figure { position: relative; z-index: 10; margin: 0; display: flex; flex-direction: column; align-items: center; max-width: 100%; max-height: 92vh; transform: scale(0.96); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .art-lightbox.is-open .art-lightbox-figure { transform: scale(1); }
+  .art-lightbox-img { max-width: 100%; max-height: 78vh; width: auto; height: auto; object-fit: contain; border-radius: 0.5rem; box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8); }
+  .art-lightbox-caption { width: 100%; max-width: 64rem; padding: 1.25rem 0.25rem 0; text-align: left; }
+  .art-lightbox-caption h3 { color: #fff; }
+  .art-lightbox-close { position: absolute; top: 1.25rem; right: 1.25rem; z-index: 20; display: flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 9999px; color: #fff; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); transition: background 0.2s ease; }
+  .art-lightbox-close:hover { background: rgba(255, 255, 255, 0.22); }
+
+  /* ── §05 STUDIO ── */
+  .bp-studio { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(32px, 5vw, 60px); align-items: start; }
+  .bp-studio-statement { font-size: clamp(1.3rem, 2.6vw, 1.9rem); font-weight: 500; line-height: 1.35; letter-spacing: -0.01em !important; }
+  .bp-stats { display: flex; flex-direction: column; }
+  .bp-stat-row { display: flex; align-items: baseline; gap: 18px; padding: 16px 0; border-top: 1px solid var(--bp-hair); }
+  .bp-stat-num { font-size: clamp(2rem, 4vw, 3rem); min-width: 110px; letter-spacing: -0.02em !important; }
+  .bp-stat-num em { color: var(--bp-acc); font-style: normal; }
+  .bp-stat-meta { display: flex; flex-direction: column; gap: 3px; }
+  .bp-stat-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-muted); }
+  .bp-stat-sub { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-faint); }
+
+  /* ── CTA (fixed dark drafting band, both themes) ── */
+  .bp-cta { position: relative; z-index: 1; background: #11161d; color: #eceae3; overflow: hidden; }
+  .bp-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(236, 234, 227, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(236, 234, 227, 0.05) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+  }
+  .bp-cta-inner { position: relative; z-index: 1; padding-top: clamp(64px, 9vw, 96px); padding-bottom: clamp(64px, 9vw, 96px); }
+  .bp-cta-label { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; font-size: 12px; letter-spacing: 0.14em; color: var(--bp-acc); }
+  .bp-cta-title { color: #eceae3; font-size: clamp(2.2rem, 6vw, 4.6rem); line-height: 0.98; letter-spacing: -0.03em !important; max-width: 900px; }
+  .bp-cta-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 34px; }
+  .bp-cta-btn { background: var(--bp-acc); color: var(--accent-ink); border: none; font-size: 14px; }
+  .bp-cta-btn:hover { filter: brightness(1.08); }
+  .bp-cta-mail { font-size: 14px; color: rgba(236, 234, 227, 0.72); text-decoration: none; border-bottom: 1px solid rgba(236, 234, 227, 0.35); padding-bottom: 4px; transition: color 0.2s ease, border-color 0.2s ease; }
+  .bp-cta-mail:hover { color: #fff; border-color: #fff; }
+
+  /* ── FOOTER ── */
+  .bp-footer { position: relative; z-index: 1; border-top: 1.5px solid var(--bp-hair); }
+  .bp-footer-cols { display: flex; flex-wrap: wrap; gap: 40px 56px; padding-top: 52px; padding-bottom: 40px; }
+  .bp-footer-brand { flex: 1 1 260px; max-width: 320px; }
+  .bp-footer-logo { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; }
+  .bp-footer-logo img { width: 30px; height: 30px; border-radius: 8px; }
+  .bp-footer-logo span { font-size: 18px; letter-spacing: 0.02em; color: var(--bp-ink); }
+  .bp-footer-blurb { margin-top: 14px; font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
+  .bp-footer-col { display: flex; flex-direction: column; gap: 12px; }
+  .bp-footer-head { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-faint); margin-bottom: 4px; }
+  :global(.bp-footer-link) { font-size: 14px; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
+  :global(.bp-footer-link:hover) { color: var(--bp-acc); }
+  .bp-footer-base { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding-top: 16px; padding-bottom: 30px; border-top: 1px solid var(--bp-line2); }
+  .bp-footer-copy { font-size: 11px; letter-spacing: 0.06em; color: var(--bp-faint); }
+  .bp-footer-legal { display: inline-flex; gap: 18px; flex-wrap: wrap; }
+  /* FooterLinks renders its own <a>/<button> (its own Astro scope) + hardcodes a
+     Tailwind `hover:text-white` that would vanish on the cream sheet — reach in and
+     re-tone it to the blueprint palette (accent on hover, legible in both themes). */
+  .bp-footer-legal :global(a),
+  .bp-footer-legal :global(button) { color: var(--bp-faint); font-size: 11px; letter-spacing: 0.08em; }
+  .bp-footer-legal :global(a:hover),
+  .bp-footer-legal :global(button:hover) { color: var(--bp-acc); }
+  .bp-footer-rev { font-size: 11px; letter-spacing: 0.06em; color: var(--bp-faint); }
+
+  /* ── connectors (dimension lines between sections) ── */
+  .bp-conn-wrap { position: relative; z-index: 1; display: flex; justify-content: center; padding: 6px 0; }
+  .bp-conn { width: 1px; height: 44px; background: linear-gradient(var(--bp-hair), transparent); display: block; }
+
+  /* ── keyframes ── */
+  @keyframes lu-spin { to { transform: rotate(360deg); } }
+  @keyframes lu-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+
+  /* ── responsive ── */
+  @media (max-width: 900px) {
+    .bp-hero { grid-template-columns: 1fr; gap: 24px; }
+    .bp-hero-right { order: -1; max-width: 300px; }
+    .bp-scroll { display: none; }
+    .bp-studio { grid-template-columns: 1fr; }
+    .bp-cap-row { grid-template-columns: 40px 1fr; row-gap: 6px; }
+    .bp-cap-desc { grid-column: 2; }
+    .bp-cap-tag { grid-column: 2; }
+  }
+  @media (max-width: 720px) {
+    .bp-dir { grid-template-columns: repeat(2, 1fr); }
+    .bp-dir-item { padding: 16px 14px 18px; }
+    .bp-dir-item:nth-child(odd) { border-left: none; }
+    .bp-dir-desc { display: none; }
+    .bp-work-grid { grid-template-columns: 1fr; }
+    .bp-write-row { grid-template-columns: 62px 1fr auto; row-gap: 4px; }
+    .bp-write-read { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bp-svg-spin, .bp-scroll-arrow { animation: none !important; }
+    [data-art-card] { opacity: 1; }
+    [data-art-card].card-visible { animation: none; }
+  }
+  :global(body.win-perf-mode) .bp-svg-spin { animation: none; }
 </style>
 
-<!-- ── Home scroll-animation hidden initial-states ──────────────────────────
-  Render-blocking + gated on html.home-anim so they exist before first paint
-  (no FOUC) and vanish when the foundation script drops .home-anim (JS off,
-  GSAP CDN failed, or reduced-motion). GSAP owns the in-motion; this only hides
-  the start. Targets PostCard/RepoCard/SeriesCard roots, which carry their own
-  Astro scope attr — so this MUST be is:global, not the scoped block above. -->
+<!-- Home scroll-animation hidden initial-states — gated on html.home-anim so JS-off /
+     GSAP-fail / reduced-motion fall back to visible content (the failsafe drops the class). -->
 <style is:global>
-  /* Step 2 — blog grid curtain: cards start invisible, GSAP owns the transform. */
-  html.home-anim #home-blog-grid > .tb-card-link { opacity: 0; }
-
-  /* Step 3 — section connectors draw downward (collapsed from the top). */
   html.home-anim [data-connector] { transform: scaleY(0); transform-origin: top center; }
-
-  /* Step 5 — Lab + Series cards start invisible (GSAP clip-reveals each);
-     the Lab underline draws left→right from a collapsed scaleX. */
-  html.home-anim .lab-palette > *,
-  html.home-anim .series-strip > li { opacity: 0; }
-  html.home-anim [data-lab-underline] { transform: scaleX(0); transform-origin: left center; }
-
   @media (prefers-reduced-motion: reduce) {
-    html.home-anim #home-blog-grid > .tb-card-link { opacity: 1; }
     html.home-anim [data-connector] { transform: none; }
-    html.home-anim .lab-palette > *,
-    html.home-anim .series-strip > li { opacity: 1; }
-    html.home-anim [data-lab-underline] { transform: none; }
   }
 </style>
 
 <script>
-  import { initHomeReveals } from '../../scripts/homeReveals';
+  import { initHomeReveals } from "../../scripts/homeReveals";
   initHomeReveals();
 </script>
-
 <script>
-  import { initHomeHeaderReveals } from '../../scripts/homeHeaderReveals';
+  import { initHomeHeaderReveals } from "../../scripts/homeHeaderReveals";
   initHomeHeaderReveals();
+</script>
+<script>
+  import { initHomeScrollAnimations } from "../../scripts/homeScrollAnimations";
+  initHomeScrollAnimations();
+</script>
+
+<script is:inline>
+  // §01 COVER/DEMO toggle — mirrors the /games featured card: the cover crossfades
+  // to a muted, looping gameplay video that autoplays. An IntersectionObserver
+  // auto-switches Cover -> Demo ~2s after the card scrolls into view (skipped on
+  // reduced motion, or if the visitor toggles first). preload stays 'none' until in view.
+  (function () {
+    var card = document.querySelector(".bp-work-card--demo");
+    if (!card) return;
+    var video = card.querySelector(".bp-fig-video");
+    var btns = card.querySelectorAll(".bp-fig-toggle [data-fmode]");
+    var userActed = false, autoTimer = null;
+    function setDemo(on) {
+      card.classList.toggle("is-demo", on);
+      btns.forEach(function (b) {
+        b.classList.toggle("is-active", (b.getAttribute("data-fmode") === "demo") === on);
+      });
+      if (video) { if (on) video.play().catch(function () {}); else video.pause(); }
+    }
+    btns.forEach(function (b) {
+      function handle(e) {
+        e.preventDefault(); e.stopPropagation();
+        userActed = true;
+        if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+        setDemo(b.getAttribute("data-fmode") === "demo");
+      }
+      b.addEventListener("click", handle);
+      b.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") handle(e); });
+    });
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce && "IntersectionObserver" in window && video) {
+      var io = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          obs.disconnect();
+          video.preload = "auto";
+          autoTimer = setTimeout(function () { if (!userActed) setDemo(true); }, 2000);
+        });
+      }, { threshold: 0.5 });
+      io.observe(card);
+    }
+  })();
 </script>
 
 <script>
-  import { initHomeScrollAnimations } from '../../scripts/homeScrollAnimations';
-  initHomeScrollAnimations();
+  // Color-scheme picker popover (blueprint nav). window.setScheme + the swatch
+  // aria-checked sync are provided globally by the Layout theme script; this only
+  // handles opening/closing the popover and forwarding swatch clicks.
+  const schemeToggle = document.getElementById("scheme-toggle");
+  const schemePopover = document.getElementById("scheme-popover") as HTMLElement | null;
+  if (schemeToggle && schemePopover) {
+    const close = () => {
+      const hadFocus = schemePopover.contains(document.activeElement);
+      schemePopover.hidden = true;
+      schemeToggle.setAttribute("aria-expanded", "false");
+      if (hadFocus) (schemeToggle as HTMLElement).focus();
+    };
+    schemeToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const willOpen = schemePopover.hidden;
+      schemePopover.hidden = !willOpen;
+      schemeToggle.setAttribute("aria-expanded", String(willOpen));
+      if (willOpen) {
+        const target = schemePopover.querySelector('.scheme-dot[aria-checked="true"]')
+          || schemePopover.querySelector(".scheme-dot");
+        (target as HTMLElement | null)?.focus();
+      }
+    });
+    schemePopover.querySelectorAll(".scheme-dot").forEach((d) => {
+      d.addEventListener("click", () => {
+        const name = (d as HTMLElement).dataset.scheme;
+        const setScheme = (window as any).setScheme;
+        if (name && typeof setScheme === "function") setScheme(name);
+        close();
+      });
+    });
+    document.addEventListener("click", (e) => {
+      const t = e.target as Node;
+      if (!schemePopover.hidden && !schemePopover.contains(t) && !schemeToggle.contains(t)) close();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !schemePopover.hidden) close();
+    });
+  }
 </script>

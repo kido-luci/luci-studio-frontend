@@ -135,7 +135,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		<link rel="preconnect" href="https://media.luci-studio.com" crossorigin>
 		<!-- Per-page <head> injection (LCP image preloads, page-specific meta) -->
 		<slot name="head" />
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Limelight&family=Outfit:wght@300;400;500;600;700;800;900&family=Boldonse&family=DM+Serif+Display:ital@0;1&family=Playfair+Display:wght@400&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400..800&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Limelight&family=Outfit:wght@300;400;500;600;700;800;900&family=Boldonse&family=DM+Serif+Display:ital@0;1&family=Playfair+Display:wght@400&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400..800&display=swap" rel="stylesheet">
 		<link href="https://cdn.jsdelivr.net/npm/@fontsource/sn-pro@latest/index.css" rel="stylesheet">
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" integrity="sha384-P8VzCVnT9NBUkMrpcIZrJbA7EBjJvh/fJS6PmP+4nLIM284DtsImIv8D0fFjIkeh" crossorigin="anonymous"></script>
@@ -425,6 +425,11 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			@media (max-width: 768px) {
 				#canvas-bg { display: none !important; }
 			}
+
+			/* Blueprint homepage draws its own drafting-grid background, so the shared
+			   particle canvas is suppressed there (marker class set before paint in the
+			   HomePage <head>). The loop still runs but paints nothing visible. */
+			html.bp-home #canvas-bg { display: none !important; }
 
 			/* === MOBILE GPU RELIEF: drop backdrop-filter on fixed elements === */
 			/* backdrop-filter on a fixed/sticky element re-rasterizes its blur on every
