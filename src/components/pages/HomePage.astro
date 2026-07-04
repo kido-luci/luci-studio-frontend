@@ -248,18 +248,22 @@ const homepageSchema = {
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
     <!-- ===================== §01 SELECTED WORK ===================== -->
-    <section class="bp-section bp-work-band" id="work">
+    <section class="bp-section" id="work">
+      <div class="bp-work-band">
+        <div class="bp-wrap">
+          <div class="bp-sec-head" data-reveal>
+            <span class="bp-dot" aria-hidden="true"></span>
+            <span class="bp-mono bp-sec-label">§01 — SELECTED WORK</span>
+            <span class="bp-rule" aria-hidden="true"></span>
+            <span class="bp-mono bp-sec-count">{String(selectedWork.length).padStart(2, "0")} PROJECTS</span>
+          </div>
+          <div class="bp-sec-title-row" data-reveal>
+            <h2 class="bp-display bp-h2" data-ml9>Things I've shipped.</h2>
+            <a href={localizedHref(locale, "/lab")} class="bp-mono bp-more">ALL WORK →</a>
+          </div>
+        </div>
+      </div>
       <div class="bp-wrap">
-        <div class="bp-sec-head" data-reveal>
-          <span class="bp-dot" aria-hidden="true"></span>
-          <span class="bp-mono bp-sec-label">§01 — SELECTED WORK</span>
-          <span class="bp-rule" aria-hidden="true"></span>
-          <span class="bp-mono bp-sec-count">{String(selectedWork.length).padStart(2, "0")} PROJECTS</span>
-        </div>
-        <div class="bp-sec-title-row" data-reveal>
-          <h2 class="bp-display bp-h2" data-ml9>Things I've shipped.</h2>
-          <a href={localizedHref(locale, "/lab")} class="bp-mono bp-more">ALL WORK →</a>
-        </div>
         <div class="bp-work-grid">
           {selectedWork.map((w) => (
             <a
@@ -559,23 +563,26 @@ const homepageSchema = {
     padding-bottom: clamp(52px, 8vw, 88px);
   }
 
-  /* §01 gets the same fixed-dark drafting band as the closing CTA (SiteFooter's
-     .bp-cta) — full-bleed, independent of light/dark mode. Re-pointing the
-     blueprint tokens here (rather than touching every child rule) is what makes
-     the existing title/badge/card styles stay legible without a rewrite —
-     --bp-acc is already a fixed blueprint-blue on this page, so it's untouched. */
+  /* §01's title row gets the same fixed-dark drafting band as the closing CTA
+     (SiteFooter's .bp-cta) — full-bleed, independent of light/dark mode. Only
+     the header (label + "Things I've shipped."); the work-card grid below it
+     stays on the page's own background. Re-pointing the blueprint tokens here
+     (rather than touching every child rule) is what keeps the existing
+     title/label styles legible without a rewrite — --bp-acc is already a
+     fixed blueprint-blue on this page, so it's untouched. */
   .bp-work-band {
     position: relative;
     z-index: 1;
     background: #11161d;
     color: #eceae3;
     overflow: hidden;
+    padding-top: clamp(40px, 6vw, 64px);
+    padding-bottom: clamp(40px, 6vw, 64px);
+    margin-bottom: clamp(36px, 5vw, 56px);
     --bp-ink: #eceae3;
     --bp-muted: rgba(236, 234, 227, 0.72);
     --bp-faint: rgba(236, 234, 227, 0.5);
     --bp-hair: rgba(236, 234, 227, 0.14);
-    --bp-line2: rgba(236, 234, 227, 0.08);
-    --bp-card: rgba(236, 234, 227, 0.035);
   }
   .bp-work-band::before {
     content: "";
@@ -586,6 +593,7 @@ const homepageSchema = {
     pointer-events: none;
   }
   .bp-work-band .bp-wrap { position: relative; z-index: 1; }
+  .bp-work-band .bp-sec-title-row { margin-bottom: 0; }
 
   /* ── shared motif atoms ── */
   .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
