@@ -6,7 +6,6 @@
 // (projects / posts / gallery / profile); the blueprint's placeholder copy was
 // mapped onto real work. The homepage is English-only (there is no /vi/ route).
 import Layout from "../../layouts/Layout.astro";
-import TopNav from "../TopNav.astro";
 import FooterLinks from "../FooterLinks.astro";
 import { postService } from "../../services/posts";
 import { galleryService } from "../../services/gallery";
@@ -19,7 +18,6 @@ const locale = getLocaleFromUrl(Astro.url);
 const API_URL = import.meta.env.PUBLIC_API_URL || "";
 
 const profile = await profileService.getProfile();
-const marquee = profile?.tech_marquee ?? [];
 const stats = profile?.portfolio_stats ?? [];
 
 // §01 SELECTED WORK — 2 apps + 2 sources, ordered by display_order. Apps lead
@@ -135,7 +133,39 @@ const homepageSchema = {
     <script is:inline>document.documentElement.classList.add('home-anim');document.documentElement.classList.add('bp-home');</script>
   </Fragment>
 
-  <TopNav active="home" ctaLabel="Let's talk" ctaHref="#contact" />
+  <nav class="bp-nav" data-bp-nav>
+    <div class="bp-wrap bp-nav-inner">
+      <a href={localizedHref(locale, "/")} class="bp-nav-logo">
+        <span class="bp-nav-mark" aria-hidden="true"><span class="bp-nav-mark-dot"></span></span>
+        <span class="bp-nav-name">LUCI <span class="bp-nav-name-acc">STUDIO</span></span>
+      </a>
+      <div class="bp-nav-links bp-mono">
+        <a href={localizedHref(locale, "/")} class="is-active">HOME</a>
+        <a href={localizedHref(locale, "/blog")}>BLOG</a>
+        <a href={localizedHref(locale, "/blog/series")}>SERIES</a>
+        <a href={localizedHref(locale, "/lab")}>LAB</a>
+        <a href="/tools">TOOLS</a>
+        <a href="/games">GAMES</a>
+      </div>
+      <div class="bp-nav-actions">
+        <button type="button" id="theme-toggle" class="bp-nav-icon" aria-label="Toggle theme" onclick="window.toggleTheme && window.toggleTheme()">☀</button>
+        <button type="button" class="bp-nav-icon bp-nav-icon--grid" aria-label="Toggle grid" onclick="var b=document.querySelector('.bp');if(b)b.classList.toggle('grid-off')">◧</button>
+        <a href="#contact" class="bp-nav-cta bp-mono">LET'S TALK</a>
+        <button type="button" class="bp-nav-burger" aria-label="Menu" aria-expanded="false" onclick="var n=document.querySelector('[data-bp-nav]');var o=n.classList.toggle('menu-open');this.setAttribute('aria-expanded',String(o))">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <div class="bp-nav-mobile bp-mono">
+      <a href={localizedHref(locale, "/")}>HOME</a>
+      <a href={localizedHref(locale, "/blog")}>BLOG</a>
+      <a href={localizedHref(locale, "/blog/series")}>SERIES</a>
+      <a href={localizedHref(locale, "/lab")}>LAB</a>
+      <a href="/tools">TOOLS</a>
+      <a href="/games">GAMES</a>
+      <a href="#contact" class="bp-nav-mobile-cta">LET'S TALK</a>
+    </div>
+  </nav>
 
   <main class="bp" data-api-url={API_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
@@ -145,7 +175,7 @@ const homepageSchema = {
       <div class="bp-hero-left">
         <div class="bp-coord" data-reveal>
           <span class="bp-coord-dot" aria-hidden="true"></span>
-          <span class="bp-mono">N 10°49′ · CREATIVE ENGINEERING</span>
+          <span class="bp-mono">N 10°49′ · CREATIVE ENGINEERING STUDIO</span>
         </div>
 
         <h1 class="bp-display bp-hero-title" data-word-reveal>
@@ -154,13 +184,15 @@ const homepageSchema = {
         </h1>
 
         <div class="bp-hero-note bp-mono" data-reveal aria-hidden="true">
-          <span class="bp-tick" aria-hidden="true"></span>
-          Δ 1440 × 8-COL BASELINE GRID · REV 1.0
+          <span class="bp-dim-tick"></span>
+          <span class="bp-dim-txt">Δ 1440 × 8-COL BASELINE GRID · REV 1.0</span>
+          <span class="bp-dim-rule"></span>
+          <span class="bp-dim-tick"></span>
         </div>
 
-        {profile?.hero_tagline && (
-          <p class="bp-tagline" data-reveal>{profile.hero_tagline}</p>
-        )}
+        <p class="bp-tagline" data-reveal>
+          A creative engineering studio — we craft <span class="bp-u">cross-platform apps</span>, <span class="bp-u">browser tools &amp; games</span>, <span class="bp-u">technical writing</span>, and <span class="bp-u bp-u--o">digital art</span>, turning hard problems into shipped products.
+        </p>
 
         <div class="bp-hero-cta" data-reveal>
           <a href="#work" class="bp-btn bp-btn--solid">View work</a>
@@ -196,17 +228,6 @@ const homepageSchema = {
         <svg class="bp-scroll-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
       </a>
     </header>
-
-    <!-- ===================== MARQUEE ===================== -->
-    {marquee.length > 0 && (
-      <div class="bp-marquee" aria-hidden="true">
-        <div class="bp-marquee-track animate-marquee">
-          {[...marquee, ...marquee].map((x) => (
-            <span class="bp-mono bp-marquee-item">{x}<em>✦</em></span>
-          ))}
-        </div>
-      </div>
-    )}
 
     <!-- ===================== DIRECTORY ===================== -->
     <section class="bp-wrap bp-section" id="directory">
@@ -511,13 +532,16 @@ const homepageSchema = {
      decorative secondary (art + coordinate markers), like the site's other
      intentionally-fixed accents.
      ══════════════════════════════════════════════════════════════════════ */
-  .bp {
-    position: relative;
-    background: var(--bp-bg);
-    /* dark defaults (site :root tokens are dark; .light-mode overrides below) */
+  /* Blueprint tokens live on html.bp-home so BOTH the sticky nav and <main.bp>
+     inherit them (the nav is a sibling of main, not a child). Dark by default;
+     the .light-mode variant paints the cream sheet. --bp-acc is a fixed blueprint
+     blue (matches the mockup), independent of the site's accent schemes; orange is
+     the fixed decorative secondary. The --nav-bg / --nav-bg-scroll overrides retune
+     the glass the shared navDimmer toggles between on scroll. */
+  :global(html.bp-home) {
     --bp-bg: #0a0e14;
     --bp-ink: var(--text-primary);
-    --bp-acc: var(--accent);
+    --bp-acc: #1b56ff;
     --bp-orange: #ff5b1a;
     --bp-line: rgba(255, 255, 255, 0.05);
     --bp-line2: rgba(255, 255, 255, 0.08);
@@ -526,17 +550,25 @@ const homepageSchema = {
     --bp-muted: color-mix(in srgb, var(--bp-ink) 58%, transparent);
     --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
-    color: var(--bp-ink);
-    font-family: "Space Grotesk", system-ui, sans-serif;
-    overflow: clip;
   }
-  :global(body.light-mode) .bp {
+  :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
     --bp-card: #e8e6df;
   }
+  .bp {
+    position: relative;
+    background: var(--bp-bg);
+    color: var(--bp-ink);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    overflow: clip;
+  }
+  /* Crisp blueprint headings — cancel the site's light-mode heading drop-shadow filter. */
+  :global(body.light-mode) .bp-display { filter: none !important; }
+  /* Grid toggle (◧ in the nav) hides the drafting grid. */
+  .bp.grid-off .bp-grid { display: none; }
 
   /* Drafting grid: fine 36px + major 180px, spanning the whole sheet. */
   .bp-grid {
@@ -623,14 +655,61 @@ const homepageSchema = {
     white-space: nowrap;
   }
 
+  /* ── NAV (the blueprint's own sticky drafting nav; replaces the shared TopNav) ── */
+  .bp-nav {
+    /* Define the nav-glass vars ON the nav element (navDimmer resolves
+       var(--nav-bg-scroll) here on scroll). Set on .bp-nav rather than an ancestor
+       because body.light-mode is a closer ancestor and would otherwise win. */
+    --nav-bg: rgba(10, 14, 20, 0.78);
+    --nav-bg-scroll: rgba(10, 14, 20, 0.92);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--bp-hair);
+  }
+  :global(body.light-mode) .bp-nav { --nav-bg: rgba(244, 242, 236, 0.82); --nav-bg-scroll: rgba(244, 242, 236, 0.94); }
+  .bp-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 15px; padding-bottom: 15px; }
+  .bp-nav-logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+  .bp-nav-mark { width: 34px; height: 34px; border: 1.5px solid var(--bp-ink); border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .bp-nav-mark-dot { width: 12px; height: 12px; border: 1.5px solid var(--bp-acc); border-radius: 50%; }
+  .bp-nav-name { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.04em; color: var(--bp-ink); white-space: nowrap; }
+  .bp-nav-name-acc { color: var(--bp-acc); }
+  .bp-nav-links { display: flex; align-items: center; gap: 30px; }
+  .bp-nav-links a { position: relative; font-size: 12px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
+  .bp-nav-links a:hover, .bp-nav-links a.is-active { color: var(--bp-ink); }
+  .bp-nav-links a.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px; background: var(--bp-acc); }
+  .bp-nav-actions { display: flex; align-items: center; gap: 11px; }
+  .bp-nav-icon { width: 36px; height: 36px; border: 1.5px solid var(--bp-hair); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--bp-muted); background: transparent; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+  .bp-nav-icon:hover { border-color: var(--bp-ink); color: var(--bp-ink); }
+  .bp-nav-cta { padding: 10px 20px; background: var(--bp-ink); color: var(--bp-bg); border-radius: 24px; font-size: 12px; letter-spacing: 0.1em; text-decoration: none; white-space: nowrap; transition: background 0.2s ease, color 0.2s ease; }
+  .bp-nav-cta:hover { background: var(--bp-acc); color: #fff; }
+  .bp-nav-burger { display: none; width: 40px; height: 40px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: transparent; border: 1.5px solid var(--bp-hair); border-radius: 9px; cursor: pointer; }
+  .bp-nav-burger span { display: block; width: 16px; height: 1.5px; background: var(--bp-ink); }
+  .bp-nav-mobile { display: none; flex-direction: column; padding: 4px 0 14px; }
+  .bp-nav-mobile a { padding: 12px clamp(20px, 5vw, 48px); font-size: 13px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; }
+  .bp-nav-mobile a:hover { color: var(--bp-ink); }
+  .bp-nav-mobile-cta { color: var(--bp-acc) !important; }
+  @media (max-width: 860px) {
+    .bp-nav-links, .bp-nav-cta, .bp-nav-icon--grid { display: none; }
+    .bp-nav-burger { display: flex; }
+    .bp-nav.menu-open .bp-nav-mobile { display: flex; }
+    .bp-nav.menu-open { border-bottom-color: var(--bp-line2); }
+  }
+
+  /* ── underlined tagline phrases ── */
+  .bp-u { border-bottom: 2px solid var(--bp-acc); font-weight: 600; color: var(--bp-ink); }
+  .bp-u--o { border-bottom-color: var(--bp-orange); }
+
   /* ── HERO ── */
   .bp-hero {
     display: grid;
     grid-template-columns: 1.15fr 0.85fr;
     gap: 40px;
     align-items: center;
-    /* Top pad clears the fixed 81px TopNav so the coordinate eyebrow isn't tucked under it. */
-    padding-top: clamp(100px, 10vw, 128px);
+    padding-top: clamp(40px, 6vw, 76px);
     padding-bottom: clamp(40px, 6vw, 64px);
     position: relative;
   }
@@ -649,13 +728,15 @@ const homepageSchema = {
   .bp-hero-note {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 10px;
     margin-top: 18px;
     font-size: 11px;
     letter-spacing: 0.06em;
     color: var(--bp-faint);
   }
-  .bp-tick { width: 10px; height: 10px; border-left: 1px solid var(--bp-faint); border-bottom: 1px solid var(--bp-faint); flex-shrink: 0; }
+  .bp-dim-txt { white-space: nowrap; }
+  .bp-dim-tick { width: 1px; height: 9px; background: var(--bp-faint); flex-shrink: 0; }
+  .bp-dim-rule { flex: 1; height: 1px; background: var(--bp-faint); min-width: 24px; }
   .bp-tagline {
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: clamp(1rem, 1.6vw, 1.2rem);
@@ -669,7 +750,8 @@ const homepageSchema = {
   .bp-btn {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 13px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
     padding: 13px 24px;
     border-radius: 8px;
     text-decoration: none;
@@ -678,12 +760,12 @@ const homepageSchema = {
     white-space: nowrap;
   }
   .bp-btn--solid { background: var(--bp-ink); color: var(--bp-bg); }
-  .bp-btn--solid:hover { background: var(--bp-acc); color: var(--accent-ink); }
+  .bp-btn--solid:hover { background: var(--bp-acc); color: #fff; }
   .bp-btn--ghost { border-color: var(--bp-ink); color: var(--bp-ink); }
   .bp-btn--ghost:hover { background: var(--bp-ink); color: var(--bp-bg); }
 
   .bp-hero-right { display: flex; justify-content: center; }
-  .bp-diagram { position: relative; width: min(100%, 400px); aspect-ratio: 1; }
+  .bp-diagram { position: relative; width: min(100%, 460px); aspect-ratio: 1; }
   .bp-hero-svg { width: 100%; height: 100%; color: var(--bp-ink); display: block; }
   .bp-svg-acc { stroke: var(--bp-acc); }
   .bp-svg-acc-fill { fill: var(--bp-acc); }
@@ -709,12 +791,6 @@ const homepageSchema = {
     text-decoration: none;
   }
   .bp-scroll-arrow { width: 16px; height: 16px; animation: lu-bob 1.8s ease-in-out infinite; }
-
-  /* ── MARQUEE ── */
-  .bp-marquee { position: relative; z-index: 1; overflow: hidden; border-top: 1px solid var(--bp-line2); border-bottom: 1px solid var(--bp-line2); padding: 13px 0; }
-  .bp-marquee-track { display: flex; width: max-content; white-space: nowrap; }
-  .bp-marquee-item { display: inline-flex; align-items: center; gap: 20px; margin: 0 20px; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--bp-muted); }
-  .bp-marquee-item em { color: var(--bp-acc); font-style: normal; font-size: 13px; }
 
   /* ── DIRECTORY ── */
   .bp-dir {
@@ -915,7 +991,7 @@ const homepageSchema = {
     .bp-write-read { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .bp-svg-spin, .bp-scroll-arrow, .bp-marquee-track { animation: none !important; }
+    .bp-svg-spin, .bp-scroll-arrow { animation: none !important; }
     [data-art-card] { opacity: 1; }
     [data-art-card].card-visible { animation: none; }
   }
