@@ -32,6 +32,7 @@ export function initNavDimmer() {
 
 	let scrollRaf = false;
 	let cachedScrollHeight = document.documentElement.scrollHeight;
+	let lastScrollY = window.scrollY;
 	window.addEventListener('resize', () => { cachedScrollHeight = document.documentElement.scrollHeight; }, { passive: true });
 	window.addEventListener('scroll', () => {
 		if (scrollRaf) return;
@@ -41,6 +42,19 @@ export function initNavDimmer() {
 			const scrollY = window.scrollY;
 			const windowHeight = window.innerHeight;
 			const isLight = document.body.classList.contains('light-mode');
+
+			// Hide the nav on scroll-down, reveal it on scroll-up. Skipped while the
+			// mobile menu is open (it lives inside the nav — hiding it would strand
+			// the open dropdown), and a small delta ignores sub-pixel/bounce jitter.
+			if (!nav.classList.contains('menu-open')) {
+				const delta = scrollY - lastScrollY;
+				if (scrollY <= 80 || delta < -4) {
+					nav.classList.remove('nav-hidden');
+				} else if (delta > 4) {
+					nav.classList.add('nav-hidden');
+				}
+			}
+			lastScrollY = scrollY;
 
 			if (scrollY > 80) {
 				nav.style.background = 'var(--nav-bg-scroll)';

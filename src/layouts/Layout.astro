@@ -272,6 +272,16 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 
 			html {
 				overflow-x: clip;
+				/* The macOS/iOS rubber-band overscroll "canvas" (revealed above/below
+				   the page when you drag past the edge) paints with html's background.
+				   The blueprint sheet bg lives on <main>, so html was transparent and
+				   the bounce showed white. Match the sheet here — navy in dark, cream
+				   in light (the same #0a0e14 / #f4f2ec every blueprint page uses) — so
+				   the bounce reveals the sheet colour, native feel kept. */
+				background-color: #0a0e14;
+			}
+			html.light-mode {
+				background-color: #f4f2ec;
 			}
 			body {
 				background-color: var(--bg-primary);
