@@ -31,7 +31,7 @@ describe('galleryService', () => {
 
             const result = await galleryService.getAll();
             expect(result).toEqual([sampleItem]);
-            expect(String(fetchMock.mock.calls[0][0])).toMatch(/\/gallery$/);
+            expect(String(fetchMock.mock.calls[0][0])).toMatch(/\/gallery\/public$/);
         });
 
         it('normalises a non-array success payload to []', async () => {
