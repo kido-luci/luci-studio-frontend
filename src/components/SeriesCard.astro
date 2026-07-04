@@ -307,8 +307,13 @@ const postLabel = `${count} ${count === 1 ? "post" : "posts"}`;
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
     --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-line2: rgba(255, 255, 255, 0.08);
-    --bp-card: rgba(255, 255, 255, 0.035);
-    --bp-hover: color-mix(in srgb, var(--accent) 7%, transparent);
+    --bp-card: rgba(255, 255, 255, 0.05);
+    /* Opaque raised panel over the drafting sheet — hides the grid behind the
+       text so the meta/title/desc read cleanly (a spec-callout box on the sheet). */
+    --bp-bg: #0a0e14;
+    --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
+    --bp-panel-hover: color-mix(in srgb, var(--bp-acc) 10%, var(--bp-panel));
+    --bp-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
 
     position: relative;
     display: grid;
@@ -318,13 +323,15 @@ const postLabel = `${count} ${count === 1 ? "post" : "posts"}`;
     padding: 16px;
     border: 1px solid var(--bp-hair);
     border-radius: 12px;
-    background: transparent;
+    background: var(--bp-panel);
+    box-shadow: var(--bp-shadow);
     color: inherit; text-decoration: none;
-    transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+    transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   }
   .bpc:hover {
     border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
-    background: var(--bp-hover);
+    background: var(--bp-panel-hover);
+    box-shadow: 0 22px 48px -26px color-mix(in srgb, var(--bp-acc) 50%, transparent);
     transform: translateY(-3px);
   }
 
@@ -416,6 +423,11 @@ const postLabel = `${count} ${count === 1 ? "post" : "posts"}`;
     --bp-card: #e8e6df;
     --bp-muted: color-mix(in srgb, var(--text-primary) 62%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 45%, transparent);
+    /* White panel lifts off the cream sheet + soft shadow for depth. */
+    --bp-bg: #f4f2ec;
+    --bp-panel: #ffffff;
+    --bp-panel-hover: color-mix(in srgb, var(--bp-acc) 6%, #ffffff);
+    --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
   }
 
   @media (max-width: 860px) {
