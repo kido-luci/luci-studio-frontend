@@ -39,3 +39,10 @@
 # "Playlists" feature renamed to "Series" on 2026-06-18. Path prefix changed; slugs unchanged.
 /blog/playlists                                                             /blog/series                                                              301
 /blog/playlists/*                                                           /blog/series/:splat                                                       301
+
+# /tools and /live hub pages removed on 2026-07-04 — the nav links straight to the
+# standalone deploys now. Redirect old indexed/bookmarked URLs (both slash variants).
+/tools/                                                                     https://tools.luci-studio.com/                                             301
+/tools                                                                      https://tools.luci-studio.com/                                             301
+/live/                                                                      https://live.luci-studio.com/                                              301
+/live                                                                       https://live.luci-studio.com/                                              301

@@ -2,7 +2,6 @@
 import Layout from "../../layouts/Layout.astro";
 import TimelineItem from "../TimelineItem.astro";
 import TopNav from "../TopNav.astro";
-import LabDecor from "../LabDecor.astro";
 import { workService } from "../../services/work";
 import { profileService } from "../../services/profile";
 import { skillsService } from "../../services/skills";
@@ -15,19 +14,6 @@ const profile = rawProfile ? localized(rawProfile, locale) : null;
 const skills = await skillsService.getAll();
 const work = await workService.getAll();
 
-// Per-category accent triplet (base / soft tint / strong text) — matches the Skills v3 design.
-const SKILL_ACCENT: Record<string, { a: string; soft: string; strong: string }> = {
-  violet: { a: "#7c5cff", soft: "#f1ecff", strong: "#5a3fd6" },
-  blue:   { a: "#3b73ff", soft: "#e7eeff", strong: "#1d54e0" },
-  cyan:   { a: "#14b8bd", soft: "#ddf5f4", strong: "#0a8f93" },
-  pink:   { a: "#ec4899", soft: "#fce6f0", strong: "#d12a6c" },
-  amber:  { a: "#f59e0b", soft: "#fcf0db", strong: "#b9740a" },
-};
-const skAccent = (token: string) => SKILL_ACCENT[token] ?? SKILL_ACCENT.violet;
-const skVars = (token: string) => {
-  const c = skAccent(token);
-  return `--accent:${c.a};--accent-soft:${c.soft};--accent-strong:${c.strong}`;
-};
 const highlightYear = (s?: string) => (s ?? "").replace(/\b(\d{4})\b/, '<span class="sk-year">$1</span>');
 const localizedWork = work.map(w => localized(w, locale));
 const localizedSkills = skills.map(s => localized(s, locale));
@@ -65,178 +51,155 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
 
   <TopNav active="portfolio" />
 
-  <main class="pt-20">
+  <main class="bp-portfolio">
+    <div class="bp-grid" aria-hidden="true"></div>
 
     <!-- MY STORY -->
-    <section id="about" class="py-24 px-4 md:px-6 overflow-hidden relative">
-      <LabDecor />
-      <div class="max-w-7xl mx-auto relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <!-- Left: Photo -->
-          <div data-story-photo class="relative group">
-            <div class="absolute -inset-4 bg-gradient-to-tr from-violet-600/20 to-blue-600/20 rounded-2xl blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
-            <div class="relative aspect-square md:aspect-auto md:h-[600px] rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]">
-              <img src={profile?.story_photo_url} alt="Trung Lap" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
-              <div data-story-badge class="absolute bottom-8 left-8 right-8 p-6 backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl">
-                <p class="text-xs font-black text-violet-400 uppercase tracking-[0.2em] mb-1">{t('portfolio.basedIn')}</p>
-                <p class="text-xl font-bold">{profile?.story_location}</p>
-              </div>
-            </div>
+    <section id="about" class="bp-wrap bp-po-sec bp-po-sec--first">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">{t('portfolio.thePersonEyebrow')}</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-count">01 · STORY</span>
+      </div>
+      <div class="bp-po-story">
+        <!-- Left: Photo -->
+        <div data-story-photo class="bp-po-photo">
+          <img src={profile?.story_photo_url} alt="Trung Lap" class="bp-po-photo-img" />
+          <div data-story-badge class="bp-po-badge">
+            <p class="bp-mono bp-po-badge-label">{t('portfolio.basedIn')}</p>
+            <p class="bp-po-badge-value">{profile?.story_location}</p>
           </div>
+        </div>
 
-          <!-- Right: Content -->
-          <div>
-            <span data-story-label class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4 block">{t('portfolio.thePersonEyebrow')}</span>
-            <h2 data-ml9 class="text-5xl md:text-7xl tracking-normal mb-8" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('portfolio.myStory')}<span class="text-violet-500">.</span></h2>
-            <div class="space-y-6 text-gray-400 text-lg leading-relaxed">
-              {(profile?.bio_paragraphs ?? []).map((para, i) => (
-                <p data-story-para={String(i)} class="text-gray-400 text-lg leading-relaxed" set:html={para} />
-              ))}
-            </div>
-            <div class="grid grid-cols-2 gap-4 mt-12">
-              {(profile?.story_facts ?? []).map((f, fi) => (
-                <div data-reveal="scale" data-delay={String(fi + 1)} class="p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
-                  <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">{f.label}</p>
-                  <p class="text-sm font-bold text-gray-300">{f.value}</p>
-                </div>
-              ))}
-            </div>
+        <!-- Right: Content -->
+        <div class="bp-po-story-text">
+          <h2 class="bp-display bp-po-title" data-reveal>{t('portfolio.myStory')}<span class="bp-acc-dot">.</span></h2>
+          <div class="bp-po-paras">
+            {(profile?.bio_paragraphs ?? []).map((para, i) => (
+              <p data-story-para={String(i)} class="bp-po-para" set:html={para} />
+            ))}
+          </div>
+          <div class="bp-po-facts">
+            {(profile?.story_facts ?? []).map((f, fi) => (
+              <div data-reveal="scale" data-delay={String(fi + 1)} class="bp-po-fact">
+                <p class="bp-mono bp-po-fact-label">{f.label}</p>
+                <p class="bp-po-fact-value">{f.value}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </section>
 
-    <div class="flex flex-col items-center py-8 opacity-40">
-      <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
-    </div>
-
     <!-- STATS -->
-    <section class="py-6 px-4 md:px-6">
-      <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-1">
+    <section class="bp-wrap bp-po-stats-sec">
+      <div class="bp-po-stats">
         {(profile?.portfolio_stats ?? []).map((s, i) => (
-          <div data-reveal data-delay={String(i+1)} class="tilt-card p-5 sm:p-8 border border-white/5 rounded-2xl text-center hover:border-violet-500/20 transition-all duration-500 bg-white/[0.02]">
-            <div class="text-6xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 mb-2">
+          <div data-reveal data-delay={String(i+1)} class="bp-po-stat">
+            <div class="bp-display bp-po-stat-num">
               <span class="count-up" data-count={s.number} data-suffix={s.suffix}>0{s.suffix}</span>
             </div>
-            <div class="text-white font-bold mb-1">{s.label}</div>
-            <div class="text-xs text-gray-400 uppercase tracking-widest">{s.sub}</div>
+            <div class="bp-po-stat-title">{s.label}</div>
+            <div class="bp-mono bp-po-stat-sub">{s.sub}</div>
           </div>
         ))}
       </div>
     </section>
 
-    <div class="flex flex-col items-center py-6 opacity-40">
-      <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
-    </div>
-
     <!-- EXPERIENCE -->
-    <section id="experience" class="py-16 px-4 md:px-6">
-      <div class="max-w-7xl mx-auto">
-        <div data-reveal class="mb-20">
-          <span class="text-xs font-black text-pink-500 uppercase tracking-[0.3em] mb-3 block">{t('portfolio.theRecord')}</span>
-          <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('portfolio.experience')}<span class="text-pink-500">.</span></h2>
+    <section id="experience" class="bp-wrap bp-po-sec">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">{t('portfolio.theRecord')}</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-count">02 · WORK</span>
+      </div>
+      <h2 class="bp-display bp-po-title" data-reveal>{t('portfolio.experience')}<span class="bp-acc-dot">.</span></h2>
+
+      <div class="bp-po-tl-group">
+        <h3 class="bp-mono bp-po-tl-label" data-reveal>{t('portfolio.paidWork')}<span class="bp-po-tl-rule" aria-hidden="true"></span></h3>
+        <div class="timeline-container bp-po-tl">
+          {experience.map((j, i) => (
+            <TimelineItem {...j} index={i} />
+          ))}
         </div>
-        <div class="mb-12">
-          <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
-            {t('portfolio.paidWork')}
-            <div class="h-px flex-1 bg-white/5"></div>
-          </h3>
-          <div class="space-y-4 timeline-container">
-            {experience.map((j, i) => (
-              <TimelineItem {...j} index={i} />
-            ))}
-          </div>
-        </div>
-        <div>
-          <h3 data-reveal class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-4">
-            {t('portfolio.ownBets')}
-            <div class="h-px flex-1 bg-white/5"></div>
-          </h3>
-          <div class="space-y-4 timeline-container">
-            {indieProjects.map((j, i) => (
-              <TimelineItem {...j} index={i} />
-            ))}
-          </div>
+      </div>
+      <div class="bp-po-tl-group">
+        <h3 class="bp-mono bp-po-tl-label" data-reveal>{t('portfolio.ownBets')}<span class="bp-po-tl-rule" aria-hidden="true"></span></h3>
+        <div class="timeline-container bp-po-tl">
+          {indieProjects.map((j, i) => (
+            <TimelineItem {...j} index={i} />
+          ))}
         </div>
       </div>
     </section>
 
-    <div class="flex flex-col items-center py-8 opacity-40">
-      <div class="w-0.5 h-12 bg-gradient-to-b from-pink-500 to-transparent"></div>
-    </div>
-
     <!-- SKILLS -->
-    <section id="skills" class="py-16 px-4 md:px-6">
-      <div class="max-w-7xl mx-auto">
-        <div data-reveal class="sk-header">
+    <section id="skills" class="bp-wrap bp-po-sec">
+      <div class="sk-header" data-reveal>
+        <div>
+          <div class="bp-sec-head">
+            <span class="bp-dot" aria-hidden="true"></span>
+            <span class="bp-mono bp-sec-label">{t('portfolio.theStack')}</span>
+          </div>
+          <h2 class="bp-display bp-po-title">{t('portfolio.skills')}<span class="bp-acc-dot">.</span></h2>
+        </div>
+        <div class="sk-stats">
           <div>
-            <span class="sk-eyebrow"><span class="sk-eyebrow-dot"></span>{t('portfolio.theStack')}</span>
-            <h2 data-ml9 class="text-6xl md:text-8xl tracking-normal" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.25;">{t('portfolio.skills')}<span class="text-emerald-500">.</span></h2>
+            <div class="bp-display sk-stat-num tabular-nums">{disciplineCount}</div>
+            <div class="bp-mono sk-stat-label">{t('portfolio.disciplines')}</div>
           </div>
-          <div class="sk-stats">
-            <div>
-              <div class="sk-stat-num tabular-nums">{disciplineCount}</div>
-              <div class="sk-stat-label">{t('portfolio.disciplines')}</div>
-            </div>
-            <div>
-              <div class="sk-stat-num tabular-nums">{toolsLabel}</div>
-              <div class="sk-stat-label">{t('portfolio.toolsAndCrafts')}</div>
-            </div>
+          <div>
+            <div class="bp-display sk-stat-num tabular-nums">{toolsLabel}</div>
+            <div class="bp-mono sk-stat-label">{t('portfolio.toolsAndCrafts')}</div>
           </div>
         </div>
+      </div>
 
-        <div class="sk-grid">
-          {narrowSkills.map(({ cat, num }) => (
-            <div data-reveal class="sk-card" style={skVars(cat.accent_color)}>
-              <div class="sk-blob"></div>
-              <div class="sk-head">
-                <div class="sk-head-left">
-                  <span class="sk-dot"></span>
-                  <span class="sk-label">{cat.name}</span>
-                </div>
-                <span class="sk-num">{num}</span>
+      <div class="sk-grid">
+        {narrowSkills.map(({ cat, num }) => (
+          <div data-reveal class="sk-card">
+            <div class="sk-head">
+              <div class="sk-head-left">
+                <span class="sk-dot"></span>
+                <span class="bp-mono sk-label">{cat.name}</span>
               </div>
-              <div class="sk-chips">
-                {cat.items.map((s) => (<span class="sk-chip">{s}</span>))}
-              </div>
+              <span class="bp-mono sk-num">{num}</span>
             </div>
-          ))}
-        </div>
-
-        {wideSkills.map(({ cat, num }) => (
-          <div data-reveal class="sk-card sk-card--wide" style={skVars(cat.accent_color)}>
-            <div class="sk-blob sk-blob--wide"></div>
-            <div class="sk-wide-left">
-              <div class="sk-head">
-                <div class="sk-head-left">
-                  <span class="sk-dot"></span>
-                  <span class="sk-label">{cat.name}</span>
-                </div>
-                <span class="sk-num">{num}</span>
-              </div>
-              {cat.description && <p class="sk-desc" set:html={highlightYear(cat.description)} />}
-            </div>
-            <div class="sk-chips sk-chips--wide">
+            <div class="sk-chips">
               {cat.items.map((s) => (<span class="sk-chip">{s}</span>))}
             </div>
           </div>
         ))}
       </div>
+
+      {wideSkills.map(({ cat, num }) => (
+        <div data-reveal class="sk-card sk-card--wide">
+          <div class="sk-wide-left">
+            <div class="sk-head">
+              <div class="sk-head-left">
+                <span class="sk-dot"></span>
+                <span class="bp-mono sk-label">{cat.name}</span>
+              </div>
+              <span class="bp-mono sk-num">{num}</span>
+            </div>
+            {cat.description && <p class="sk-desc" set:html={highlightYear(cat.description)} />}
+          </div>
+          <div class="sk-chips sk-chips--wide">
+            {cat.items.map((s) => (<span class="sk-chip">{s}</span>))}
+          </div>
+        </div>
+      ))}
     </section>
 
-    <div class="flex flex-col items-center py-8 opacity-40">
-      <div class="w-0.5 h-12 bg-gradient-to-b from-violet-500 to-transparent"></div>
-    </div>
-
     <!-- Footer CTA -->
-    <section class="py-24 px-4 md:px-6 text-center">
-      <div class="max-w-2xl mx-auto">
-        <p data-reveal class="text-xs font-black text-gray-600 uppercase tracking-[0.3em] mb-6">{t('portfolio.enoughTalking')}</p>
-        <h2 data-reveal class="text-5xl md:text-7xl font-black tracking-wide mb-10">{t('portfolio.letsBuild')}<span class="text-violet-500">.</span></h2>
-        <div data-reveal class="flex flex-wrap items-center justify-center gap-4">
-          <a href="mailto:kidoluci.work@gmail.com" class="px-8 py-4 bg-white text-black font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest text-sm">{t('portfolio.emailMe')}</a>
-          <a href={localizedHref(locale, '/')} class="px-8 py-4 border border-white/20 font-black rounded-full hover:border-violet-500/60 transition-all duration-300 uppercase tracking-widest text-sm text-gray-400 hover:text-white">{t('portfolio.backHome')}</a>
-        </div>
+    <section class="bp-wrap bp-po-cta">
+      <p class="bp-mono bp-po-cta-eyebrow" data-reveal>{t('portfolio.enoughTalking')}</p>
+      <h2 class="bp-display bp-po-cta-title" data-reveal>{t('portfolio.letsBuild')}<span class="bp-acc-dot">.</span></h2>
+      <div class="bp-po-cta-actions" data-reveal>
+        <a href="mailto:kidoluci.work@gmail.com" class="bp-po-btn bp-po-btn--solid">{t('portfolio.emailMe')}</a>
+        <a href={localizedHref(locale, '/')} class="bp-po-btn bp-po-btn--ghost">{t('portfolio.backHome')}</a>
       </div>
     </section>
 
@@ -244,170 +207,166 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
 
 </Layout>
 
-<style is:global>
-/* ── MY STORY animations ────────────────────────────────────────── */
-@keyframes storyPhotoIn {
-  from { opacity: 0; transform: translateX(-48px) scale(0.97); }
-  to   { opacity: 1; transform: translateX(0) scale(1); }
-}
-@keyframes storyLabelIn {
-  from { opacity: 0; transform: translateY(14px); letter-spacing: 0.6em; }
-  to   { opacity: 1; transform: translateY(0); letter-spacing: 0.3em; }
-}
-@keyframes storyParaIn {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes storyBadgeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-[data-story-photo] { opacity: 0; transform: translateX(-48px) scale(0.97); }
-[data-story-photo].story-visible { animation: storyPhotoIn 0.85s cubic-bezier(0.16,1,0.3,1) both; }
-[data-story-badge] { opacity: 0; transform: translateY(20px); }
-[data-story-badge].story-visible { animation: storyBadgeIn 0.6s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 0.45s; }
-[data-story-label] { opacity: 0; transform: translateY(14px); }
-[data-story-label].story-visible { animation: storyLabelIn 0.55s cubic-bezier(0.16,1,0.3,1) both; }
-[data-story-para] { opacity: 0; transform: translateY(22px); }
-[data-story-para].story-visible { animation: storyParaIn 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+<style>
+  /* /portfolio — homepage "blueprint" drafting-sheet DNA. Line grid + §-headers +
+     Space Grotesk display + IBM Plex Mono. Accent follows the color scheme. The
+     story / count-up / timeline reveal JS hooks (data-story-*, .count-up,
+     .timeline-container) are unchanged. */
+  .bp-portfolio {
+    --bp-bg: #0a0e14;
+    --bp-ink: var(--text-primary);
+    --bp-acc: var(--accent);
+    --bp-line: rgba(255, 255, 255, 0.05);
+    --bp-line2: rgba(255, 255, 255, 0.08);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-fig: rgba(255, 255, 255, 0.05);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
+    --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
+    --bp-panel-hover: color-mix(in srgb, var(--bp-acc) 8%, var(--bp-panel));
+    --bp-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
 
-body.light-mode {
-  background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
-}
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--bp-bg);
+    color: var(--bp-ink);
+    padding-top: clamp(96px, 12vh, 140px);
+    padding-bottom: clamp(72px, 12vw, 128px);
+    overflow-x: clip;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+  }
+  :global(body.light-mode) .bp-portfolio {
+    --bp-bg: #f4f2ec;
+    --bp-line: rgba(22, 32, 43, 0.05);
+    --bp-line2: rgba(22, 32, 43, 0.08);
+    --bp-hair: rgba(22, 32, 43, 0.16);
+    --bp-fig: #e8e6df;
+    --bp-panel: #ffffff;
+    --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
+  }
 
-/* Stats tilt-card light mode */
-body.light-mode .tilt-card {
-  background-color: rgba(255,255,255,0.85) !important;
-  border-color: rgba(0,0,0,0.07) !important;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-}
-body.light-mode .tilt-card:hover { border-color: rgb(var(--accent-rgb) / 0.25) !important; }
-body.light-mode .bg-gradient-to-br.from-white.to-gray-500 {
-  background-image: linear-gradient(to bottom right, rgb(17,24,39), rgb(107,114,128)) !important;
-}
+  /* Drafting grid — a top-anchored header band, fading into the clean sheet. */
+  .bp-portfolio .bp-grid {
+    position: absolute; top: 0; left: 0; right: 0; height: 900px; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(var(--bp-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
+      linear-gradient(var(--bp-line2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);
+  }
 
-/* Light-mode text overrides (mirror what index.astro applies) */
-body.light-mode .text-white { color: rgb(17, 24, 39) !important; }
-body.light-mode .text-gray-400 { color: rgb(75, 85, 99) !important; }
-body.light-mode .text-gray-300 { color: rgb(55, 65, 81) !important; }
-body.light-mode .text-gray-500 { color: rgb(107, 114, 128) !important; }
-body.light-mode .text-gray-600 { color: rgb(107, 114, 128) !important; }
-/* Keep accent colors vivid — must come AFTER the text-white override */
-body.light-mode .text-violet-500 { color: var(--accent) !important; }
-body.light-mode .text-violet-400 { color: var(--accent) !important; }
-body.light-mode .text-pink-500   { color: #ec4899 !important; }
-body.light-mode .text-blue-500   { color: #3b82f6 !important; }
-body.light-mode .text-emerald-500{ color: #10b981 !important; }
-body.light-mode .text-amber-500  { color: #f59e0b !important; }
-body.light-mode .text-cyan-500   { color: #06b6d4 !important; }
+  .bp-wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding-left: clamp(20px, 5vw, 40px); padding-right: clamp(20px, 5vw, 40px); }
+  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .bp-display { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink); }
+  .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
+  .bp-sec-head { display: flex; align-items: center; gap: 14px; }
+  .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
+  .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
+  .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
 
-/* Borders, surfaces, badges */
-body.light-mode .border-white\/10 { border-color: rgba(0, 0, 0, 0.08) !important; }
-body.light-mode .border-white\/5 { border-color: rgba(0, 0, 0, 0.06) !important; }
-body.light-mode .bg-white\/\[0\.02\] { background-color: rgba(255, 255, 255, 0.9) !important; }
-body.light-mode .bg-white\/5 { background-color: rgba(0, 0, 0, 0.04) !important; }
-body.light-mode .bg-black\/40 { background-color: rgba(255, 255, 255, 0.85) !important; }
-body.light-mode .hover\:bg-white\/\[0\.05\]:hover { background-color: rgb(var(--accent-rgb) / 0.05) !important; }
+  .bp-po-sec { padding-top: clamp(48px, 8vw, 88px); padding-bottom: clamp(24px, 4vw, 40px); }
+  .bp-po-sec--first { padding-top: clamp(20px, 3vw, 32px); }
+  .bp-po-title { font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1.0; margin: clamp(16px, 2.5vw, 26px) 0 0; }
 
-/* ── SKILLS — Skills v3 design (theme-aware: pixel-match in light, adapted in dark) ── */
-.sk-header {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 32px; flex-wrap: wrap; margin-bottom: clamp(36px, 5vw, 56px);
-}
-.sk-eyebrow {
-  display: inline-flex; align-items: center; gap: 10px; margin-bottom: 10px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-weight: 700; font-size: 12px; letter-spacing: 0.4em; text-transform: uppercase;
-  color: #16a36b;
-}
-.sk-eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #16a36b; }
-.sk-stats { display: flex; gap: 36px; padding-bottom: 14px; }
-.sk-stat-num { font-weight: 800; font-size: 30px; line-height: 1; letter-spacing: -0.02em; color: #f3f4f6; }
-.sk-stat-label {
-  margin-top: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-weight: 400; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: #8a92a0;
-}
+  /* ── My story ── */
+  .bp-po-story { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 64px); align-items: center; margin-top: clamp(28px, 4vw, 44px); }
+  .bp-po-photo { position: relative; border: 1px solid var(--bp-hair); border-radius: 14px; overflow: hidden; background: var(--bp-fig); box-shadow: var(--bp-shadow); aspect-ratio: 4 / 5; }
+  .bp-po-photo-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .bp-po-photo:hover .bp-po-photo-img { transform: scale(1.04); }
+  .bp-po-badge { position: absolute; left: 18px; right: 18px; bottom: 18px; padding: 16px 18px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(10, 14, 20, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .bp-po-badge-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bp-acc); margin: 0 0 4px; }
+  .bp-po-badge-value { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; margin: 0; }
+  .bp-po-story-text { min-width: 0; }
+  .bp-po-story-text .bp-po-title { margin-top: 4px; }
+  .bp-po-paras { display: flex; flex-direction: column; gap: 1.1rem; margin-top: 1.6rem; }
+  .bp-po-para { font-size: 1.05rem; line-height: 1.65; color: var(--bp-muted); margin: 0; }
+  /* Bio emphasis arrives as set:html (`.text-white font-bold`) baked for the dark
+     theme; retint to blueprint ink so it reads on the sheet in both modes. */
+  .bp-po-para :global(.text-white),
+  .bp-po-para :global(strong),
+  .bp-po-para :global(b) { color: var(--bp-ink); font-weight: 700; }
+  .bp-po-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 2rem; }
+  .bp-po-fact { padding: 14px 16px; border: 1px solid var(--bp-hair); border-radius: 10px; background: var(--bp-panel); transition: border-color 0.2s ease, background 0.2s ease; }
+  .bp-po-fact:hover { border-color: color-mix(in srgb, var(--bp-acc) 40%, transparent); background: var(--bp-panel-hover); }
+  .bp-po-fact-label { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-faint); margin: 0 0 4px; }
+  .bp-po-fact-value { font-size: 0.92rem; font-weight: 600; color: var(--bp-ink); margin: 0; }
 
-.sk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  /* ── Stats ── */
+  .bp-po-stats-sec { padding-top: clamp(40px, 6vw, 64px); }
+  .bp-po-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 14px; }
+  .bp-po-stat { padding: clamp(20px, 3vw, 32px); border: 1px solid var(--bp-hair); border-radius: 12px; background: var(--bp-panel); text-align: center; transition: border-color 0.3s ease; }
+  .bp-po-stat:hover { border-color: color-mix(in srgb, var(--bp-acc) 40%, transparent); }
+  .bp-po-stat-num { font-size: clamp(2.8rem, 6vw, 4rem); line-height: 1; color: var(--bp-ink); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+  .bp-po-stat-title { font-weight: 700; color: var(--bp-ink); margin-bottom: 4px; }
+  .bp-po-stat-sub { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bp-faint); }
 
-.sk-card {
-  position: relative; border-radius: 22px; padding: 26px 24px 28px; overflow: hidden;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 18px 36px -24px rgba(0, 0, 0, 0.7);
-}
-.sk-card--wide {
-  margin-top: 20px; display: grid;
-  grid-template-columns: minmax(240px, 330px) 1fr; gap: clamp(28px, 4vw, 56px); align-items: start;
-}
-.sk-blob {
-  position: absolute; top: -44px; right: -44px; width: 130px; height: 130px;
-  border-radius: 50%; background: var(--accent); opacity: 0.16; pointer-events: none;
-}
-.sk-blob--wide { width: 200px; height: 200px; top: -60px; right: -30px; opacity: 0.12; }
+  /* ── Experience ── */
+  .bp-po-tl-group { margin-top: clamp(40px, 6vw, 64px); }
+  .bp-po-tl-label { display: flex; align-items: center; gap: 16px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bp-faint); margin: 0 0 clamp(20px, 3vw, 30px); }
+  .bp-po-tl-rule { flex: 1; height: 1px; background: var(--bp-hair); }
+  .bp-po-tl { display: flex; flex-direction: column; gap: 1rem; }
 
-.sk-head {
-  position: relative; display: flex; align-items: center; justify-content: space-between;
-  padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-.sk-head-left { display: flex; align-items: center; gap: 10px; }
-.sk-dot {
-  width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
-}
-.sk-label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-weight: 700; font-size: 12.5px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--accent);
-}
-.sk-num {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-weight: 400; font-size: 13px; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.28);
-}
+  /* ── Skills ── */
+  .sk-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; margin-bottom: clamp(32px, 5vw, 52px); }
+  .sk-header .bp-po-title { margin-top: clamp(14px, 2vw, 20px); }
+  .sk-stats { display: flex; gap: 36px; padding-bottom: 10px; }
+  .sk-stat-num { font-size: 2rem; line-height: 1; color: var(--bp-ink); }
+  .sk-stat-label { margin-top: 5px; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-faint); }
 
-.sk-chips { display: flex; flex-wrap: wrap; gap: 10px; }
-.sk-chips--wide { align-content: flex-start; }
-.sk-chip {
-  display: inline-flex; align-items: center; padding: 9px 15px; border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10);
-  color: rgba(229, 231, 235, 0.92);
-  font-weight: 600; font-size: 13.5px; letter-spacing: -0.01em; cursor: default;
-  transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
-}
-.sk-chip:hover {
-  transform: translateY(-3px);
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  border-color: var(--accent); color: #fff;
-  box-shadow: 0 10px 22px -10px var(--accent);
-}
-.sk-desc { margin: 0; font-weight: 500; font-size: 16px; line-height: 1.6; color: rgba(255, 255, 255, 0.55); max-width: 34ch; }
-.sk-year { color: var(--accent); font-weight: 700; }
+  .sk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  .sk-card { position: relative; border-radius: 12px; padding: 22px 22px 24px; overflow: hidden; background: var(--bp-panel); border: 1px solid var(--bp-hair); box-shadow: none; transition: border-color 0.25s ease, background 0.25s ease; }
+  .sk-card:hover { border-color: color-mix(in srgb, var(--bp-acc) 35%, transparent); background: var(--bp-panel-hover); }
+  .sk-card--wide { margin-top: 18px; display: grid; grid-template-columns: minmax(240px, 330px) 1fr; gap: clamp(28px, 4vw, 56px); align-items: start; }
+  .sk-head { position: relative; display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid var(--bp-hair); }
+  .sk-head-left { display: flex; align-items: center; gap: 10px; }
+  .sk-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); box-shadow: 0 0 0 4px color-mix(in srgb, var(--bp-acc) 20%, transparent); }
+  .sk-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); }
+  .sk-num { font-size: 12px; letter-spacing: 0.1em; color: var(--bp-faint); }
+  .sk-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sk-chips--wide { align-content: flex-start; }
+  .sk-chip { display: inline-flex; align-items: center; padding: 7px 13px; border-radius: 999px; background: transparent; border: 1px solid var(--bp-hair); color: var(--bp-muted); font-size: 12.5px; letter-spacing: -0.01em; cursor: default; transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease; }
+  .sk-chip:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--bp-acc) 12%, transparent); border-color: var(--bp-acc); color: var(--bp-ink); }
+  .sk-desc { margin: 0; font-size: 0.95rem; line-height: 1.6; color: var(--bp-muted); max-width: 34ch; }
+  /* .sk-year arrives via set:html (highlightYear), so it isn't scoped — target it globally. */
+  .sk-desc :global(.sk-year) { color: var(--bp-acc); font-weight: 700; }
+  @media (max-width: 720px) { .sk-card--wide { grid-template-columns: 1fr; } }
 
-/* Light mode — match the reference exactly */
-body.light-mode .sk-stat-num { color: #0f1420; }
-body.light-mode .sk-card {
-  background: #ffffff; border-color: #ebedf1;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 16px 34px -22px rgba(16, 24, 40, .16);
-}
-body.light-mode .sk-blob { opacity: 0.08; }
-body.light-mode .sk-blob--wide { opacity: 0.06; }
-body.light-mode .sk-head { border-bottom-color: #eef0f3; }
-body.light-mode .sk-dot { box-shadow: 0 0 0 4px var(--accent-soft); }
-body.light-mode .sk-label { color: var(--accent-strong); }
-body.light-mode .sk-num { color: #b6bcc8; }
-body.light-mode .sk-chip {
-  background: #eef0f3; border-color: #e4e7ec; color: #1b2330;
-  box-shadow: 0 1px 1px rgba(16, 24, 40, .03);
-}
-body.light-mode .sk-chip:hover {
-  background: var(--accent-soft); border-color: var(--accent); color: var(--accent-strong);
-  box-shadow: 0 10px 22px -10px var(--accent);
-}
-body.light-mode .sk-desc { color: #5b6472; }
-body.light-mode .sk-year { color: var(--accent-strong); }
+  /* ── CTA ── */
+  .bp-po-cta { padding-top: clamp(56px, 9vw, 100px); text-align: center; }
+  .bp-po-cta-eyebrow { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bp-faint); margin: 0 0 14px; }
+  .bp-po-cta-title { font-size: clamp(2.4rem, 6vw, 4.25rem); line-height: 1.0; margin: 0 0 clamp(24px, 4vw, 40px); }
+  .bp-po-cta-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; }
+  .bp-po-btn { display: inline-flex; align-items: center; padding: 13px 26px; border-radius: 999px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+  .bp-po-btn--solid { background: var(--bp-ink); color: var(--bp-bg); border: 1px solid var(--bp-ink); }
+  .bp-po-btn--solid:hover { background: var(--bp-acc); border-color: var(--bp-acc); color: #fff; }
+  .bp-po-btn--ghost { background: transparent; color: var(--bp-muted); border: 1px solid var(--bp-hair); }
+  .bp-po-btn--ghost:hover { border-color: var(--bp-acc); color: var(--bp-acc); }
 
-@media (max-width: 720px) { .sk-card--wide { grid-template-columns: 1fr; } }
+  /* ── Story reveal (IntersectionObserver-driven; classes/attrs unchanged) ── */
+  @keyframes storyPhotoIn { from { opacity: 0; transform: translateX(-40px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
+  @keyframes storyParaIn { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes storyBadgeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  [data-story-photo] { opacity: 0; transform: translateX(-40px) scale(0.98); }
+  [data-story-photo].story-visible { animation: storyPhotoIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  [data-story-badge] { opacity: 0; transform: translateY(20px); }
+  [data-story-badge].story-visible { animation: storyBadgeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.45s; }
+  [data-story-para] { opacity: 0; transform: translateY(22px); }
+  [data-story-para].story-visible { animation: storyParaIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* ── Mobile ── */
+  @media (max-width: 900px) {
+    .bp-po-story { grid-template-columns: 1fr; }
+    .bp-po-photo { max-width: 440px; aspect-ratio: 4 / 3; }
+    .sk-header { align-items: flex-start; }
+  }
+  @media (max-width: 560px) {
+    .bp-po-facts { grid-template-columns: 1fr; }
+  }
 </style>
 
 <script>
