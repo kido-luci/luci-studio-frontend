@@ -1,8 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
-import AffiliateCard from "../AffiliateCard.astro";
-import { affiliateService } from "../../services/affiliates";
 import { buildPostSlug, readTimeFor, formatDate, needsVietnameseSerif } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
 import type { Playlist } from "../../services/playlists";
@@ -14,10 +12,6 @@ interface Props {
 }
 const { playlist: rawPlaylist } = Astro.props;
 const playlist = localized(rawPlaylist, locale);
-
-const API_URL = import.meta.env.PUBLIC_API_URL || '';
-// 1 random active link picked at build time (the series page's fixed slot count).
-const affiliateCards = await affiliateService.getCardsRandom(API_URL, 1);
 
 const SITE_URL = 'https://luci-studio.com';
 const formattedDate = formatDate(playlist.created_at, locale);
@@ -52,71 +46,75 @@ const seoDescription = playlist.description
 
   <TopNav active="series" />
 
-  <main class="pt-36 pb-24 px-4 md:px-6 min-h-screen bg-[var(--bg-primary)]">
-    <div class="max-w-5xl mx-auto">
+  <main class="bp-sd">
+    <div class="bp-grid" aria-hidden="true"></div>
+    <div class="bp-wrap">
 
-      <!-- Hero -->
-      <div data-reveal class="mb-16">
-        <a href={localizedHref(locale, '/blog/series')} class="inline-flex items-center gap-2 mb-6 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-violet-400 transition-colors duration-300">
+      <!-- Header -->
+      <header class="bp-sd-head" data-reveal>
+        <a href={localizedHref(locale, '/blog/series')} class="bp-sd-back bp-mono">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           {t('series.allSeries')}
         </a>
 
-        <div class="playlist-hero-cover aspect-video overflow-hidden mb-8 border-2 border-violet-500/[0.22] relative">
-          <img src={coverImage} alt={playlist.title} class="w-full h-full object-cover" />
-          <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%);"></div>
+        <div class="bp-sec-head">
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">{t('series.curatedSeries')}</span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-count">{String(posts.length).padStart(2, '0')} POSTS</span>
         </div>
 
-        <span class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-3 block">{t('series.curatedSeries')}</span>
-        <h1 class="text-5xl md:text-7xl tracking-tighter leading-[1.05]" style={`font-family:${needsVietnameseSerif(playlist.title) ? "'Playfair Display'" : "'DM Serif Display'"},Georgia,serif;font-weight:400;`}>{playlist.title}<span class="text-violet-500">.</span></h1>
+        <h1 class="bp-display bp-sd-title" style={needsVietnameseSerif(playlist.title) ? "font-family:system-ui,'Segoe UI',sans-serif" : undefined}>{playlist.title}<span class="bp-acc-dot">.</span></h1>
 
         {playlist.description && (
-          <p class="text-gray-400 max-w-2xl text-base md:text-lg leading-relaxed mt-6">{playlist.description}</p>
+          <p class="bp-sd-desc">{playlist.description}</p>
         )}
 
-        <div class="flex items-center gap-3 mt-6 text-xs text-gray-600 uppercase tracking-widest">
+        <div class="bp-sd-meta bp-mono">
           <span>{format(t(posts.length === 1 ? 'series.postCountOne' : 'series.postCountOther'), { n: posts.length })}</span>
-          <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+          <span class="bp-sd-dot" aria-hidden="true">·</span>
           <span>{t('series.curatedLabel')} {formattedDate}</span>
         </div>
 
-        <div data-reveal class="line-draw h-px bg-gradient-to-r from-violet-500 to-transparent mt-8 max-w-xs"></div>
-      </div>
+        <div class="bp-sd-cover">
+          <img src={coverImage} alt={playlist.title} />
+          <span class="bp-mono bp-sd-cover-callout">fig.00 — cover</span>
+          <span class="bp-sd-cover-node" aria-hidden="true">◦</span>
+        </div>
+      </header>
 
       <!-- Empty state -->
       {posts.length === 0 && (
-        <div class="text-center py-24">
-          <p class="text-gray-500 text-sm uppercase tracking-widest">{t('series.seriesEmpty')}</p>
-        </div>
+        <div class="bp-sd-empty bp-mono" data-reveal>{t('series.seriesEmpty')}</div>
       )}
 
-      <!-- Spotify-style ordered post list -->
+      <!-- Ordered reading list (blueprint track rows) -->
       {posts.length > 0 && (
-        <ol class="playlist-track-list space-y-4 list-none p-0">
+        <ol class="bp-sd-list">
           {posts.map((p, i) => (
-            <li>
-              <a href={p.href} class="track-row no-underline">
-                <span class="track-number">{String(i + 1).padStart(2, '0')}</span>
-                <div class="track-thumb">
+            <li data-reveal>
+              <a href={p.href} class="bp-track">
+                <span class="bp-track-num">{String(i + 1).padStart(2, '0')}</span>
+                <div class="bp-track-thumb">
                   <img src={p.img} alt={p.title} loading="lazy" onerror="this.style.opacity='0'" />
                 </div>
-                <div class="track-meta">
-                  <div class="track-tags">
-                    <span class="tag-label text-[10px] font-black text-violet-400 uppercase tracking-widest">{p.tags.join(' · ')}</span>
-                    <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
-                    <span class="text-[10px] text-gray-600">{p.date}</span>
-                    <span class="w-1 h-1 bg-gray-700 rounded-full hidden sm:inline-block"></span>
-                    <span class="text-[10px] text-gray-600 hidden sm:inline">{p.read} read</span>
+                <div class="bp-track-meta">
+                  <div class="bp-track-tags bp-mono">
+                    <span class="bp-track-tag">{p.tags.join(' · ')}</span>
+                    <span class="bp-sd-dot" aria-hidden="true">·</span>
+                    <span>{p.date}</span>
+                    <span class="bp-sd-dot hide-sm" aria-hidden="true">·</span>
+                    <span class="hide-sm">{p.read} read</span>
                   </div>
-                  <h3 class="track-title">{p.title}</h3>
-                  {p.subtitle && <p class="track-subtitle">{p.subtitle}</p>}
+                  <h3 class="bp-track-title">{p.title}</h3>
+                  {p.subtitle && <p class="bp-track-sub">{p.subtitle}</p>}
                 </div>
-                <div class="track-stats">
-                  <span class="stat" title={`${p.views} views`}>
+                <div class="bp-track-stats bp-mono">
+                  <span class="bp-track-stat" title={`${p.views} views`}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     {p.views}
                   </span>
-                  <span class="stat" title={`${p.likes} likes`}>
+                  <span class="bp-track-stat" title={`${p.likes} likes`}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     {p.likes}
                   </span>
@@ -127,137 +125,150 @@ const seoDescription = playlist.description
         </ol>
       )}
 
-      <!-- Sponsored card — end of page -->
-      {affiliateCards.length > 0 && (
-        <div data-reveal class="mt-16">
-          <AffiliateCard
-            label={affiliateCards[0].label}
-            url={affiliateCards[0].url}
-            network={affiliateCards[0].network}
-            badge="Sponsored"
-            cta={affiliateCards[0].cta || undefined}
-            image={affiliateCards[0].image}
-            imageAlt={affiliateCards[0].imageAlt}
-            logo={affiliateCards[0].logo}
-          />
-        </div>
-      )}
-
     </div>
   </main>
 
 </Layout>
 
 <style>
-  .playlist-hero-cover {
-    background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
+  /* ══════════════════════════════════════════════════════════════════════
+     Series detail — homepage "blueprint" drafting-sheet DNA (matches the
+     series index / blog / post pages). Line grid + §-section header + Space
+     Grotesk display + IBM Plex Mono labels; the ordered post list becomes a
+     blueprint "track" list. Accent follows the active color scheme.
+     ══════════════════════════════════════════════════════════════════════ */
+  .bp-sd {
+    --bp-bg: #0a0e14;
+    --bp-ink: var(--text-primary);
+    --bp-acc: var(--accent);
+    --bp-line: rgba(255, 255, 255, 0.05);
+    --bp-line2: rgba(255, 255, 255, 0.08);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-fig: rgba(255, 255, 255, 0.05);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
+    --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
+    --bp-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
+
+    position: relative;
+    min-height: 100vh;
+    background: var(--bp-bg);
+    color: var(--bp-ink);
+    padding-top: clamp(120px, 15vh, 168px);
+    padding-bottom: clamp(72px, 12vw, 128px);
+    overflow-x: clip;
+  }
+  :global(body.light-mode) .bp-sd {
+    --bp-bg: #f4f2ec;
+    --bp-line: rgba(22, 32, 43, 0.05);
+    --bp-line2: rgba(22, 32, 43, 0.08);
+    --bp-hair: rgba(22, 32, 43, 0.16);
+    --bp-fig: #e8e6df;
+    --bp-panel: #ffffff;
+    --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
   }
 
-  .playlist-track-list { margin: 0; padding: 0; }
-
-  .track-row {
-    display: grid;
-    grid-template-columns: 3rem 5rem 1fr auto;
-    gap: 1.25rem;
-    align-items: center;
-    padding: 1rem 1.25rem;
-    border: 2px solid rgb(var(--accent-rgb) / 0.18);
-    border-radius: 1.125rem;
-    background: rgba(255, 255, 255, 0.02);
-    color: inherit;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  .bp-sd .bp-grid {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(var(--bp-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
+      linear-gradient(var(--bp-line2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
   }
-  .track-row:hover {
-    border-color: rgb(var(--accent-rgb) / 0.6);
-    background: rgb(var(--accent-rgb) / 0.05);
+
+  .bp-wrap { position: relative; z-index: 1; max-width: 64rem; margin: 0 auto; padding-left: clamp(20px, 5vw, 48px); padding-right: clamp(20px, 5vw, 48px); }
+  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .bp-display { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink); }
+  .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
+
+  /* §-section header motif (shared with the homepage) */
+  .bp-sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: clamp(16px, 2vw, 22px); }
+  .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
+  .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
+  .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
+
+  /* ── Header ── */
+  .bp-sd-head { margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+  .bp-sd-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--bp-muted); text-decoration: none; margin-bottom: 2.2rem;
+    transition: color 0.2s ease;
+  }
+  .bp-sd-back:hover { color: var(--bp-acc); }
+  .bp-sd-back svg { transition: transform 0.2s ease; }
+  .bp-sd-back:hover svg { transform: translateX(-3px); }
+
+  .bp-sd-title { font-size: clamp(2.8rem, 8vw, 6rem); line-height: 0.98; margin: 0; }
+  .bp-sd-desc { max-width: 42rem; margin: 1.4rem 0 0; font-family: "Space Grotesk", system-ui, sans-serif; font-size: 1.02rem; line-height: 1.7; color: var(--bp-muted); }
+  .bp-sd-meta { display: flex; align-items: center; gap: 10px; margin-top: 1.4rem; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bp-faint); }
+  .bp-sd-dot { color: var(--bp-hair); }
+
+  /* cover as a blueprint figure */
+  .bp-sd-cover {
+    position: relative; margin-top: clamp(30px, 4vw, 46px);
+    aspect-ratio: 16 / 9; overflow: hidden;
+    border: 1px solid var(--bp-hair); border-radius: 14px;
+    background: var(--bp-fig); box-shadow: var(--bp-shadow);
+  }
+  .bp-sd-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bp-sd-cover-callout {
+    position: absolute; left: 14px; bottom: 12px;
+    font-size: 10px; letter-spacing: 0.06em; color: var(--bp-ink);
+    padding: 4px 9px; border-radius: 5px;
+    background: color-mix(in srgb, var(--bp-bg) 62%, transparent);
+    border: 1px solid var(--bp-hair);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .bp-sd-cover-node { position: absolute; top: 12px; right: 14px; font-size: 13px; color: var(--bp-acc); }
+
+  /* ── Empty ── */
+  .bp-sd-empty { text-align: center; padding: 5rem 0; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bp-muted); }
+
+  /* ── Ordered reading list (blueprint track rows) ── */
+  .bp-sd-list { list-style: none; margin: clamp(32px, 4.5vw, 52px) 0 0; padding: 0; display: flex; flex-direction: column; gap: 1rem; }
+  .bp-track {
+    display: grid; grid-template-columns: 3rem 5rem 1fr auto; gap: 1.25rem; align-items: center;
+    padding: 1rem 1.25rem; border: 1px solid var(--bp-hair); border-radius: 12px;
+    background: var(--bp-panel); color: inherit; text-decoration: none;
+    box-shadow: var(--bp-shadow);
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .bp-track:hover {
     transform: translateX(4px);
-    box-shadow: 0 8px 32px rgb(var(--accent-rgb) / 0.15);
+    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    box-shadow: 0 18px 40px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
   }
-
-  .track-number {
-    font-family: inherit;
-    font-size: 2rem;
-    font-weight: 900;
-    color: rgb(var(--accent-rgb) / 0.85);
-    letter-spacing: -0.03em;
-    line-height: 1;
-    text-align: center;
+  .bp-track-num { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 1.9rem; line-height: 1; letter-spacing: -0.03em; color: var(--bp-acc); text-align: center; font-variant-numeric: tabular-nums; }
+  .bp-track-thumb { width: 5rem; aspect-ratio: 1 / 1; overflow: hidden; border: 1px solid var(--bp-hair); border-radius: 8px; background: var(--bp-fig); }
+  .bp-track-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+  .bp-track:hover .bp-track-thumb img { transform: scale(1.08); }
+  .bp-track-meta { min-width: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .bp-track-tags { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-faint); }
+  .bp-track-tag { color: var(--bp-acc); }
+  .bp-track-title {
+    font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700;
+    font-size: 1.02rem; line-height: 1.3; letter-spacing: -0.01em; color: var(--bp-ink); margin: 0;
+    overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   }
-
-  .track-thumb {
-    width: 5rem;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    border: 1px solid rgb(var(--accent-rgb) / 0.2);
-    border-radius: 0.75rem;
-    background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.15) 0%, rgba(59, 130, 246, 0.10) 100%);
+  .bp-track:hover .bp-track-title { color: var(--bp-acc); }
+  .bp-track-sub {
+    font-family: "Space Grotesk", system-ui, sans-serif; font-size: 0.82rem; color: var(--bp-muted); line-height: 1.4; margin: 0;
+    overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
   }
-  .track-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-  .track-row:hover .track-thumb img { transform: scale(1.08); }
-
-  .track-meta { min-width: 0; display: flex; flex-direction: column; gap: 0.35rem; }
-  .track-tags { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-  .track-title {
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.3;
-    color: var(--text-primary);
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-  .track-row:hover .track-title { color: var(--accent); }
-  .track-subtitle {
-    font-size: 0.8rem;
-    color: rgb(107, 114, 128);
-    line-height: 1.4;
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-  }
-
-  .track-stats {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    color: rgb(107, 114, 128);
-    font-size: 0.75rem;
-  }
-  .track-stats .stat {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
+  .bp-track-stats { display: flex; align-items: center; gap: 0.875rem; color: var(--bp-faint); font-size: 11px; letter-spacing: 0.04em; }
+  .bp-track-stat { display: inline-flex; align-items: center; gap: 0.35rem; }
 
   @media (max-width: 640px) {
-    .track-row {
-      grid-template-columns: 2.25rem 4rem 1fr;
-      gap: 0.875rem;
-      padding: 0.875rem 1rem;
-    }
-    .track-number { font-size: 1.5rem; }
-    .track-thumb { width: 4rem; }
-    .track-stats { display: none; }
+    .bp-track { grid-template-columns: 2.25rem 4rem 1fr; gap: 0.875rem; padding: 0.875rem 1rem; }
+    .bp-track-num { font-size: 1.5rem; }
+    .bp-track-thumb { width: 4rem; }
+    .bp-track-stats { display: none; }
+    .bp-track-tags .hide-sm { display: none; }
   }
-
-  body.light-mode .track-row {
-    border-color: rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.85);
-  }
-  body.light-mode .track-row:hover {
-    border-color: rgb(var(--accent-rgb) / 0.4);
-    background: rgb(var(--accent-rgb) / 0.05);
-  }
-  body.light-mode .track-title { color: rgb(17, 24, 39); }
 </style>

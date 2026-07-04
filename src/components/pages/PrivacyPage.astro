@@ -1,7 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
-import LabDecor from "../LabDecor.astro";
 import { getLocaleFromUrl, useTranslations } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
@@ -18,12 +17,16 @@ const lastUpdated = 'June 23, 2026';
 >
   <TopNav />
 
-  <main class="legal-page pt-36 pb-60 px-4 md:px-6 min-h-screen">
-    <LabDecor />
-    <article class="max-w-3xl mx-auto relative z-10">
-      <p class="text-xs font-black text-violet-500 uppercase tracking-[0.3em] mb-4">{t('legal.eyebrow')}</p>
-      <h1 class="text-5xl md:text-7xl tracking-tighter mb-4" style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;">{t('legal.privacyTitle')}<span class="text-violet-500">.</span></h1>
-      <p class="text-sm text-gray-500 mb-12">{t('legal.lastUpdated')} {lastUpdated}</p>
+  <main class="bp-legal">
+    <div class="bp-grid" aria-hidden="true"></div>
+    <article class="bp-legal-inner">
+      <div class="bp-sec-head">
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">{t('legal.eyebrow')}</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+      </div>
+      <h1 class="bp-display bp-legal-title">{t('legal.privacyTitle')}<span class="bp-acc-dot">.</span></h1>
+      <p class="bp-mono bp-legal-updated">{t('legal.lastUpdated')} {lastUpdated}</p>
       <!-- i18n: body copy is Phase 5 content -->
 
       <div class="legal-copy">
@@ -84,57 +87,67 @@ const lastUpdated = 'June 23, 2026';
 </Layout>
 
 <style>
-  .legal-page {
+  /* Legal pages — homepage "blueprint" drafting-sheet DNA (shared by
+     terms / privacy / license). Line grid header band + §-header + Space Grotesk
+     title + IBM Plex Mono labels; the legal copy stays a readable document. */
+  .bp-legal {
+    --bp-bg: #0a0e14;
+    --bp-ink: var(--text-primary);
+    --bp-acc: var(--accent);
+    --bp-line: rgba(255, 255, 255, 0.05);
+    --bp-line2: rgba(255, 255, 255, 0.08);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-fig: rgba(255, 255, 255, 0.05);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
+
     position: relative;
-    background: var(--bg-primary);
+    min-height: 100vh;
+    background: var(--bp-bg);
+    color: var(--bp-ink);
+    padding-top: clamp(120px, 15vh, 168px);
+    padding-bottom: clamp(80px, 14vw, 160px);
+    overflow-x: clip;
+    font-family: "Space Grotesk", system-ui, sans-serif;
   }
+  :global(body.light-mode) .bp-legal {
+    --bp-bg: #f4f2ec;
+    --bp-line: rgba(22, 32, 43, 0.05);
+    --bp-line2: rgba(22, 32, 43, 0.08);
+    --bp-hair: rgba(22, 32, 43, 0.16);
+    --bp-fig: #e8e6df;
+  }
+  .bp-legal .bp-grid {
+    position: absolute; top: 0; left: 0; right: 0; height: 560px; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(var(--bp-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
+      linear-gradient(var(--bp-line2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);
+  }
+  .bp-legal-inner { position: relative; z-index: 1; max-width: 48rem; margin: 0 auto; padding-left: clamp(20px, 5vw, 40px); padding-right: clamp(20px, 5vw, 40px); }
+  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .bp-display { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink); }
+  .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
+  .bp-sec-head { display: flex; align-items: center; gap: 14px; }
+  .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
+  .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
+  .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
 
-  body.light-mode .legal-page {
-    background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
-  }
+  .bp-legal-title { font-size: clamp(2.8rem, 8vw, 5.5rem); line-height: 0.98; margin: clamp(16px, 2.5vw, 24px) 0 0; }
+  .bp-legal-updated { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bp-faint); margin: 1.2rem 0 0; }
 
-  .legal-copy {
-    display: grid;
-    gap: 2.25rem;
-  }
-
-  .legal-copy h2 {
-    font-size: 1rem;
-    font-weight: 900;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 0.75rem;
-  }
-
-  .legal-copy p {
-    color: var(--text-secondary);
-    font-size: 0.98rem;
-    line-height: 1.85;
-    margin: 0.75rem 0 0;
-  }
-
-  .legal-copy code {
-    color: var(--text-primary);
-    font-size: 0.9em;
-    padding: 0.1rem 0.3rem;
-    border-radius: 0.35rem;
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  .legal-copy a {
-    color: var(--accent);
-    font-weight: 700;
-  }
-
-  .legal-copy a:hover {
-    color: #fff;
-  }
-
-  body.light-mode .legal-copy code {
-    background: rgba(17, 24, 39, 0.08);
-  }
-
-  body.light-mode .legal-copy a:hover {
-    color: var(--accent-strong);
-  }
+  .legal-copy { display: grid; gap: 0; margin-top: clamp(40px, 6vw, 64px); }
+  .legal-copy section { padding: clamp(24px, 3.5vw, 34px) 0; border-top: 1px solid var(--bp-hair); }
+  .legal-copy section:first-child { border-top: none; padding-top: 0; }
+  .legal-copy h2 { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: -0.01em; text-transform: none; color: var(--bp-ink); margin: 0 0 0.9rem; }
+  .legal-copy p { color: var(--bp-muted); font-size: 0.98rem; line-height: 1.8; margin: 0.7rem 0 0; }
+  .legal-copy p:first-of-type { margin-top: 0; }
+  .legal-copy a { color: var(--bp-acc); font-weight: 600; text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent); }
+  .legal-copy a:hover { border-bottom-color: var(--bp-acc); }
+  .legal-copy code { font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--bp-ink); font-size: 0.88em; padding: 0.1rem 0.35rem; border-radius: 5px; background: var(--bp-fig); border: 1px solid var(--bp-hair); }
 </style>

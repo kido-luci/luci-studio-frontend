@@ -6,6 +6,7 @@
 // (projects / posts / gallery / profile); the blueprint's placeholder copy was
 // mapped onto real work. The homepage is English-only (there is no /vi/ route).
 import Layout from "../../layouts/Layout.astro";
+import TopNav from "../TopNav.astro";
 import FooterLinks from "../FooterLinks.astro";
 import { postService } from "../../services/posts";
 import { galleryService } from "../../services/gallery";
@@ -18,17 +19,6 @@ const API_URL = import.meta.env.PUBLIC_API_URL || "";
 
 const profile = await profileService.getProfile();
 const stats = profile?.portfolio_stats ?? [];
-
-// Color-scheme picker presets — mirror the site's TopNav so the nav's palette
-// button drives the same window.setScheme + html[data-scheme=…] system site-wide.
-const schemes = [
-  { id: "violet", hex: "#8b5cf6", label: "Violet" },
-  { id: "ocean", hex: "#3b82f6", label: "Ocean" },
-  { id: "ember", hex: "#f97316", label: "Ember" },
-  { id: "forest", hex: "#10b981", label: "Forest" },
-  { id: "rose", hex: "#f43f5e", label: "Rose" },
-  { id: "mono", hex: "#a1a1aa", label: "Mono" },
-];
 
 // §01 SELECTED WORK — a hand-picked set (app · game · open source · writing series).
 // Cover-less items fall back to the striped drafting-fig pattern. `ext` opens
@@ -128,7 +118,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
 // Static blueprint copy — kept as data so the JSX stays free of raw "&" text nodes.
 const directory = [
   { n: "01", label: "BLOG", desc: "Engineering notes & deep-dives", href: localizedHref(locale, "/blog"), ext: false, orange: false },
-  { n: "02", label: "TOOLS", desc: "Free browser micro-tools", href: "/tools", ext: false, orange: false },
+  { n: "02", label: "TOOLS", desc: "Free browser micro-tools", href: "/lab#hubs", ext: false, orange: false },
   { n: "03", label: "GAMES", desc: "Browser games, 60fps", href: "https://games.luci-studio.com", ext: true, orange: false },
   { n: "04", label: "APPS", desc: "Cross-platform & open source", href: "#work", ext: false, orange: false },
   { n: "05", label: "ART", desc: "Pen, pencil & digital", href: "#art", ext: false, orange: true },
@@ -146,7 +136,7 @@ const sitemapLinks = [
   { label: "Lab", href: localizedHref(locale, "/lab") },
 ];
 const makeLinks = [
-  { label: "Tools", href: "/tools", ext: false },
+  { label: "Tools", href: "/lab#hubs", ext: false },
   { label: "Games", href: "https://games.luci-studio.com", ext: true },
   { label: "Apps", href: "#work", ext: false },
   { label: "Art", href: "#art", ext: false },
@@ -179,51 +169,7 @@ const homepageSchema = {
     <script is:inline>document.documentElement.classList.add('home-anim');document.documentElement.classList.add('bp-home');</script>
   </Fragment>
 
-  <nav class="bp-nav" data-bp-nav>
-    <div class="bp-wrap bp-nav-inner">
-      <a href={localizedHref(locale, "/")} class="bp-nav-logo">
-        <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="bp-nav-logo-img" />
-        <span class="bp-nav-name">LUCI <span class="text-shimmer">STUDIO</span><span class="bp-nav-name-dot">.</span></span>
-      </a>
-      <div class="bp-nav-links bp-mono">
-        <a href={localizedHref(locale, "/")} class="is-active">HOME</a>
-        <a href={localizedHref(locale, "/blog")}>BLOG</a>
-        <a href={localizedHref(locale, "/blog/series")}>SERIES</a>
-        <a href={localizedHref(locale, "/lab")}>LAB</a>
-        <a href="/tools">TOOLS</a>
-        <a href="/games">GAMES</a>
-      </div>
-      <div class="bp-nav-actions">
-        <button type="button" id="theme-toggle" class="bp-nav-icon" aria-label="Toggle theme" onclick="window.toggleTheme && window.toggleTheme()">
-          <svg class="bp-nav-svg dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-          <svg class="bp-nav-svg light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-        </button>
-        <div class="bp-scheme">
-          <button type="button" id="scheme-toggle" class="bp-nav-icon" aria-label="Color scheme" aria-controls="scheme-popover" aria-expanded="false">
-            <svg class="bp-nav-svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.88 2.88M6.75 17.25h.008v.008H6.75v-.008Z" /></svg>
-          </button>
-          <div id="scheme-popover" role="radiogroup" aria-label="Color scheme" class="bp-scheme-popover" hidden>
-            {schemes.map((s) => (
-              <button type="button" class="scheme-dot" role="radio" data-scheme={s.id} aria-checked="false" aria-label={s.label} title={s.label} style={`background:${s.hex}`}></button>
-            ))}
-          </div>
-        </div>
-        <a href="#contact" class="bp-nav-cta bp-mono">LET'S TALK</a>
-        <button type="button" class="bp-nav-burger" aria-label="Menu" aria-expanded="false" onclick="var n=document.querySelector('[data-bp-nav]');var o=n.classList.toggle('menu-open');this.setAttribute('aria-expanded',String(o))">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
-    </div>
-    <div class="bp-nav-mobile bp-mono">
-      <a href={localizedHref(locale, "/")}>HOME</a>
-      <a href={localizedHref(locale, "/blog")}>BLOG</a>
-      <a href={localizedHref(locale, "/blog/series")}>SERIES</a>
-      <a href={localizedHref(locale, "/lab")}>LAB</a>
-      <a href="/tools">TOOLS</a>
-      <a href="/games">GAMES</a>
-      <a href="#contact" class="bp-nav-mobile-cta">LET'S TALK</a>
-    </div>
-  </nav>
+  <TopNav active="home" ctaHref="#contact" />
 
   <main class="bp" data-api-url={API_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
@@ -730,82 +676,6 @@ const homepageSchema = {
     white-space: nowrap;
   }
 
-  /* ── NAV (the blueprint's own sticky drafting nav; replaces the shared TopNav) ── */
-  .bp-nav {
-    /* Define the nav-glass vars ON the nav element (navDimmer resolves
-       var(--nav-bg-scroll) here on scroll). Set on .bp-nav rather than an ancestor
-       because body.light-mode is a closer ancestor and would otherwise win. */
-    --nav-bg: rgba(10, 14, 20, 0.78);
-    --nav-bg-scroll: rgba(10, 14, 20, 0.92);
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    background: var(--nav-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--bp-hair);
-  }
-  :global(body.light-mode) .bp-nav { --nav-bg: rgba(244, 242, 236, 0.82); --nav-bg-scroll: rgba(244, 242, 236, 0.94); }
-  .bp-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 15px; padding-bottom: 15px; }
-  .bp-nav-logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
-  .bp-nav-logo-img { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; }
-  .bp-nav-name { font-family: "Limelight", sans-serif; font-weight: normal; font-size: 20px; letter-spacing: 0.02em; color: var(--bp-ink); white-space: nowrap; }
-  .bp-nav-name-dot { color: var(--bp-acc); }
-  .bp-nav-links { display: flex; align-items: center; gap: 30px; }
-  .bp-nav-links a { position: relative; font-size: 12px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
-  .bp-nav-links a:hover, .bp-nav-links a.is-active { color: var(--bp-ink); }
-  .bp-nav-links a.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px; background: var(--bp-acc); }
-  .bp-nav-actions { display: flex; align-items: center; gap: 11px; }
-  .bp-nav-icon { width: 36px; height: 36px; border: 1.5px solid var(--bp-hair); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--bp-muted); background: transparent; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
-  .bp-nav-icon:hover { border-color: var(--bp-ink); color: var(--bp-ink); }
-  .bp-nav-svg { width: 18px; height: 18px; }
-  /* Color-scheme picker (ported from TopNav; the global window.setScheme +
-     theme.ts syncSchemeUI drive it, this only styles + opens the popover). */
-  .bp-scheme { position: relative; }
-  .bp-scheme-popover {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    right: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.55rem;
-    padding: 0.6rem;
-    border-radius: 0.85rem;
-    background: var(--nav-bg-scroll);
-    border: 1px solid var(--bp-hair);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
-    z-index: 110;
-  }
-  .bp-scheme-popover[hidden] { display: none; }
-  .scheme-dot {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 9999px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    box-shadow: 0 0 0 1px rgba(120, 120, 120, 0.45);
-    transition: transform 0.15s ease;
-  }
-  .scheme-dot:hover { transform: scale(1.18); }
-  .scheme-dot:focus-visible { outline: 2px solid var(--bp-ink); outline-offset: 2px; }
-  .scheme-dot[aria-checked="true"] { box-shadow: 0 0 0 2px var(--nav-bg-scroll), 0 0 0 4px var(--bp-ink); }
-  .bp-nav-cta { padding: 10px 20px; background: var(--bp-ink); color: var(--bp-bg); border-radius: 24px; font-size: 12px; letter-spacing: 0.1em; text-decoration: none; white-space: nowrap; transition: background 0.2s ease, color 0.2s ease; }
-  .bp-nav-cta:hover { background: var(--bp-acc); color: #fff; }
-  .bp-nav-burger { display: none; width: 40px; height: 40px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: transparent; border: 1.5px solid var(--bp-hair); border-radius: 9px; cursor: pointer; }
-  .bp-nav-burger span { display: block; width: 16px; height: 1.5px; background: var(--bp-ink); }
-  .bp-nav-mobile { display: none; flex-direction: column; padding: 4px 0 14px; }
-  .bp-nav-mobile a { padding: 12px clamp(20px, 5vw, 48px); font-size: 13px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; }
-  .bp-nav-mobile a:hover { color: var(--bp-ink); }
-  .bp-nav-mobile-cta { color: var(--bp-acc) !important; }
-  @media (max-width: 860px) {
-    .bp-nav-links, .bp-nav-cta { display: none; }
-    .bp-nav-burger { display: flex; }
-    .bp-nav.menu-open .bp-nav-mobile { display: flex; }
-    .bp-nav.menu-open { border-bottom-color: var(--bp-line2); }
-  }
-
   /* ── underlined tagline phrases ── */
   .bp-u { border-bottom: 2px solid var(--bp-acc); font-weight: 600; color: var(--bp-ink); }
   .bp-u--o { border-bottom-color: var(--bp-orange); }
@@ -1238,46 +1108,4 @@ const homepageSchema = {
       io.observe(card);
     }
   })();
-</script>
-
-<script>
-  // Color-scheme picker popover (blueprint nav). window.setScheme + the swatch
-  // aria-checked sync are provided globally by the Layout theme script; this only
-  // handles opening/closing the popover and forwarding swatch clicks.
-  const schemeToggle = document.getElementById("scheme-toggle");
-  const schemePopover = document.getElementById("scheme-popover") as HTMLElement | null;
-  if (schemeToggle && schemePopover) {
-    const close = () => {
-      const hadFocus = schemePopover.contains(document.activeElement);
-      schemePopover.hidden = true;
-      schemeToggle.setAttribute("aria-expanded", "false");
-      if (hadFocus) (schemeToggle as HTMLElement).focus();
-    };
-    schemeToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const willOpen = schemePopover.hidden;
-      schemePopover.hidden = !willOpen;
-      schemeToggle.setAttribute("aria-expanded", String(willOpen));
-      if (willOpen) {
-        const target = schemePopover.querySelector('.scheme-dot[aria-checked="true"]')
-          || schemePopover.querySelector(".scheme-dot");
-        (target as HTMLElement | null)?.focus();
-      }
-    });
-    schemePopover.querySelectorAll(".scheme-dot").forEach((d) => {
-      d.addEventListener("click", () => {
-        const name = (d as HTMLElement).dataset.scheme;
-        const setScheme = (window as any).setScheme;
-        if (name && typeof setScheme === "function") setScheme(name);
-        close();
-      });
-    });
-    document.addEventListener("click", (e) => {
-      const t = e.target as Node;
-      if (!schemePopover.hidden && !schemePopover.contains(t) && !schemeToggle.contains(t)) close();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !schemePopover.hidden) close();
-    });
-  }
 </script>
