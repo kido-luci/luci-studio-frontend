@@ -577,11 +577,13 @@ const homepageSchema = {
     color: #eceae3;
     overflow: hidden;
     padding-top: clamp(40px, 6vw, 64px);
-    /* Extra reach is half the first work-card's rendered height, set as
-       --work-band-extra by the measuring script below (responsive — the
-       card's height itself changes with viewport width / column count). */
+    /* The band reaches half a card's height below the title so the work-card
+       grid (pulled up by the same amount, below) overlaps it — top half of the
+       cards sits on the dark sheet, bottom half on the page. --work-band-extra
+       (= half the first card's measured height) is set on the section by the
+       script below so both the band and its sibling grid-wrap can read it. */
     padding-bottom: calc(clamp(40px, 6vw, 64px) + var(--work-band-extra, 0px));
-    margin-bottom: clamp(36px, 5vw, 56px);
+    margin-bottom: 0;
     --bp-ink: #eceae3;
     --bp-muted: rgba(236, 234, 227, 0.72);
     --bp-faint: rgba(236, 234, 227, 0.5);
@@ -597,6 +599,13 @@ const homepageSchema = {
   }
   .bp-work-band .bp-wrap { position: relative; z-index: 1; }
   .bp-work-band .bp-sec-title-row { margin-bottom: 0; }
+  /* Overlap: lift the grid up by half a card so its top half straddles the dark
+     band; z-index above the band so the cards paint over the dark sheet. */
+  .bp-work-band + .bp-wrap {
+    position: relative;
+    z-index: 2;
+    margin-top: calc(-1 * var(--work-band-extra, 0px));
+  }
 
   /* ── shared motif atoms ── */
   .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
@@ -1048,17 +1057,19 @@ const homepageSchema = {
 </script>
 
 <script is:inline>
-  // §01 dark band — extends its own bottom reach by half the first work-card's
-  // rendered height (measured, not guessed: the card's height itself changes
-  // with viewport width and the grid's column count).
+  // §01 dark band — set --work-band-extra to half the first work-card's
+  // rendered height (measured, not guessed: the card's height changes with
+  // viewport width and the grid's column count). It's set on the SECTION, not
+  // the band, so the band and its sibling grid-wrap can both inherit it — the
+  // band reaches down by it, the grid lifts up by it, and the cards overlap.
   (function () {
-    var band = document.querySelector(".bp-work-band");
+    var section = document.getElementById("work");
     var firstCard = document.querySelector(".bp-work-grid .bp-work-card");
-    if (!band || !firstCard) return;
+    if (!section || !firstCard) return;
     var raf = false;
     function apply() {
       raf = false;
-      band.style.setProperty("--work-band-extra", firstCard.offsetHeight / 2 + "px");
+      section.style.setProperty("--work-band-extra", firstCard.offsetHeight / 2 + "px");
     }
     function schedule() {
       if (raf) return;
