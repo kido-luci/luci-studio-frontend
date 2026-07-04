@@ -1,8 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
-import AffiliateCard from "../AffiliateCard.astro";
-import { affiliateService } from "../../services/affiliates";
 import { buildPostSlug, readTimeFor, formatDate, needsVietnameseSerif } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
 import type { Playlist } from "../../services/playlists";
@@ -14,10 +12,6 @@ interface Props {
 }
 const { playlist: rawPlaylist } = Astro.props;
 const playlist = localized(rawPlaylist, locale);
-
-const API_URL = import.meta.env.PUBLIC_API_URL || '';
-// 1 random active link picked at build time (the series page's fixed slot count).
-const affiliateCards = await affiliateService.getCardsRandom(API_URL, 1);
 
 const SITE_URL = 'https://luci-studio.com';
 const formattedDate = formatDate(playlist.created_at, locale);
@@ -125,22 +119,6 @@ const seoDescription = playlist.description
             </li>
           ))}
         </ol>
-      )}
-
-      <!-- Sponsored card — end of page -->
-      {affiliateCards.length > 0 && (
-        <div data-reveal class="mt-16">
-          <AffiliateCard
-            label={affiliateCards[0].label}
-            url={affiliateCards[0].url}
-            network={affiliateCards[0].network}
-            badge="Sponsored"
-            cta={affiliateCards[0].cta || undefined}
-            image={affiliateCards[0].image}
-            imageAlt={affiliateCards[0].imageAlt}
-            logo={affiliateCards[0].logo}
-          />
-        </div>
       )}
 
     </div>

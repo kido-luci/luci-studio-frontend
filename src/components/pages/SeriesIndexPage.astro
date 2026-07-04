@@ -3,10 +3,8 @@ import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import LabDecor from "../LabDecor.astro";
 import SeriesCard from "../SeriesCard.astro";
-import AffiliateCard from "../AffiliateCard.astro";
 import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
-import { affiliateService } from "../../services/affiliates";
 import { buildSeriesViews } from "../../utils/series";
 import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
@@ -19,10 +17,6 @@ const [rawPosts, rawPlaylists] = await Promise.all([
 
 const localizedPlaylists = rawPlaylists.map(pl => localized(pl, locale));
 const sorted = buildSeriesViews(localizedPlaylists, rawPosts);
-
-const API_URL = import.meta.env.PUBLIC_API_URL || '';
-// 1 random active link picked at build time (the series list page's slot count).
-const affiliateCards = await affiliateService.getCardsRandom(API_URL, 1);
 
 const SITE_URL = 'https://luci-studio.com';
 ---
@@ -59,22 +53,6 @@ const SITE_URL = 'https://luci-studio.com';
       {sorted.length === 0 && (
         <div class="series-empty">
           <p>{t('series.empty')}</p>
-        </div>
-      )}
-
-      <!-- Sponsored card — above the series list -->
-      {affiliateCards.length > 0 && (
-        <div data-reveal class="mb-16">
-          <AffiliateCard
-            label={affiliateCards[0].label}
-            url={affiliateCards[0].url}
-            network={affiliateCards[0].network}
-            badge="Sponsored"
-            cta={affiliateCards[0].cta || undefined}
-            image={affiliateCards[0].image}
-            imageAlt={affiliateCards[0].imageAlt}
-            logo={affiliateCards[0].logo}
-          />
         </div>
       )}
 
