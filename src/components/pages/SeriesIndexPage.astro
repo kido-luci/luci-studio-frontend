@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SeriesCard from "../SeriesCard.astro";
+import SiteFooter from "../SiteFooter.astro";
 import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
 import { buildSeriesViews } from "../../utils/series";
@@ -27,7 +28,7 @@ const SITE_URL = 'https://luci-studio.com';
   keywords="curated series, reading lists, blog collections, Luci Studio"
 >
 
-  <TopNav active="series" />
+  <TopNav active="blog" />
 
   <main class="bp-series">
     <div class="bp-grid" aria-hidden="true"></div>
@@ -76,6 +77,8 @@ const SITE_URL = 'https://luci-studio.com';
       )}
 
     </div>
+
+    <SiteFooter locale={locale} />
   </main>
 
 </Layout>

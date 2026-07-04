@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
+import SiteFooter from "../SiteFooter.astro";
 import { getLocaleFromUrl, useTranslations } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
@@ -96,6 +97,8 @@ const lastUpdated = 'June 30, 2026';
         </section>
       </div>
     </article>
+
+    <SiteFooter locale={locale} />
   </main>
 </Layout>
 

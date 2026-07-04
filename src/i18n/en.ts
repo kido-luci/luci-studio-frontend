@@ -105,9 +105,6 @@ export const en: Record<string, string> = {
   'portfolio.skills': 'Skills',
   'portfolio.disciplines': 'Disciplines',
   'portfolio.toolsAndCrafts': 'Tools & Crafts',
-  'portfolio.enoughTalking': 'Enough talking.',
-  'portfolio.emailMe': 'Email Me',
-  'portfolio.backHome': 'Back Home',
   'portfolio.basedIn': 'Based in',
 
   // lab (lab.astro)
@@ -167,9 +164,6 @@ export const en: Record<string, string> = {
   'legal.privacyTitle': 'Privacy Policy',
   'legal.termsTitle': 'Terms of Use',
   'legal.licenseTitle': 'License',
-
-  // portfolio CTA
-  'portfolio.letsBuild': "LET'S BUILD",
 
   // comments i18n (read by public/scripts/post-engagement-comments.js via data-*)
   'comments.noComments': 'No comments yet. Be the first!',

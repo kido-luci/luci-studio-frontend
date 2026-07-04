@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import RepoCard from "../RepoCard.astro";
+import SiteFooter from "../SiteFooter.astro";
 import { projectService } from "../../services/projects";
 import { buildLabCards } from "../../utils/labCards";
 import "../../styles/lab-cards.css";
@@ -109,6 +110,8 @@ const hubs = [
       </section>
 
     </div>
+
+    <SiteFooter locale={locale} />
   </main>
 </Layout>
 

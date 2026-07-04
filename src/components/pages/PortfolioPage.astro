@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import TimelineItem from "../TimelineItem.astro";
 import TopNav from "../TopNav.astro";
+import SiteFooter from "../SiteFooter.astro";
 import { workService } from "../../services/work";
 import { profileService } from "../../services/profile";
 import { skillsService } from "../../services/skills";
@@ -193,15 +194,7 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
       ))}
     </section>
 
-    <!-- Footer CTA -->
-    <section class="bp-wrap bp-po-cta">
-      <p class="bp-mono bp-po-cta-eyebrow" data-reveal>{t('portfolio.enoughTalking')}</p>
-      <h2 class="bp-display bp-po-cta-title" data-reveal>{t('portfolio.letsBuild')}<span class="bp-acc-dot">.</span></h2>
-      <div class="bp-po-cta-actions" data-reveal>
-        <a href="mailto:kidoluci.work@gmail.com" class="bp-po-btn bp-po-btn--solid">{t('portfolio.emailMe')}</a>
-        <a href={localizedHref(locale, '/')} class="bp-po-btn bp-po-btn--ghost">{t('portfolio.backHome')}</a>
-      </div>
-    </section>
+    <SiteFooter locale={locale} />
 
   </main>
 
@@ -337,15 +330,6 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
   @media (max-width: 720px) { .sk-card--wide { grid-template-columns: 1fr; } }
 
   /* ── CTA ── */
-  .bp-po-cta { padding-top: clamp(56px, 9vw, 100px); text-align: center; }
-  .bp-po-cta-eyebrow { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bp-faint); margin: 0 0 14px; }
-  .bp-po-cta-title { font-size: clamp(2.4rem, 6vw, 4.25rem); line-height: 1.0; margin: 0 0 clamp(24px, 4vw, 40px); }
-  .bp-po-cta-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; }
-  .bp-po-btn { display: inline-flex; align-items: center; padding: 13px 26px; border-radius: 999px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
-  .bp-po-btn--solid { background: var(--bp-ink); color: var(--bp-bg); border: 1px solid var(--bp-ink); }
-  .bp-po-btn--solid:hover { background: var(--bp-acc); border-color: var(--bp-acc); color: #fff; }
-  .bp-po-btn--ghost { background: transparent; color: var(--bp-muted); border: 1px solid var(--bp-hair); }
-  .bp-po-btn--ghost:hover { border-color: var(--bp-acc); color: var(--bp-acc); }
 
   /* ── Story reveal (IntersectionObserver-driven; classes/attrs unchanged) ── */
   @keyframes storyPhotoIn { from { opacity: 0; transform: translateX(-40px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
