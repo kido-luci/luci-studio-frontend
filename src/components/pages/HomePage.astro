@@ -577,7 +577,10 @@ const homepageSchema = {
     color: #eceae3;
     overflow: hidden;
     padding-top: clamp(40px, 6vw, 64px);
-    padding-bottom: clamp(40px, 6vw, 64px);
+    /* Extra reach is half the first work-card's rendered height, set as
+       --work-band-extra by the measuring script below (responsive — the
+       card's height itself changes with viewport width / column count). */
+    padding-bottom: calc(clamp(40px, 6vw, 64px) + var(--work-band-extra, 0px));
     margin-bottom: clamp(36px, 5vw, 56px);
     --bp-ink: #eceae3;
     --bp-muted: rgba(236, 234, 227, 0.72);
@@ -1041,5 +1044,28 @@ const homepageSchema = {
       }, { threshold: 0.5 });
       io.observe(card);
     }
+  })();
+</script>
+
+<script is:inline>
+  // §01 dark band — extends its own bottom reach by half the first work-card's
+  // rendered height (measured, not guessed: the card's height itself changes
+  // with viewport width and the grid's column count).
+  (function () {
+    var band = document.querySelector(".bp-work-band");
+    var firstCard = document.querySelector(".bp-work-grid .bp-work-card");
+    if (!band || !firstCard) return;
+    var raf = false;
+    function apply() {
+      raf = false;
+      band.style.setProperty("--work-band-extra", firstCard.offsetHeight / 2 + "px");
+    }
+    function schedule() {
+      if (raf) return;
+      raf = true;
+      requestAnimationFrame(apply);
+    }
+    schedule();
+    window.addEventListener("resize", schedule, { passive: true });
   })();
 </script>
