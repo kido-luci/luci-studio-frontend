@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
+import SiteFooter from "../SiteFooter.astro";
 import { buildPostSlug, readTimeFor, formatDate, needsVietnameseSerif } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
 import type { Playlist } from "../../services/playlists";
@@ -126,6 +127,8 @@ const seoDescription = playlist.description
       )}
 
     </div>
+
+    <SiteFooter locale={locale} />
   </main>
 
 </Layout>

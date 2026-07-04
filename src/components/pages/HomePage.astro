@@ -7,7 +7,7 @@
 // mapped onto real work. The homepage is English-only (there is no /vi/ route).
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
-import FooterLinks from "../FooterLinks.astro";
+import SiteFooter from "../SiteFooter.astro";
 import { postService } from "../../services/posts";
 import { galleryService } from "../../services/gallery";
 import { profileService } from "../../services/profile";
@@ -129,19 +129,6 @@ const capabilities = [
   { n: "03", title: "Technical writing", desc: "Deep-dives and engineering notes on Flutter, Dart and systems that people actually read.", tag: "Blog · Series", orange: false },
   { n: "04", title: "Digital art", desc: "Hand-drawn and digital pieces — portraits, manga studies, ink.", tag: "Pen · Pencil · Digital", orange: true },
 ];
-const sitemapLinks = [
-  { label: "Home", href: localizedHref(locale, "/") },
-  { label: "Blog", href: localizedHref(locale, "/blog") },
-  { label: "Series", href: localizedHref(locale, "/blog/series") },
-  { label: "Lab", href: localizedHref(locale, "/lab") },
-];
-const makeLinks = [
-  { label: "Tools", href: "/lab#hubs", ext: false },
-  { label: "Games", href: "https://games.luci-studio.com", ext: true },
-  { label: "Apps", href: "#work", ext: false },
-  { label: "Art", href: "#art", ext: false },
-];
-
 const SITE_URL = "https://luci-studio.com";
 const homepageSchema = {
   "@context": "https://schema.org",
@@ -492,55 +479,7 @@ const homepageSchema = {
       </div>
     </section>
 
-    <!-- ===================== CTA ===================== -->
-    <section class="bp-cta" id="contact">
-      <div class="bp-cta-inner bp-wrap">
-        <div class="bp-cta-label" data-reveal>
-          <span class="bp-coord-dot" aria-hidden="true"></span>
-          <span class="bp-mono">END OF SHEET — LET'S BUILD</span>
-        </div>
-        <h2 class="bp-display bp-cta-title" data-reveal>Got a hard problem? Let's talk.</h2>
-        <div class="bp-cta-actions" data-reveal>
-          <a href="mailto:kidoluci.work@gmail.com" class="bp-btn bp-cta-btn">Let's talk →</a>
-          <a href="mailto:kidoluci.work@gmail.com" class="bp-mono bp-cta-mail">kidoluci.work@gmail.com</a>
-          <a href="https://www.linkedin.com/in/kido-luci/" target="_blank" rel="noopener noreferrer" class="bp-mono bp-cta-mail">LinkedIn ↗</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== FOOTER ===================== -->
-    <footer class="bp-footer">
-      <div class="bp-wrap bp-footer-cols">
-        <div class="bp-footer-brand">
-          <a href={localizedHref(locale, "/")} class="bp-footer-logo">
-            <img src="/images/logo_icon.png" alt="Luci Studio Logo" loading="lazy" />
-            <span class="bp-display">LUCI STUDIO<em class="bp-acc-dot">.</em></span>
-          </a>
-          <p class="bp-footer-blurb">A creative engineering studio turning hard problems into shipped products.</p>
-        </div>
-        <div class="bp-footer-col">
-          <span class="bp-mono bp-footer-head">SITEMAP</span>
-          {sitemapLinks.map((l) => <a href={l.href} class="bp-footer-link">{l.label}</a>)}
-        </div>
-        <div class="bp-footer-col">
-          <span class="bp-mono bp-footer-head">MAKE</span>
-          {makeLinks.map((l) => (
-            <a href={l.href} class="bp-footer-link" {...(l.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{l.label}</a>
-          ))}
-        </div>
-        <div class="bp-footer-col">
-          <span class="bp-mono bp-footer-head">ELSEWHERE</span>
-          {(profile?.social_links ?? []).map((l) => (
-            <a href={l.url} target="_blank" rel="noopener" class="bp-footer-link">{l.label}</a>
-          ))}
-        </div>
-      </div>
-      <div class="bp-wrap bp-footer-base">
-        <span class="bp-mono bp-footer-copy">{profile?.copyright ?? "© 2026 LUCI STUDIO — ALL RIGHTS RESERVED"}</span>
-        <span class="bp-footer-legal"><FooterLinks linkColor="bp-footer-link" /></span>
-        <span class="bp-mono bp-footer-rev" aria-hidden="true">REV 1.0 / SHEET 6 OF 6 / ✛ N10°49′</span>
-      </div>
-    </footer>
+    <SiteFooter locale={locale} />
   </main>
 </Layout>
 
@@ -966,49 +905,6 @@ const homepageSchema = {
   .bp-stat-meta { display: flex; flex-direction: column; gap: 3px; }
   .bp-stat-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-muted); }
   .bp-stat-sub { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-faint); }
-
-  /* ── CTA (fixed dark drafting band, both themes) ── */
-  .bp-cta { position: relative; z-index: 1; background: #11161d; color: #eceae3; overflow: hidden; }
-  .bp-cta::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(rgba(236, 234, 227, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(236, 234, 227, 0.05) 1px, transparent 1px);
-    background-size: 36px 36px;
-    pointer-events: none;
-  }
-  .bp-cta-inner { position: relative; z-index: 1; padding-top: clamp(64px, 9vw, 96px); padding-bottom: clamp(64px, 9vw, 96px); }
-  .bp-cta-label { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; font-size: 12px; letter-spacing: 0.14em; color: var(--bp-acc); }
-  .bp-cta-title { color: #eceae3; font-size: clamp(2.2rem, 6vw, 4.6rem); line-height: 0.98; letter-spacing: -0.03em !important; max-width: 900px; }
-  .bp-cta-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 34px; }
-  .bp-cta-btn { background: var(--bp-acc); color: var(--accent-ink); border: none; font-size: 14px; }
-  .bp-cta-btn:hover { filter: brightness(1.08); }
-  .bp-cta-mail { font-size: 14px; color: rgba(236, 234, 227, 0.72); text-decoration: none; border-bottom: 1px solid rgba(236, 234, 227, 0.35); padding-bottom: 4px; transition: color 0.2s ease, border-color 0.2s ease; }
-  .bp-cta-mail:hover { color: #fff; border-color: #fff; }
-
-  /* ── FOOTER ── */
-  .bp-footer { position: relative; z-index: 1; border-top: 1.5px solid var(--bp-hair); }
-  .bp-footer-cols { display: flex; flex-wrap: wrap; gap: 40px 56px; padding-top: 52px; padding-bottom: 40px; }
-  .bp-footer-brand { flex: 1 1 260px; max-width: 320px; }
-  .bp-footer-logo { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; }
-  .bp-footer-logo img { width: 30px; height: 30px; border-radius: 8px; }
-  .bp-footer-logo span { font-size: 18px; letter-spacing: 0.02em; color: var(--bp-ink); }
-  .bp-footer-blurb { margin-top: 14px; font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
-  .bp-footer-col { display: flex; flex-direction: column; gap: 12px; }
-  .bp-footer-head { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-faint); margin-bottom: 4px; }
-  :global(.bp-footer-link) { font-size: 14px; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
-  :global(.bp-footer-link:hover) { color: var(--bp-acc); }
-  .bp-footer-base { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding-top: 16px; padding-bottom: 30px; border-top: 1px solid var(--bp-line2); }
-  .bp-footer-copy { font-size: 11px; letter-spacing: 0.06em; color: var(--bp-faint); }
-  .bp-footer-legal { display: inline-flex; gap: 18px; flex-wrap: wrap; }
-  /* FooterLinks renders its own <a>/<button> (its own Astro scope) + hardcodes a
-     Tailwind `hover:text-white` that would vanish on the cream sheet — reach in and
-     re-tone it to the blueprint palette (accent on hover, legible in both themes). */
-  .bp-footer-legal :global(a),
-  .bp-footer-legal :global(button) { color: var(--bp-faint); font-size: 11px; letter-spacing: 0.08em; }
-  .bp-footer-legal :global(a:hover),
-  .bp-footer-legal :global(button:hover) { color: var(--bp-acc); }
-  .bp-footer-rev { font-size: 11px; letter-spacing: 0.06em; color: var(--bp-faint); }
 
   /* ── connectors (dimension lines between sections) ── */
   .bp-conn-wrap { position: relative; z-index: 1; display: flex; justify-content: center; padding: 6px 0; }

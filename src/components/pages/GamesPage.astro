@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
+import SiteFooter from "../SiteFooter.astro";
 import "../../styles/lab-cards.css";
 
 // Games are hosted as standalone deploys and linked out from here (same model
@@ -161,6 +162,8 @@ const rest = GAMES.slice(1);
       )}
 
     </div>
+
+    <SiteFooter locale="en" />
   </main>
 
   <!-- Cover / Demo toggle on the featured card. The pills live inside the
