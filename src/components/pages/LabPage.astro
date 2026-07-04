@@ -13,6 +13,31 @@ const rawProjects = await projectService.getAll();
 const projects = rawProjects.map(p => localized(p, locale));
 const { apps, sources } = buildLabCards(projects);
 const repoCount = String(sources.length).padStart(2, "0");
+
+// External standalone deploys, shown as a section here instead of top-nav items.
+// Rendered with the same RepoCard (monogram tile + stats + host footer), linking out.
+const hubs = [
+  {
+    url: "https://tools.luci-studio.com/",
+    name: "Tools",
+    monogram: "T",
+    bar: "#6366f1",
+    desc: "Free browser-native micro-tools — image & PDF conversions, QR codes, JSON, and text utilities. Everything runs client-side; nothing is uploaded to a server.",
+    tags: ["Images", "PDF", "QR", "JSON", "Text"],
+    stats: [{ n: "60+", label: "tools" }],
+    host: "tools.luci-studio.com",
+  },
+  {
+    url: "https://live.luci-studio.com/",
+    name: "Live",
+    monogram: "L",
+    bar: "#3aa0ff",
+    desc: "Live-data widgets built on free public APIs — earthquakes, the ISS, currency, weather and crypto, each updating in real time.",
+    tags: ["Quakes", "ISS", "Currency", "Weather", "Crypto"],
+    stats: [{ n: "5", label: "widgets" }],
+    host: "live.luci-studio.com",
+  },
+];
 ---
 
 <Layout
@@ -43,6 +68,22 @@ const repoCount = String(sources.length).padStart(2, "0");
           </div>
         </section>
       )}
+
+      <!-- external hubs (tools + live) -->
+      <section id="hubs" class="bp-lab-sec" style="scroll-margin-top:96px;">
+        <div class="bp-sec-head">
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">HUBS</span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-count">{String(hubs.length).padStart(2, "0")} EXTERNAL</span>
+        </div>
+        <h2 class="bp-display bp-lab-title bp-lab-title--sub">Tools &amp; Live<span class="bp-acc-dot">.</span></h2>
+        <div class="bp-lab-grid">
+          {hubs.map((h) => (
+            <RepoCard {...h} variant="blueprint" />
+          ))}
+        </div>
+      </section>
 
       <!-- public source -->
       <section id="public-source" class="bp-lab-sec" style="scroll-margin-top:96px;">

@@ -25,9 +25,7 @@ const links = [
   { key: 'blog',   label: 'BLOG',   href: localizedHref(locale, '/blog') },
   { key: 'series', label: 'SERIES', href: localizedHref(locale, '/blog/series') },
   { key: 'lab',    label: 'LAB',    href: localizedHref(locale, '/lab') },
-  { key: 'tools',  label: 'TOOLS',  href: 'https://tools.luci-studio.com/', ext: true },
   { key: 'games',  label: 'GAMES',  href: '/games' },
-  { key: 'live',   label: 'LIVE',   href: 'https://live.luci-studio.com/', ext: true },
 ];
 
 // Color-scheme picker presets. The swatch shows each scheme's accent; `id` maps to
@@ -57,7 +55,6 @@ const schemes = [
         <a
           href={l.href}
           class={active === l.key ? 'is-active' : undefined}
-          {...(l.ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >{l.label}</a>
       ))}
     </div>
@@ -97,7 +94,7 @@ const schemes = [
 
   <div class="bp-nav-mobile bp-nav-mono">
     {links.map((l) => (
-      <a href={l.href} {...(l.ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{l.label}</a>
+      <a href={l.href}>{l.label}</a>
     ))}
     {showLangSwitch && (
       <div class="bp-nav-lang is-mobile">
