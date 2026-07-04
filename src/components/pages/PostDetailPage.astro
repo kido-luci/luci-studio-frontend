@@ -1,13 +1,12 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import TopNav from "../TopNav.astro";
 import PostCard from "../PostCard.astro";
 import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown, needsVietnameseSerif } from "../../utils/blog";
-import { getLocaleFromUrl, useTranslations, localizedHref, switchLocalePath, localized } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, localized } from '../../i18n';
 import type { Post } from "../../services/posts";
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
-const enHref = switchLocalePath(Astro.url.pathname, 'en');
-const viHref = switchLocalePath(Astro.url.pathname, 'vi');
 
 // Body component — getStaticPaths lives in the route files (en + vi) and passes
 // the fetched post / related / slug in via props.
@@ -117,14 +116,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
 {!post ? (
   <Layout title="Post Not Found">
-    <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
-      <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <a href={localizedHref(locale, '/')} class="flex items-center gap-3 group">
-          <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
-          <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
-        </a>
-      </div>
-    </nav>
+    <TopNav active="blog" />
     <main class="pt-64 pb-24 px-6 min-h-screen bg-[var(--bg-primary)] text-center">
       <h1 class="text-4xl font-black text-[var(--text-primary)] mb-6">{t('post.notFoundTitle')}</h1>
       <p class="text-gray-400 mb-12 max-w-md mx-auto">{t('post.notFoundBody')}</p>
@@ -156,37 +148,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" is:inline></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" is:inline></script>
 
-  <nav class="fixed top-0 w-full z-50 border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
-    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href={localizedHref(locale, '/')} class="flex items-center gap-3 group">
-        <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
-        <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
-      </a>
-      <div class="flex items-center gap-4">
-        <div class="lang-switch flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
-          <a href={enHref} class={locale === 'en' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="English">EN</a>
-          <span class="text-gray-600" aria-hidden="true">/</span>
-          <a href={viHref} class={locale === 'vi' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="Tiếng Việt">VI</a>
-        </div>
-        <button
-          onclick="window.toggleTheme()"
-          class="w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
-          aria-label={t('nav.toggleTheme')}
-        >
-          <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-          </svg>
-          <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-        </button>
-        <a href={localizedHref(locale, '/blog')} class="text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 uppercase tracking-[0.2em] flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          <span class="hidden sm:inline">{t('post.backToBlog')}</span>
-        </a>
-      </div>
-    </div>
-  </nav>
+  <TopNav active="blog" />
 
   <!-- Floating like pill -->
   <div id="floating-like" class="fixed bottom-5 right-5 sm:bottom-8 sm:right-8 z-40 opacity-0 pointer-events-none transition-all duration-500 translate-y-4">
@@ -205,6 +167,11 @@ const structuredData = [articleSchema, breadcrumbSchema];
     <div class="max-w-4xl mx-auto bp-post-inner">
 
       <header class="bd-header" data-reveal>
+        <a href={localizedHref(locale, '/blog')} class="bd-back">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          {t('post.backToBlog')}
+        </a>
+
         <!-- Topic pills -->
         <div class="bd-tags">
           {tags.map(t => (
@@ -300,16 +267,15 @@ const structuredData = [articleSchema, breadcrumbSchema];
       </div>
 
       {relatedPosts.length > 0 && (
-        <section class="more-posts mt-20 pt-12 border-t border-white/5">
-          <div class="flex items-end justify-between mb-8 flex-wrap gap-4">
-            <div>
-              <span class="text-[10px] font-black uppercase tracking-[0.3em] bd-more-eyebrow">{t('post.continueReading')}</span>
-              <h2 class="text-2xl md:text-3xl tracking-wide mt-2 bd-more-title">{t('post.morePosts')}<span class="bd-acc-dot">.</span></h2>
-            </div>
-            <a href={localizedHref(locale, '/blog')} class="text-xs font-bold uppercase tracking-widest flex items-center gap-2 group bd-more-link">
-              {t('post.viewAll')}
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
+        <section class="more-posts mt-24">
+          <div class="bp-sec-head">
+            <span class="bp-dot" aria-hidden="true"></span>
+            <span class="bp-mono bp-sec-label">{t('post.continueReading')}</span>
+            <span class="bp-rule" aria-hidden="true"></span>
+            <a href={localizedHref(locale, '/blog')} class="bp-mono bp-more">{t('post.viewAll')} →</a>
+          </div>
+          <div class="bp-sec-title-row">
+            <h2 class="bp-display bp-more-h2">{t('post.morePosts')}<span class="bd-acc-dot">.</span></h2>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {relatedPosts.map(p => (
@@ -598,12 +564,30 @@ const structuredData = [articleSchema, breadcrumbSchema];
   .support-card #like-count { color: var(--bp-ink); }
   .support-card .border-t { border-color: var(--bp-hair) !important; }
 
-  /* ── More posts (related) → blueprint header ── */
-  .more-posts { border-top-color: var(--bp-hair) !important; }
-  .more-posts .bd-more-title { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; color: var(--bp-ink); }
-  .more-posts .bd-more-eyebrow { font-family: var(--bp-mono); color: var(--bp-acc); }
-  .more-posts .bd-more-link { color: var(--bp-muted); transition: color .2s ease; }
-  .more-posts .bd-more-link:hover { color: var(--bp-acc); }
+  /* ── In-header back link (mirrors series' .bp-series-back) ── */
+  .bd-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--bp-mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--bp-muted); text-decoration: none; margin-bottom: clamp(20px, 3vw, 30px);
+    transition: color 0.2s ease;
+  }
+  .bd-back:hover { color: var(--bp-acc); }
+  .bd-back svg { transition: transform 0.2s ease; }
+  .bd-back:hover svg { transform: translateX(-3px); }
+
+  /* ── Shared blueprint §-section header (matches blog's series strip) ── */
+  .bp-post .bp-mono { font-family: var(--bp-mono); }
+  .bp-post .bp-display { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink); }
+  .bp-post .bp-sec-head { display: flex; align-items: center; gap: 14px; }
+  .bp-post .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
+  .bp-post .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
+  .bp-post .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
+  .bp-post .bp-more { font-size: 12px; letter-spacing: 0.08em; color: var(--bp-ink); text-decoration: none; border-bottom: 1.5px solid var(--bp-ink); padding-bottom: 3px; white-space: nowrap; transition: color 0.2s ease, border-color 0.2s ease; }
+  .bp-post .bp-more:hover { color: var(--bp-acc); border-color: var(--bp-acc); }
+
+  /* ── More posts (related) → blueprint section header + title ── */
+  .more-posts .bp-sec-title-row { margin-top: clamp(16px, 2vw, 22px); margin-bottom: clamp(24px, 3.5vw, 36px); }
+  .more-posts .bp-more-h2 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.0; margin: 0; }
 
   @media (max-width: 560px) {
     .bd-byline { align-items: flex-start; }
@@ -931,23 +915,6 @@ const structuredData = [articleSchema, breadcrumbSchema];
     border-color: rgba(0, 0, 0, 0.1);
   }
 
-  body.light-mode nav {
-    background: rgba(255, 255, 255, 0.8) !important;
-    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
-  }
-
-  body.light-mode nav .text-xl {
-    color: #111827 !important;
-  }
-
-  body.light-mode nav a.text-gray-400 {
-    color: #6b7280 !important;
-  }
-
-  body.light-mode nav a.text-gray-400:hover {
-    color: #111827 !important;
-  }
-
   body.light-mode header .text-gray-500 {
     color: #6b7280 !important;
   }
@@ -1040,11 +1007,6 @@ const structuredData = [articleSchema, breadcrumbSchema];
     --google-btn-bg: #fff;
     --google-btn-text: #111;
     --google-btn-border: rgba(0, 0, 0, 0.15);
-  }
-
-  /* ── More Posts section (cards render via <PostCard>) ── */
-  body.light-mode .more-posts {
-    border-top-color: rgba(0, 0, 0, 0.08) !important;
   }
 
 </style>
