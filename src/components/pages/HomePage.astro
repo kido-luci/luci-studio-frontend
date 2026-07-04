@@ -128,7 +128,7 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
 // Static blueprint copy — kept as data so the JSX stays free of raw "&" text nodes.
 const directory = [
   { n: "01", label: "BLOG", desc: "Engineering notes & deep-dives", href: localizedHref(locale, "/blog"), ext: false, orange: false },
-  { n: "02", label: "TOOLS", desc: "Free browser micro-tools", href: "/tools", ext: false, orange: false },
+  { n: "02", label: "TOOLS", desc: "Free browser micro-tools", href: "https://tools.luci-studio.com/", ext: true, orange: false },
   { n: "03", label: "GAMES", desc: "Browser games, 60fps", href: "https://games.luci-studio.com", ext: true, orange: false },
   { n: "04", label: "APPS", desc: "Cross-platform & open source", href: "#work", ext: false, orange: false },
   { n: "05", label: "ART", desc: "Pen, pencil & digital", href: "#art", ext: false, orange: true },
@@ -146,7 +146,7 @@ const sitemapLinks = [
   { label: "Lab", href: localizedHref(locale, "/lab") },
 ];
 const makeLinks = [
-  { label: "Tools", href: "/tools", ext: false },
+  { label: "Tools", href: "https://tools.luci-studio.com/", ext: true },
   { label: "Games", href: "https://games.luci-studio.com", ext: true },
   { label: "Apps", href: "#work", ext: false },
   { label: "Art", href: "#art", ext: false },
@@ -190,7 +190,7 @@ const homepageSchema = {
         <a href={localizedHref(locale, "/blog")}>BLOG</a>
         <a href={localizedHref(locale, "/blog/series")}>SERIES</a>
         <a href={localizedHref(locale, "/lab")}>LAB</a>
-        <a href="/tools">TOOLS</a>
+        <a href="https://tools.luci-studio.com/" target="_blank" rel="noopener noreferrer">TOOLS</a>
         <a href="/games">GAMES</a>
       </div>
       <div class="bp-nav-actions">
@@ -219,7 +219,7 @@ const homepageSchema = {
       <a href={localizedHref(locale, "/blog")}>BLOG</a>
       <a href={localizedHref(locale, "/blog/series")}>SERIES</a>
       <a href={localizedHref(locale, "/lab")}>LAB</a>
-      <a href="/tools">TOOLS</a>
+      <a href="https://tools.luci-studio.com/" target="_blank" rel="noopener noreferrer">TOOLS</a>
       <a href="/games">GAMES</a>
       <a href="#contact" class="bp-nav-mobile-cta">LET'S TALK</a>
     </div>
