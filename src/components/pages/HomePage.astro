@@ -637,7 +637,10 @@ const homepageSchema = {
     background: var(--bp-bg);
     color: var(--bp-ink);
     font-family: "Space Grotesk", system-ui, sans-serif;
-    overflow: clip;
+    /* overflow-x only (not `overflow: clip`) so it never becomes a scroll container
+       that would trap the §04 sticky background. Matches the old layout, where only
+       html had overflow-x: clip. */
+    overflow-x: clip;
   }
   /* Crisp blueprint headings — cancel the site's light-mode heading drop-shadow filter. */
   :global(body.light-mode) .bp-display { filter: none !important; }
@@ -1028,7 +1031,10 @@ const homepageSchema = {
   /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
      homeScrollAnimations.ts drifts #art-bg's background-position on scroll (same
      mechanism as the old homepage). Section text flips light over the dark photo. */
-  .bp-art { position: relative; overflow: hidden; }
+  /* No overflow:hidden here — it would create a scroll container and break the
+     child #art-bg's position:sticky. Clipping is handled by the wrapper's clip-path,
+     exactly like the old homepage. */
+  .bp-art { position: relative; }
   .bp-art-bg-wrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; clip-path: inset(0); }
   .bp-art-bg {
     position: sticky;
