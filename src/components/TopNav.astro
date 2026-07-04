@@ -193,6 +193,12 @@ const schemes = [
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--bp-hair);
+    transition: transform 0.3s ease;
+  }
+  /* Hide-on-scroll-down / reveal-on-scroll-up (toggled by navDimmer.ts).
+     Never applied while the mobile dropdown is open — see navDimmer.ts. */
+  .bp-nav.nav-hidden {
+    transform: translateY(-100%);
   }
   /* Blueprint homepage: the nav is part of the drafting sheet — sticky in flow,
      with the sheet-tinted glass the mockup specifies. */
