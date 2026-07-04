@@ -9,7 +9,6 @@ import Layout from "../../layouts/Layout.astro";
 import FooterLinks from "../FooterLinks.astro";
 import { postService } from "../../services/posts";
 import { galleryService } from "../../services/gallery";
-import { projectService } from "../../services/projects";
 import { profileService } from "../../services/profile";
 import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
 import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
@@ -31,23 +30,55 @@ const schemes = [
   { id: "mono", hex: "#a1a1aa", label: "Mono" },
 ];
 
-// §01 SELECTED WORK — 2 apps + 2 sources, ordered by display_order. Apps lead
-// with their cover; source repos have none → the striped drafting-fig fallback.
-const allProjects = await projectService.getAll();
-const byOrder = (a: { display_order: number }, b: { display_order: number }) =>
-  (a.display_order ?? 0) - (b.display_order ?? 0);
-const apps = allProjects.filter((p) => p.type === "app").sort(byOrder);
-const sources = allProjects.filter((p) => p.type === "source").sort(byOrder);
-const selectedWork = [...apps.slice(0, 2), ...sources.slice(0, 2)].map((p, i) => ({
-  n: String(i + 1).padStart(2, "0"),
-  title: p.title,
-  badge: p.type === "app" ? "APP" : "OPEN SOURCE",
-  year: p.year || "",
-  desc: p.description || "",
-  img: p.cover_image_url || "",
-  href: (p.links && p.links[0]?.url) || "",
-  fig: p.type === "app" ? "app screenshot" : "source · repo",
-}));
+// §01 SELECTED WORK — a hand-picked set (app · game · open source · writing series).
+// Cover-less items fall back to the striped drafting-fig pattern. `ext` opens
+// external links in a new tab; the series link stays in-tab.
+const selectedWork = [
+  {
+    n: "01",
+    title: "MemoirMe",
+    badge: "APP",
+    year: "2024",
+    desc: "Zero-knowledge RSA/AES encrypted diary with geolocation mapping, AI features, and cross-platform sync.",
+    img: "https://media.luci-studio.com/MEMOIRME.webp",
+    href: "https://memoirme.app/",
+    fig: "app screenshot",
+    ext: true,
+  },
+  {
+    n: "02",
+    title: "Faldrop",
+    badge: "GAME",
+    year: "2026",
+    desc: "A 2.5D block-stacker — extruded-cube pieces, combos and a global leaderboard, at 60fps on one canvas.",
+    img: "https://faldrop.luci-studio.com/og-image.png",
+    href: "https://faldrop.luci-studio.com",
+    fig: "game capture",
+    ext: true,
+  },
+  {
+    n: "03",
+    title: "Flutter Starter Template",
+    badge: "OPEN SOURCE",
+    year: "2026",
+    desc: "A production-ready Flutter foundation: modular Clean Architecture, offline-first sync, JWT auth, Firebase, and a Go reference backend.",
+    img: "",
+    href: "https://github.com/kido-luci/flutter-starter-template",
+    fig: "source · repo",
+    ext: true,
+  },
+  {
+    n: "04",
+    title: "Flutter & Dart",
+    badge: "SERIES",
+    year: "2026",
+    desc: "A written series — Flutter architecture, state management, testing, DI and advanced Dart concepts.",
+    img: "https://media.luci-studio.com/posts/covers/1779710466887355000.jpg",
+    href: localizedHref(locale, "/blog/series/flutter-dart-1b6c8568/"),
+    fig: "series cover",
+    ext: false,
+  },
+];
 
 // §03 WRITING — latest 5 posts (art-topic posts excluded, same rule as before).
 const rawPosts = await postService.getAll();
@@ -297,7 +328,7 @@ const homepageSchema = {
             href={w.href || "#work"}
             class="bp-work-card"
             data-reveal
-            {...(w.href ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            {...(w.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           >
             <div class={`bp-fig${w.img ? "" : " bp-fig--striped"}`}>
               {w.img && <img src={w.img} alt={w.title} loading="lazy" />}
