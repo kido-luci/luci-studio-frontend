@@ -1,7 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
-import LabDecor from "../LabDecor.astro";
 import SeriesCard from "../SeriesCard.astro";
 import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
@@ -30,43 +29,47 @@ const SITE_URL = 'https://luci-studio.com';
 
   <TopNav active="series" />
 
-  <main class="series-main pt-36 pb-28 px-5 md:px-8 min-h-screen">
-    <div class="series-grid-bg" aria-hidden="true"></div>
-    <LabDecor />
+  <main class="bp-series">
+    <div class="bp-grid" aria-hidden="true"></div>
 
-    <div class="series-shell">
+    <div class="bp-wrap">
 
       <!-- Header -->
-      <header class="series-head" data-reveal>
-        <a href={localizedHref(locale, '/blog')} class="series-back">
+      <header class="bp-series-head">
+        <a href={localizedHref(locale, '/blog')} class="bp-series-back bp-mono" data-reveal>
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           {t('series.backToThoughts')}
         </a>
-        <span class="series-eyebrow">{t('series.eyebrow')}</span>
-        <h1 class="series-display">{t('series.title')}<span class="series-dot">.</span></h1>
-        <p class="series-sub">
+
+        <div class="bp-sec-head" data-reveal>
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">{t('series.eyebrow')}</span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-count">{String(sorted.length).padStart(2, '0')} COLLECTIONS</span>
+        </div>
+
+        <h1 class="bp-display bp-series-title" data-reveal>{t('series.title')}<span class="bp-acc-dot">.</span></h1>
+        <p class="bp-series-sub" data-reveal>
           {format(t('series.sub'), { n: sorted.length })}
         </p>
       </header>
 
       <!-- Empty state -->
       {sorted.length === 0 && (
-        <div class="series-empty">
-          <p>{t('series.empty')}</p>
-        </div>
+        <div class="bp-series-empty bp-mono" data-reveal>{t('series.empty')}</div>
       )}
 
       <!-- Series list -->
       {sorted.length > 0 && (
-        <ol class="series-list">
+        <ol class="bp-series-list">
           {sorted.map((p, i) => (
-            <li class="series-item" data-reveal>
-              <div class="series-marker">
-                <span class="series-marker-num">{String(i + 1).padStart(2, '0')}</span>
-                <span class="series-marker-label">{t('series.collectionLabel')}</span>
-                <span class="series-marker-line"></span>
+            <li class="bp-series-item" data-reveal>
+              <div class="bp-series-marker bp-mono">
+                <span class="bp-series-marker-num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="bp-series-marker-label">{t('series.collectionLabel')}</span>
+                <span class="bp-series-marker-line" aria-hidden="true"></span>
               </div>
-              <SeriesCard series={p} />
+              <SeriesCard series={p} variant="blueprint" index={i + 1} />
             </li>
           ))}
         </ol>
@@ -78,93 +81,110 @@ const SITE_URL = 'https://luci-studio.com';
 </Layout>
 
 <style>
-  /* ====== Series page — header + layout (card lives in SeriesCard.astro) ====== */
-  .series-main {
-    --series-accent: var(--accent);
-    --series-ink: var(--text-primary);
-    --series-muted: var(--text-secondary, #6b7280);
-    --series-line: rgb(var(--accent-rgb) / 0.18);
+  /* ══════════════════════════════════════════════════════════════════════
+     Series index — homepage "blueprint" drafting-sheet DNA.
+     Line grid + §-section header + Space Grotesk display + IBM Plex Mono
+     labels. Accent follows the active color scheme (--accent), matching the
+     shared nav on this page; the drafting-sheet bg still flips with light/dark.
+     ══════════════════════════════════════════════════════════════════════ */
+  .bp-series {
+    --bp-bg: #0a0e14;
+    --bp-ink: var(--text-primary);
+    --bp-acc: var(--accent);
+    --bp-line: rgba(255, 255, 255, 0.05);
+    --bp-line2: rgba(255, 255, 255, 0.08);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
+
     position: relative;
-    background: var(--bg-primary);
-    overflow: hidden;
+    min-height: 100vh;
+    background: var(--bp-bg);
+    color: var(--bp-ink);
+    padding-top: clamp(120px, 15vh, 168px);
+    padding-bottom: clamp(72px, 12vw, 128px);
+    overflow-x: clip;
   }
-  /* faint dot grid */
-  .series-grid-bg {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image: radial-gradient(circle, rgb(var(--accent-rgb) / 0.10) 1px, transparent 1px);
-    background-size: 38px 38px;
-    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
-            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
+  :global(body.light-mode) .bp-series {
+    --bp-bg: #f4f2ec;
+    --bp-line: rgba(22, 32, 43, 0.05);
+    --bp-line2: rgba(22, 32, 43, 0.08);
+    --bp-hair: rgba(22, 32, 43, 0.16);
   }
-  .series-shell { position: relative; z-index: 1; max-width: 72rem; margin: 0 auto; }
+
+  /* Drafting grid: fine 36px + major 180px, faded toward the bottom. */
+  .bp-series .bp-grid {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(var(--bp-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
+      linear-gradient(var(--bp-line2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  }
+
+  .bp-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: clamp(20px, 5vw, 48px);
+    padding-right: clamp(20px, 5vw, 48px);
+  }
+  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .bp-display {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink);
+  }
+  .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
 
   /* ---- Header ---- */
-  .series-head { margin-bottom: 4.5rem; }
-  .series-back {
-    display: inline-flex; align-items: center; gap: 0.55rem;
-    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.22em;
-    color: var(--series-muted); text-decoration: none;
-    transition: color 0.3s ease; margin-bottom: 2.5rem;
+  .bp-series-head { margin-bottom: clamp(3rem, 6vw, 5rem); }
+  .bp-series-back {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--bp-muted); text-decoration: none; margin-bottom: 2.2rem;
+    transition: color 0.2s ease;
   }
-  .series-back:hover { color: var(--series-accent); }
-  .series-back svg { transition: transform 0.3s ease; }
-  .series-back:hover svg { transform: translateX(-3px); }
+  .bp-series-back:hover { color: var(--bp-acc); }
+  .bp-series-back svg { transition: transform 0.2s ease; }
+  .bp-series-back:hover svg { transform: translateX(-3px); }
 
-  .series-eyebrow {
-    display: block;
-    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.3em;
-    color: var(--series-accent); margin-bottom: 0.9rem;
+  /* section-head motif (mirrors home .bp-sec-head) */
+  .bp-sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: clamp(20px, 3vw, 30px); }
+  .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
+  .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
+  .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
+
+  .bp-series-title {
+    font-size: clamp(3.2rem, 10vw, 7rem); line-height: 0.95; margin: 0;
   }
-  .series-display {
-    font-family: 'DM Serif Display', Georgia, serif;
-    font-weight: 400; font-style: normal;
-    font-size: clamp(4rem, 11vw, 8.8rem);
-    line-height: 0.92; letter-spacing: -0.02em;
-    color: var(--series-ink); margin: 0;
-  }
-  .series-dot { color: var(--series-accent); }
-  .series-sub {
-    max-width: 30rem; margin: 1.6rem 0 0;
-    font-family: 'Inter', sans-serif; font-size: 1rem; line-height: 1.65;
-    color: var(--series-muted);
+  .bp-series-sub {
+    max-width: 34rem; margin: 1.4rem 0 0;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 1.02rem; line-height: 1.6; color: var(--bp-muted);
   }
 
   /* ---- List + per-series marker ---- */
-  .series-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4rem; }
-  .series-marker { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.5rem; }
-  .series-marker-num,
-  .series-marker-label {
-    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.28em; color: var(--series-muted);
+  .bp-series-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: clamp(2.5rem, 4vw, 3.75rem); }
+  .bp-series-marker { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.25rem; }
+  .bp-series-marker-num,
+  .bp-series-marker-label {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bp-muted);
   }
-  .series-marker-num { color: var(--series-accent); }
-  .series-marker-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--series-line), transparent); }
+  .bp-series-marker-num { color: var(--bp-acc); }
+  .bp-series-marker-line { flex: 1; height: 1px; background: var(--bp-hair); }
 
   /* ---- Empty ---- */
-  .series-empty { text-align: center; padding: 6rem 0; }
-  .series-empty p {
-    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
-    text-transform: uppercase; letter-spacing: 0.25em; color: var(--series-muted);
+  .bp-series-empty {
+    text-align: center; padding: 5rem 0;
+    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bp-muted);
   }
 
-  /* ---- Light mode ---- */
-  body.light-mode .series-main {
-    --series-ink: #14152a;
-    --series-muted: #6b6c84;
-    background: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
-  }
-  body.light-mode .series-grid-bg {
-    background-image: radial-gradient(circle, rgba(20, 21, 42, 0.07) 1px, transparent 1px);
-  }
-
-  /* ---- Responsive ---- */
   @media (max-width: 560px) {
-    .series-list { gap: 3rem; }
-    .series-head { margin-bottom: 3rem; }
+    .bp-series-head { margin-bottom: 2.5rem; }
   }
 </style>

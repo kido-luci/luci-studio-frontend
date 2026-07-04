@@ -5,74 +5,137 @@ import type { SeriesView } from "../utils/series";
 
 interface Props {
   series: SeriesView;
+  // "editorial" — the /blog list strip card (default, unchanged).
+  // "blueprint" — the /blog/series page card, in the homepage drafting-sheet DNA.
+  variant?: "editorial" | "blueprint";
+  // 1-based list position, used only by the blueprint variant's fig.NN callout.
+  index?: number;
 }
 
-const { series: p } = Astro.props;
+const { series: p, variant = "editorial", index } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url);
 const href = localizedHref(locale, `/blog/series/${buildPostSlug(p.title, p.id)}/`);
 const count = p.post_ids?.length ?? 0;
 const cover = p.cover_image_url;
-const titleSerif = needsVietnameseSerif(p.title) ? "font-family:'Playfair Display',Georgia,serif" : undefined;
+const isVi = needsVietnameseSerif(p.title);
+const titleSerif = isVi ? "font-family:'Playfair Display',Georgia,serif" : undefined;
+// Blueprint titles stay sans. Space Grotesk lacks full Vietnamese diacritics, so a VN
+// title falls back to a system sans that covers the glyphs (not a serif).
+const bpTitleStyle = isVi ? "font-family:system-ui,'Segoe UI',sans-serif" : undefined;
+const figNo = String(index ?? 1).padStart(2, "0");
+// Single expression — Astro strips the whitespace between two adjacent `{}` exprs.
+const postLabel = `${count} ${count === 1 ? "post" : "posts"}`;
 ---
 
-<a
-  href={href}
-  class="playlist-row series-card no-underline"
-  data-playlist-post-ids={JSON.stringify(p.post_ids ?? [])}
->
-  <div
-    class={`series-thumb${cover ? ' has-cover' : ''}`}
-    style={cover ? `background-image:url('${cover}')` : ''}
+{variant === "blueprint" ? (
+  <a
+    href={href}
+    class="playlist-row bpc no-underline"
+    data-playlist-post-ids={JSON.stringify(p.post_ids ?? [])}
   >
-    {!cover && (
-      <>
-        <span class="thumb-deco thumb-deco-tl">{'{ }'}</span>
-        <span class="thumb-deco thumb-deco-tr">&lt;/&gt;</span>
-        <span class="thumb-glyph">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-        </span>
-        <div class="thumb-center">
-          <h3 class="thumb-title" style={titleSerif}>{p.title}</h3>
-          <span class="thumb-caption">Curated guides · tips</span>
-        </div>
-      </>
-    )}
-    <span class="thumb-pill">{count} {count === 1 ? 'post' : 'posts'} · {p.year}</span>
-  </div>
-
-  <div class="series-body">
-    <div class="series-meta">
-      <span class="series-meta-kicker">Series</span>
-      <span class="series-meta-sep">/</span>
-      <span>{count} {count === 1 ? 'post' : 'posts'}</span>
-      <span class="series-meta-sep">/</span>
-      <span class="series-meta-stat">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        <span class="playlist-views-count">{p.totalViews.toLocaleString()}</span>
-      </span>
-      <span class="series-meta-sep">/</span>
-      <span class="series-meta-stat">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        <span class="playlist-likes-count">{p.totalLikes.toLocaleString()}</span>
-      </span>
+    <div
+      class={`bpc-fig${cover ? " has-cover" : " bpc-fig--striped"}`}
+      style={cover ? `background-image:url('${cover}')` : ""}
+    >
+      <span class="bpc-node" aria-hidden="true">◦</span>
+      <span class="bpc-callout">fig.{figNo} · {postLabel}</span>
     </div>
 
-    <h2 class="series-title" style={titleSerif}>{p.title}</h2>
-    {p.description && <p class="series-desc">{p.description}</p>}
-
-    {p.topics.length > 0 && (
-      <div class="series-tags">
-        {p.topics.map((t) => <span class="series-tag">{t}</span>)}
+    <div class="bpc-body">
+      <div class="bpc-meta">
+        <span class="bpc-meta-kicker">SERIES</span>
+        <span class="bpc-sep">/</span>
+        <span>{postLabel.toUpperCase()}</span>
+        <span class="bpc-sep">/</span>
+        <span class="bpc-stat">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="playlist-views-count">{p.totalViews.toLocaleString()}</span>
+        </span>
+        <span class="bpc-sep">/</span>
+        <span class="bpc-stat">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="playlist-likes-count">{p.totalLikes.toLocaleString()}</span>
+        </span>
+        <span class="bpc-sep">/</span>
+        <span>{p.year}</span>
       </div>
-    )}
 
-    <span class="series-cta">Read the series →</span>
-  </div>
+      <h2 class="bpc-title" style={bpTitleStyle}>{p.title}</h2>
+      {p.description && <p class="bpc-desc">{p.description}</p>}
 
-  <span class="series-arrow" aria-hidden="true">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-  </span>
-</a>
+      {p.topics.length > 0 && (
+        <div class="bpc-tags">
+          {p.topics.map((tp) => <span class="bpc-tag">{tp}</span>)}
+        </div>
+      )}
+
+      <span class="bpc-cta">READ THE SERIES →</span>
+    </div>
+
+    <span class="bpc-arrow" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </span>
+  </a>
+) : (
+  <a
+    href={href}
+    class="playlist-row series-card no-underline"
+    data-playlist-post-ids={JSON.stringify(p.post_ids ?? [])}
+  >
+    <div
+      class={`series-thumb${cover ? ' has-cover' : ''}`}
+      style={cover ? `background-image:url('${cover}')` : ''}
+    >
+      {!cover && (
+        <>
+          <span class="thumb-deco thumb-deco-tl">{'{ }'}</span>
+          <span class="thumb-deco thumb-deco-tr">&lt;/&gt;</span>
+          <span class="thumb-glyph">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </span>
+          <div class="thumb-center">
+            <h3 class="thumb-title" style={titleSerif}>{p.title}</h3>
+            <span class="thumb-caption">Curated guides · tips</span>
+          </div>
+        </>
+      )}
+      <span class="thumb-pill">{count} {count === 1 ? 'post' : 'posts'} · {p.year}</span>
+    </div>
+
+    <div class="series-body">
+      <div class="series-meta">
+        <span class="series-meta-kicker">Series</span>
+        <span class="series-meta-sep">/</span>
+        <span>{count} {count === 1 ? 'post' : 'posts'}</span>
+        <span class="series-meta-sep">/</span>
+        <span class="series-meta-stat">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="playlist-views-count">{p.totalViews.toLocaleString()}</span>
+        </span>
+        <span class="series-meta-sep">/</span>
+        <span class="series-meta-stat">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="playlist-likes-count">{p.totalLikes.toLocaleString()}</span>
+        </span>
+      </div>
+
+      <h2 class="series-title" style={titleSerif}>{p.title}</h2>
+      {p.description && <p class="series-desc">{p.description}</p>}
+
+      {p.topics.length > 0 && (
+        <div class="series-tags">
+          {p.topics.map((t) => <span class="series-tag">{t}</span>)}
+        </div>
+      )}
+
+      <span class="series-cta">Read the series →</span>
+    </div>
+
+    <span class="series-arrow" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </span>
+  </a>
+)}
 
 <style>
   /* ====== Shared Series card — editorial style ======
@@ -231,5 +294,137 @@ const titleSerif = needsVietnameseSerif(p.title) ? "font-family:'Playfair Displa
   @media (max-width: 560px) {
     .series-card { grid-template-columns: 1fr; gap: 1.1rem; }
     .series-thumb { min-height: 170px; }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     Blueprint variant — /blog/series card in the homepage drafting-sheet DNA.
+     Self-contained --bp-* tokens (accent follows the active color scheme, like
+     the page nav); mirrors the home §01 work-card figure + mono callouts. */
+  .bpc {
+    --bp-acc: var(--accent);
+    --bp-ink: var(--text-primary);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-line2: rgba(255, 255, 255, 0.08);
+    --bp-card: rgba(255, 255, 255, 0.035);
+    --bp-hover: color-mix(in srgb, var(--accent) 7%, transparent);
+
+    position: relative;
+    display: grid;
+    grid-template-columns: clamp(190px, 26%, 300px) 1fr auto;
+    align-items: stretch;
+    gap: clamp(1.25rem, 2.4vw, 2.25rem);
+    padding: 16px;
+    border: 1px solid var(--bp-hair);
+    border-radius: 12px;
+    background: transparent;
+    color: inherit; text-decoration: none;
+    transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+  }
+  .bpc:hover {
+    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    background: var(--bp-hover);
+    transform: translateY(-3px);
+  }
+
+  /* figure — mirrors home .bp-fig */
+  .bpc-fig {
+    position: relative;
+    min-height: 190px;
+    border: 1px solid var(--bp-hair);
+    border-radius: 10px;
+    background-color: var(--bp-card);
+    background-size: cover; background-position: center;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+  }
+  .bpc:hover .bpc-fig { border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent); }
+  .bpc-fig--striped {
+    background-image: repeating-linear-gradient(45deg, var(--bp-line2) 0, var(--bp-line2) 1px, transparent 1px, transparent 12px);
+  }
+  .bpc-fig.has-cover::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10, 14, 20, 0.6) 0%, rgba(10, 14, 20, 0.05) 55%);
+  }
+  .bpc-node { position: absolute; top: 10px; right: 14px; z-index: 2; font-size: 12px; color: var(--bp-acc); }
+  .bpc-callout {
+    position: absolute; left: 14px; bottom: 12px; z-index: 2;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px; letter-spacing: 0.06em; color: var(--bp-muted);
+  }
+  .bpc-fig.has-cover .bpc-callout { color: rgba(255, 255, 255, 0.82); }
+
+  /* body */
+  .bpc-body { min-width: 0; display: flex; flex-direction: column; justify-content: center; padding: 6px 0; }
+  .bpc-meta {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.06em; color: var(--bp-muted);
+    margin-bottom: 0.85rem;
+  }
+  .bpc-meta-kicker { color: var(--bp-acc); }
+  .bpc-sep { color: var(--bp-faint); }
+  .bpc-stat { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .bpc-stat svg { opacity: 0.75; }
+
+  .bpc-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 700; letter-spacing: -0.02em;
+    font-size: clamp(1.5rem, 2.8vw, 2.3rem); line-height: 1.05;
+    color: var(--bp-ink); margin: 0 0 0.7rem;
+    transition: color 0.3s ease;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .bpc:hover .bpc-title { color: var(--bp-acc); }
+  .bpc-desc {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 0.95rem; line-height: 1.55; color: var(--bp-muted); margin: 0; max-width: 46rem;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .bpc-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+  .bpc-tag {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px; letter-spacing: 0.08em; color: var(--bp-acc);
+    border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent);
+    padding: 2px 7px; border-radius: 4px; white-space: nowrap;
+  }
+  .bpc-cta {
+    display: inline-block; margin-top: 1.15rem;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.16em; color: var(--bp-acc);
+    transition: letter-spacing 0.3s ease;
+  }
+  .bpc:hover .bpc-cta { letter-spacing: 0.22em; }
+
+  /* arrow — hairline round button like the home nav icons */
+  .bpc-arrow {
+    align-self: center; flex-shrink: 0;
+    width: 46px; height: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid var(--bp-hair); color: var(--bp-muted);
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+  }
+  .bpc:hover .bpc-arrow { background: var(--bp-acc); border-color: var(--bp-acc); color: #fff; transform: translateX(4px); }
+
+  /* blueprint light mode — cream figure fill + darker hairlines */
+  :global(body.light-mode) .bpc {
+    --bp-hair: rgba(22, 32, 43, 0.16);
+    --bp-line2: rgba(22, 32, 43, 0.08);
+    --bp-card: #e8e6df;
+    --bp-muted: color-mix(in srgb, var(--text-primary) 62%, transparent);
+    --bp-faint: color-mix(in srgb, var(--text-primary) 45%, transparent);
+  }
+
+  @media (max-width: 860px) {
+    .bpc { grid-template-columns: 150px 1fr; gap: 1.1rem; padding: 12px; }
+    .bpc-arrow { display: none; }
+    .bpc-fig { min-height: 150px; }
+  }
+  @media (max-width: 560px) {
+    .bpc { grid-template-columns: 1fr; gap: 1rem; }
+    .bpc-fig { min-height: 0; aspect-ratio: 16 / 10; }
   }
 </style>
