@@ -76,6 +76,42 @@ export function initHomeReveals() {
   (function () {
     const items = Array.from(document.querySelectorAll<HTMLElement>('[data-art-card]'));
     if (!items.length) return;
+
+    // Square-cell mosaic: make the cells square by pinning grid-auto-rows to the
+    // measured column width (1fr columns are fluid, so this can't be a fixed px), and
+    // give each item a whole-cell span from its image ratio — landscape → 2×1
+    // (.is-wide), portrait → 1×2 (.is-tall), square → 1×1. The 2×2 features (.is-big)
+    // are set server-side and left alone. Dense flow packs it into an aligned grid.
+    const grid = items[0].closest<HTMLElement>('.quilt-art-grid');
+    if (grid) {
+      const sizeRows = () => {
+        const cs = getComputedStyle(grid);
+        const cols = cs.gridTemplateColumns.split(' ').length;
+        const gap = parseFloat(cs.columnGap) || 0;
+        const colW = (grid.clientWidth - gap * (cols - 1)) / cols;
+        if (colW > 0) grid.style.gridAutoRows = Math.round(colW) + 'px';
+      };
+      const classify = (item: HTMLElement) => {
+        if (item.classList.contains('is-big')) return; // featured 2×2 stays as-is
+        const img = item.querySelector<HTMLImageElement>('img');
+        if (!img || !img.naturalHeight) return;
+        const ratio = img.naturalWidth / img.naturalHeight;
+        item.classList.remove('is-wide', 'is-tall');
+        if (ratio >= 1.35) item.classList.add('is-wide');
+        else if (ratio <= 0.8) item.classList.add('is-tall');
+      };
+      items.forEach(item => {
+        const img = item.querySelector<HTMLImageElement>('img');
+        if (!img) return;
+        if (img.complete && img.naturalWidth) classify(item);
+        else img.addEventListener('load', () => classify(item), { once: true });
+      });
+      let raf = 0;
+      const schedule = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; sizeRows(); }); };
+      sizeRows();
+      window.addEventListener('resize', schedule, { passive: true });
+    }
+
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
