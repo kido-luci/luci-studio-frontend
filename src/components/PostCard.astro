@@ -18,13 +18,18 @@ interface Props {
   badge?: string;          // cover badge label; pass "" to hide
   interactive?: boolean;   // emit tile-* data-id so per-page JS can wire likes/refresh
   compact?: boolean;       // shorter cover + tighter body (e.g. secondary "More Posts" grid)
+  // "editorial" — the canonical tb-card (default, used on /blog series strip, post page).
+  // "blueprint" — the /blog list card in the homepage drafting-sheet DNA. Same markup
+  // + JS hooks (.tb-card / .tile-*); only the visuals change.
+  variant?: "editorial" | "blueprint";
 }
 
 const {
   href, title, subtitle = "", tags, date, read,
   img = "", id, views = 0, likes = 0,
-  badge = "Blog", interactive = false, compact = false,
+  badge = "Blog", interactive = false, compact = false, variant = "editorial",
 } = Astro.props;
+const isBp = variant === "blueprint";
 
 const safeTags = (tags && tags.length > 0) ? tags : ["Engineering"];
 const catLine = safeTags.join("  ·  ");
@@ -33,8 +38,8 @@ const cover = coverGradient(safeTags[0]);
 const statId = interactive && id != null ? String(id) : undefined;
 ---
 
-<a href={href} class="tb-card-link">
-  <article class:list={["tb-card", { "tb-card--compact": compact }]}>
+<a href={href} class:list={["tb-card-link", { "tb-card-link--bp": isBp }]}>
+  <article class:list={["tb-card", { "tb-card--compact": compact, "tb-card--bp": isBp }]}>
     <div class="tb-card-cover" style={!img ? `background:${cover}` : undefined}>
       {img
         ? <img src={img} alt={title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
@@ -125,4 +130,76 @@ const statId = interactive && id != null ? String(id) : undefined;
   .tb-stat--like .tile-like-icon { transition: color .2s ease, fill .2s ease; }
   .tb-stat--like:hover .tile-like-icon { color: #ef4d6b; }
   :global(body.light-mode) .tile-like-count { color: rgb(107, 114, 128); }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     Blueprint variant — /blog list card in the homepage drafting-sheet DNA.
+     Same markup + JS hooks; scoped under .tb-card-link--bp so it wins over the
+     editorial base regardless of source order. Accent follows the color scheme. */
+  .tb-card-link--bp {
+    --bp-acc: var(--accent);
+    --bp-ink: var(--text-primary);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-line2: rgba(255, 255, 255, 0.08);
+    --bp-bg: #0a0e14;
+    --bp-fig: rgba(255, 255, 255, 0.05);
+    --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
+    --bp-panel-hover: color-mix(in srgb, var(--bp-acc) 8%, var(--bp-panel));
+    --bp-mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  :global(body.light-mode) .tb-card-link--bp {
+    --bp-hair: rgba(22, 32, 43, 0.16);
+    --bp-line2: rgba(22, 32, 43, 0.08);
+    --bp-bg: #f4f2ec;
+    --bp-fig: #e8e6df;
+    --bp-panel: #ffffff;
+    --bp-panel-hover: color-mix(in srgb, var(--bp-acc) 5%, #ffffff);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 62%, transparent);
+    --bp-faint: color-mix(in srgb, var(--text-primary) 45%, transparent);
+  }
+
+  .tb-card-link--bp .tb-card {
+    background: var(--bp-panel);
+    border: 1px solid var(--bp-hair);
+    border-radius: 12px;
+    box-shadow: none;
+  }
+  .tb-card-link--bp .tb-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    background: var(--bp-panel-hover);
+    box-shadow: 0 20px 44px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
+  }
+
+  /* Cover → an inset blueprint figure (hairline border, 16:10). */
+  .tb-card-link--bp .tb-card-cover {
+    height: auto;
+    aspect-ratio: 16 / 10;
+    margin: 14px 14px 0;
+    border: 1px solid var(--bp-hair);
+    border-radius: 10px;
+    background: var(--bp-fig);
+  }
+  .tb-card-link--bp .tb-card-body { padding: 16px 18px 16px; }
+
+  /* Blueprint typography — Space Grotesk display + IBM Plex Mono labels. */
+  .tb-card-link--bp .tb-badge {
+    top: 10px; left: 10px;
+    font-family: var(--bp-mono);
+    border: 1px solid var(--bp-hair);
+    font-size: 9px; letter-spacing: 0.1em;
+  }
+  .tb-card-link--bp .tb-cat { font-family: var(--bp-mono); color: var(--bp-acc); }
+  .tb-card-link--bp .tb-card-title {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink);
+  }
+  .tb-card-link--bp:hover .tb-card-title { color: var(--bp-acc); }
+  .tb-card-link--bp .tb-excerpt { font-family: "Space Grotesk", system-ui, sans-serif; color: var(--bp-muted); }
+  .tb-card-link--bp .tb-meta { font-family: var(--bp-mono); color: var(--bp-faint); }
+  .tb-card-link--bp .tb-card-foot { border-top-color: var(--bp-hair); }
+  .tb-card-link--bp .tb-read { font-family: var(--bp-mono); color: var(--bp-acc); }
+  .tb-card-link--bp .tb-stats { font-family: var(--bp-mono); color: var(--bp-muted); }
+  .tb-card-link--bp .tb-cover-word { color: color-mix(in srgb, var(--bp-ink) 12%, transparent); }
 </style>
