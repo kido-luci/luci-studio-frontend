@@ -136,8 +136,8 @@ const homepageSchema = {
   <nav class="bp-nav" data-bp-nav>
     <div class="bp-wrap bp-nav-inner">
       <a href={localizedHref(locale, "/")} class="bp-nav-logo">
-        <span class="bp-nav-mark" aria-hidden="true"><span class="bp-nav-mark-dot"></span></span>
-        <span class="bp-nav-name">LUCI <span class="bp-nav-name-acc">STUDIO</span></span>
+        <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="bp-nav-logo-img" />
+        <span class="bp-nav-name">LUCI <span class="text-shimmer">STUDIO</span><span class="bp-nav-name-dot">.</span></span>
       </a>
       <div class="bp-nav-links bp-mono">
         <a href={localizedHref(locale, "/")} class="is-active">HOME</a>
@@ -673,10 +673,9 @@ const homepageSchema = {
   :global(body.light-mode) .bp-nav { --nav-bg: rgba(244, 242, 236, 0.82); --nav-bg-scroll: rgba(244, 242, 236, 0.94); }
   .bp-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 15px; padding-bottom: 15px; }
   .bp-nav-logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
-  .bp-nav-mark { width: 34px; height: 34px; border: 1.5px solid var(--bp-ink); border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .bp-nav-mark-dot { width: 12px; height: 12px; border: 1.5px solid var(--bp-acc); border-radius: 50%; }
-  .bp-nav-name { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.04em; color: var(--bp-ink); white-space: nowrap; }
-  .bp-nav-name-acc { color: var(--bp-acc); }
+  .bp-nav-logo-img { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; }
+  .bp-nav-name { font-family: "Limelight", sans-serif; font-weight: normal; font-size: 20px; letter-spacing: 0.02em; color: var(--bp-ink); white-space: nowrap; }
+  .bp-nav-name-dot { color: var(--bp-acc); }
   .bp-nav-links { display: flex; align-items: center; gap: 30px; }
   .bp-nav-links a { position: relative; font-size: 12px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
   .bp-nav-links a:hover, .bp-nav-links a.is-active { color: var(--bp-ink); }
