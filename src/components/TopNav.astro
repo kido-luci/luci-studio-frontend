@@ -22,16 +22,16 @@ const { active = null, ctaLabel = t('nav.cta'), ctaHref = '/#contact' } = Astro.
 // English in every locale by design; Tools/Live link out to their standalone hosts.
 const links = [
   { key: 'home', label: 'HOME',          href: localizedHref(locale, '/') },
-  { key: 'blog', label: 'BLOG & SERIES', href: localizedHref(locale, '/blog') },
-  { key: 'lab',  label: 'APPS & TOOLS',  href: localizedHref(locale, '/lab') },
+  { key: 'blog', label: 'BLOG / SERIES', href: localizedHref(locale, '/blog') },
+  { key: 'lab',  label: 'APPS / TOOLS',  href: localizedHref(locale, '/lab') },
   { key: 'games', label: 'GAMES',        href: '/games' },
 ];
 
-// "X & Y" labels render the " & " with its own tighter span (smaller
-// ampersand, less surrounding space) so the two-word labels above don't
-// eat as much nav width as a plain " & " would.
+// "X / Y" labels render on a diagonal: first word hugs the top-left, an
+// oversized slash is the tilted axis, second word hangs at the bottom-right.
+// Split here; the desktop nav applies the stagger (mobile stays flat).
 const labelParts = (label: string) => {
-  const parts = label.split(' & ');
+  const parts = label.split(' / ');
   return parts.length === 2 ? parts : null;
 };
 
@@ -64,7 +64,7 @@ const schemes = [
           <a
             href={l.href}
             class={active === l.key ? 'is-active' : undefined}
-          >{parts ? <>{parts[0]}<span class="bp-nav-amp"> & </span>{parts[1]}</> : l.label}</a>
+          >{parts ? <span class="bp-nav-diag"><span class="bp-nav-diag-1">{parts[0]}</span><span class="bp-nav-diag-sl">/</span><span class="bp-nav-diag-2">{parts[1]}</span></span> : l.label}</a>
         );
       })}
     </div>
@@ -103,12 +103,9 @@ const schemes = [
   </div>
 
   <div class="bp-nav-mobile bp-nav-mono">
-    {links.map((l) => {
-      const parts = labelParts(l.label);
-      return (
-        <a href={l.href}>{parts ? <>{parts[0]}<span class="bp-nav-amp"> & </span>{parts[1]}</> : l.label}</a>
-      );
-    })}
+    {links.map((l) => (
+      <a href={l.href}>{l.label}</a>
+    ))}
     {showLangSwitch && (
       <div class="bp-nav-lang is-mobile">
         <a href={enHref} class={locale === 'en' ? 'is-active' : undefined} aria-label="English">EN</a>
@@ -245,9 +242,15 @@ const schemes = [
   .bp-nav-links a { position: relative; font-size: 12px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
   .bp-nav-links a:hover, .bp-nav-links a.is-active { color: var(--bp-ink); }
   .bp-nav-links a.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px; background: var(--bp-acc); }
-  /* Tighter "&" for two-word nav labels (e.g. "BLOG & SERIES") — smaller glyph,
-     no inherited letter-spacing/word gap, so it reads as one compact unit. */
-  .bp-nav-amp { font-size: 0.7em; letter-spacing: 0.02em; }
+  /* Diagonal two-word labels (e.g. "BLOG / SERIES"): first word hugs the
+     top-left, an oversized slash is the tilted axis, second word hangs at the
+     bottom-right. The tall slash stretches the inline-flex so the align-self
+     offsets read as a downward diagonal. */
+  .bp-nav-diag { display: inline-flex; align-items: stretch; }
+  .bp-nav-diag-1 { align-self: flex-start; }
+  .bp-nav-diag-sl { font-size: 1.9em; line-height: 0.8; font-weight: 400; color: var(--bp-muted); margin: 0 2px; }
+  .bp-nav-diag-2 { align-self: flex-end; }
+  .bp-nav-links a.is-active .bp-nav-diag-sl { color: var(--bp-acc); }
   .bp-nav-actions { display: flex; align-items: center; gap: 11px; }
   .bp-nav-lang { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 0.16em; }
   .bp-nav-lang a { color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
