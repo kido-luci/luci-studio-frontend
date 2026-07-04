@@ -15,10 +15,11 @@ export interface GalleryItem {
 }
 
 export const galleryService = {
+    // Active pieces only — deactivated artwork stays out of the public build.
     async getAll(): Promise<GalleryItem[]> {
         try {
-            const response = await fetch(`${BASE_URL}/gallery`);
-            if (!response.ok) throw new Error(`GET /gallery failed with ${response.status}`);
+            const response = await fetch(`${BASE_URL}/gallery/public`);
+            if (!response.ok) throw new Error(`GET /gallery/public failed with ${response.status}`);
             const data = await response.json();
             return Array.isArray(data) ? data : (data || []);
         } catch (error) {
