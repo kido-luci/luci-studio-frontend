@@ -73,103 +73,95 @@ const rest = GAMES.slice(1);
   title="Games · Luci Studio"
   description="Browser-native games you can play instantly — no install, no account. Built from scratch at Luci Studio."
 >
-  <link
-    slot="head"
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:wght@400..800&display=swap"
-  />
-
   <TopNav active="games" />
 
-  <div class="lab-root lab-palette">
-
-    <!-- decorative confetti (same style as ToolsPage) -->
-    <div style="position:absolute; inset:0; pointer-events:none; z-index:0;">
-      <span style="position:absolute; left:18%; top:8%; width:7px; height:7px; border-radius:50%; background:var(--accent); animation:lab-floaty 7s ease-in-out infinite;"></span>
-      <span style="position:absolute; left:42%; top:5%; width:20px; height:3px; border-radius:3px; background:#ec5a9b; transform:rotate(-32deg); --r:-32deg; animation:lab-floaty 9s ease-in-out .4s infinite;"></span>
-      <span style="position:absolute; left:60%; top:12%; width:9px; height:9px; border:2px solid #3aa0ff; border-radius:50%;"></span>
-      <span style="position:absolute; left:76%; top:6%; width:6px; height:6px; border-radius:50%; background:#16a394;"></span>
-      <span style="position:absolute; left:86%; top:18%; width:18px; height:3px; border-radius:3px; background:#f97316; transform:rotate(40deg); --r:40deg; animation:lab-floaty 8s ease-in-out 1s infinite;"></span>
-      <span style="position:absolute; left:10%; top:32%; width:8px; height:8px; border:2px solid var(--accent); border-radius:50%;"></span>
-      <span style="position:absolute; left:92%; top:44%; width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
-    </div>
-
-    <div style="position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 clamp(20px, 5vw, 40px);">
+  <main class="bp-games lab-palette">
+    <div class="bp-grid" aria-hidden="true"></div>
+    <div class="bp-wrap">
 
       <!-- page header -->
-      <div style="padding:36px 0 18px;">
-        <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:22px;">// {String(totalGames).padStart(2, "0")} game{totalGames === 1 ? "" : "s"}</div>
-        <h1 style="margin:0; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(40px,6.5vw,78px); line-height:1.1; letter-spacing:-.01em; color:var(--lab-text);">Play a game<span style="color:var(--accent);">.</span></h1>
-        <p style="margin:24px 0 0; max-width:540px; font-size:20px; line-height:1.5; color:var(--lab-muted);">Browser-native games built from scratch — instant play, no install, no account. Just open and go.</p>
-      </div>
+      <header class="bp-games-head">
+        <div class="bp-sec-head">
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">ARCADE</span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-count">{String(totalGames).padStart(2, "0")} {totalGames === 1 ? "GAME" : "GAMES"}</span>
+        </div>
+        <h1 class="bp-display bp-games-title">Play a game<span class="bp-acc-dot">.</span></h1>
+        <p class="bp-games-sub">Browser-native games built from scratch — instant play, no install, no account. Just open and go.</p>
+      </header>
 
       <!-- featured game -->
-      <div style="padding:48px 0 0;">
-        <a href={featured.href} target="_blank" rel="noopener noreferrer" class="game-feature">
-          <div class={`game-feature-media${featured.video ? " game-feature-media--demo" : ""}`}>
-            {featured.beta && <span class="game-beta">Beta</span>}
-            {featured.video ? (
-              <Fragment>
-                <img class="game-feature-cover" src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
-                <video
-                  class="game-feature-video"
-                  muted
-                  loop
-                  playsinline
-                  preload="none"
-                  width="1056"
-                  height="1844"
-                  aria-label={`${featured.title} gameplay demo`}
-                >
-                  <source src={featured.video} type="video/mp4" />
-                </video>
-                <div class="game-feature-toggle" role="group" aria-label="Media view">
-                  <span class="game-feature-toggle-btn is-active" role="button" tabindex="0" data-demo="off">Cover</span>
-                  <span class="game-feature-toggle-btn" role="button" tabindex="0" data-demo="on">Demo</span>
-                </div>
-              </Fragment>
-            ) : (
-              <img src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
-            )}
+      <a href={featured.href} target="_blank" rel="noopener noreferrer" class="game-feature">
+        <div class={`game-feature-media${featured.video ? " game-feature-media--demo" : ""}`}>
+          {featured.beta && <span class="game-beta bp-mono">Beta</span>}
+          {featured.video ? (
+            <Fragment>
+              <img class="game-feature-cover" src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
+              <video
+                class="game-feature-video"
+                muted
+                loop
+                playsinline
+                preload="none"
+                width="1056"
+                height="1844"
+                aria-label={`${featured.title} gameplay demo`}
+              >
+                <source src={featured.video} type="video/mp4" />
+              </video>
+              <div class="game-feature-toggle bp-mono" role="group" aria-label="Media view">
+                <span class="game-feature-toggle-btn is-active" role="button" tabindex="0" data-demo="off">Cover</span>
+                <span class="game-feature-toggle-btn" role="button" tabindex="0" data-demo="on">Demo</span>
+              </div>
+            </Fragment>
+          ) : (
+            <img src={featured.image} alt={`${featured.title} — ${featured.tagline}`} loading="lazy" width="1200" height="630" />
+          )}
+          <span class="game-feature-node" aria-hidden="true">◦</span>
+        </div>
+        <div class="game-feature-body">
+          <div class="bp-mono game-feature-eyebrow">{featured.tagline}</div>
+          <h2 class="bp-display game-feature-title">{featured.title}</h2>
+          <p class="game-feature-blurb">{featured.blurb}</p>
+          <div class="game-feature-tags">
+            {featured.tags.map((tag) => (<span class="bp-mono game-tag">{tag}</span>))}
           </div>
-          <div class="game-feature-body">
-            <div class="game-feature-eyebrow">{featured.tagline}</div>
-            <h2 class="game-feature-title">{featured.title}</h2>
-            <p class="game-feature-blurb">{featured.blurb}</p>
-            <div class="game-feature-tags">
-              {featured.tags.map((tag) => (<span class="game-tag">{tag}</span>))}
-            </div>
-            <span class="game-feature-cta">Play now ↗</span>
-            <span class="game-feature-host"><span class="game-feature-dot"></span>{featured.host}</span>
-          </div>
-        </a>
-      </div>
+          <span class="bp-mono game-feature-cta">Play now ↗</span>
+          <span class="bp-mono game-feature-host"><span class="game-feature-dot"></span>{featured.host}</span>
+        </div>
+      </a>
 
       <!-- more games (grid grows as games are added) -->
       {rest.length > 0 && (
-        <div style="padding:64px 0 0;">
-          <h2 style="margin:0 0 28px; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:clamp(24px,3vw,34px); line-height:1.1; color:var(--lab-text);">More games<span style="color:var(--accent);">.</span></h2>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:22px;">
+        <section class="bp-games-more">
+          <div class="bp-sec-head">
+            <span class="bp-dot" aria-hidden="true"></span>
+            <span class="bp-mono bp-sec-label">MORE</span>
+            <span class="bp-rule" aria-hidden="true"></span>
+            <span class="bp-mono bp-sec-count">{String(rest.length).padStart(2, "0")} MORE</span>
+          </div>
+          <h2 class="bp-display bp-games-h2">More games<span class="bp-acc-dot">.</span></h2>
+          <div class="bp-games-grid">
             {rest.map((game) => (
               <a href={game.href} target="_blank" rel="noopener noreferrer" class="game-card">
-                <div class="game-card-media">{game.beta && <span class="game-beta">Beta</span>}<img src={game.image} alt={`${game.title} — ${game.tagline}`} loading="lazy" width="1200" height="630" /></div>
+                <div class="game-card-media">{game.beta && <span class="game-beta bp-mono">Beta</span>}<img src={game.image} alt={`${game.title} — ${game.tagline}`} loading="lazy" width="1200" height="630" /></div>
                 <div class="game-card-body">
-                  <div class="game-card-title">{game.title}</div>
+                  <div class="bp-display game-card-title">{game.title}</div>
                   <div class="game-card-desc">{game.blurb}</div>
                 </div>
-                <div class="game-card-footer">
+                <div class="bp-mono game-card-footer">
                   <span class="game-card-host"><span class="game-card-dot"></span>{game.host}</span>
                   <span class="game-card-arrow">↗</span>
                 </div>
               </a>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      <div style="height:100px;"></div>
     </div>
-  </div>
+  </main>
 
   <!-- Cover / Demo toggle on the featured card. The pills live inside the
        card's <a>, so cancel the click/keydown to stop it opening the game.
@@ -222,60 +214,106 @@ const rest = GAMES.slice(1);
   </script>
 </Layout>
 
-<style is:global>
-  .lab-root {
+<style>
+  /* /games — homepage "blueprint" drafting-sheet DNA. Line grid + §-headers +
+     Space Grotesk display + IBM Plex Mono. Accent follows the color scheme; the
+     Cover⇄Demo toggle on the featured card (script above) is preserved. */
+  .bp-games {
+    --bp-bg: #0a0e14;
+    --bp-ink: var(--text-primary);
+    --bp-acc: var(--accent);
+    --bp-line: rgba(255, 255, 255, 0.05);
+    --bp-line2: rgba(255, 255, 255, 0.08);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-fig: rgba(255, 255, 255, 0.05);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
+    --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
+    --bp-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
+    --bp-screen: #0a0e14;
+
     position: relative;
     min-height: 100vh;
     width: 100%;
-    background: var(--lab-bg);
-    overflow: hidden;
-    padding: 96px 0 100px;
-    font-family: 'Hanken Grotesk', system-ui, sans-serif;
-    color: var(--lab-text);
+    background: var(--bp-bg);
+    color: var(--bp-ink);
+    padding-top: clamp(120px, 15vh, 168px);
+    padding-bottom: clamp(72px, 12vw, 128px);
+    overflow-x: clip;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+  }
+  :global(body.light-mode) .bp-games {
+    --bp-bg: #f4f2ec;
+    --bp-line: rgba(22, 32, 43, 0.05);
+    --bp-line2: rgba(22, 32, 43, 0.08);
+    --bp-hair: rgba(22, 32, 43, 0.16);
+    --bp-fig: #e8e6df;
+    --bp-panel: #ffffff;
+    --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
   }
 
-  /* Featured game card */
+  .bp-games .bp-grid {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(var(--bp-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
+      linear-gradient(var(--bp-line2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 85%);
+            mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 85%);
+  }
+
+  .bp-wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding-left: clamp(20px, 5vw, 40px); padding-right: clamp(20px, 5vw, 40px); }
+  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .bp-display { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink); }
+  .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
+
+  .bp-sec-head { display: flex; align-items: center; gap: 14px; }
+  .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
+  .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
+  .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
+
+  .bp-games-head { margin-bottom: clamp(30px, 5vw, 48px); }
+  .bp-games-title { font-size: clamp(2.8rem, 8vw, 6rem); line-height: 0.98; margin: clamp(16px, 2.5vw, 24px) 0 0; }
+  .bp-games-sub { margin: 1.4rem 0 0; max-width: 34rem; font-size: 1.05rem; line-height: 1.6; color: var(--bp-muted); }
+  .bp-games-more { padding-top: clamp(56px, 9vw, 96px); }
+  .bp-games-h2 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.0; margin: clamp(14px, 2vw, 20px) 0 0; }
+  .bp-games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 22px; margin-top: clamp(28px, 4vw, 40px); }
+
+  /* ── Featured game — blueprint panel (media left, body right) ── */
   .game-feature {
     display: grid;
     grid-template-columns: 1.15fr 1fr;
-    text-decoration: none;
-    color: inherit;
-    background: var(--lab-card-bg, #ffffff);
-    border: 1px solid var(--lab-card-border, rgba(19,21,29,0.08));
-    border-radius: 22px;
+    text-decoration: none; color: inherit;
+    background: var(--bp-panel);
+    border: 1px solid var(--bp-hair);
+    border-radius: 14px;
     overflow: hidden;
-    box-shadow: var(--lab-card-shadow, 0 1px 2px rgba(19,21,29,0.04));
-    transition: transform 0.25s cubic-bezier(0.2,0.7,0.3,1), box-shadow 0.25s, border-color 0.25s;
+    box-shadow: var(--bp-shadow);
+    margin-top: clamp(30px, 4vw, 48px);
+    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
   }
   .game-feature:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--lab-card-shadow-hover, 0 22px 50px -18px rgba(19,21,29,0.28));
-    border-color: var(--lab-card-border-hover, rgba(19,21,29,0.16));
+    transform: translateY(-4px);
+    box-shadow: 0 26px 56px -30px color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    border-color: color-mix(in srgb, var(--bp-acc) 40%, transparent);
   }
   .game-feature-media {
-    position: relative;
-    overflow: hidden;
-    background: var(--lab-tile-grad, radial-gradient(120% 120% at 30% 20%, #2a2d3a 0%, #0c0d12 70%));
+    position: relative; overflow: hidden;
+    background: var(--bp-screen);
+    border-right: 1px solid var(--bp-hair);
   }
-  .game-feature-media img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s cubic-bezier(0.2,0.7,0.3,1);
-  }
+  .game-feature-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.2,0.7,0.3,1); }
   .game-feature:hover .game-feature-media img { transform: scale(1.04); }
+  .game-feature-node { position: absolute; top: 12px; right: 14px; z-index: 2; font-size: 12px; color: var(--bp-acc); }
 
-  /* Featured card with a Cover ⇄ Demo toggle (Faldrop): the branded cover
-     and the gameplay video are stacked layers that cross-fade. Both share a
-     dark background so the fade across their aspect ratios is seamless. */
+  /* Cover ⇄ Demo cross-fade layers (dark screen so aspect ratios blend). */
   .game-feature-media--demo { min-height: 340px; }
   .game-feature-media--demo .game-feature-cover,
   .game-feature-media--demo .game-feature-video {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    position: absolute; inset: 0; width: 100%; height: 100%;
     transition: opacity 0.45s ease, transform 0.4s cubic-bezier(0.2,0.7,0.3,1);
   }
   .game-feature-media--demo .game-feature-cover { object-fit: cover; opacity: 1; }
@@ -283,171 +321,92 @@ const rest = GAMES.slice(1);
   .game-feature-media--demo.is-demo .game-feature-cover { opacity: 0; }
   .game-feature-media--demo.is-demo .game-feature-video { opacity: 1; }
 
-  /* Cover / Demo toggle pills overlaid on the media */
+  /* Cover / Demo toggle pills (blueprint mono) */
   .game-feature-toggle {
-    position: absolute;
-    z-index: 3;
-    left: 14px;
-    bottom: 14px;
-    display: inline-flex;
-    gap: 3px;
-    padding: 3px;
-    border-radius: 999px;
-    background: rgba(12,13,18,0.55);
-    border: 1px solid rgba(255,255,255,0.14);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    position: absolute; z-index: 3; left: 14px; bottom: 14px;
+    display: inline-flex; gap: 3px; padding: 3px;
+    border-radius: 8px;
+    background: rgba(10, 14, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   }
   .game-feature-toggle-btn {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 5px 13px;
-    border-radius: 999px;
-    color: rgba(255,255,255,0.72);
-    cursor: pointer;
-    user-select: none;
+    /* Direct font-family to beat the global `[role="button"]` Boldonse rule in Layout. */
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 5px 11px; border-radius: 6px;
+    color: rgba(255, 255, 255, 0.72); cursor: pointer; user-select: none;
     transition: background 0.2s, color 0.2s;
   }
   .game-feature-toggle-btn:hover { color: #fff; }
-  .game-feature-toggle-btn.is-active { background: var(--accent); color: #fff; }
+  .game-feature-toggle-btn.is-active { background: var(--bp-acc); color: #fff; }
 
-  .game-feature-body {
-    padding: 38px 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .game-feature-eyebrow {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  .game-feature-title {
-    margin: 14px 0 0;
-    font-family: 'DM Serif Display', Georgia, serif;
-    font-weight: 400;
-    font-size: clamp(32px, 4vw, 46px);
-    line-height: 1.05;
-    color: var(--lab-name, #13151d);
-  }
-  .game-feature-blurb {
-    margin: 16px 0 0;
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--lab-desc, #5c606b);
-  }
+  .game-feature-body { padding: clamp(28px, 3vw, 40px); display: flex; flex-direction: column; align-items: flex-start; }
+  .game-feature-eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bp-acc); }
+  .game-feature-title { margin: 14px 0 0; font-size: clamp(1.9rem, 4vw, 2.8rem); line-height: 1.02; }
+  .game-feature-blurb { margin: 16px 0 0; font-size: 1rem; line-height: 1.6; color: var(--bp-muted); }
   .game-feature-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
   .game-tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    padding: 5px 11px;
-    border-radius: 999px;
-    background: var(--lab-tag-bg, #f7f5f0);
-    border: 1px solid var(--lab-tag-border, rgba(19,21,29,0.1));
-    color: var(--lab-tag-text, #41454f);
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 5px;
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent);
+    color: var(--bp-acc);
   }
   .game-feature-cta {
-    margin-top: 28px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: var(--accent);
-    color: #fff;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    border-radius: 999px;
+    margin-top: 26px; display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 22px; border-radius: 999px;
+    background: var(--bp-acc); color: var(--accent-ink);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
     transition: opacity 0.2s;
   }
-  .game-feature:hover .game-feature-cta { opacity: 0.85; }
-  .game-feature-host {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 20px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--lab-footer-text, #13151d);
-  }
-  .game-feature-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lab-dot, #13151d); }
+  .game-feature:hover .game-feature-cta { opacity: 0.88; }
+  .game-feature-host { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-faint); }
+  .game-feature-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); }
 
   @media (max-width: 760px) {
     .game-feature { grid-template-columns: 1fr; }
-    .game-feature-media { aspect-ratio: 1200 / 630; }
+    .game-feature-media { aspect-ratio: 1200 / 630; border-right: none; border-bottom: 1px solid var(--bp-hair); }
     .game-feature-media--demo { aspect-ratio: 4 / 3; min-height: 0; }
-    .game-feature-body { padding: 30px 26px; }
+    .game-feature-body { padding: 28px 24px; }
   }
 
-  /* Secondary game cards (the grid below the feature) */
+  /* ── Secondary game cards ── */
   .game-card {
-    display: flex;
-    flex-direction: column;
-    text-decoration: none;
-    color: inherit;
-    background: var(--lab-card-bg, #ffffff);
-    border: 1px solid var(--lab-card-border, rgba(19,21,29,0.08));
-    border-radius: 18px;
+    display: flex; flex-direction: column;
+    text-decoration: none; color: inherit;
+    background: var(--bp-panel);
+    border: 1px solid var(--bp-hair);
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: var(--lab-card-shadow, 0 1px 2px rgba(19,21,29,0.04));
-    transition: transform 0.25s cubic-bezier(0.2,0.7,0.3,1), box-shadow 0.25s, border-color 0.25s;
+    box-shadow: none;
+    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
   }
   .game-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--lab-card-shadow-hover, 0 22px 50px -18px rgba(19,21,29,0.28));
-    border-color: var(--lab-card-border-hover, rgba(19,21,29,0.16));
+    transform: translateY(-4px);
+    box-shadow: 0 20px 44px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
   }
-  .game-card-media { position: relative; aspect-ratio: 1200 / 630; overflow: hidden; background: var(--lab-tile-grad); }
+  .game-card-media { position: relative; aspect-ratio: 1200 / 630; overflow: hidden; background: var(--bp-screen); }
   .game-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .game-card-body { padding: 22px 26px 18px; flex: 1; }
-  .game-card-title {
-    font-size: 20px;
-    font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-    color: var(--lab-name, #13151d);
-  }
-  .game-card-desc { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--lab-desc, #5c606b); }
+  .game-card-body { padding: 20px 22px 16px; flex: 1; }
+  .game-card-title { font-size: 1.2rem; line-height: 1.2; color: var(--bp-ink); }
+  .game-card-desc { margin-top: 10px; font-size: 0.92rem; line-height: 1.55; color: var(--bp-muted); }
   .game-card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 26px;
-    border-top: 1px solid var(--lab-footer-border, rgba(19,21,29,0.07));
-    background: var(--lab-footer-bg, #fbfaf7);
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--lab-footer-text, #13151d);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 22px; border-top: 1px solid var(--bp-hair);
+    background: transparent;
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-muted);
   }
   .game-card-host { display: flex; align-items: center; gap: 8px; }
-  .game-card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lab-dot, #13151d); }
+  .game-card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); }
   .game-card-arrow { font-size: 14px; }
 
-  /* BETA status badge overlaid on a game's media (beta games only) */
+  /* BETA badge overlaid on a game's media */
   .game-beta {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 2;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    padding: 4px 9px;
-    border-radius: 999px;
-    color: #fff;
-    background: var(--accent);
-    box-shadow: 0 2px 8px rgba(19,21,29,0.22);
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 5px;
+    color: #fff; background: var(--bp-acc);
   }
 </style>
