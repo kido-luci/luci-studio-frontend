@@ -44,6 +44,7 @@ const selectedWork = [
     href: "https://memoirme.app/",
     fig: "app screenshot",
     ext: true,
+    demo: "",
   },
   {
     n: "02",
@@ -55,6 +56,7 @@ const selectedWork = [
     href: "https://faldrop.luci-studio.com",
     fig: "game capture",
     ext: true,
+    demo: "https://faldrop.luci-studio.com/",
   },
   {
     n: "03",
@@ -66,6 +68,7 @@ const selectedWork = [
     href: "https://github.com/kido-luci/flutter-starter-template",
     fig: "repo preview",
     ext: true,
+    demo: "",
   },
   {
     n: "04",
@@ -77,6 +80,7 @@ const selectedWork = [
     href: localizedHref(locale, "/blog/series/flutter-dart-1b6c8568/"),
     fig: "series cover",
     ext: false,
+    demo: "",
   },
 ];
 
@@ -323,26 +327,49 @@ const homepageSchema = {
         <a href={localizedHref(locale, "/lab")} class="bp-mono bp-more">ALL WORK →</a>
       </div>
       <div class="bp-work-grid">
-        {selectedWork.map((w) => (
-          <a
-            href={w.href || "#work"}
-            class="bp-work-card"
-            data-reveal
-            {...(w.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          >
-            <div class={`bp-fig${w.img ? "" : " bp-fig--striped"}`}>
-              {w.img && <img src={w.img} alt={w.title} loading="lazy" />}
-              <span class="bp-mono bp-callout">fig.{w.n} — {w.fig} · 16:10</span>
-              <span class="bp-mono bp-node">◦</span>
+        {selectedWork.map((w) =>
+          w.demo ? (
+            <div class="bp-work-card bp-work-card--demo" data-reveal data-fdemo>
+              <div class="bp-fig">
+                <div class="bp-fig-toggle bp-mono" role="group" aria-label="Preview mode">
+                  <button type="button" class="is-active" data-fmode="cover">COVER</button>
+                  <button type="button" data-fmode="demo">DEMO</button>
+                </div>
+                <a class="bp-fig-cover" href={w.href} target="_blank" rel="noopener noreferrer" aria-label={`Open ${w.title}`}>
+                  {w.img && <img src={w.img} alt={w.title} loading="lazy" />}
+                </a>
+                <iframe class="bp-fig-demo" title={`${w.title} — live demo`} data-demo-src={w.demo} loading="lazy" allow="autoplay; fullscreen; gamepad"></iframe>
+                <span class="bp-mono bp-callout">fig.{w.n} — {w.fig} · 16:10</span>
+                <span class="bp-mono bp-node">◦</span>
+              </div>
+              <div class="bp-work-meta">
+                <a class="bp-work-title-link" href={w.href} target="_blank" rel="noopener noreferrer"><span class="bp-display bp-work-title">{w.title}</span></a>
+                <span class="bp-mono bp-badge">{w.badge}</span>
+                {w.year && <span class="bp-mono bp-work-year">{w.year}</span>}
+              </div>
+              {w.desc && <p class="bp-work-desc">{w.desc}</p>}
             </div>
-            <div class="bp-work-meta">
-              <span class="bp-display bp-work-title">{w.title}</span>
-              <span class="bp-mono bp-badge">{w.badge}</span>
-              {w.year && <span class="bp-mono bp-work-year">{w.year}</span>}
-            </div>
-            {w.desc && <p class="bp-work-desc">{w.desc}</p>}
-          </a>
-        ))}
+          ) : (
+            <a
+              href={w.href || "#work"}
+              class="bp-work-card"
+              data-reveal
+              {...(w.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >
+              <div class={`bp-fig${w.img ? "" : " bp-fig--striped"}`}>
+                {w.img && <img src={w.img} alt={w.title} loading="lazy" />}
+                <span class="bp-mono bp-callout">fig.{w.n} — {w.fig} · 16:10</span>
+                <span class="bp-mono bp-node">◦</span>
+              </div>
+              <div class="bp-work-meta">
+                <span class="bp-display bp-work-title">{w.title}</span>
+                <span class="bp-mono bp-badge">{w.badge}</span>
+                {w.year && <span class="bp-mono bp-work-year">{w.year}</span>}
+              </div>
+              {w.desc && <p class="bp-work-desc">{w.desc}</p>}
+            </a>
+          )
+        )}
       </div>
     </section>
 
@@ -924,6 +951,42 @@ const homepageSchema = {
   .bp-work-year { font-size: 11px; color: var(--bp-faint); margin-left: auto; }
   .bp-work-desc { margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
 
+  /* §01 demo card — COVER/DEMO toggle (Faldrop): swap the cover image for a live iframe. */
+  .bp-work-title-link { text-decoration: none; }
+  .bp-work-title-link:hover .bp-work-title { color: var(--bp-acc); }
+  .bp-fig-cover { position: absolute; inset: 0; display: block; }
+  .bp-fig-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bp-fig-demo { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: none; background: #0a0e14; }
+  .bp-work-card--demo.demo-on .bp-fig-cover { display: none; }
+  .bp-work-card--demo.demo-on .bp-fig-demo { display: block; }
+  /* Don't lift the card while the live demo is playing. */
+  .bp-work-card--demo.demo-on:hover .bp-fig { transform: none; }
+  .bp-fig-toggle {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    z-index: 4;
+    display: inline-flex;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(10, 14, 20, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .bp-fig-toggle button {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 5px 10px;
+    background: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .bp-fig-toggle button.is-active { background: var(--bp-acc); color: #fff; }
+
   /* ── §02 CAPABILITIES ── */
   .bp-cap-list { border-top: 1px solid var(--bp-hair); }
   .bp-cap-row {
@@ -1102,6 +1165,28 @@ const homepageSchema = {
 <script>
   import { initHomeScrollAnimations } from "../../scripts/homeScrollAnimations";
   initHomeScrollAnimations();
+</script>
+
+<script>
+  // §01 COVER/DEMO toggle — swaps the cover image for a live <iframe>, lazy-loading
+  // its src only on the first DEMO click so the game isn't fetched on page load.
+  document.querySelectorAll("[data-fdemo]").forEach((card) => {
+    const frame = card.querySelector(".bp-fig-demo") as HTMLIFrameElement | null;
+    const btns = card.querySelectorAll<HTMLButtonElement>(".bp-fig-toggle button");
+    btns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        btns.forEach((b) => b.classList.toggle("is-active", b === btn));
+        if (btn.dataset.fmode === "demo") {
+          if (frame && !frame.src && frame.dataset.demoSrc) frame.src = frame.dataset.demoSrc;
+          card.classList.add("demo-on");
+        } else {
+          card.classList.remove("demo-on");
+        }
+      });
+    });
+  });
 </script>
 
 <script>
