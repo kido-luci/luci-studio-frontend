@@ -27,6 +27,14 @@ const links = [
   { key: 'games', label: 'GAMES',        href: '/games' },
 ];
 
+// "X & Y" labels render the " & " with its own tighter span (smaller
+// ampersand, less surrounding space) so the two-word labels above don't
+// eat as much nav width as a plain " & " would.
+const labelParts = (label: string) => {
+  const parts = label.split(' & ');
+  return parts.length === 2 ? parts : null;
+};
+
 // Color-scheme picker presets. The swatch shows each scheme's accent; `id` maps to
 // the html[data-scheme=…] palette blocks in Layout.astro and to window.setScheme.
 const schemes = [
@@ -50,12 +58,15 @@ const schemes = [
     </a>
 
     <div class="bp-nav-links bp-nav-mono">
-      {links.map((l) => (
-        <a
-          href={l.href}
-          class={active === l.key ? 'is-active' : undefined}
-        >{l.label}</a>
-      ))}
+      {links.map((l) => {
+        const parts = labelParts(l.label);
+        return (
+          <a
+            href={l.href}
+            class={active === l.key ? 'is-active' : undefined}
+          >{parts ? <>{parts[0]}<span class="bp-nav-amp"> & </span>{parts[1]}</> : l.label}</a>
+        );
+      })}
     </div>
 
     <div class="bp-nav-actions">
@@ -92,9 +103,12 @@ const schemes = [
   </div>
 
   <div class="bp-nav-mobile bp-nav-mono">
-    {links.map((l) => (
-      <a href={l.href}>{l.label}</a>
-    ))}
+    {links.map((l) => {
+      const parts = labelParts(l.label);
+      return (
+        <a href={l.href}>{parts ? <>{parts[0]}<span class="bp-nav-amp"> & </span>{parts[1]}</> : l.label}</a>
+      );
+    })}
     {showLangSwitch && (
       <div class="bp-nav-lang is-mobile">
         <a href={enHref} class={locale === 'en' ? 'is-active' : undefined} aria-label="English">EN</a>
@@ -231,6 +245,9 @@ const schemes = [
   .bp-nav-links a { position: relative; font-size: 12px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
   .bp-nav-links a:hover, .bp-nav-links a.is-active { color: var(--bp-ink); }
   .bp-nav-links a.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px; background: var(--bp-acc); }
+  /* Tighter "&" for two-word nav labels (e.g. "BLOG & SERIES") — smaller glyph,
+     no inherited letter-spacing/word gap, so it reads as one compact unit. */
+  .bp-nav-amp { font-size: 0.7em; letter-spacing: 0.02em; }
   .bp-nav-actions { display: flex; align-items: center; gap: 11px; }
   .bp-nav-lang { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 0.16em; }
   .bp-nav-lang a { color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
