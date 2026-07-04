@@ -76,6 +76,47 @@ export function initHomeReveals() {
   (function () {
     const items = Array.from(document.querySelectorAll<HTMLElement>('[data-art-card]'));
     if (!items.length) return;
+
+    // Quilt mosaic: size each cell to the image's natural ratio — landscape spans
+    // 2 columns, portrait spans 2 rows, square-ish stays 1×1. Runs per image on load
+    // (lazy images resolve as they enter view), so the mosaic firms up progressively.
+    items.forEach(item => {
+      const img = item.querySelector<HTMLImageElement>('img');
+      if (!img) return;
+      const classify = () => {
+        const w = img.naturalWidth, h = img.naturalHeight;
+        if (!w || !h) return;
+        const ratio = w / h;
+        item.classList.remove('is-wide', 'is-tall');
+        if (ratio >= 1.3) item.classList.add('is-wide');
+        else if (ratio <= 0.78) item.classList.add('is-tall');
+      };
+      if (img.complete && img.naturalWidth) classify();
+      else img.addEventListener('load', classify, { once: true });
+    });
+
+    // Row height = column width + info-bar height, so a single-cell image area is
+    // ~square (columns are fluid 1fr, so this has to be measured, not a fixed px).
+    // Wide items (2 cols × 1 row) then read ~2:1 and tall items (1 col × 2 rows)
+    // ~1:2 — cells that roughly match their images, keeping the cover-crop light.
+    const grid = items[0].closest<HTMLElement>('.quilt-art-grid');
+    if (grid) {
+      const sizeRows = () => {
+        const cs = getComputedStyle(grid);
+        const cols = cs.gridTemplateColumns.split(' ').length;
+        const gap = parseFloat(cs.columnGap) || 0;
+        const colW = (grid.clientWidth - gap * (cols - 1)) / cols;
+        const bars = grid.querySelectorAll<HTMLElement>('.bp-art-bar');
+        let bar = 0;
+        bars.forEach(b => { bar = Math.max(bar, b.offsetHeight); });
+        if (colW > 0) grid.style.gridAutoRows = Math.round(colW + bar) + 'px';
+      };
+      let raf = 0;
+      const schedule = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; sizeRows(); }); };
+      sizeRows();
+      window.addEventListener('resize', schedule, { passive: true });
+    }
+
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
