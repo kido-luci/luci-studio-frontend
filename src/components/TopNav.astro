@@ -18,19 +18,17 @@ interface Props {
 
 const { active = null, ctaLabel = t('nav.cta'), ctaHref = '/#contact' } = Astro.props;
 
-const linkBase = "topnav-link text-xs font-bold transition-all duration-300 uppercase tracking-[0.2em]";
-const linkIdle = "text-gray-400 hover:text-white";
-const linkActive = "is-active text-violet-400";
-
-const cls = (key: 'home' | 'blog' | 'series' | 'portfolio' | 'lab' | 'games') => {
-  if (active === key) return `${linkBase} ${linkActive}`;
-  return `${linkBase} ${linkIdle}`;
-};
-
-const mobileBase = "mobile-nav-link text-4xl font-black tracking-tighter text-white hover:text-violet-500 transition-colors";
-const mobileActive = "mobile-nav-link text-4xl font-black tracking-tighter text-violet-400";
-const mobileSmallBase = "mobile-nav-link text-xl font-bold text-gray-300 uppercase tracking-widest";
-const mobileSmallActive = "mobile-nav-link text-xl font-bold text-violet-400 uppercase tracking-widest";
+// Shared blueprint nav links (ported from the blueprint homepage). UI chrome is
+// English in every locale by design; Tools/Live link out to their standalone hosts.
+const links = [
+  { key: 'home',   label: 'HOME',   href: localizedHref(locale, '/') },
+  { key: 'blog',   label: 'BLOG',   href: localizedHref(locale, '/blog') },
+  { key: 'series', label: 'SERIES', href: localizedHref(locale, '/blog/series') },
+  { key: 'lab',    label: 'LAB',    href: localizedHref(locale, '/lab') },
+  { key: 'tools',  label: 'TOOLS',  href: 'https://tools.luci-studio.com/', ext: true },
+  { key: 'games',  label: 'GAMES',  href: '/games' },
+  { key: 'live',   label: 'LIVE',   href: 'https://live.luci-studio.com/', ext: true },
+];
 
 // Color-scheme picker presets. The swatch shows each scheme's accent; `id` maps to
 // the html[data-scheme=…] palette blocks in Layout.astro and to window.setScheme.
@@ -44,137 +42,76 @@ const schemes = [
 ];
 ---
 
-<!-- NAV -->
-<nav class="fixed top-0 w-full z-[100] border-b border-white/5" style="background:var(--nav-bg);backdrop-filter:blur(16px)">
-  <div class="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
-    <a href={localizedHref(locale, '/')} class="flex items-center gap-3 group">
-      <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-violet-500/50 transition-all duration-300" />
-      <span class="text-xl font-normal tracking-wide" style="font-family: 'Limelight', sans-serif;">LUCI <span class="text-shimmer">STUDIO</span><span class="text-violet-500">.</span></span>
+<!-- Blueprint drafting nav — one shared bar for the whole site (the homepage
+     mockup's nav, extracted). Sticky-in-flow on the blueprint homepage
+     (html.bp-home), fixed overlay on every other page (they pad their own top). -->
+<nav class="bp-nav" data-bp-nav>
+  <div class="bp-nav-wrap bp-nav-inner">
+    <a href={localizedHref(locale, '/')} class="bp-nav-logo">
+      <img src="/images/logo_icon.png" alt="Luci Studio Logo" class="bp-nav-logo-img" />
+      <span class="bp-nav-name">LUCI <span class="text-shimmer">STUDIO</span><span class="bp-nav-name-dot">.</span></span>
     </a>
-    <div class="hidden lg:flex items-center gap-6 xl:gap-8">
-      <a href={localizedHref(locale, '/')} class={cls('home')}>{t('nav.home')}</a>
-      <a href={localizedHref(locale, '/blog')} class={cls('blog')}>{t('nav.blog')}</a>
-      <a href={localizedHref(locale, '/blog/series')} class={cls('series')}>{t('nav.series')}</a>
-      <a href={localizedHref(locale, '/lab')} class={cls('lab')}>{t('nav.lab')}</a>
-      <a href="https://tools.luci-studio.com/" target="_blank" rel="noopener noreferrer" class={`${linkBase} ${linkIdle}`}>Tools</a>
-      <a href="/games" class={cls('games')}>Games</a>
-      <a href="https://live.luci-studio.com/" target="_blank" rel="noopener noreferrer" class={`${linkBase} ${linkIdle}`}>Live</a>
+
+    <div class="bp-nav-links bp-nav-mono">
+      {links.map((l) => (
+        <a
+          href={l.href}
+          class={active === l.key ? 'is-active' : undefined}
+          {...(l.ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >{l.label}</a>
+      ))}
     </div>
 
-    <div class="flex items-center gap-4">
+    <div class="bp-nav-actions">
       {showLangSwitch && (
-        <div class="lang-switch hidden sm:flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
-          <a href={enHref} class={locale === 'en' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="English">EN</a>
-          <span class="text-gray-600" aria-hidden="true">/</span>
-          <a href={viHref} class={locale === 'vi' ? 'text-violet-400' : 'text-gray-400 hover:text-white transition-colors'} aria-label="Tiếng Việt">VI</a>
+        <div class="bp-nav-lang bp-nav-mono">
+          <a href={enHref} class={locale === 'en' ? 'is-active' : undefined} aria-label="English">EN</a>
+          <span aria-hidden="true">/</span>
+          <a href={viHref} class={locale === 'vi' ? 'is-active' : undefined} aria-label="Tiếng Việt">VI</a>
         </div>
       )}
-      <button
-        id="theme-toggle"
-        onclick="window.toggleTheme()"
-        class="topnav-theme-btn w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
-        aria-label={t('nav.toggleTheme')}
-      >
-        <svg class="topnav-theme-icon w-5 h-5 text-gray-400 group-hover:text-white transition-colors dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-        </svg>
-        <svg class="topnav-theme-icon w-5 h-5 text-gray-400 group-hover:text-white transition-colors light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-        </svg>
+
+      <button type="button" id="theme-toggle" class="bp-nav-icon" aria-label={t('nav.toggleTheme')} onclick="window.toggleTheme && window.toggleTheme()">
+        <svg class="bp-nav-svg dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <svg class="bp-nav-svg light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
       </button>
 
-      <!-- Color-scheme picker: palette button + popover of accent swatches -->
-      <div class="scheme-picker relative">
-        <button
-          id="scheme-toggle"
-          type="button"
-          class="topnav-theme-btn w-10 h-10 flex items-center justify-center rounded-full border border-white/10 hover:border-violet-500/40 hover:bg-white/5 transition-all duration-300 group"
-          aria-label={t('nav.colorScheme')}
-          aria-controls="scheme-popover"
-          aria-expanded="false"
-        >
-          <svg class="topnav-theme-icon w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.88 2.88M6.75 17.25h.008v.008H6.75v-.008Z" />
-          </svg>
+      <div class="bp-scheme">
+        <button type="button" id="scheme-toggle" class="bp-nav-icon" aria-label={t('nav.colorScheme')} aria-controls="scheme-popover" aria-expanded="false">
+          <svg class="bp-nav-svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.88 2.88M6.75 17.25h.008v.008H6.75v-.008Z" /></svg>
         </button>
-        <div id="scheme-popover" role="radiogroup" aria-label={t('nav.colorScheme')} class="scheme-popover" hidden>
+        <div id="scheme-popover" role="radiogroup" aria-label={t('nav.colorScheme')} class="bp-scheme-popover" hidden>
           {schemes.map((s) => (
-            <button
-              type="button"
-              class="scheme-dot"
-              role="radio"
-              data-scheme={s.id}
-              aria-checked="false"
-              aria-label={s.label}
-              title={s.label}
-              style={`background:${s.hex}`}
-            ></button>
+            <button type="button" class="scheme-dot" role="radio" data-scheme={s.id} aria-checked="false" aria-label={s.label} title={s.label} style={`background:${s.hex}`}></button>
           ))}
         </div>
       </div>
 
-      <span class="hidden lg:block"><a href={ctaHref} class="magnetic px-5 py-2.5 bg-white text-black text-xs font-black rounded-full hover:bg-violet-500 hover:text-white transition-all duration-300 uppercase tracking-widest">{ctaLabel}</a></span>
+      <a href={ctaHref} class="bp-nav-cta bp-nav-mono">{ctaLabel}</a>
 
-      <button id="mobile-menu-toggle" class="lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 z-[100] group">
-        <span class="w-6 h-0.5 transition-transform duration-300 group-[.active]:rotate-45 group-[.active]:translate-y-2" style="background-color: var(--text-primary);"></span>
-        <span class="w-6 h-0.5 transition-opacity duration-300 group-[.active]:opacity-0" style="background-color: var(--text-primary);"></span>
-        <span class="w-6 h-0.5 transition-transform duration-300 group-[.active]:-rotate-45 group-[.active]:-translate-y-2" style="background-color: var(--text-primary);"></span>
+      <button type="button" class="bp-nav-burger" aria-label="Menu" aria-expanded="false" onclick="var n=document.querySelector('[data-bp-nav]');var o=n.classList.toggle('menu-open');this.setAttribute('aria-expanded',String(o))">
+        <span></span><span></span><span></span>
       </button>
     </div>
   </div>
+
+  <div class="bp-nav-mobile bp-nav-mono">
+    {links.map((l) => (
+      <a href={l.href} {...(l.ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{l.label}</a>
+    ))}
+    {showLangSwitch && (
+      <div class="bp-nav-lang is-mobile">
+        <a href={enHref} class={locale === 'en' ? 'is-active' : undefined} aria-label="English">EN</a>
+        <span aria-hidden="true">/</span>
+        <a href={viHref} class={locale === 'vi' ? 'is-active' : undefined} aria-label="Tiếng Việt">VI</a>
+      </div>
+    )}
+    <a href={ctaHref} class="bp-nav-mobile-cta">{ctaLabel}</a>
+  </div>
 </nav>
 
-<!-- Mobile Menu Overlay -->
-<div id="mobile-menu" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center gap-8 opacity-0 pointer-events-none transition-all duration-500">
-  <a href={localizedHref(locale, '/')} class={active === 'home' ? mobileActive : mobileBase}>{t('nav.home')}</a>
-  <a href={localizedHref(locale, '/blog')} class={active === 'blog' ? mobileActive : mobileBase}>{t('nav.blog')}</a>
-  <a href={localizedHref(locale, '/blog/series')} class={active === 'series' ? mobileActive : mobileBase}>{t('nav.series')}</a>
-  <div class="h-px w-12 bg-white/10 my-4"></div>
-  <a href={localizedHref(locale, '/lab')} class={active === 'lab' ? mobileSmallActive : mobileSmallBase}>{t('nav.lab')}</a>
-  <a href="https://tools.luci-studio.com/" target="_blank" rel="noopener noreferrer" class={mobileSmallBase}>Tools</a>
-  <a href="/games" class={active === 'games' ? mobileSmallActive : mobileSmallBase}>Games</a>
-  <a href="https://live.luci-studio.com/" target="_blank" rel="noopener noreferrer" class={mobileSmallBase}>Live</a>
-  {showLangSwitch && (
-    <div class="flex items-center gap-3 mt-4 text-lg font-bold uppercase tracking-widest">
-      <a href={enHref} class={locale === 'en' ? 'text-violet-400' : 'text-gray-300'} aria-label="English">EN</a>
-      <span class="text-gray-600" aria-hidden="true">/</span>
-      <a href={viHref} class={locale === 'vi' ? 'text-violet-400' : 'text-gray-300'} aria-label="Tiếng Việt">VI</a>
-    </div>
-  )}
-  <a href={ctaHref} class="mobile-nav-link mt-8 px-8 py-4 bg-white text-black font-black rounded-full uppercase tracking-widest">{ctaLabel}</a>
-</div>
-
 <script>
-  const toggle = document.getElementById('mobile-menu-toggle');
-  const menu   = document.getElementById('mobile-menu');
-  const links  = document.querySelectorAll('.mobile-nav-link');
-
-  toggle?.addEventListener('click', () => {
-    toggle.classList.toggle('active');
-    menu?.classList.toggle('opacity-100');
-    menu?.classList.toggle('pointer-events-auto');
-    document.body.style.overflow = toggle.classList.contains('active') ? 'hidden' : '';
-  });
-
-  links.forEach(link => {
-    link.addEventListener('click', () => {
-      toggle?.classList.remove('active');
-      menu?.classList.remove('opacity-100');
-      menu?.classList.remove('pointer-events-auto');
-      document.body.style.overflow = '';
-    });
-  });
-
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768 || window.matchMedia('(orientation: landscape)').matches) {
-      if (toggle?.classList.contains('active')) {
-        toggle.classList.remove('active');
-        menu?.classList.remove('opacity-100', 'pointer-events-auto');
-        document.body.style.overflow = '';
-      }
-    }
-  });
-
+  // Theme icon sync (sun/moon) — idempotent alongside the Layout theme script.
   const syncTheme = () => {
     const light = document.documentElement.classList.contains('light-mode');
     document.querySelectorAll('.dark-icon').forEach(el => el.classList.toggle('hidden', light));
@@ -183,7 +120,9 @@ const schemes = [
   syncTheme();
   document.getElementById('theme-toggle')?.addEventListener('click', () => requestAnimationFrame(syncTheme));
 
-  // Color-scheme picker popover
+  // Color-scheme picker popover. window.setScheme + the swatch aria-checked sync
+  // are provided globally by the Layout theme script; this only handles
+  // opening/closing the popover and forwarding swatch clicks.
   const schemeToggle = document.getElementById('scheme-toggle');
   const schemePopover = document.getElementById('scheme-popover');
   if (schemeToggle && schemePopover) {
@@ -225,35 +164,85 @@ const schemes = [
   }
 </script>
 
-<style is:global>
-  /* Brighter nav link text in dark mode for better contrast over the translucent nav bg */
-  body:not(.light-mode) nav .topnav-link {
-    color: rgb(229, 231, 235) !important; /* gray-200 */
+<style>
+  /* ── Blueprint nav (ported from the blueprint homepage) ──────────────────
+     On html.bp-home the --bp-* tokens are inherited from the homepage's token
+     block (fixed blueprint-blue accent). Everywhere else the fallbacks below
+     map them onto the site's theme/scheme variables, so the accent follows
+     the active color scheme like the rest of each page. */
+  :global(html:not(.bp-home)) .bp-nav {
+    --bp-ink: var(--text-primary);
+    --bp-acc: var(--accent);
+    --bp-bg: var(--bg-primary);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-line2: rgba(255, 255, 255, 0.08);
   }
-  body:not(.light-mode) nav .topnav-link:hover {
-    color: #ffffff !important;
-  }
-  body:not(.light-mode) nav .topnav-link.is-active {
-    color: var(--accent) !important; /* violet-400 keeps active state */
-  }
-
-  /* Theme toggle button — light-mode contrast fix */
-  body.light-mode .topnav-theme-btn {
-    border-color: rgba(17, 24, 39, 0.2) !important;
-  }
-  body.light-mode .topnav-theme-btn:hover {
-    border-color: rgb(var(--accent-rgb) / 0.6) !important;
-    background-color: rgb(var(--accent-rgb) / 0.08) !important;
-  }
-  body.light-mode .topnav-theme-icon {
-    color: rgb(31, 41, 55) !important;
-  }
-  body.light-mode .topnav-theme-btn:hover .topnav-theme-icon {
-    color: var(--accent) !important;
+  :global(html:not(.bp-home) body.light-mode) .bp-nav {
+    --bp-hair: rgba(22, 32, 43, 0.16);
+    --bp-line2: rgba(22, 32, 43, 0.08);
   }
 
-  /* Color-scheme picker */
-  .scheme-popover {
+  .bp-nav {
+    /* Define the nav-glass vars ON the nav element (navDimmer resolves
+       var(--nav-bg-scroll) here on scroll). Non-home pages inherit the
+       theme-aware :root values instead. */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--bp-hair);
+  }
+  /* Blueprint homepage: the nav is part of the drafting sheet — sticky in flow,
+     with the sheet-tinted glass the mockup specifies. */
+  :global(html.bp-home) .bp-nav {
+    --nav-bg: rgba(10, 14, 20, 0.78);
+    --nav-bg-scroll: rgba(10, 14, 20, 0.92);
+    position: sticky;
+    z-index: 40;
+  }
+  :global(html.bp-home body.light-mode) .bp-nav {
+    --nav-bg: rgba(244, 242, 236, 0.82);
+    --nav-bg-scroll: rgba(244, 242, 236, 0.94);
+  }
+
+  .bp-nav-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: clamp(20px, 5vw, 48px);
+    padding-right: clamp(20px, 5vw, 48px);
+  }
+  .bp-nav-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  .bp-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 15px; padding-bottom: 15px; }
+  .bp-nav-logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+  .bp-nav-logo-img { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; }
+  .bp-nav-name { font-family: "Limelight", sans-serif; font-weight: normal; font-size: 20px; letter-spacing: 0.02em; color: var(--bp-ink); white-space: nowrap; }
+  .bp-nav-name-dot { color: var(--bp-acc); }
+  .bp-nav-links { display: flex; align-items: center; gap: 30px; }
+  .bp-nav-links a { position: relative; font-size: 12px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
+  .bp-nav-links a:hover, .bp-nav-links a.is-active { color: var(--bp-ink); }
+  .bp-nav-links a.is-active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 2px; background: var(--bp-acc); }
+  .bp-nav-actions { display: flex; align-items: center; gap: 11px; }
+  .bp-nav-lang { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 0.16em; }
+  .bp-nav-lang a { color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
+  .bp-nav-lang a:hover { color: var(--bp-ink); }
+  .bp-nav-lang a.is-active { color: var(--bp-acc); }
+  .bp-nav-lang span { color: var(--bp-hair); }
+  .bp-nav-icon { width: 36px; height: 36px; border: 1.5px solid var(--bp-hair); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--bp-muted); background: transparent; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+  .bp-nav-icon:hover { border-color: var(--bp-ink); color: var(--bp-ink); }
+  .bp-nav-svg { width: 18px; height: 18px; }
+
+  /* Color-scheme picker (the global window.setScheme + theme.ts syncSchemeUI
+     drive it, this only styles the popover). */
+  .bp-scheme { position: relative; }
+  .bp-scheme-popover {
     position: absolute;
     top: calc(100% + 0.5rem);
     right: 0;
@@ -263,55 +252,41 @@ const schemes = [
     padding: 0.6rem;
     border-radius: 0.85rem;
     background: var(--nav-bg-scroll);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--bp-hair);
     backdrop-filter: blur(16px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
     z-index: 110;
   }
-  .scheme-popover[hidden] { display: none; }
+  .bp-scheme-popover[hidden] { display: none; }
   .scheme-dot {
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 9999px;
     cursor: pointer;
     border: 2px solid transparent;
-    box-shadow: 0 0 0 1px rgba(120, 120, 120, 0.45); /* visible ring on light + dark popover */
+    box-shadow: 0 0 0 1px rgba(120, 120, 120, 0.45);
     transition: transform 0.15s ease;
   }
   .scheme-dot:hover { transform: scale(1.18); }
-  .scheme-dot:focus-visible {
-    outline: 2px solid var(--text-primary);
-    outline-offset: 2px;
-  }
-  .scheme-dot[aria-checked="true"] {
-    box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--text-primary);
-  }
+  .scheme-dot:focus-visible { outline: 2px solid var(--bp-ink); outline-offset: 2px; }
+  .scheme-dot[aria-checked="true"] { box-shadow: 0 0 0 2px var(--nav-bg-scroll), 0 0 0 4px var(--bp-ink); }
 
-  /* Mobile menu overlay — always dark regardless of theme */
-  body.light-mode #mobile-menu {
-    background: rgba(0, 0, 0, 0.95) !important;
-  }
-  body.light-mode #mobile-menu .mobile-nav-link {
-    color: white !important;
-  }
-  body.light-mode #mobile-menu .mobile-nav-link:hover {
-    color: var(--accent) !important;
-  }
-  body.light-mode #mobile-menu a.text-violet-400,
-  body.light-mode #mobile-menu .mobile-nav-link.text-violet-400 {
-    color: var(--accent) !important;
-  }
-  /* "Let's Talk" button in mobile menu stays white bg / black text */
-  body.light-mode #mobile-menu a[class*="bg-white"][class*="text-black"] {
-    background: white !important;
-    color: black !important;
-  }
-  /* Divider line in mobile menu */
-  body.light-mode #mobile-menu .h-px {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-  }
-  /* Small links (LinkedIn, Portfolio) */
-  body.light-mode #mobile-menu .text-gray-300 {
-    color: rgb(209, 213, 219) !important;
+  .bp-nav-cta { padding: 10px 20px; background: var(--bp-ink); color: var(--bp-bg); border-radius: 24px; font-size: 12px; letter-spacing: 0.1em; text-decoration: none; white-space: nowrap; text-transform: uppercase; transition: background 0.2s ease, color 0.2s ease; }
+  .bp-nav-cta:hover { background: var(--bp-acc); color: #fff; }
+  .bp-nav-burger { display: none; width: 40px; height: 40px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: transparent; border: 1.5px solid var(--bp-hair); border-radius: 9px; cursor: pointer; }
+  .bp-nav-burger span { display: block; width: 16px; height: 1.5px; background: var(--bp-ink); }
+  .bp-nav-mobile { display: none; flex-direction: column; padding: 4px 0 14px; }
+  .bp-nav-mobile a { padding: 12px clamp(20px, 5vw, 48px); font-size: 13px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; }
+  .bp-nav-mobile a:hover { color: var(--bp-ink); }
+  .bp-nav-mobile .bp-nav-lang.is-mobile { padding: 12px clamp(20px, 5vw, 48px); font-size: 13px; }
+  .bp-nav-mobile .bp-nav-lang.is-mobile a { padding: 0; }
+  .bp-nav-mobile-cta { color: var(--bp-acc) !important; text-transform: uppercase; }
+  @media (max-width: 860px) {
+    .bp-nav-links, .bp-nav-cta { display: none; }
+    .bp-nav-lang:not(.is-mobile) { display: none; }
+    .bp-nav-burger { display: flex; }
+    .bp-nav.menu-open .bp-nav-mobile { display: flex; }
+    .bp-nav.menu-open { border-bottom-color: var(--bp-line2); }
   }
 </style>
