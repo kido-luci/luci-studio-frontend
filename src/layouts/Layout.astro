@@ -272,10 +272,15 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 
 			html {
 				overflow-x: clip;
+				/* Kill the macOS/iOS rubber-band overscroll bounce — it revealed the
+				   white root background as padding above/below the page. Set on both
+				   html and body so it takes on Safari (viewport propagation quirk). */
+				overscroll-behavior: none;
 			}
 			body {
 				background-color: var(--bg-primary);
 				color: var(--text-primary);
+				overscroll-behavior: none;
 			}
 			.cookie-consent {
 				opacity: 0;
