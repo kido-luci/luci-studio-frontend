@@ -51,6 +51,24 @@ const hubs = [
     <div class="bp-grid" aria-hidden="true"></div>
     <div class="bp-wrap">
 
+      <div class="bp-lab-plot" aria-hidden="true">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <line class="bp-p-axis" x1="8" y1="50" x2="92" y2="50"></line>
+          <line class="bp-p-axis" x1="50" y1="8" x2="50" y2="92"></line>
+          <rect class="bp-p-mark" id="bp-p-mark0" x="27" y="25" width="8" height="8"></rect>
+          <rect class="bp-p-mark" id="bp-p-mark1" x="66" y="30" width="8" height="8"></rect>
+          <rect class="bp-p-mark" id="bp-p-mark2" x="60" y="66" width="8" height="8"></rect>
+          <rect class="bp-p-mark" id="bp-p-mark3" x="28" y="62" width="8" height="8"></rect>
+          <g class="bp-p-cross" id="bp-p-cross" transform="translate(-19,-21)">
+            <line x1="50" y1="40" x2="50" y2="60"></line>
+            <line x1="40" y1="50" x2="60" y2="50"></line>
+            <circle cx="50" cy="50" r="6" class="bp-p-ring"></circle>
+            <circle cx="50" cy="50" r="1.8" class="bp-p-core"></circle>
+          </g>
+        </svg>
+        <span class="bp-mono bp-p-read" id="bp-p-read">x 128  y 214</span>
+      </div>
+
       <!-- released apps (top) -->
       {apps.length > 0 && (
         <section id="released-apps" class="bp-lab-sec" style="scroll-margin-top:96px;">
@@ -177,4 +195,62 @@ const hubs = [
   .bp-lab-sub { margin: 1.4rem 0 0; max-width: 34rem; font-size: 1.05rem; line-height: 1.6; color: var(--bp-muted); }
   .bp-lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 26px; margin-top: clamp(36px, 5vw, 60px); }
   .bp-lab-empty { margin-top: clamp(36px, 5vw, 60px); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-muted); }
+
+  /* Coordinate-plotter instrument in the hero's top-right: a crosshair steps
+     between plotted marks while the x/y readout ticks. Driven by the inline
+     script below (reduced-motion parks it at the first point). Hidden <=900px so
+     it never collides with the section grid. */
+  .bp-lab-plot { position: absolute; top: 46px; right: 0; width: 116px; z-index: 2; pointer-events: none; }
+  .bp-lab-plot svg { display: block; width: 108px; height: 108px; margin-left: auto; }
+  .bp-p-axis { stroke: var(--bp-hair); stroke-width: 1; }
+  .bp-p-mark { fill: none; stroke: var(--bp-faint); stroke-width: 1; opacity: 0; transition: opacity .3s ease; }
+  .bp-p-cross line { stroke: var(--bp-acc); stroke-width: 1.2; }
+  .bp-p-ring { fill: none; stroke: var(--bp-acc); stroke-width: 1.3; }
+  .bp-p-core { fill: var(--bp-orange); }
+  .bp-p-read { display: block; text-align: right; margin-top: 6px; font-size: 10px; letter-spacing: 0.06em; color: var(--bp-faint); }
+  @media (max-width: 900px) { .bp-lab-plot { display: none; } }
 </style>
+
+<script is:inline>
+  // /lab plotter instrument: step a crosshair between plotted marks and tick the
+  // x/y readout. Reduced-motion parks it at the first point with all marks shown.
+  (function () {
+    function init() {
+      var cross = document.getElementById("bp-p-cross");
+      var read = document.getElementById("bp-p-read");
+      if (!cross) return;
+      var pts = [
+        { x: 31, y: 29, lx: "128", ly: "214" },
+        { x: 70, y: 34, lx: "322", ly: "196" },
+        { x: 64, y: 70, lx: "274", ly: "088" },
+        { x: 32, y: 66, lx: "104", ly: "112" },
+      ];
+      function mark(k) { var m = document.getElementById("bp-p-mark" + k); if (m) m.setAttribute("opacity", "1"); }
+      function say(p) { if (read) read.textContent = "x " + p.lx + "  y " + p.ly; }
+      mark(0); say(pts[0]);
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) { pts.forEach(function (_, k) { mark(k); }); return; }
+      var cur = { x: pts[0].x, y: pts[0].y }, i = 0;
+      function tween(tx, ty, dur, done) {
+        var sx = cur.x, sy = cur.y, t0 = null;
+        function fr(ts) {
+          if (t0 == null) t0 = ts;
+          var k = Math.min(1, (ts - t0) / dur);
+          var e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+          cur.x = sx + (tx - sx) * e; cur.y = sy + (ty - sy) * e;
+          cross.setAttribute("transform", "translate(" + (cur.x - 50) + "," + (cur.y - 50) + ")");
+          if (k < 1) requestAnimationFrame(fr); else done && done();
+        }
+        requestAnimationFrame(fr);
+      }
+      function step() {
+        var n = (i + 1) % pts.length, p = pts[n];
+        say(p);
+        tween(p.x, p.y, 1100, function () { mark(n); i = n; setTimeout(step, 1100); });
+      }
+      setTimeout(step, 1100);
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
+  })();
+</script>
