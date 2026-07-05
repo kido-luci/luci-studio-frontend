@@ -114,7 +114,7 @@ const lastUpdated = 'June 30, 2026';
     --bp-line2: rgba(255, 255, 255, 0.08);
     --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-fig: rgba(255, 255, 255, 0.05);
-    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
 
     position: relative;
@@ -152,10 +152,10 @@ const lastUpdated = 'June 30, 2026';
   .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
   .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
   .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
-  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); white-space: nowrap; }
 
   .bp-legal-title { font-size: clamp(2.8rem, 8vw, 5.5rem); line-height: 0.98; margin: clamp(16px, 2.5vw, 24px) 0 0; }
-  .bp-legal-updated { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bp-faint); margin: 1.2rem 0 0; }
+  .bp-legal-updated { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bp-muted); margin: 1.2rem 0 0; }
 
   .legal-copy { display: grid; gap: 0; margin-top: clamp(40px, 6vw, 64px); }
   .legal-copy section { padding: clamp(24px, 3.5vw, 34px) 0; border-top: 1px solid var(--bp-hair); }

@@ -127,7 +127,7 @@ const hubs = [
     --bp-line: rgba(255, 255, 255, 0.05);
     --bp-line2: rgba(255, 255, 255, 0.08);
     --bp-hair: rgba(255, 255, 255, 0.14);
-    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
 
     position: relative;
@@ -168,7 +168,7 @@ const hubs = [
   .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
   .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
   .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
-  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); white-space: nowrap; }
 
   .bp-lab-sec { padding-top: clamp(28px, 5vw, 40px); }
   .bp-lab-sec + .bp-lab-sec { padding-top: clamp(64px, 9vw, 104px); }
@@ -176,5 +176,5 @@ const hubs = [
   .bp-lab-title--sub { font-size: clamp(2.1rem, 5vw, 3.75rem); }
   .bp-lab-sub { margin: 1.4rem 0 0; max-width: 34rem; font-size: 1.05rem; line-height: 1.6; color: var(--bp-muted); }
   .bp-lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 26px; margin-top: clamp(36px, 5vw, 60px); }
-  .bp-lab-empty { margin-top: clamp(36px, 5vw, 60px); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-faint); }
+  .bp-lab-empty { margin-top: clamp(36px, 5vw, 60px); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-muted); }
 </style>

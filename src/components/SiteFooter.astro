@@ -139,18 +139,18 @@ const makeLinks = [
   .bp-footer-logo span { font-size: 18px; letter-spacing: 0.02em; color: var(--bp-ink); }
   .bp-footer-blurb { margin-top: 14px; font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
   .bp-footer-col { display: flex; flex-direction: column; gap: 12px; }
-  .bp-footer-head { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-faint); margin-bottom: 4px; }
+  .bp-footer-head { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-muted); margin-bottom: 4px; }
   :global(.bp-footer-link) { font-size: 14px; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
   :global(.bp-footer-link:hover) { color: var(--bp-acc); }
   .bp-footer-base { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding-top: 16px; padding-bottom: 30px; border-top: 1px solid var(--bp-line2); }
-  .bp-footer-copy { font-size: 11px; letter-spacing: 0.06em; color: var(--bp-faint); }
+  .bp-footer-copy { font-size: 11px; letter-spacing: 0.06em; color: var(--bp-muted); }
   .bp-footer-legal { display: inline-flex; gap: 18px; flex-wrap: wrap; }
   /* FooterLinks renders its own <a>/<button> (its own Astro scope) + hardcodes a
      Tailwind `hover:text-white` that would vanish on the cream sheet — reach in and
      re-tone it to the blueprint palette (accent on hover, legible in both themes). */
   .bp-footer-legal :global(a),
-  .bp-footer-legal :global(button) { color: var(--bp-faint); font-size: 11px; letter-spacing: 0.08em; }
+  .bp-footer-legal :global(button) { color: var(--bp-muted); font-size: 11px; letter-spacing: 0.08em; }
   .bp-footer-legal :global(a:hover),
   .bp-footer-legal :global(button:hover) { color: var(--bp-acc); }
-  .bp-footer-rev { font-size: 11px; letter-spacing: 0.06em; color: var(--bp-faint); }
+  .bp-footer-rev { font-size: 11px; letter-spacing: 0.06em; color: var(--bp-muted); }
 </style>
