@@ -402,7 +402,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
       <section id="comments-section" class="mt-20">
 
         <!-- Write area card -->
-        <div class="rounded-xl border overflow-hidden mb-8" style="border-color:var(--comment-divider,rgba(255,255,255,0.1));background:var(--comment-box-bg,rgba(255,255,255,0.02));">
+        <div class="rounded-xl border overflow-hidden mb-8" style="border-color:var(--bp-hair);background:var(--bp-panel);box-shadow:var(--bp-shadow);">
 
           <!-- Not logged in state -->
           <div id="sign-in-prompt">
@@ -414,7 +414,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
               <div style="width:1px;height:1rem;background:var(--comment-divider,rgba(255,255,255,0.1));margin:0 0.375rem;"></div>
               <button type="button" disabled style="padding:0.25rem 0.375rem;border-radius:0.375rem;font-size:0.875rem;background:transparent;border:none;cursor:default;opacity:0.4;display:flex;align-items:center;"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/svg/1f60a.svg" width="18" height="18" alt="😊" style="pointer-events:none;"></button>
               <div style="flex:1;"></div>
-              <button id="google-sign-in-btn" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.75rem;font-weight:700;cursor:pointer;background:var(--accent);color:var(--accent-ink);border:none;transition:background 0.2s;white-space:nowrap;" onmouseover="this.style.background='var(--accent-strong)'" onmouseout="this.style.background='var(--accent)'">
+              <button id="google-sign-in-btn" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;background:var(--bp-acc);color:var(--accent-ink);border:none;transition:filter 0.2s;white-space:nowrap;" onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter='none'">
                 <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#fff" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#fff" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#fff" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#fff" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                 {t('post.signInWithGoogle')}
               </button>
@@ -426,7 +426,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
             <div style="display:flex;align-items:center;gap:0.625rem;padding:0.875rem 1.25rem 0;">
               <img id="user-avatar" src="" alt="" style="width:2rem;height:2rem;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none';document.getElementById('user-avatar-fallback').style.display='flex';" />
               <div id="user-avatar-fallback" style="display:none;width:2rem;height:2rem;border-radius:50%;background:rgb(var(--accent-rgb) / 0.2);align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;font-weight:900;color:var(--accent);" id="user-avatar-fallback"></div>
-              <span id="user-name" style="font-size:0.85rem;font-weight:600;color:var(--text-primary);"></span>
+              <span id="user-name" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:0.85rem;font-weight:700;color:var(--bp-ink);"></span>
             </div>
             <form id="comment-form">
               <div
@@ -447,22 +447,22 @@ const structuredData = [articleSchema, breadcrumbSchema];
                   <button id="fmt-emoji" type="button" title="Emoji" class="emoji-picker-btn" style="padding:0.25rem 0.375rem;border-radius:0.375rem;background:transparent;border:none;cursor:pointer;transition:background 0.15s;display:flex;align-items:center;" onmouseover="this.style.background='rgb(var(--accent-rgb) / 0.1)'" onmouseout="this.style.background='transparent'"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/svg/1f60a.svg" width="18" height="18" alt="😊" style="pointer-events:none;"></button>
                 </div>
                 <div style="flex:1;"></div>
-                <span id="char-count" style="font-size:0.65rem;color:var(--text-tertiary);margin-right:0.5rem;"></span>
-                <button id="sign-out-btn" type="button" style="font-size:0.7rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0.375rem 0.625rem;border-radius:0.375rem;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">{t('post.signOut')}</button>
-                <button type="submit" style="padding:0.5rem 1.25rem;border-radius:0.5rem;font-size:0.8rem;font-weight:700;background:var(--accent);color:var(--accent-ink);border:none;cursor:pointer;transition:background 0.2s;white-space:nowrap;" onmouseover="this.style.background='var(--accent-strong)'" onmouseout="this.style.background='var(--accent)'">{t('post.submitComment')}</button>
+                <span id="char-count" style="font-family:var(--bp-mono);font-size:0.65rem;color:var(--bp-faint);margin-right:0.5rem;"></span>
+                <button id="sign-out-btn" type="button" style="font-family:var(--bp-mono);font-size:0.65rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--bp-faint);background:transparent;border:none;cursor:pointer;padding:0.375rem 0.625rem;border-radius:6px;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='color-mix(in srgb, var(--bp-ink) 6%, transparent)';this.style.color='var(--bp-ink)'" onmouseout="this.style.background='transparent';this.style.color='var(--bp-faint)'">{t('post.signOut')}</button>
+                <button type="submit" style="padding:0.5rem 1.25rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--bp-acc);color:var(--accent-ink);border:none;cursor:pointer;transition:filter 0.2s;white-space:nowrap;" onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter='none'">{t('post.submitComment')}</button>
               </div>
             </form>
           </div>
         </div>
 
-        <!-- Comments list header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
-          <div style="display:flex;align-items:center;gap:0.625rem;">
-            <span style="font-size:1rem;font-weight:700;color:var(--text-primary);">{t('post.commentsLabel')}</span>
-            <span id="comment-count-badge" style="display:none;padding:0.1rem 0.5rem;border-radius:9999px;font-size:0.7rem;font-weight:700;background:rgb(var(--accent-rgb) / 0.15);color:var(--accent);"></span>
-          </div>
-          <button id="sort-toggle" type="button" style="display:flex;align-items:center;gap:0.375rem;font-size:0.75rem;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;padding:0.25rem 0.5rem;border-radius:0.375rem;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
-            <svg id="sort-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l4-4 4 4"/><path d="M7 5v14"/><path d="M21 15l-4 4-4-4"/><path d="M17 19V5"/></svg>
+        <!-- Comments list header (blueprint §-section head) -->
+        <div class="bp-sec-head" style="margin-bottom:1.5rem;">
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">{t('post.commentsLabel')}</span>
+          <span id="comment-count-badge" style="display:none;font-family:var(--bp-mono);font-size:0.62rem;font-weight:700;letter-spacing:0.1em;padding:2px 8px;border:1px solid var(--bp-hair);border-radius:999px;color:var(--bp-muted);"></span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <button id="sort-toggle" type="button" style="display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--bp-mono);font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--bp-muted);background:transparent;border:1px solid var(--bp-hair);cursor:pointer;padding:0.35rem 0.65rem;border-radius:6px;white-space:nowrap;transition:color 0.15s,border-color 0.15s;" onmouseover="this.style.color='var(--bp-acc)';this.style.borderColor='var(--bp-acc)'" onmouseout="this.style.color='var(--bp-muted)';this.style.borderColor='var(--bp-hair)'">
+            <svg id="sort-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l4-4 4 4"/><path d="M7 5v14"/><path d="M21 15l-4 4-4-4"/><path d="M17 19V5"/></svg>
             <span id="sort-label">{t('post.commentsSortNewest')}</span>
           </button>
         </div>
@@ -470,13 +470,13 @@ const structuredData = [articleSchema, breadcrumbSchema];
         <!-- Comment list -->
         <div id="comment-list" class="flex flex-col">
           <div id="comments-loading" style="padding:3rem 0;text-align:center;">
-            <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--text-tertiary);">Loading…</p>
+            <p style="font-family:var(--bp-mono);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--bp-faint);">Loading…</p>
           </div>
         </div>
 
         <!-- Load more -->
         <div style="display:flex;justify-content:center;padding:0.5rem 0 0.25rem;">
-          <button id="load-more-comments" type="button" style="display:none;align-items:center;gap:0.4rem;font-size:0.75rem;font-weight:600;color:var(--text-secondary);background:transparent;border:1px solid var(--border-color, rgba(255,255,255,0.12));cursor:pointer;padding:0.5rem 1.1rem;border-radius:9999px;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">{t('post.loadMoreComments')}</button>
+          <button id="load-more-comments" type="button" style="display:none;align-items:center;gap:0.4rem;font-family:var(--bp-mono);font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--bp-muted);background:transparent;border:1px solid var(--bp-hair);cursor:pointer;padding:0.55rem 1.2rem;border-radius:8px;transition:color 0.15s,border-color 0.15s;" onmouseover="this.style.color='var(--bp-acc)';this.style.borderColor='var(--bp-acc)'" onmouseout="this.style.color='var(--bp-muted)';this.style.borderColor='var(--bp-hair)'">{t('post.loadMoreComments')}</button>
         </div>
       </section>
     </div>
@@ -573,6 +573,10 @@ const structuredData = [articleSchema, breadcrumbSchema];
     --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
     --bp-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
     --bp-mono: "IBM Plex Mono", ui-monospace, monospace;
+    /* Comment zone rides the blueprint tokens (both themes): hairline dividers +
+       a faint ink-tint panel for nested surfaces (reply forms). */
+    --comment-divider: var(--bp-hair);
+    --comment-box-bg: color-mix(in srgb, var(--bp-ink) 3.5%, transparent);
     position: relative;
     background: var(--bp-bg);
   }
@@ -1152,16 +1156,6 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
   html[lang="vi"] .reply-input[data-empty="true"]::before {
     content: 'Viết trả lời…';
-  }
-
-  /* ── Comment box light-mode overrides ── */
-  body.light-mode {
-    --comment-box-bg: rgb(var(--accent-rgb) / 0.04);
-    --comment-divider: rgba(0, 0, 0, 0.07);
-    --comment-input-bg: rgba(0, 0, 0, 0.04);
-    --google-btn-bg: #fff;
-    --google-btn-text: #111;
-    --google-btn-border: rgba(0, 0, 0, 0.15);
   }
 
 </style>
