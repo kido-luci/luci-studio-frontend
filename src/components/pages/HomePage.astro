@@ -527,7 +527,7 @@ const homepageSchema = {
     --bp-line2: rgba(255, 255, 255, 0.08);
     --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-card: rgba(255, 255, 255, 0.035);
-    --bp-muted: color-mix(in srgb, var(--bp-ink) 58%, transparent);
+    --bp-muted: color-mix(in srgb, var(--bp-ink) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
   }
@@ -643,7 +643,7 @@ const homepageSchema = {
   .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; color: var(--bp-acc); white-space: nowrap; }
   .bp-sec-label.is-orange { color: var(--bp-orange); }
   .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
-  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); white-space: nowrap; }
 
   .bp-sec-title-row {
     display: flex;
@@ -818,7 +818,7 @@ const homepageSchema = {
   .bp-node { position: absolute; top: 10px; right: 14px; font-size: 12px; color: var(--bp-acc); }
   .bp-work-meta { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
   .bp-work-title { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
-  .bp-work-year { font-size: 11px; color: var(--bp-faint); margin-left: auto; }
+  .bp-work-year { font-size: 11px; color: var(--bp-muted); margin-left: auto; }
   .bp-work-desc { margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
 
   /* §01 demo card — COVER/DEMO toggle (Faldrop): the cover image crossfades to an
@@ -880,7 +880,7 @@ const homepageSchema = {
   .bp-cap-row.is-orange .bp-cap-num { color: var(--bp-orange); }
   .bp-cap-title { font-size: clamp(1.35rem, 2.6vw, 2rem); }
   .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
-  .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-faint); white-space: nowrap; }
+  .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-muted); white-space: nowrap; }
 
   /* ── §03 WRITING ── */
   .bp-write-list { border-top: 1px solid var(--bp-hair); }
@@ -895,11 +895,11 @@ const homepageSchema = {
     transition: padding-left 0.25s ease;
   }
   .bp-write-row:hover { padding-left: 10px; }
-  .bp-write-date { font-size: 12px; color: var(--bp-faint); }
+  .bp-write-date { font-size: 12px; color: var(--bp-muted); }
   .bp-write-title { font-size: clamp(1rem, 2vw, 1.35rem); font-weight: 600; color: var(--bp-ink); letter-spacing: -0.01em; }
   .bp-write-row:hover .bp-write-title { color: var(--bp-acc); }
   .bp-write-topic { justify-self: start; }
-  .bp-write-read { font-size: 11px; color: var(--bp-faint); text-align: right; white-space: nowrap; }
+  .bp-write-read { font-size: 11px; color: var(--bp-muted); text-align: right; white-space: nowrap; }
 
   /* ── §04 ART (quilt grid + lightbox subsystem) ── */
   /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
@@ -995,7 +995,7 @@ const homepageSchema = {
   .bp-stat-num em { color: var(--bp-acc); font-style: normal; }
   .bp-stat-meta { display: flex; flex-direction: column; gap: 3px; }
   .bp-stat-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-muted); }
-  .bp-stat-sub { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-faint); }
+  .bp-stat-sub { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-muted); }
 
   /* ── connectors (dimension lines between sections) ── */
   .bp-conn-wrap { position: relative; z-index: 1; display: flex; justify-content: center; padding: 6px 0; }

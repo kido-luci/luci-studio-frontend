@@ -229,7 +229,7 @@ const rest = GAMES.slice(1);
     --bp-line2: rgba(255, 255, 255, 0.08);
     --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-fig: rgba(255, 255, 255, 0.05);
-    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
     --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
     --bp-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
@@ -276,7 +276,7 @@ const rest = GAMES.slice(1);
   .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
   .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
   .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
-  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-faint); white-space: nowrap; }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); white-space: nowrap; }
 
   .bp-games-head { margin-bottom: clamp(30px, 5vw, 48px); }
   .bp-games-title { font-size: clamp(2.8rem, 8vw, 6rem); line-height: 0.98; margin: clamp(16px, 2.5vw, 24px) 0 0; }
@@ -364,7 +364,7 @@ const rest = GAMES.slice(1);
     transition: opacity 0.2s;
   }
   .game-feature:hover .game-feature-cta { opacity: 0.88; }
-  .game-feature-host { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-faint); }
+  .game-feature-host { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-muted); }
   .game-feature-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); }
 
   @media (max-width: 760px) {

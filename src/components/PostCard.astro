@@ -138,7 +138,7 @@ const statId = interactive && id != null ? String(id) : undefined;
   .tb-card-link--bp {
     --bp-acc: var(--accent);
     --bp-ink: var(--text-primary);
-    --bp-muted: color-mix(in srgb, var(--text-primary) 58%, transparent);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
     --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-line2: rgba(255, 255, 255, 0.08);
@@ -197,7 +197,7 @@ const statId = interactive && id != null ? String(id) : undefined;
   }
   .tb-card-link--bp:hover .tb-card-title { color: var(--bp-acc); }
   .tb-card-link--bp .tb-excerpt { font-family: "Space Grotesk", system-ui, sans-serif; color: var(--bp-muted); }
-  .tb-card-link--bp .tb-meta { font-family: var(--bp-mono); color: var(--bp-faint); }
+  .tb-card-link--bp .tb-meta { font-family: var(--bp-mono); color: var(--bp-muted); }
   .tb-card-link--bp .tb-card-foot { border-top-color: var(--bp-hair); }
   .tb-card-link--bp .tb-read { font-family: var(--bp-mono); color: var(--bp-acc); }
   .tb-card-link--bp .tb-stats { font-family: var(--bp-mono); color: var(--bp-muted); }
