@@ -248,8 +248,21 @@ const structuredData = [articleSchema, breadcrumbSchema];
         <p class="text-[10px] font-black text-gray-600 uppercase tracking-[0.35em]">{t('post.foundHelpful')}</p>
         <h3 class="text-2xl md:text-3xl font-black">{t('post.supportWork')}<span class="bd-acc-dot">.</span></h3>
         <p class="text-sm text-gray-400 max-w-md leading-relaxed">{t('post.supportBody')}</p>
-        <!-- Support methods — three blueprint cards (VietQR · PayPal · GitHub), each
-             with a logo, region, hint and a collapsible QR (mirrors Faldrop's SUPPORT_TERMINAL). -->
+        <!-- Support methods live in a popup (opened here) so they don't crowd the post. -->
+        <button type="button" class="sup-open-btn" data-sup-open aria-haspopup="dialog" aria-controls="sup-dialog">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+          {t('post.supportOpen')}
+        </button>
+      </div>
+
+      <!-- Support popup — the three payment methods (VietQR · PayPal · GitHub), opened
+           from the support card. Native <dialog>: top-layer, Esc-to-close, focus-managed. -->
+      <dialog id="sup-dialog" class="sup-dialog" aria-labelledby="sup-dialog-title">
+        <button type="button" class="sup-dialog-close" data-sup-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        <h3 id="sup-dialog-title" class="sup-dialog-title">{t('post.supportWork')}<span class="bd-acc-dot">.</span></h3>
+        <p class="sup-dialog-sub">{t('post.supportBody')}</p>
         <div class="sup-methods">
           <!-- 01 · Vietnamese bank (VietQR) -->
           <div class="sup-method">
@@ -308,7 +321,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
             </details>
           </div>
         </div>
-      </div>
+      </dialog>
 
       {relatedPosts.length > 0 && (
         <section class="more-posts mt-24">
@@ -497,6 +510,23 @@ const structuredData = [articleSchema, breadcrumbSchema];
 <script is:inline src="/scripts/post-emoji-picker.js" defer></script>
 
 <script is:inline>
+  // Support popup — open/close the native <dialog>.
+  var supDialog = document.getElementById('sup-dialog');
+  if (supDialog) {
+    var supOpen = document.querySelector('[data-sup-open]');
+    if (supOpen) supOpen.addEventListener('click', function () {
+      if (typeof supDialog.showModal === 'function') supDialog.showModal();
+      else supDialog.setAttribute('open', '');
+    });
+    supDialog.querySelectorAll('[data-sup-close]').forEach(function (b) {
+      b.addEventListener('click', function () { supDialog.close(); });
+    });
+    // Click on the backdrop (outside the panel content) closes the dialog.
+    supDialog.addEventListener('click', function (e) {
+      if (e.target === supDialog) supDialog.close();
+    });
+  }
+
   // Support card — copy the VietQR bank account number (whole row is the target).
   document.querySelectorAll('.sup-account').forEach(function (row) {
     var btn = row.querySelector('.sup-copy-btn');
@@ -663,6 +693,22 @@ const structuredData = [articleSchema, breadcrumbSchema];
   .sup-qr-panel { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--bp-hair); border-radius: 8px; }
   .sup-qr-panel img { width: 140px; height: 140px; object-fit: contain; background: #fff; padding: 6px; border-radius: 6px; }
   .sup-qr-cap { font-family: var(--bp-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bp-muted); }
+
+  /* Trigger button — opens the support popup */
+  .sup-open-btn { margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 9px; padding: 12px 24px; border-radius: 999px; font-family: var(--bp-mono); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--bp-acc); border: none; cursor: pointer; transition: filter 0.2s ease, transform 0.2s ease; }
+  .sup-open-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .sup-open-btn svg { flex: 0 0 auto; }
+
+  /* Support popup — native <dialog> (top layer, so it clears any transformed ancestor) */
+  .sup-dialog { width: min(720px, 92vw); max-width: 720px; max-height: 86vh; overflow: auto; padding: clamp(22px, 4vw, 38px); border: 1px solid var(--bp-hair); border-radius: 16px; background: var(--bp-panel); color: var(--bp-ink); box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6); }
+  .sup-dialog::backdrop { background: rgba(6, 9, 14, 0.6); backdrop-filter: blur(3px); }
+  .sup-dialog[open] { animation: sup-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes sup-pop { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+  .sup-dialog-close { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--bp-hair); background: transparent; color: var(--bp-muted); cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease; }
+  .sup-dialog-close:hover { color: var(--bp-ink); border-color: var(--bp-acc); }
+  .sup-dialog-title { padding-right: 44px; font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: clamp(1.4rem, 3vw, 1.9rem); color: var(--bp-ink); }
+  .sup-dialog-sub { margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--bp-muted); }
+  .sup-dialog .sup-methods { margin-top: 1.5rem; max-width: 100%; }
 
   /* ── In-header back link (mirrors series' .bp-series-back) ── */
   .bd-back {

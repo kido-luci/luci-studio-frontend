@@ -72,6 +72,7 @@ export const en: Record<string, string> = {
   'post.hideQr': 'Hide QR',
   'post.copy': 'Copy',
   'post.copied': 'Copied',
+  'post.supportOpen': 'Buy me a coffee',
   'post.continueReading': 'Continue Reading',
   'post.morePosts': 'More Posts',
   'post.viewAll': 'View All',
