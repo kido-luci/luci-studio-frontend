@@ -1008,7 +1008,12 @@ const homepageSchema = {
 
   /* ── connectors (dimension lines between sections) ── */
   .bp-conn-wrap { position: relative; z-index: 1; display: flex; justify-content: center; padding: 6px 0; }
-  .bp-conn { width: 1px; height: 44px; background: linear-gradient(var(--bp-hair), transparent); display: block; }
+  /* Section connectors read as vertical drafting "dimension" marks: an extension
+     tick at the top and a small measurement node at the bottom tip. The GSAP
+     scaleY draw (see homeScrollAnimations) still animates the whole mark in. */
+  .bp-conn { position: relative; width: 1px; height: 44px; background: linear-gradient(var(--bp-hair), color-mix(in srgb, var(--bp-hair) 35%, transparent)); display: block; }
+  .bp-conn::before { content: ""; position: absolute; top: 0; left: 50%; width: 10px; height: 1px; margin-left: -5px; background: color-mix(in srgb, var(--bp-acc) 50%, transparent); }
+  .bp-conn::after { content: ""; position: absolute; bottom: -1.5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--bp-acc); }
 
   /* ── keyframes ── */
   @keyframes lu-spin { to { transform: rotate(360deg); } }
