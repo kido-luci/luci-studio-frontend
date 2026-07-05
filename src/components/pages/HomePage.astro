@@ -116,13 +116,18 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
       ];
 
 // The 2 most-viewed pieces become the big 2×2 "feature" tiles in the art mosaic
-// (the ratio-driven wide/tall spans are set client-side in homeReveals.ts).
+// (the ratio-driven wide/tall spans are set client-side in homeReveals.ts). Only
+// feature when the gallery is big enough to fill around them — with a sparse set the
+// 2×2 blocks strand space, so drop them until there are ≥10 pieces.
+const featureCount = artItems.length >= 10 ? 2 : 0;
 const featuredArtIdx = new Set(
-  artItems
-    .map((a, i) => ({ i, v: a.views ?? 0 }))
-    .sort((x, y) => y.v - x.v)
-    .slice(0, 2)
-    .map((o) => o.i),
+  featureCount === 0
+    ? []
+    : artItems
+        .map((a, i) => ({ i, v: a.views ?? 0 }))
+        .sort((x, y) => y.v - x.v)
+        .slice(0, featureCount)
+        .map((o) => o.i),
 );
 
 // Static blueprint copy — kept as data so the JSX stays free of raw "&" text nodes.

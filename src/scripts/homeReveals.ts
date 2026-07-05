@@ -84,10 +84,16 @@ export function initHomeReveals() {
     // are set server-side and left alone. Dense flow packs it into an aligned grid.
     const grid = items[0].closest<HTMLElement>('.quilt-art-grid');
     if (grid) {
-      const sizeRows = () => {
-        const cs = getComputedStyle(grid);
-        const cols = cs.gridTemplateColumns.split(' ').length;
-        const gap = parseFloat(cs.columnGap) || 0;
+      // Adapt the column count to the piece count so a sparse gallery still fills
+      // (few tall portraits in a wide grid strands big holes). Cap the viewport's
+      // column count at floor(items/2) — at least ~2 rows' worth — then square the
+      // rows to the resulting column width.
+      const sizeGrid = () => {
+        grid.style.gridTemplateColumns = ''; // reset to the CSS media-query value first
+        const viewportCols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+        const cols = Math.max(2, Math.min(viewportCols, Math.floor(items.length / 2)));
+        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        const gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
         const colW = (grid.clientWidth - gap * (cols - 1)) / cols;
         if (colW > 0) grid.style.gridAutoRows = Math.round(colW) + 'px';
       };
@@ -107,8 +113,8 @@ export function initHomeReveals() {
         else img.addEventListener('load', () => classify(item), { once: true });
       });
       let raf = 0;
-      const schedule = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; sizeRows(); }); };
-      sizeRows();
+      const schedule = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; sizeGrid(); }); };
+      sizeGrid();
       window.addEventListener('resize', schedule, { passive: true });
     }
 
