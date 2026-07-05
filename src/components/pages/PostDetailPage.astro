@@ -731,6 +731,15 @@ const structuredData = [articleSchema, breadcrumbSchema];
   .bp-post .bp-more { font-size: 12px; letter-spacing: 0.08em; color: var(--bp-ink); text-decoration: none; border-bottom: 1.5px solid var(--bp-ink); padding-bottom: 3px; white-space: nowrap; transition: color 0.2s ease, border-color 0.2s ease; }
   .bp-post .bp-more:hover { color: var(--bp-acc); border-color: var(--bp-acc); }
 
+  /* ── Shared SiteFooter CTA/footer: this <main> pads itself with px-6 (1.5rem),
+     but the homepage renders these full-bleed. Cancel the gutter so the dark
+     drafting band reaches both edges, and restore the CTA title's light ink —
+     the global `.bp-post .bp-display` above otherwise overrides SiteFooter's own
+     #eceae3, making the heading invisible on the dark band. ── */
+  .bp-post > .bp-cta,
+  .bp-post > .bp-footer { margin-left: -1.5rem; margin-right: -1.5rem; }
+  .bp-post .bp-cta-title { color: #eceae3; }
+
   /* ── More posts (related) → blueprint section header + title ── */
   .more-posts .bp-sec-title-row { margin-top: clamp(16px, 2vw, 22px); margin-bottom: clamp(24px, 3.5vw, 36px); }
   .more-posts .bp-more-h2 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.0; margin: 0; }
