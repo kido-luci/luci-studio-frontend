@@ -205,8 +205,8 @@ const schemes = [
     right: 0;
     z-index: 100;
     background: var(--nav-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     border-bottom: 1px solid var(--bp-hair);
     transition: transform 0.3s ease;
   }
@@ -234,11 +234,13 @@ const schemes = [
     --nav-bg: rgba(10, 14, 20, 0.55);
     --nav-bg-scroll: rgba(10, 14, 20, 0.85);
   }
-  /* Light mode: plain white glass, a touch more transparent — kept in sync with
-     the site-wide light nav in Layout.astro (not sheet-cream), per request. */
+  /* Light mode: translucent white glass — low alpha + the soft blur above let the
+     drafting sheet (grid + the top of the constellation, which sits behind the
+     fixed nav) read through it. Kept in sync with the site-wide light nav in
+     Layout.astro. */
   :global(html.bp-home body.light-mode) .bp-nav {
-    --nav-bg: rgba(255, 255, 255, 0.55);
-    --nav-bg-scroll: rgba(255, 255, 255, 0.85);
+    --nav-bg: rgba(255, 255, 255, 0.35);
+    --nav-bg-scroll: rgba(255, 255, 255, 0.7);
   }
 
   .bp-nav-wrap {
