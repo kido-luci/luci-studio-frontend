@@ -17,6 +17,32 @@ import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
 const locale = getLocaleFromUrl(Astro.url);
 const API_URL = import.meta.env.PUBLIC_API_URL || "";
 
+// Blueprint constellation: a field of twinkling points biased toward the
+// top-right corner (under the lamp glow). Positions are generated at BUILD time
+// with a fixed-seed PRNG so the layout is deterministic across rebuilds (no
+// per-build drift, no runtime JS). The linked "nodes" are curated in the template
+// SVG; these are the loose surrounding stars.
+const bpRand = (() => {
+  let s = 1337 >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+})();
+const bpStars = Array.from({ length: 40 }, () => {
+  const rx = Math.pow(bpRand(), 0.6); // 0 = hugging the right edge
+  const ry = Math.pow(bpRand(), 0.6); // 0 = hugging the top edge
+  return {
+    right: +(rx * 97).toFixed(1),
+    top: +(ry * 95).toFixed(1),
+    size: +(1 + bpRand() * 1.8).toFixed(1),
+    dur: +(2.6 + bpRand() * 2.8).toFixed(2),
+    dl: +(-bpRand() * 5).toFixed(2),
+  };
+});
+
 const profile = await profileService.getProfile();
 const stats = profile?.portfolio_stats ?? [];
 
@@ -176,36 +202,48 @@ const homepageSchema = {
   <main class="bp" data-api-url={API_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
 
-    <!-- Signal waveform: 24 bars hanging from the sheet's true top edge, animating
-         downward (transform-origin:top). Anchored at y=0 so they slip behind the
-         translucent fixed nav in the top-right corner. CSS-only — one shared
-         keyframe + a progressive per-bar delay makes a smooth travelling wave (no
-         JS/rAF). Gated for reduced-motion, win-perf-mode and mobile (see CSS). -->
-    <div class="bp-waveform" aria-hidden="true">
-      <span style="--dl:0s"></span>
-      <span style="--dl:-0.2s"></span>
-      <span style="--dl:-0.4s"></span>
-      <span style="--dl:-0.6s"></span>
-      <span style="--dl:-0.8s"></span>
-      <span style="--dl:-1s"></span>
-      <span style="--dl:-1.2s"></span>
-      <span style="--dl:-1.4s"></span>
-      <span style="--dl:-1.6s"></span>
-      <span style="--dl:-1.8s"></span>
-      <span style="--dl:-2s"></span>
-      <span style="--dl:-2.2s"></span>
-      <span style="--dl:-2.4s"></span>
-      <span style="--dl:-2.6s"></span>
-      <span style="--dl:-2.8s"></span>
-      <span style="--dl:-3s"></span>
-      <span style="--dl:-3.2s"></span>
-      <span style="--dl:-3.4s"></span>
-      <span style="--dl:-3.6s"></span>
-      <span style="--dl:-3.8s"></span>
-      <span style="--dl:-4s"></span>
-      <span style="--dl:-4.2s"></span>
-      <span style="--dl:-4.4s"></span>
-      <span style="--dl:-4.6s"></span>
+    <!-- Blueprint constellation: a twinkling point-field in the top-right corner
+         with a few larger nodes linked by hairlines — a schematic star chart, on
+         theme for the drafting sheet. Anchored at top:0/right:0 so it sits behind
+         the translucent fixed nav; a radial mask fades it out toward centre so it
+         never crowds the hero copy. Points are baked at build time (fixed-seed PRNG
+         in the frontmatter); twinkle is pure CSS (staggered delays, no JS/rAF).
+         Gated for reduced-motion, win-perf-mode and mobile (see CSS). -->
+    <div class="bp-constellation" aria-hidden="true">
+      <svg class="bp-cst-lines" viewBox="0 0 440 300" preserveAspectRatio="none" fill="none">
+        <g class="bp-cst-edges">
+          <line x1="424" y1="24" x2="360" y2="60" />
+          <line x1="424" y1="24" x2="300" y2="40" />
+          <line x1="360" y1="60" x2="410" y2="108" />
+          <line x1="360" y1="60" x2="330" y2="128" />
+          <line x1="300" y1="40" x2="250" y2="90" />
+          <line x1="410" y1="108" x2="382" y2="172" />
+          <line x1="330" y1="128" x2="250" y2="90" />
+          <line x1="330" y1="128" x2="382" y2="172" />
+          <line x1="250" y1="90" x2="210" y2="150" />
+          <line x1="382" y1="172" x2="296" y2="210" />
+          <line x1="330" y1="128" x2="296" y2="210" />
+        </g>
+        <g class="bp-cst-nodes">
+          <circle cx="424" cy="24" r="2.8" style="--dur:3.8s;--dl:-0.2s" />
+          <circle cx="360" cy="60" r="3" style="--dur:4.4s;--dl:-1.4s" />
+          <circle cx="410" cy="108" r="2.4" style="--dur:4s;--dl:-2.6s" />
+          <circle cx="300" cy="40" r="2.6" style="--dur:3.4s;--dl:-0.9s" />
+          <circle cx="330" cy="128" r="2.6" style="--dur:4.6s;--dl:-3.1s" />
+          <circle cx="250" cy="90" r="2.2" style="--dur:3.6s;--dl:-1.9s" />
+          <circle cx="382" cy="172" r="2.4" style="--dur:4.2s;--dl:-2.2s" />
+          <circle cx="210" cy="150" r="2" style="--dur:5s;--dl:-0.5s" />
+          <circle cx="296" cy="210" r="2.2" style="--dur:4s;--dl:-3.6s" />
+        </g>
+      </svg>
+      {
+        bpStars.map((s) => (
+          <span
+            class="bp-star"
+            style={`right:${s.right}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;--dur:${s.dur}s;--dl:${s.dl}s`}
+          />
+        ))
+      }
     </div>
 
     <!-- ===================== HERO ===================== -->
@@ -634,51 +672,66 @@ const homepageSchema = {
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
-  /* Signal waveform — 12 bars hanging from the top edge, flush to the sheet's
-     right corner. z-index below the fixed nav (100) so they run behind the
-     translucent glass; the top ~topbar-height is hidden behind it, which is why
-     the bars are lengthened by that much below. transform-origin:top => they
-     grow DOWN. Slow, desynced durations/delays read as random music "levels". */
-  .bp-waveform {
+  /* Blueprint constellation — a build-time point-field twinkling in the top-right
+     corner, with a few larger nodes linked by SVG hairlines. z-index below the
+     fixed nav (100) so it runs behind the translucent glass; a radial mask fades
+     it toward the centre so it never crowds the hero copy. Colour tracks the
+     active accent (--bp-acc). CSS-only twinkle (staggered per-element delays, no
+     JS/rAF). */
+  .bp-constellation {
     position: absolute;
     top: 0;
     right: 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 4px;
+    width: min(460px, 60vw);
+    height: 340px;
     z-index: 2;
     pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
+    mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
   }
-  .bp-waveform span {
-    display: block;
-    box-sizing: border-box;
-    width: 5px;
-    /* Max length 176px (104 base + 72 topbar). scaleY floor 0.41 => min rendered
-       height = 72px = the topbar height, so at their shortest the bars sit flush
-       with the nav's bottom edge and grow down from there. Fixed (not clamped) so
-       the 72px floor holds at any width. */
-    height: 176px;
-    border: 1px solid #000;
-    background: var(--bp-acc);
-    opacity: 0.8;
-    transform-origin: top;
-    will-change: transform;
-    /* One shared keyframe + a progressive per-bar delay (set in the markup) makes
-       the wave TRAVEL smoothly across the bars: neighbours differ by only a small
-       phase, so adjacent heights flow into each other instead of jumping. */
-    animation: bp-wf 2.6s ease-in-out infinite;
+  .bp-cst-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .bp-cst-edges line {
+    stroke: var(--bp-acc);
+    stroke-width: 0.75;
+    opacity: 0.16;
+  }
+  /* Shared twinkle: fade + scale, staggered per element via --dur/--dl. */
+  .bp-cst-nodes circle,
+  .bp-star {
+    fill: var(--bp-acc);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: bp-twinkle var(--dur, 4s) ease-in-out infinite;
     animation-delay: var(--dl, 0s);
+    will-change: opacity, transform;
   }
-  @keyframes bp-wf { 0%, 100% { transform: scaleY(0.41); } 50% { transform: scaleY(1); } }
-  /* Gates: honour reduced-motion, drop on mobile (avoids the burger/CTA zone),
-     and freeze under win-perf-mode (Windows) like the other homepage anims. */
+  .bp-star {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    background: var(--bp-acc);
+  }
+  @keyframes bp-twinkle {
+    0%, 100% { opacity: 0.12; transform: scale(0.6); }
+    50% { opacity: 0.9; transform: scale(1); }
+  }
+  /* Gates: honour reduced-motion, drop on mobile (keeps the burger/CTA zone
+     clean), and freeze under win-perf-mode (Windows) like the other homepage
+     anims — a static, faint field in each case. */
   @media (prefers-reduced-motion: reduce) {
-    .bp-waveform span { animation: none; transform: scaleY(0.45); }
+    .bp-cst-nodes circle,
+    .bp-star { animation: none; opacity: 0.5; }
   }
   @media (max-width: 768px) {
-    .bp-waveform { display: none; }
+    .bp-constellation { display: none; }
   }
-  :global(body.win-perf-mode) .bp-waveform span { animation: none; transform: scaleY(0.45); }
+  :global(body.win-perf-mode) .bp-cst-nodes circle,
+  :global(body.win-perf-mode) .bp-star { animation: none; opacity: 0.5; }
 
   .bp-wrap {
     position: relative;
