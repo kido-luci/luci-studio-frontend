@@ -215,12 +215,6 @@ const homepageSchema = {
          in the frontmatter); twinkle is pure CSS (staggered delays, no JS/rAF).
          Gated for reduced-motion, win-perf-mode and mobile (see CSS). -->
     <div class="bp-constellation" aria-hidden="true">
-      <!-- TRIAL (feat/bp-lamp-glow): the tsParticles "links" constellation mounts
-           into this box when the CDN lib loads (init script at file end). It fills
-           the same masked corner; while active (html.bp-tsp-on) it replaces the CSS
-           star field below. Falls back to the CSS field under reduced-motion,
-           win-perf-mode, no-CDN, or localStorage bpStars="css". -->
-      <div id="bp-tsp" class="bp-tsp-mount"></div>
       <svg class="bp-cst-lines" viewBox="0 0 440 300" preserveAspectRatio="none" fill="none">
         <g class="bp-cst-edges">
           <line x1="424" y1="24" x2="360" y2="60" />
@@ -711,15 +705,6 @@ const homepageSchema = {
     -webkit-mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
     mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
   }
-  /* TRIAL — tsParticles mount + CSS↔lib swap. The lib canvas fills this same
-     masked corner box; when it loads (html.bp-tsp-on) the CSS star field hides so
-     only one renders at a time. Both are kept side-by-side so reverting the trial
-     is just dropping the mount + scripts; the CSS field is the untouched fallback. */
-  .bp-tsp-mount { position: absolute; inset: 0; pointer-events: none; }
-  .bp-tsp-mount canvas { width: 100% !important; height: 100% !important; }
-  :global(html:not(.bp-tsp-on)) .bp-tsp-mount { display: none; }
-  :global(html.bp-tsp-on) .bp-cst-lines,
-  :global(html.bp-tsp-on) .bp-star { display: none; }
   .bp-cst-lines {
     position: absolute;
     inset: 0;
@@ -1399,58 +1384,5 @@ const homepageSchema = {
     }
     schedule();
     window.addEventListener("resize", schedule, { passive: true });
-  })();
-</script>
-
-<!-- ── TRIAL: tsParticles "links" constellation (feat/bp-lamp-glow) ──────────────
-     Reuses the same corner box (#bp-tsp inside .bp-constellation) + its radial mask.
-     Loads the slim bundle (~43kB gzip, has the particle-links interaction) from the
-     same CDN as GSAP. Blue #1b56ff matches the fixed blueprint accent; decorative
-     only (no hover/click). Skips — leaving the CSS star field as the fallback —
-     under reduced-motion, win-perf-mode, or localStorage bpStars="css" (an A/B
-     escape hatch: set it + reload to see the CSS version, remove it for the lib). -->
-<script is:inline defer src="https://cdn.jsdelivr.net/npm/@tsparticles/slim@3/tsparticles.slim.bundle.min.js"></script>
-<script is:inline>
-  (function () {
-    var OPTS = {
-      fullScreen: { enable: false },
-      detectRetina: true,
-      fpsLimit: 60,
-      pauseOnBlur: true,
-      pauseOnOutsideViewport: true,
-      background: { color: "transparent" },
-      particles: {
-        number: { value: 46, density: { enable: false } },
-        color: { value: "#1b56ff" },
-        shape: { type: "circle" },
-        opacity: { value: { min: 0.12, max: 0.85 }, animation: { enable: true, speed: 0.9, sync: false } },
-        size: { value: { min: 1, max: 2.6 } },
-        links: { enable: true, color: "#1b56ff", distance: 118, opacity: 0.18, width: 0.7 },
-        move: { enable: true, speed: 0.5, direction: "none", random: true, straight: false, outModes: { default: "out" } }
-      },
-      interactivity: { events: { onHover: { enable: false }, onClick: { enable: false } } },
-      motion: { reduce: { value: true, factor: 4 } }
-    };
-    function start() {
-      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      var winPerf = document.body && document.body.classList.contains("win-perf-mode");
-      var forceCss = false;
-      try { forceCss = localStorage.getItem("bpStars") === "css"; } catch (e) {}
-      if (reduce || winPerf || forceCss) return; // keep the CSS star field (fallback)
-      // The slim .bundle only BUNDLES its plugins — it doesn't auto-register them;
-      // loadSlim(tsParticles) must run first or the particle-links interaction (the
-      // whole point — the constellation lines) is silently dropped. Add the swap
-      // class only once the lib is actually up, so the CSS field stays visible until
-      // the canvas is ready (no empty-corner flash).
-      window.loadSlim(window.tsParticles).then(function () {
-        document.documentElement.classList.add("bp-tsp-on");
-        return window.tsParticles.load({ id: "bp-tsp", options: OPTS });
-      });
-    }
-    var n = 0;
-    (function wait() {
-      if (window.tsParticles && window.loadSlim) { start(); return; }
-      if (n++ < 120) setTimeout(wait, 50);
-    })();
   })();
 </script>
