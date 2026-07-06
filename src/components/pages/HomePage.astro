@@ -656,31 +656,38 @@ const homepageSchema = {
     inset: 0;
     z-index: 0;
     pointer-events: none;
+    /* Desk-lamp glow's horizontal anchor: top-LEFT (0%) on desktop so it pairs
+       with the constellation (also top-left ≥900px, opposite the hero ring);
+       flipped to top-RIGHT (100%) at ≤900px where the ring moves up and both
+       accents shift to the free top-right corner (see media query below). */
+    --bp-lamp-x: 0%;
     background-image:
       linear-gradient(var(--bp-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
       linear-gradient(var(--bp-line2) 1px, transparent 1px),
       linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px),
-      /* Desk-lamp glow at the sheet's top-right corner, dissolving fast so the
-         hero label/copy stay legible (ramp tokens above). Kept compact
-         (650×500) — a bigger ellipse floods half the hero. Plain gradient,
-         no blur filter — win-perf-mode safe. `in oklab` + a same-hue
-         transparent end (--bp-lamp-end) keep the fade clean (no muddy grey),
-         which is what made light mode look smudged before. */
-      radial-gradient(ellipse var(--bp-lamp-size) at 100% 0% in oklab, var(--bp-lamp), var(--bp-lamp-hint), var(--bp-lamp-end) 75%);
+      /* Desk-lamp glow at the sheet's top corner (--bp-lamp-x: 0% desktop /
+         100% ≤900px), dissolving fast so the hero label/copy stay legible
+         (ramp tokens above). Kept compact (650×500) — a bigger ellipse floods
+         half the hero. Plain gradient, no blur filter — win-perf-mode safe.
+         `in oklab` + a same-hue transparent end (--bp-lamp-end) keep the fade
+         clean (no muddy grey), which is what made light mode look smudged before. */
+      radial-gradient(ellipse var(--bp-lamp-size) at var(--bp-lamp-x) 0% in oklab, var(--bp-lamp), var(--bp-lamp-hint), var(--bp-lamp-end) 75%);
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
-  /* Blueprint constellation — a build-time point-field twinkling in the top-LEFT
-     corner, placed diagonally opposite the hero's rotating compass ring (which
-     sits on the right) so the two animations don't crowd each other. The point +
-     line coordinates and the star `right:%` offsets are all authored for a
-     top-RIGHT cluster; `transform: scaleX(-1)` mirrors the whole field — mask
-     included — over to the left, so only the anchor flips to `left: 0` and every
-     coordinate below stays as-is. z-index below the fixed nav (100) so it runs
-     behind the translucent glass; a radial mask fades it toward the centre so it
-     never crowds the hero copy. Colour tracks the active accent (--bp-acc).
-     CSS-only twinkle (staggered per-element delays, no JS/rAF). */
+  /* Blueprint constellation — a build-time twinkling point-field that shares the
+     hero's corner accent with the desk-lamp glow, sitting opposite the rotating
+     ring. Point + line coordinates and the star `right:%` offsets are all
+     authored for a top-RIGHT cluster. Base (desktop ≥900px, ring on the right):
+     `transform: scaleX(-1)` mirrors the whole field — mask included — to the
+     top-LEFT (only the anchor flips to `left: 0`; every coordinate below stays
+     as-is). At ≤900px the hero stacks and the ring moves up, so the field drops
+     the flip and returns to its authored top-RIGHT corner (see media query
+     below). z-index below the fixed nav (100) so it runs behind the translucent
+     glass; a radial mask fades it toward the centre so it never crowds the hero
+     copy. Colour tracks the active accent (--bp-acc). CSS-only twinkle (staggered
+     per-element delays, no JS/rAF). */
   .bp-constellation {
     position: absolute;
     top: 0;
@@ -726,15 +733,19 @@ const homepageSchema = {
     0%, 100% { opacity: 0.12; transform: scale(0.6); }
     50% { opacity: 0.9; transform: scale(1); }
   }
-  /* Gates: honour reduced-motion, drop on mobile (keeps the burger/CTA zone
-     clean), and freeze under win-perf-mode (Windows) like the other homepage
-     anims — a static, faint field in each case. */
+  /* Gates: honour reduced-motion and freeze under win-perf-mode (Windows) like
+     the other homepage anims — a static, faint field in each case. */
   @media (prefers-reduced-motion: reduce) {
     .bp-cst-nodes circle,
     .bp-star { animation: none; opacity: 0.5; }
   }
-  @media (max-width: 768px) {
-    .bp-constellation { display: none; }
+  /* ≤900px the hero stacks and the ring moves up, freeing the top-right corner:
+     shift BOTH accents there — the glow via --bp-lamp-x, and the constellation by
+     dropping its scaleX flip back to the authored top-RIGHT anchor. Constellation
+     now shows on mobile too (was display:none ≤768px). */
+  @media (max-width: 900px) {
+    .bp-grid { --bp-lamp-x: 100%; }
+    .bp-constellation { left: auto; right: 0; transform: none; }
   }
   :global(body.win-perf-mode) .bp-cst-nodes circle,
   :global(body.win-perf-mode) .bp-star { animation: none; opacity: 0.5; }
