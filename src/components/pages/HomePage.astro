@@ -641,8 +641,11 @@ const homepageSchema = {
     display: block;
     box-sizing: border-box;
     width: 12px;
-    /* longer: base length + the topbar height that sits hidden behind the nav */
-    height: calc(clamp(64px, 9vw, 104px) + 72px);
+    /* Max length 176px (104 base + 72 topbar). scaleY floor 0.41 => min rendered
+       height = 72px = the topbar height, so at their shortest the bars sit flush
+       with the nav's bottom edge and grow down from there. Fixed (not clamped) so
+       the 72px floor holds at any width. */
+    height: 176px;
     border: 1px solid #000;
     background: var(--bp-acc);
     opacity: 0.8;
@@ -653,9 +656,9 @@ const homepageSchema = {
   }
   .bp-waveform span.b { animation-name: bp-wf-b; }
   .bp-waveform span.c { animation-name: bp-wf-c; }
-  @keyframes bp-wf-a { 0%, 100% { transform: scaleY(0.16); } 50% { transform: scaleY(1); } }
-  @keyframes bp-wf-b { 0%, 100% { transform: scaleY(0.85); } 45% { transform: scaleY(0.26); } 80% { transform: scaleY(0.6); } }
-  @keyframes bp-wf-c { 0%, 100% { transform: scaleY(0.4); } 30% { transform: scaleY(1); } 70% { transform: scaleY(0.2); } }
+  @keyframes bp-wf-a { 0%, 100% { transform: scaleY(0.41); } 50% { transform: scaleY(1); } }
+  @keyframes bp-wf-b { 0%, 100% { transform: scaleY(0.9); } 45% { transform: scaleY(0.41); } 80% { transform: scaleY(0.62); } }
+  @keyframes bp-wf-c { 0%, 100% { transform: scaleY(0.55); } 30% { transform: scaleY(1); } 70% { transform: scaleY(0.41); } }
   /* Gates: honour reduced-motion, drop on mobile (avoids the burger/CTA zone),
      and freeze under win-perf-mode (Windows) like the other homepage anims. */
   @media (prefers-reduced-motion: reduce) {
