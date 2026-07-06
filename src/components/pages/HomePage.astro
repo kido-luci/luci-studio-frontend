@@ -541,12 +541,13 @@ const homepageSchema = {
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
     /* Desk-lamp glow: a single soft pool of blueprint-blue light near the top of
        the sheet (plain radial-gradient, no blur filter — win-perf-mode safe).
-       Light mode gets a slightly weaker wash — the tint reads stronger on cream. */
+       The cream sheet needs a stronger mix than the dark navy to read at all —
+       12% there ≈ the same perceived softness as 9% on dark. */
     --bp-lamp: color-mix(in srgb, var(--bp-acc) 9%, transparent);
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
-    --bp-lamp: color-mix(in srgb, var(--bp-acc) 7%, transparent);
+    --bp-lamp: color-mix(in srgb, var(--bp-acc) 12%, transparent);
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
