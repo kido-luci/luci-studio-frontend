@@ -547,13 +547,16 @@ const homepageSchema = {
        wash — solid blue on cream reads far heavier than on navy. */
     --bp-lamp: var(--bp-acc);
     --bp-lamp-hint: 20%;
-    --bp-lamp-size: 650px 500px;
+    /* Ellipse radii in vw so the glow scales with device width (≈650×500 /
+       480×370 at the 1440 baseline); both radii off the width keeps the
+       ellipse's aspect constant. */
+    --bp-lamp-size: 45vw 35vw;
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
     --bp-lamp: color-mix(in srgb, var(--bp-acc) 80%, transparent);
     --bp-lamp-hint: 12%;
-    --bp-lamp-size: 480px 370px;
+    --bp-lamp-size: 33vw 26vw;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
