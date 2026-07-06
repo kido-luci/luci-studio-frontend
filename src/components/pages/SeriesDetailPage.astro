@@ -63,6 +63,14 @@ const seoDescription = playlist.description
           <span class="bp-mono bp-sec-label">{t('series.curatedSeries')}</span>
           <span class="bp-rule" aria-hidden="true"></span>
           <span class="bp-mono bp-sec-count">{String(posts.length).padStart(2, '0')} POSTS</span>
+          <span class="bp-cs" aria-hidden="true">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="16" class="bp-cs-guide"></circle>
+              <circle cx="24" cy="24" r="16" class="bp-cs-draw"></circle>
+              <g class="bp-cs-arm"><line x1="24" y1="24" x2="40" y2="24"></line><circle cx="40" cy="24" r="2.4" class="bp-cs-tip"></circle></g>
+              <circle cx="24" cy="24" r="1.8" class="bp-cs-pivot"></circle>
+            </svg>
+          </span>
         </div>
 
         <h1 class="bp-display bp-sd-title" style={needsVietnameseSerif(playlist.title) ? "font-family:system-ui,'Segoe UI',sans-serif" : undefined}>{playlist.title}<span class="bp-acc-dot">.</span></h1>
@@ -194,6 +202,20 @@ const seoDescription = playlist.description
   .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
   .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
   .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); white-space: nowrap; }
+  /* Section-head compass instrument (mirrors the homepage §05 compass, sized
+     down and inline at the row's end). Frozen under reduced-motion / win-perf. */
+  .bp-cs { width: 26px; height: 26px; flex: none; }
+  .bp-cs svg { display: block; width: 100%; height: 100%; }
+  .bp-cs-guide { fill: none; stroke: var(--bp-hair); stroke-width: 1.2; }
+  .bp-cs-draw { fill: none; stroke: var(--bp-acc); stroke-width: 1.8; stroke-linecap: round; stroke-dasharray: 20 81; transform-box: view-box; transform-origin: center; animation: bpCsSpin 5s linear infinite; }
+  .bp-cs-arm { transform-box: view-box; transform-origin: center; animation: bpCsSpin 5s linear infinite; }
+  .bp-cs-arm line { stroke: var(--bp-ink); stroke-width: 1.4; stroke-opacity: 0.55; }
+  .bp-cs-tip { fill: var(--bp-acc); }
+  .bp-cs-pivot { fill: var(--bp-ink); fill-opacity: 0.6; }
+  @keyframes bpCsSpin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .bp-cs-draw, .bp-cs-arm { animation: none; } }
+  :global(body.win-perf-mode) .bp-cs-draw,
+  :global(body.win-perf-mode) .bp-cs-arm { animation: none; }
 
   /* ── Header ── */
   .bp-sd-head { margin-bottom: clamp(2.5rem, 5vw, 4rem); }

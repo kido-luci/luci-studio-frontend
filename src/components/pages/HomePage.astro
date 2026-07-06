@@ -220,9 +220,10 @@ const homepageSchema = {
               <circle cx="210" cy="210" r="200" class="bp-svg-acc bp-svg-spin" stroke-opacity="0.5" stroke-dasharray="2 9"></circle>
               <rect x="280" y="256" width="12" height="12" stroke-opacity="0.22"></rect>
             </g>
+            <circle cx="210" cy="210" r="6" class="bp-svg-ping"></circle>
             <circle cx="210" cy="210" r="5" class="bp-svg-orange-fill"></circle>
-            <circle cx="306" cy="114" r="4" class="bp-svg-acc-fill"></circle>
-            <circle cx="138" cy="300" r="3" class="bp-svg-orange-fill"></circle>
+            <g class="bp-orbit bp-orbit--a"><circle cx="306" cy="114" r="4" class="bp-svg-acc-fill"></circle></g>
+            <g class="bp-orbit bp-orbit--b"><circle cx="138" cy="300" r="3" class="bp-svg-orange-fill"></circle></g>
           </svg>
           <span class="bp-mono bp-diagram-ann bp-diagram-ann--tr">R = 96px<br />◦ node.02</span>
           <span class="bp-mono bp-diagram-ann bp-diagram-ann--bl">Ø 400<br />tol ±0.5</span>
@@ -475,10 +476,18 @@ const homepageSchema = {
 
     <!-- ===================== §05 STUDIO ===================== -->
     <section class="bp-wrap bp-section" id="studio">
-      <div class="bp-sec-head" data-reveal>
+      <div class="bp-sec-head bp-sec-head--inst" data-reveal>
         <span class="bp-dot" aria-hidden="true"></span>
         <span class="bp-mono bp-sec-label">§05 — STUDIO</span>
         <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-compass" aria-hidden="true">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="16" class="bp-compass-guide"></circle>
+            <circle cx="24" cy="24" r="16" class="bp-compass-draw"></circle>
+            <g class="bp-compass-arm"><line x1="24" y1="24" x2="40" y2="24"></line><circle cx="40" cy="24" r="2.4" class="bp-compass-tip"></circle></g>
+            <circle cx="24" cy="24" r="1.8" class="bp-compass-pivot"></circle>
+          </svg>
+        </span>
       </div>
       <div class="bp-studio">
         <p class="bp-display bp-studio-statement" data-reveal>
@@ -640,6 +649,17 @@ const homepageSchema = {
   }
   .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
   .bp-dot.is-orange { background: var(--bp-orange); }
+  /* §05 header instrument: a small compass whose arm sweeps and traces its ring
+     (echoes the "measure twice" studio statement). Guarded like the hero SVG. */
+  .bp-sec-head--inst { position: relative; }
+  .bp-compass { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; pointer-events: none; }
+  .bp-compass svg { display: block; width: 100%; height: 100%; }
+  .bp-compass-guide { fill: none; stroke: var(--bp-hair); stroke-width: 1; }
+  .bp-compass-draw { fill: none; stroke: var(--bp-acc); stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 20 81; transform-box: view-box; transform-origin: center; animation: lu-spin 5s linear infinite; }
+  .bp-compass-arm { transform-box: view-box; transform-origin: center; animation: lu-spin 5s linear infinite; }
+  .bp-compass-arm line { stroke: var(--bp-ink); stroke-width: 1.2; stroke-opacity: 0.55; }
+  .bp-compass-tip { fill: var(--bp-orange); }
+  .bp-compass-pivot { fill: var(--bp-ink); fill-opacity: 0.6; }
   .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; color: var(--bp-acc); white-space: nowrap; }
   .bp-sec-label.is-orange { color: var(--bp-orange); }
   .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
@@ -752,6 +772,14 @@ const homepageSchema = {
   .bp-svg-acc-fill { fill: var(--bp-acc); }
   .bp-svg-orange-fill { fill: var(--bp-orange); }
   .bp-svg-spin { transform-box: fill-box; transform-origin: center; animation: lu-spin 44s linear infinite; }
+  /* Orbiting nodes + center ping — rotate/scale about the SVG centre (view-box
+     origin), so they trace the guide rings instead of spinning in place. When
+     motion is off (reduce / win-perf) they rest at their authored coords = the
+     prior static diagram. */
+  .bp-orbit { transform-box: view-box; transform-origin: center; }
+  .bp-orbit--a { animation: lu-spin 30s linear infinite; }
+  .bp-orbit--b { animation: lu-spin 24s linear infinite reverse; }
+  .bp-svg-ping { fill: none; stroke: var(--bp-orange); stroke-width: 1.4; opacity: 0; transform-box: view-box; transform-origin: center; animation: lu-ping 2.8s ease-out infinite; }
   .bp-diagram-ann { position: absolute; font-size: 10px; line-height: 1.35; letter-spacing: 0.04em; color: var(--bp-faint); }
   .bp-diagram-ann--tr { top: 12%; right: -2%; text-align: left; }
   .bp-diagram-ann--bl { bottom: 12%; left: -2%; text-align: right; }
@@ -999,10 +1027,16 @@ const homepageSchema = {
 
   /* ── connectors (dimension lines between sections) ── */
   .bp-conn-wrap { position: relative; z-index: 1; display: flex; justify-content: center; padding: 6px 0; }
-  .bp-conn { width: 1px; height: 44px; background: linear-gradient(var(--bp-hair), transparent); display: block; }
+  /* Section connectors read as vertical drafting "dimension" marks: an extension
+     tick at the top and a small measurement node at the bottom tip. The GSAP
+     scaleY draw (see homeScrollAnimations) still animates the whole mark in. */
+  .bp-conn { position: relative; width: 1px; height: 44px; background: linear-gradient(var(--bp-hair), color-mix(in srgb, var(--bp-hair) 35%, transparent)); display: block; }
+  .bp-conn::before { content: ""; position: absolute; top: 0; left: 50%; width: 10px; height: 1px; margin-left: -5px; background: color-mix(in srgb, var(--bp-acc) 50%, transparent); }
+  .bp-conn::after { content: ""; position: absolute; bottom: -1.5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--bp-acc); }
 
   /* ── keyframes ── */
   @keyframes lu-spin { to { transform: rotate(360deg); } }
+  @keyframes lu-ping { 0% { transform: scale(1); opacity: 0.55; } 70% { opacity: 0; } 100% { transform: scale(3.4); opacity: 0; } }
   @keyframes lu-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
 
   /* ── responsive ── */
@@ -1025,11 +1059,15 @@ const homepageSchema = {
     .bp-write-read { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .bp-svg-spin, .bp-scroll-arrow { animation: none !important; }
+    .bp-svg-spin, .bp-orbit, .bp-svg-ping, .bp-compass-arm, .bp-compass-draw, .bp-scroll-arrow { animation: none !important; }
     [data-art-card] { opacity: 1; }
     [data-art-card].card-visible { animation: none; }
   }
-  :global(body.win-perf-mode) .bp-svg-spin { animation: none; }
+  :global(body.win-perf-mode) .bp-svg-spin,
+  :global(body.win-perf-mode) .bp-orbit,
+  :global(body.win-perf-mode) .bp-svg-ping,
+  :global(body.win-perf-mode) .bp-compass-arm,
+  :global(body.win-perf-mode) .bp-compass-draw { animation: none; }
 </style>
 
 <!-- Home scroll-animation hidden initial-states — gated on html.home-anim so JS-off /
