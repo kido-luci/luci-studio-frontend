@@ -542,16 +542,16 @@ const homepageSchema = {
     /* Desk-lamp glow ramp: peak color + a gradient interpolation hint. The
        hint (midpoint position) curves the falloff smoothly — a literal mid
        color stop kinks the ramp's slope there, which the eye amplifies into a
-       visible band (Mach band) on the cream sheet. Light mode: softer 80%
-       peak + earlier hint, so the core stays dense but the spread is a faint
-       wash — solid blue on cream reads far heavier than on navy. */
+       visible band (Mach band) on the cream sheet. Light mode: same
+       full-strength peak but an earlier hint + smaller ellipse, so the core
+       stays dense while the spread dissolves to a faint wash. */
     --bp-lamp: var(--bp-acc);
     --bp-lamp-hint: 20%;
     --bp-lamp-size: 650px 500px;
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
-    --bp-lamp: color-mix(in srgb, var(--bp-acc) 80%, transparent);
+    --bp-lamp: var(--bp-acc);
     --bp-lamp-hint: 12%;
     --bp-lamp-size: 480px 370px;
     --bp-line: rgba(22, 32, 43, 0.05);
