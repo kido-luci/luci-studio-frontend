@@ -617,8 +617,9 @@ const homepageSchema = {
        is blueprint blue #1b56ff at alpha 0, so the fade stays blue the whole way.
        The gradient also interpolates `in oklab` (see .bp-grid) for a
        perceptually smooth ramp with no grey midtone. The hint curves the
-       falloff; light mode keeps the full-strength peak but an earlier hint +
-       smaller ellipse, so the core stays dense while the spread dissolves clean. */
+       falloff; light mode pushes the hint way out + grows the ellipse for a
+       dense, saturated corner pool (white stars ride on top) — same-hue
+       transparent end keeps it smudge-free even when intensified. */
     --bp-lamp: var(--bp-acc);
     --bp-lamp-hint: 20%;
     --bp-lamp-size: 650px 500px;
@@ -627,8 +628,8 @@ const homepageSchema = {
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
     --bp-lamp: var(--bp-acc);
-    --bp-lamp-hint: 12%;
-    --bp-lamp-size: 480px 370px;
+    --bp-lamp-hint: 48%;
+    --bp-lamp-size: 540px 430px;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
@@ -715,6 +716,17 @@ const homepageSchema = {
     display: block;
     border-radius: 50%;
     background: var(--bp-acc);
+  }
+  /* Light mode: the corner pool is a dense blue, so the whole star chart flips to
+     white to read on top of it. Dark mode keeps blue-on-navy (untouched). */
+  :global(html.bp-home.light-mode) .bp-star,
+  :global(html.bp-home.light-mode) .bp-cst-nodes circle {
+    background: #fff;
+    fill: #fff;
+  }
+  :global(html.bp-home.light-mode) .bp-cst-edges line {
+    stroke: #fff;
+    opacity: 0.45;
   }
   @keyframes bp-twinkle {
     0%, 100% { opacity: 0.12; transform: scale(0.6); }
