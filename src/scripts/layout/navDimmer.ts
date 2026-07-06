@@ -58,11 +58,12 @@ export function initNavDimmer() {
 
 			if (scrollY > 80) {
 				nav.style.background = 'var(--nav-bg-scroll)';
-				if (!isWindows) nav.style.backdropFilter = 'blur(32px)';
+				if (!isWindows) nav.style.backdropFilter = 'blur(12px)';
 			} else {
 				nav.style.background = 'var(--nav-bg)';
-				// Match the CSS base blur so the top landing stays see-through after a scroll.
-				if (!isWindows) nav.style.backdropFilter = 'blur(5px)';
+				// No blur at the top landing so the drafting sheet (grid + constellation)
+				// stays sharp behind the translucent nav — you see straight through.
+				if (!isWindows) nav.style.backdropFilter = 'none';
 			}
 		});
 	}, { passive: true });
