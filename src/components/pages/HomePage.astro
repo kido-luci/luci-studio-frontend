@@ -539,15 +539,20 @@ const homepageSchema = {
     --bp-muted: color-mix(in srgb, var(--bp-ink) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
-    /* Desk-lamp glow ramp: peak color + a gradient interpolation hint. The
-       hint (midpoint position) curves the falloff smoothly — a literal mid
-       color stop kinks the ramp's slope there, which the eye amplifies into a
-       visible band (Mach band) on the cream sheet. Light mode: same
-       full-strength peak but an earlier hint + smaller ellipse, so the core
-       stays dense while the spread dissolves to a faint wash. */
+    /* Desk-lamp glow ramp: peak color, a gradient interpolation hint, and a
+       transparent END that stays the SAME hue as the peak. The end is NOT the
+       bare `transparent` keyword — that resolves to transparent *black*, so the
+       fade drifts through muddy blue-grey; on the cream sheet that reads as a
+       dirty smudge (invisible on navy, hence dark looked fine). rgba(27,86,255,0)
+       is blueprint blue #1b56ff at alpha 0, so the fade stays blue the whole way.
+       The gradient also interpolates `in oklab` (see .bp-grid) for a
+       perceptually smooth ramp with no grey midtone. The hint curves the
+       falloff; light mode keeps the full-strength peak but an earlier hint +
+       smaller ellipse, so the core stays dense while the spread dissolves clean. */
     --bp-lamp: var(--bp-acc);
     --bp-lamp-hint: 20%;
     --bp-lamp-size: 650px 500px;
+    --bp-lamp-end: rgba(27, 86, 255, 0); /* transparent blueprint blue (== --bp-acc, alpha 0) */
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
@@ -590,8 +595,10 @@ const homepageSchema = {
       /* Desk-lamp glow at the sheet's top-right corner, dissolving fast so the
          hero label/copy stay legible (ramp tokens above). Kept compact
          (650×500) — a bigger ellipse floods half the hero. Plain gradient,
-         no blur filter — win-perf-mode safe. */
-      radial-gradient(ellipse var(--bp-lamp-size) at 100% 0%, var(--bp-lamp), var(--bp-lamp-hint), transparent 75%);
+         no blur filter — win-perf-mode safe. `in oklab` + a same-hue
+         transparent end (--bp-lamp-end) keep the fade clean (no muddy grey),
+         which is what made light mode look smudged before. */
+      radial-gradient(ellipse var(--bp-lamp-size) at 100% 0% in oklab, var(--bp-lamp), var(--bp-lamp-hint), var(--bp-lamp-end) 75%);
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
