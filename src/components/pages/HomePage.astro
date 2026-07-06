@@ -547,8 +547,6 @@ const homepageSchema = {
        wash — solid blue on cream reads far heavier than on navy. */
     --bp-lamp: var(--bp-acc);
     --bp-lamp-hint: 20%;
-    /* Ellipse radii per device tier — desktop here, tablet/mobile overrides
-       in the media queries below the light-mode block. */
     --bp-lamp-size: 650px 500px;
   }
   :global(html.bp-home.light-mode) {
@@ -560,16 +558,6 @@ const homepageSchema = {
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
     --bp-card: #e8e6df;
-  }
-  /* Lamp-glow size tiers: tablet ≤1024, mobile ≤768 (site's existing
-     breakpoints); aspect stays ~1.3 across tiers. */
-  @media (max-width: 1024px) {
-    :global(html.bp-home) { --bp-lamp-size: 460px 355px; }
-    :global(html.bp-home.light-mode) { --bp-lamp-size: 340px 260px; }
-  }
-  @media (max-width: 768px) {
-    :global(html.bp-home) { --bp-lamp-size: 280px 215px; }
-    :global(html.bp-home.light-mode) { --bp-lamp-size: 210px 160px; }
   }
   .bp {
     position: relative;
