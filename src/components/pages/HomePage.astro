@@ -622,22 +622,16 @@ const homepageSchema = {
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
-  /* Signal waveform — 12 bars hanging from the top edge into the top-right
-     corner, aligned to the content's right edge (same 1280 + gutter as the nav)
-     so they sit under the nav's controls. z-index below the fixed nav (100) so
-     they run behind the translucent glass. transform-origin:top => they grow
-     DOWN. Slow, desynced durations/delays read as random music "levels". */
+  /* Signal waveform — 12 bars hanging from the top edge, flush to the sheet's
+     right corner. z-index below the fixed nav (100) so they run behind the
+     translucent glass; the top ~topbar-height is hidden behind it, which is why
+     the bars are lengthened by that much below. transform-origin:top => they
+     grow DOWN. Slow, desynced durations/delays read as random music "levels". */
   .bp-waveform {
     position: absolute;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 1280px;
-    padding: 0 clamp(20px, 5vw, 48px);
-    box-sizing: border-box;
+    right: 0;
     display: flex;
-    justify-content: flex-end;
     align-items: flex-start;
     gap: 5px;
     z-index: 2;
@@ -645,9 +639,11 @@ const homepageSchema = {
   }
   .bp-waveform span {
     display: block;
-    width: 6px;
-    height: clamp(64px, 9vw, 104px);
-    border-radius: 0 0 3px 3px;
+    box-sizing: border-box;
+    width: 12px;
+    /* longer: base length + the topbar height that sits hidden behind the nav */
+    height: calc(clamp(64px, 9vw, 104px) + 72px);
+    border: 1px solid #000;
     background: var(--bp-acc);
     opacity: 0.8;
     transform-origin: top;
