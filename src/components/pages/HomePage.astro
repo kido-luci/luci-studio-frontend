@@ -571,11 +571,11 @@ const homepageSchema = {
       linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
       linear-gradient(var(--bp-line2) 1px, transparent 1px),
       linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px),
-      /* Desk-lamp glow: fully opaque blueprint blue at the sheet's top-left
+      /* Desk-lamp glow: fully opaque blueprint blue at the sheet's top-right
          corner, dissolving fast so the hero label/copy stay legible. Kept
          compact (650×500) — a bigger ellipse floods half the hero. Plain
          gradient, no blur filter — win-perf-mode safe; same ramp both modes. */
-      radial-gradient(ellipse 650px 500px at 0% 0%, var(--bp-acc), color-mix(in srgb, var(--bp-acc) 50%, transparent) 22%, transparent 72%);
+      radial-gradient(ellipse 650px 500px at 100% 0%, var(--bp-acc), color-mix(in srgb, var(--bp-acc) 50%, transparent) 22%, transparent 72%);
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
