@@ -145,7 +145,11 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			// Initialize theme + color scheme immediately to prevent flash
 			(function() {
 				const savedTheme = localStorage.getItem('theme');
-				const theme = savedTheme || 'light';
+				// Priority: explicit user choice → OS preference → dark when the OS
+				// theme can't be read.
+				const theme = (savedTheme === 'light' || savedTheme === 'dark')
+					? savedTheme
+					: (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
 				if (theme === 'light') {
 					document.documentElement.classList.add('light-mode');
 					// We'll also add it to body once it's available
