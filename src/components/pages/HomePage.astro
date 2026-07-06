@@ -617,9 +617,9 @@ const homepageSchema = {
        is blueprint blue #1b56ff at alpha 0, so the fade stays blue the whole way.
        The gradient also interpolates `in oklab` (see .bp-grid) for a
        perceptually smooth ramp with no grey midtone. The hint curves the
-       falloff; light mode pushes the hint way out + grows the ellipse for a
-       dense, saturated corner pool (white stars ride on top) — same-hue
-       transparent end keeps it smudge-free even when intensified. */
+       falloff. Light mode hides this glow entirely (--bp-lamp set to a
+       transparent blue below) so the cream sheet shows only the grid +
+       the twinkling constellation; dark mode keeps the blue corner pool. */
     --bp-lamp: var(--bp-acc);
     --bp-lamp-hint: 20%;
     --bp-lamp-size: 650px 500px;
@@ -627,9 +627,7 @@ const homepageSchema = {
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
-    --bp-lamp: var(--bp-acc);
-    --bp-lamp-hint: 48%;
-    --bp-lamp-size: 540px 430px;
+    --bp-lamp: rgba(27, 86, 255, 0); /* hide the corner glow on the cream sheet — the twinkling stars carry the corner alone */
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
@@ -717,17 +715,8 @@ const homepageSchema = {
     border-radius: 50%;
     background: var(--bp-acc);
   }
-  /* Light mode: the corner pool is a dense blue, so the whole star chart flips to
-     white to read on top of it. Dark mode keeps blue-on-navy (untouched). */
-  :global(html.bp-home.light-mode) .bp-star,
-  :global(html.bp-home.light-mode) .bp-cst-nodes circle {
-    background: #fff;
-    fill: #fff;
-  }
-  :global(html.bp-home.light-mode) .bp-cst-edges line {
-    stroke: #fff;
-    opacity: 0.45;
-  }
+  /* Light mode has no corner glow (see --bp-lamp above), so the stars stay the
+     default blueprint blue — blue-on-cream reads fine; no white flip needed. */
   @keyframes bp-twinkle {
     0%, 100% { opacity: 0.12; transform: scale(0.6); }
     50% { opacity: 0.9; transform: scale(1); }
