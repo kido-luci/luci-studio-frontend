@@ -183,16 +183,22 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
   /* Scroll reveal (triggered by .tl-visible on the wrapper) */
   @keyframes tlDotPop    { from { opacity: 0; transform: scale(0); }                         to { opacity: 1; transform: scale(1); } }
   @keyframes tlLineFade  { from { opacity: 0; }                                              to { opacity: 1; } }
+  @keyframes tlLineDraw  { from { opacity: 1; transform: scaleY(0); }                        to { opacity: 1; transform: scaleY(1); } }
   @keyframes tlPeriodIn  { from { opacity: 0; transform: translateX(14px); }                to { opacity: 1; transform: translateX(0); } }
   @keyframes tlCardIn    { from { opacity: 0; transform: translateX(36px) translateY(10px); } to { opacity: 1; transform: translateX(0) translateY(0); } }
 
   .tl-dot         { opacity: 0; transform: scale(0); }
-  .tl-line        { opacity: 0; }
+  .tl-line        { opacity: 0; transform: scaleY(0); transform-origin: top center; }
   .tl-period      { opacity: 0; transform: translateX(14px); }
   .tl-card-reveal { opacity: 0; transform: translateX(36px) translateY(10px); }
 
   .tl-visible .tl-dot         { animation: tlDotPop   0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0s    both; }
-  .tl-visible .tl-line        { animation: tlLineFade 0.5s  cubic-bezier(0.16, 1, 0.3, 1)     0.22s both; }
+  .tl-visible .tl-line        { animation: tlLineDraw 0.7s  cubic-bezier(0.16, 1, 0.3, 1)     0.22s both; }
+  /* Reduced motion: keep the original opacity fade (no new movement). */
+  @media (prefers-reduced-motion: reduce) {
+    .tl-line { transform: none; }
+    .tl-visible .tl-line { animation: tlLineFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both; }
+  }
   .tl-visible .tl-period      { animation: tlPeriodIn 0.4s  cubic-bezier(0.16, 1, 0.3, 1)     0.12s both; }
   .tl-visible .tl-card-reveal { animation: tlCardIn   0.65s cubic-bezier(0.16, 1, 0.3, 1)     0.18s both; }
 
