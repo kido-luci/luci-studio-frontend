@@ -61,7 +61,8 @@ export function initNavDimmer() {
 				if (!isWindows) nav.style.backdropFilter = 'blur(32px)';
 			} else {
 				nav.style.background = 'var(--nav-bg)';
-				if (!isWindows) nav.style.backdropFilter = 'blur(16px)';
+				// Match the CSS base blur so the top landing stays see-through after a scroll.
+				if (!isWindows) nav.style.backdropFilter = 'blur(5px)';
 			}
 		});
 	}, { passive: true });
