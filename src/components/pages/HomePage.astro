@@ -539,9 +539,14 @@ const homepageSchema = {
     --bp-muted: color-mix(in srgb, var(--bp-ink) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
+    /* Desk-lamp glow: a single soft pool of blueprint-blue light near the top of
+       the sheet (plain radial-gradient, no blur filter — win-perf-mode safe).
+       Dark mode only; light mode's cream paper washes it out, so it's disabled. */
+    --bp-lamp: color-mix(in srgb, var(--bp-acc) 9%, transparent);
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
+    --bp-lamp: transparent;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
@@ -570,8 +575,9 @@ const homepageSchema = {
       linear-gradient(var(--bp-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
       linear-gradient(var(--bp-line2) 1px, transparent 1px),
-      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
-    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px),
+      radial-gradient(ellipse 1100px 720px at 22% 140px, var(--bp-lamp), transparent 70%);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
   .bp-wrap {
