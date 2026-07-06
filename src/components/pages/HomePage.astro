@@ -1209,6 +1209,13 @@ const homepageSchema = {
   .quilt-art-item.is-wide { grid-column: span 2; }
   .quilt-art-item.is-tall { grid-row: span 2; }
   .quilt-art-item.is-big { grid-column: span 2; grid-row: span 2; }
+  /* Mobile 2-col grid: a half-width, 2-row-tall portrait (.is-tall) strands a single
+     cell that a following full-width banner can't backfill (even with dense flow),
+     leaving a hole. Drop the row-span here so every multi-cell tile spans the full
+     width and the grid packs clean. */
+  @media (max-width: 639.98px) {
+    .quilt-art-item.is-tall { grid-row: auto; }
+  }
   .art-img-frame {
     height: 100%;
     border: 1px solid color-mix(in srgb, var(--bp-acc) 35%, transparent);
