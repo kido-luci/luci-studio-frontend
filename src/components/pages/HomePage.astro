@@ -34,12 +34,17 @@ const bpRand = (() => {
 const bpStars = Array.from({ length: 40 }, () => {
   const rx = Math.pow(bpRand(), 0.6); // 0 = hugging the right edge
   const ry = Math.pow(bpRand(), 0.6); // 0 = hugging the top edge
+  const da = bpRand() * 6.283, dd = 6 + bpRand() * 10; // drift heading + 6–16px radius
   return {
     right: +(rx * 97).toFixed(1),
     top: +(ry * 95).toFixed(1),
     size: +(1 + bpRand() * 1.8).toFixed(1),
     dur: +(2.6 + bpRand() * 2.8).toFixed(2),
     dl: +(-bpRand() * 5).toFixed(2),
+    dx: +(Math.cos(da) * dd).toFixed(1), // drift vector (px), used by bp-star-drift
+    dy: +(Math.sin(da) * dd).toFixed(1),
+    ddur: +(9 + bpRand() * 8).toFixed(2), // 9–17s slow float, independent of the twinkle
+    ddl: +(-bpRand() * 17).toFixed(2), // negative offset desyncs each star's drift
   };
 });
 
@@ -240,7 +245,7 @@ const homepageSchema = {
         bpStars.map((s) => (
           <span
             class="bp-star"
-            style={`right:${s.right}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;--dur:${s.dur}s;--dl:${s.dl}s`}
+            style={`right:${s.right}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;--dur:${s.dur}s;--dl:${s.dl}s;--dx:${s.dx}px;--dy:${s.dy}px;--ddur:${s.ddur}s;--ddl:${s.ddl}s`}
           />
         ))
       }
@@ -710,6 +715,7 @@ const homepageSchema = {
     stroke: var(--bp-acc);
     stroke-width: 0.75;
     opacity: 0.16;
+    animation: bp-line-pulse 6s ease-in-out infinite;
   }
   /* Shared twinkle: fade + scale, staggered per element via --dur/--dl. */
   .bp-cst-nodes circle,
@@ -726,6 +732,15 @@ const homepageSchema = {
     display: block;
     border-radius: 50%;
     background: var(--bp-acc);
+    /* Loose "dust" stars (no connecting lines) drift on a slow, independent
+       timeline (individual `translate`) while they twinkle (individual `scale`
+       + opacity) — two separate animations on distinct properties, so they
+       compose AND desync for an organic float. The 9 linked SVG nodes keep the
+       plain in-place twinkle (shared rule above) so their connectors stay put. */
+    animation:
+      bp-star-twinkle var(--dur, 4s) ease-in-out infinite var(--dl, 0s),
+      bp-star-drift var(--ddur, 12s) ease-in-out infinite var(--ddl, 0s);
+    will-change: translate, scale, opacity;
   }
   /* Light mode has no corner glow (see --bp-lamp above), so the stars stay the
      default blueprint blue — blue-on-cream reads fine; no white flip needed. */
@@ -733,11 +748,35 @@ const homepageSchema = {
     0%, 100% { opacity: 0.12; transform: scale(0.6); }
     50% { opacity: 0.9; transform: scale(1); }
   }
+  /* Loose-star twinkle via the individual `scale` property (not `transform`), so
+     it composes with the independent `translate` drift below instead of the two
+     fighting over a single `transform`. */
+  @keyframes bp-star-twinkle {
+    0%, 100% { opacity: 0.12; scale: 0.6; }
+    50% { opacity: 0.9; scale: 1; }
+  }
+  /* Slow wander: eased through a few fractions of the per-star drift vector
+     (--dx/--dy) and back, on its own long duration so it never syncs with the
+     twinkle. Individual `translate` composes with the `scale` above. */
+  @keyframes bp-star-drift {
+    0% { translate: 0 0; }
+    25% { translate: var(--dx, 8px) var(--dy, -6px); }
+    50% { translate: calc(var(--dx, 8px) * -0.35) calc(var(--dy, -6px) * 0.8); }
+    75% { translate: calc(var(--dx, 8px) * 0.65) calc(var(--dy, -6px) * -0.45); }
+    100% { translate: 0 0; }
+  }
+  /* Connector lines breathe faintly so the fixed node structure feels alive
+     alongside the drifting dust. */
+  @keyframes bp-line-pulse {
+    0%, 100% { opacity: 0.08; }
+    50% { opacity: 0.22; }
+  }
   /* Gates: honour reduced-motion and freeze under win-perf-mode (Windows) like
      the other homepage anims — a static, faint field in each case. */
   @media (prefers-reduced-motion: reduce) {
     .bp-cst-nodes circle,
     .bp-star { animation: none; opacity: 0.5; }
+    .bp-cst-edges line { animation: none; }
   }
   /* ≤900px the hero stacks and the ring moves up, freeing the top-right corner:
      shift BOTH accents there — the glow via --bp-lamp-x, and the constellation by
@@ -749,6 +788,7 @@ const homepageSchema = {
   }
   :global(body.win-perf-mode) .bp-cst-nodes circle,
   :global(body.win-perf-mode) .bp-star { animation: none; opacity: 0.5; }
+  :global(body.win-perf-mode) .bp-cst-edges line { animation: none; }
 
   .bp-wrap {
     position: relative;
