@@ -176,24 +176,36 @@ const homepageSchema = {
   <main class="bp" data-api-url={API_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
 
-    <!-- Signal waveform: 12 bars hanging from the sheet's true top edge, animating
+    <!-- Signal waveform: 24 bars hanging from the sheet's true top edge, animating
          downward (transform-origin:top). Anchored at y=0 so they slip behind the
-         translucent fixed nav in the top-right corner. CSS-only — staggered
-         durations/delays fake the random "levels", no JS/rAF. Gated for
-         reduced-motion, win-perf-mode and mobile (see CSS). -->
+         translucent fixed nav in the top-right corner. CSS-only — one shared
+         keyframe + a progressive per-bar delay makes a smooth travelling wave (no
+         JS/rAF). Gated for reduced-motion, win-perf-mode and mobile (see CSS). -->
     <div class="bp-waveform" aria-hidden="true">
-      <span style="--d:3.2s;--dl:-0.4s"></span>
-      <span class="b" style="--d:3.8s;--dl:-1.2s"></span>
-      <span class="c" style="--d:2.8s;--dl:-0.7s"></span>
-      <span style="--d:4s;--dl:-2s"></span>
-      <span class="b" style="--d:3s;--dl:-0.2s"></span>
-      <span class="c" style="--d:3.6s;--dl:-1.5s"></span>
-      <span style="--d:2.8s;--dl:-0.9s"></span>
-      <span class="b" style="--d:4.2s;--dl:-0.5s"></span>
-      <span class="c" style="--d:3.4s;--dl:-1.8s"></span>
-      <span style="--d:3.9s;--dl:-0.3s"></span>
-      <span class="b" style="--d:2.9s;--dl:-1.1s"></span>
-      <span class="c" style="--d:4.4s;--dl:-2.3s"></span>
+      <span style="--dl:0s"></span>
+      <span style="--dl:-0.2s"></span>
+      <span style="--dl:-0.4s"></span>
+      <span style="--dl:-0.6s"></span>
+      <span style="--dl:-0.8s"></span>
+      <span style="--dl:-1s"></span>
+      <span style="--dl:-1.2s"></span>
+      <span style="--dl:-1.4s"></span>
+      <span style="--dl:-1.6s"></span>
+      <span style="--dl:-1.8s"></span>
+      <span style="--dl:-2s"></span>
+      <span style="--dl:-2.2s"></span>
+      <span style="--dl:-2.4s"></span>
+      <span style="--dl:-2.6s"></span>
+      <span style="--dl:-2.8s"></span>
+      <span style="--dl:-3s"></span>
+      <span style="--dl:-3.2s"></span>
+      <span style="--dl:-3.4s"></span>
+      <span style="--dl:-3.6s"></span>
+      <span style="--dl:-3.8s"></span>
+      <span style="--dl:-4s"></span>
+      <span style="--dl:-4.2s"></span>
+      <span style="--dl:-4.4s"></span>
+      <span style="--dl:-4.6s"></span>
     </div>
 
     <!-- ===================== HERO ===================== -->
@@ -633,14 +645,14 @@ const homepageSchema = {
     right: 0;
     display: flex;
     align-items: flex-start;
-    gap: 5px;
+    gap: 4px;
     z-index: 2;
     pointer-events: none;
   }
   .bp-waveform span {
     display: block;
     box-sizing: border-box;
-    width: 12px;
+    width: 5px;
     /* Max length 176px (104 base + 72 topbar). scaleY floor 0.41 => min rendered
        height = 72px = the topbar height, so at their shortest the bars sit flush
        with the nav's bottom edge and grow down from there. Fixed (not clamped) so
@@ -651,14 +663,13 @@ const homepageSchema = {
     opacity: 0.8;
     transform-origin: top;
     will-change: transform;
-    animation: bp-wf-a var(--d, 3.2s) ease-in-out infinite;
+    /* One shared keyframe + a progressive per-bar delay (set in the markup) makes
+       the wave TRAVEL smoothly across the bars: neighbours differ by only a small
+       phase, so adjacent heights flow into each other instead of jumping. */
+    animation: bp-wf 2.6s ease-in-out infinite;
     animation-delay: var(--dl, 0s);
   }
-  .bp-waveform span.b { animation-name: bp-wf-b; }
-  .bp-waveform span.c { animation-name: bp-wf-c; }
-  @keyframes bp-wf-a { 0%, 100% { transform: scaleY(0.41); } 50% { transform: scaleY(1); } }
-  @keyframes bp-wf-b { 0%, 100% { transform: scaleY(0.9); } 45% { transform: scaleY(0.41); } 80% { transform: scaleY(0.62); } }
-  @keyframes bp-wf-c { 0%, 100% { transform: scaleY(0.55); } 30% { transform: scaleY(1); } 70% { transform: scaleY(0.41); } }
+  @keyframes bp-wf { 0%, 100% { transform: scaleY(0.41); } 50% { transform: scaleY(1); } }
   /* Gates: honour reduced-motion, drop on mobile (avoids the burger/CTA zone),
      and freeze under win-perf-mode (Windows) like the other homepage anims. */
   @media (prefers-reduced-motion: reduce) {
