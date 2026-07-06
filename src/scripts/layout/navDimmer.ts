@@ -16,14 +16,12 @@ export function initNavDimmer() {
 		nav.style.background = 'var(--nav-bg-scroll)';
 	}
 
-	// Scroll-progress dimension rule pinned to the viewport top (TopNav's
-	// .bp-nav-progress — a sibling of <nav>, not a child, so it stays put
-	// even when nav-hidden transforms the nav itself). Rule scales with
-	// document scroll progress; the tick tracks its leading edge. Runs before
-	// the class/style writes below so the layout reads (scrollHeight/clientWidth)
-	// never follow a same-frame write.
-	const progressRule = document.querySelector('.bp-nav-progress-rule') as HTMLElement | null;
-	const progressTip = document.querySelector('.bp-nav-progress-tip') as HTMLElement | null;
+	// Scroll-progress dimension rule along the nav's bottom edge (TopNav's
+	// .bp-nav-progress). Rule scales with document scroll progress; the tick
+	// tracks its leading edge. Runs before the class/style writes below so the
+	// layout reads (scrollHeight/clientWidth) never follow a same-frame write.
+	const progressRule = nav.querySelector('.bp-nav-progress-rule') as HTMLElement | null;
+	const progressTip = nav.querySelector('.bp-nav-progress-tip') as HTMLElement | null;
 	const updateProgress = (scrollY: number) => {
 		if (!progressRule || !progressTip) return;
 		const doc = document.documentElement;

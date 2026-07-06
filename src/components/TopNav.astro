@@ -115,16 +115,12 @@ const schemes = [
     )}
     <a href={ctaHref} class="bp-nav-mobile-cta">{ctaLabel}</a>
   </div>
-</nav>
 
-<!-- Sibling of <nav>, not a child: it must stay pinned to the viewport
-     even while the nav itself slides away on scroll-down (nav-hidden
-     applies a transform to <nav>, which would drag any fixed-position
-     descendant along with it — see navDimmer.ts). -->
-<span class="bp-nav-progress" aria-hidden="true">
-  <span class="bp-nav-progress-rule"></span>
-  <span class="bp-nav-progress-tip"></span>
-</span>
+  <span class="bp-nav-progress" aria-hidden="true">
+    <span class="bp-nav-progress-rule"></span>
+    <span class="bp-nav-progress-tip"></span>
+  </span>
+</nav>
 
 <script>
   // Theme icon sync (sun/moon) — idempotent alongside the Layout theme script.
@@ -219,20 +215,16 @@ const schemes = [
   .bp-nav.nav-hidden {
     transform: translateY(-100%);
   }
-  /* Scroll-progress dimension rule: accent rule pinned to the very top of the
-     viewport that draws with page-scroll progress, tipped by a small drafting
-     tick (transforms set by navDimmer.ts). It's a sibling of <nav>, fixed
-     independently of it, so it stays visible even while nav-hidden slides the
-     nav itself away on scroll-down. Needs its own --bp-acc fallback since it
-     no longer inherits the token through .bp-nav's scope (home pages already
-     get it from the html.bp-home block above). Scroll-driven — it only
-     mirrors the user's own scrolling — so no reduced-motion gate; transform-only,
-     so win-perf-mode is unaffected. */
-  :global(html:not(.bp-home)) .bp-nav-progress { --bp-acc: var(--accent); }
-  .bp-nav-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 101; pointer-events: none; }
+  /* Scroll-progress dimension rule: accent rule along the nav's bottom edge
+     that draws with page-scroll progress, tipped by a small drafting tick
+     (transforms set by navDimmer.ts). Scroll-driven — it only mirrors the
+     user's own scrolling — so no reduced-motion gate; transform-only, so
+     win-perf-mode is unaffected. Hidden while the mobile dropdown is open
+     (the nav bottom edge belongs to the menu then). */
+  .bp-nav-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; }
   .bp-nav-progress-rule { position: absolute; inset: 0; background: var(--bp-acc); transform: scaleX(0); transform-origin: left center; }
-  .bp-nav-progress-tip { position: absolute; left: 0; top: 0; width: 2px; height: 6px; background: var(--bp-acc); }
-  .bp-nav.menu-open ~ .bp-nav-progress { display: none; }
+  .bp-nav-progress-tip { position: absolute; left: 0; bottom: 0; width: 2px; height: 6px; background: var(--bp-acc); }
+  .bp-nav.menu-open .bp-nav-progress { display: none; }
   /* Blueprint homepage: the nav is part of the drafting sheet — sticky in flow,
      with the sheet-tinted glass the mockup specifies. */
   :global(html.bp-home) .bp-nav {
