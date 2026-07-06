@@ -539,9 +539,16 @@ const homepageSchema = {
     --bp-muted: color-mix(in srgb, var(--bp-ink) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
+    /* Desk-lamp glow ramp (peak + mid stop): fully opaque at the corner on the
+       dark sheet; light mode softens to a 45% wash — solid blue on cream reads
+       far heavier than on navy. */
+    --bp-lamp: var(--bp-acc);
+    --bp-lamp-mid: color-mix(in srgb, var(--bp-acc) 50%, transparent);
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
+    --bp-lamp: color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    --bp-lamp-mid: color-mix(in srgb, var(--bp-acc) 22%, transparent);
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
@@ -571,11 +578,11 @@ const homepageSchema = {
       linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
       linear-gradient(var(--bp-line2) 1px, transparent 1px),
       linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px),
-      /* Desk-lamp glow: fully opaque blueprint blue at the sheet's top-right
-         corner, dissolving fast so the hero label/copy stay legible. Kept
-         compact (650×500) — a bigger ellipse floods half the hero. Plain
-         gradient, no blur filter — win-perf-mode safe; same ramp both modes. */
-      radial-gradient(ellipse 650px 500px at 100% 0%, var(--bp-acc), color-mix(in srgb, var(--bp-acc) 50%, transparent) 22%, transparent 72%);
+      /* Desk-lamp glow at the sheet's top-right corner, dissolving fast so the
+         hero label/copy stay legible (ramp tokens above). Kept compact
+         (650×500) — a bigger ellipse floods half the hero. Plain gradient,
+         no blur filter — win-perf-mode safe. */
+      radial-gradient(ellipse 650px 500px at 100% 0%, var(--bp-lamp), var(--bp-lamp-mid) 22%, transparent 72%);
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
