@@ -541,12 +541,12 @@ const homepageSchema = {
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
     /* Desk-lamp glow: a single soft pool of blueprint-blue light near the top of
        the sheet (plain radial-gradient, no blur filter — win-perf-mode safe).
-       Dark mode only; light mode's cream paper washes it out, so it's disabled. */
+       Light mode gets a slightly weaker wash — the tint reads stronger on cream. */
     --bp-lamp: color-mix(in srgb, var(--bp-acc) 9%, transparent);
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
-    --bp-lamp: transparent;
+    --bp-lamp: color-mix(in srgb, var(--bp-acc) 7%, transparent);
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
