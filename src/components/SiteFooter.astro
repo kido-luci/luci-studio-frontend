@@ -31,6 +31,25 @@ const makeLinks = [
 ---
 
 <section class="bp-cta" id="contact">
+  <span class="bp-cta-graph" aria-hidden="true">
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <line class="bp-g-edge" x1="60" y1="60" x2="24" y2="30"></line>
+      <line class="bp-g-edge" x1="60" y1="60" x2="98" y2="26"></line>
+      <line class="bp-g-edge" x1="60" y1="60" x2="96" y2="94"></line>
+      <line class="bp-g-edge" x1="60" y1="60" x2="28" y2="92"></line>
+      <line class="bp-g-edge bp-g-edge--faint" x1="24" y1="30" x2="98" y2="26"></line>
+      <line class="bp-g-edge bp-g-edge--faint" x1="28" y1="92" x2="96" y2="94"></line>
+      <line class="bp-g-pulse bp-g-pulse--1" x1="60" y1="60" x2="24" y2="30"></line>
+      <line class="bp-g-pulse bp-g-pulse--2" x1="60" y1="60" x2="98" y2="26"></line>
+      <line class="bp-g-pulse bp-g-pulse--3" x1="60" y1="60" x2="96" y2="94"></line>
+      <circle class="bp-g-node" cx="24" cy="30" r="2.6"></circle>
+      <circle class="bp-g-node" cx="98" cy="26" r="2.6"></circle>
+      <circle class="bp-g-node" cx="96" cy="94" r="2.6"></circle>
+      <circle class="bp-g-node" cx="28" cy="92" r="2.6"></circle>
+      <circle class="bp-g-hub" cx="60" cy="60" r="4"></circle>
+      <circle class="bp-g-hub-ping" cx="60" cy="60" r="4"></circle>
+    </svg>
+  </span>
   <div class="bp-cta-inner bp-wrap">
     <div class="bp-cta-label" data-reveal>
       <span class="bp-coord-dot" aria-hidden="true"></span>
@@ -153,4 +172,28 @@ const makeLinks = [
   .bp-footer-legal :global(a:hover),
   .bp-footer-legal :global(button:hover) { color: var(--bp-acc); }
   .bp-footer-rev { font-size: 11px; letter-spacing: 0.06em; color: var(--bp-muted); }
+
+  /* ── Decorative node-graph instrument in the CTA band's top-right corner: a
+     signal travels the edges out from the orange hub. On the fixed-dark band, so
+     colours are hardcoded light + the page accent. Hidden ≤900px (text reclaims
+     the corner) and under reduced-motion / win-perf-mode. ── */
+  .bp-cta-graph { position: absolute; top: 24px; right: 30px; width: 112px; height: 112px; opacity: 0.55; pointer-events: none; z-index: 1; }
+  .bp-cta-graph svg { display: block; width: 100%; height: 100%; }
+  .bp-g-edge { stroke: rgba(236, 234, 227, 0.20); stroke-width: 1; }
+  .bp-g-edge--faint { stroke: rgba(236, 234, 227, 0.10); }
+  .bp-g-node { fill: var(--bp-acc); }
+  .bp-g-hub { fill: #ff5b1a; }
+  .bp-g-hub-ping { fill: none; stroke: #ff5b1a; stroke-width: 1.2; transform-box: view-box; transform-origin: 60px 60px; animation: bpCtaPing 2.6s ease-out infinite; }
+  .bp-g-pulse { stroke: var(--bp-acc); stroke-width: 2; stroke-linecap: round; fill: none; }
+  .bp-g-pulse--1 { stroke-dasharray: 7 300; animation: bpCtaP1 1.9s linear infinite; }
+  .bp-g-pulse--2 { stroke-dasharray: 7 300; animation: bpCtaP2 1.9s linear infinite; animation-delay: 0.5s; }
+  .bp-g-pulse--3 { stroke-dasharray: 7 300; animation: bpCtaP3 1.9s linear infinite; animation-delay: 1s; }
+  @keyframes bpCtaP1 { from { stroke-dashoffset: 46.9; } to { stroke-dashoffset: -7; } }
+  @keyframes bpCtaP2 { from { stroke-dashoffset: 51; } to { stroke-dashoffset: -7; } }
+  @keyframes bpCtaP3 { from { stroke-dashoffset: 49.5; } to { stroke-dashoffset: -7; } }
+  @keyframes bpCtaPing { 0% { transform: scale(1); opacity: 0.5; } 70% { opacity: 0; } 100% { transform: scale(3); opacity: 0; } }
+  @media (max-width: 900px) { .bp-cta-graph { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .bp-g-pulse { display: none; } .bp-g-hub-ping { animation: none; } }
+  :global(body.win-perf-mode) .bp-g-pulse { display: none; }
+  :global(body.win-perf-mode) .bp-g-hub-ping { animation: none; }
 </style>

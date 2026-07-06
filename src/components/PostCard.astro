@@ -45,6 +45,16 @@ const statId = interactive && id != null ? String(id) : undefined;
         ? <img src={img} alt={title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
         : <span class="tb-cover-word tb-cover-word--sm">{coverWord}</span>}
       {badge && <span class="tb-badge">{badge}</span>}
+      {isBp && (
+        <span class="tb-scan" aria-hidden="true">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="18" class="tb-scan-ring"></circle>
+            <circle cx="24" cy="24" r="9" class="tb-scan-ring"></circle>
+            <g class="tb-scan-sweep"><line x1="24" y1="24" x2="24" y2="4" class="tb-scan-beam"></line></g>
+            <circle cx="24" cy="24" r="1.6" class="tb-scan-core"></circle>
+          </svg>
+        </span>
+      )}
     </div>
     <div class="tb-card-body">
       <div class="tb-cat tb-cat--clamp">{catLine}</div>
@@ -202,4 +212,19 @@ const statId = interactive && id != null ? String(id) : undefined;
   .tb-card-link--bp .tb-read { font-family: var(--bp-mono); color: var(--bp-acc); }
   .tb-card-link--bp .tb-stats { font-family: var(--bp-mono); color: var(--bp-muted); }
   .tb-card-link--bp .tb-cover-word { color: color-mix(in srgb, var(--bp-ink) 12%, transparent); }
+
+  /* Blueprint cards: a small radar "scan" fades into the cover's top-right corner
+     on hover and sweeps only while hovered (paused otherwise). Hidden entirely
+     under reduced motion / win-perf-mode. */
+  .tb-scan { position: absolute; top: 8px; right: 8px; width: 42px; height: 42px; opacity: 0; transition: opacity .25s ease; pointer-events: none; z-index: 2; }
+  .tb-scan svg { display: block; width: 100%; height: 100%; }
+  .tb-card-link--bp:hover .tb-scan { opacity: 0.62; }
+  .tb-scan-ring { fill: none; stroke: var(--bp-acc); stroke-width: 1; opacity: 0.5; }
+  .tb-scan-beam { stroke: var(--bp-acc); stroke-width: 1.4; stroke-linecap: round; }
+  .tb-scan-core { fill: var(--bp-orange); }
+  .tb-scan-sweep { transform-box: view-box; transform-origin: 24px 24px; animation: lu-scan 2.4s linear infinite; animation-play-state: paused; }
+  .tb-card-link--bp:hover .tb-scan-sweep { animation-play-state: running; }
+  @keyframes lu-scan { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .tb-scan { display: none; } }
+  :global(body.win-perf-mode) .tb-scan { display: none; }
 </style>

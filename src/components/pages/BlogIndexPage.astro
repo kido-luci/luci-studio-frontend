@@ -126,6 +126,11 @@ const allTopics = [...topicCounts.keys()].sort(
             <span class="bp-mono bp-feat-callout">fig.00 — featured</span>
             <span class="bp-mono bp-feat-badge">{t('blog.featuredBadge')}</span>
             <span class="bp-feat-node" aria-hidden="true">◦</span>
+            <span class="bp-feat-dim" aria-hidden="true">
+              <span class="bp-feat-dim-tick"></span>
+              <span class="bp-feat-dim-rule"></span>
+              <span class="bp-feat-dim-tick"></span>
+            </span>
           </div>
           <div class="bp-feat-body">
             <div class="bp-mono bp-feat-cat">{featured.catLine}</div>
@@ -203,7 +208,7 @@ const allTopics = [...topicCounts.keys()].sort(
             <span class="bp-dot" aria-hidden="true"></span>
             <span class="bp-mono bp-sec-label">{t('blog.seriesEyebrow')}</span>
             <span class="bp-rule" aria-hidden="true"></span>
-            <a href={localizedHref(locale, '/blog/series')} class="bp-mono bp-more">{t('blog.seeAll')} →</a>
+            <a href={localizedHref(locale, '/blog/series')} class="bp-mono bp-more">{t('blog.seeAll')}</a>
           </div>
           <div class="bp-sec-title-row">
             <h2 class="bp-display bp-blog-h2">{t('blog.seriesHeader')}<span class="bp-acc-dot">.</span></h2>
@@ -329,7 +334,21 @@ const allTopics = [...topicCounts.keys()].sort(
   .bp-feat-fig .tb-cover-word { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 16px; font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 58px; line-height: .85; letter-spacing: -.03em; color: color-mix(in srgb, var(--bp-ink) 14%, transparent); transform: rotate(-6deg); pointer-events: none; }
   .bp-feat-callout { position: absolute; left: 14px; bottom: 12px; font-size: 10px; letter-spacing: 0.06em; color: var(--bp-muted); }
   .bp-feat-badge { position: absolute; top: 14px; left: 14px; padding: 5px 10px; border-radius: 5px; border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent); background: color-mix(in srgb, var(--bp-bg) 55%, transparent); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-acc); backdrop-filter: blur(4px); }
-  .bp-feat-node { position: absolute; top: 12px; right: 14px; font-size: 12px; color: var(--bp-acc); }
+  .bp-feat-node { position: absolute; top: 12px; right: 14px; font-size: 12px; color: var(--bp-acc); animation: bpFeatNode 2.6s ease-in-out infinite; }
+  /* Dimension mark in the fig's bottom-right: tick—rule—tick draws in on load,
+     as if the featured figure were being measured. Static under reduced motion
+     and win-perf-mode. */
+  .bp-feat-dim { position: absolute; right: 14px; bottom: 14px; width: 110px; display: flex; align-items: center; }
+  .bp-feat-dim-tick { width: 1px; height: 10px; background: color-mix(in srgb, var(--bp-acc) 70%, transparent); flex: none; }
+  .bp-feat-dim-rule { flex: 1; height: 1px; background: color-mix(in srgb, var(--bp-acc) 50%, transparent); transform: scaleX(0); transform-origin: left center; animation: bpFeatDim 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards; }
+  @keyframes bpFeatDim { to { transform: scaleX(1); } }
+  @keyframes bpFeatNode { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) {
+    .bp-feat-node { animation: none; }
+    .bp-feat-dim-rule { animation: none; transform: scaleX(1); }
+  }
+  :global(body.win-perf-mode) .bp-feat-node { animation: none; }
+  :global(body.win-perf-mode) .bp-feat-dim-rule { animation: none; transform: scaleX(1); }
   .bp-feat-body { padding: clamp(28px, 3vw, 44px); display: flex; flex-direction: column; }
   .bp-feat-cat { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bp-acc); }
   .bp-feat-title { font-size: clamp(1.7rem, 3vw, 2.5rem); line-height: 1.05; margin: 14px 0 0; }
