@@ -539,17 +539,19 @@ const homepageSchema = {
     --bp-muted: color-mix(in srgb, var(--bp-ink) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
-    /* Desk-lamp glow ramp (peak + mid stop): fully opaque at the corner on the
-       dark sheet; light mode keeps a dense 80% core but drops to a 20% mid so
-       the spread stays a faint wash — solid blue on cream reads far heavier
-       than on navy. */
+    /* Desk-lamp glow ramp: peak color + a gradient interpolation hint. The
+       hint (midpoint position) curves the falloff smoothly — a literal mid
+       color stop kinks the ramp's slope there, which the eye amplifies into a
+       visible band (Mach band) on the cream sheet. Light mode: softer 80%
+       peak + earlier hint, so the core stays dense but the spread is a faint
+       wash — solid blue on cream reads far heavier than on navy. */
     --bp-lamp: var(--bp-acc);
-    --bp-lamp-mid: color-mix(in srgb, var(--bp-acc) 50%, transparent);
+    --bp-lamp-hint: 20%;
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
     --bp-lamp: color-mix(in srgb, var(--bp-acc) 80%, transparent);
-    --bp-lamp-mid: color-mix(in srgb, var(--bp-acc) 20%, transparent);
+    --bp-lamp-hint: 12%;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
@@ -583,7 +585,7 @@ const homepageSchema = {
          hero label/copy stay legible (ramp tokens above). Kept compact
          (650×500) — a bigger ellipse floods half the hero. Plain gradient,
          no blur filter — win-perf-mode safe. */
-      radial-gradient(ellipse 650px 500px at 100% 0%, var(--bp-lamp), var(--bp-lamp-mid) 22%, transparent 72%);
+      radial-gradient(ellipse 650px 500px at 100% 0%, var(--bp-lamp), var(--bp-lamp-hint), transparent 75%);
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
