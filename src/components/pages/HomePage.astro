@@ -540,15 +540,16 @@ const homepageSchema = {
     --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
     /* Desk-lamp glow ramp (peak + mid stop): fully opaque at the corner on the
-       dark sheet; light mode softens to a 45% wash — solid blue on cream reads
-       far heavier than on navy. */
+       dark sheet; light mode keeps a dense 80% core but drops to a 20% mid so
+       the spread stays a faint wash — solid blue on cream reads far heavier
+       than on navy. */
     --bp-lamp: var(--bp-acc);
     --bp-lamp-mid: color-mix(in srgb, var(--bp-acc) 50%, transparent);
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
-    --bp-lamp: color-mix(in srgb, var(--bp-acc) 45%, transparent);
-    --bp-lamp-mid: color-mix(in srgb, var(--bp-acc) 22%, transparent);
+    --bp-lamp: color-mix(in srgb, var(--bp-acc) 80%, transparent);
+    --bp-lamp-mid: color-mix(in srgb, var(--bp-acc) 20%, transparent);
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
