@@ -671,16 +671,21 @@ const homepageSchema = {
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
-  /* Blueprint constellation — a build-time point-field twinkling in the top-right
-     corner, with a few larger nodes linked by SVG hairlines. z-index below the
-     fixed nav (100) so it runs behind the translucent glass; a radial mask fades
-     it toward the centre so it never crowds the hero copy. Colour tracks the
-     active accent (--bp-acc). CSS-only twinkle (staggered per-element delays, no
-     JS/rAF). */
+  /* Blueprint constellation — a build-time point-field twinkling in the top-LEFT
+     corner, placed diagonally opposite the hero's rotating compass ring (which
+     sits on the right) so the two animations don't crowd each other. The point +
+     line coordinates and the star `right:%` offsets are all authored for a
+     top-RIGHT cluster; `transform: scaleX(-1)` mirrors the whole field — mask
+     included — over to the left, so only the anchor flips to `left: 0` and every
+     coordinate below stays as-is. z-index below the fixed nav (100) so it runs
+     behind the translucent glass; a radial mask fades it toward the centre so it
+     never crowds the hero copy. Colour tracks the active accent (--bp-acc).
+     CSS-only twinkle (staggered per-element delays, no JS/rAF). */
   .bp-constellation {
     position: absolute;
     top: 0;
-    right: 0;
+    left: 0;
+    transform: scaleX(-1);
     width: min(460px, 60vw);
     height: 340px;
     z-index: 2;
