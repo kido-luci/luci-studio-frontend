@@ -145,7 +145,11 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			// Initialize theme + color scheme immediately to prevent flash
 			(function() {
 				const savedTheme = localStorage.getItem('theme');
-				const theme = savedTheme || 'light';
+				// Priority: explicit user choice → OS preference → dark when the OS
+				// theme can't be read.
+				const theme = (savedTheme === 'light' || savedTheme === 'dark')
+					? savedTheme
+					: (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
 				if (theme === 'light') {
 					document.documentElement.classList.add('light-mode');
 					// We'll also add it to body once it's available
@@ -156,7 +160,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				// Apply the saved accent scheme before paint (default = violet/brand).
 				const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'];
 				const savedScheme = localStorage.getItem('scheme');
-				document.documentElement.dataset.scheme = SCHEMES.indexOf(savedScheme) >= 0 ? savedScheme : 'violet';
+				document.documentElement.dataset.scheme = SCHEMES.indexOf(savedScheme) >= 0 ? savedScheme : 'ocean';
 			})();
 		</script>
 	</head>
@@ -200,7 +204,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				/* accent tokens — default = brand violet. Channels are space-separated
 				   so the Tailwind `accent` color (rgb(var(--accent-rgb) / <alpha-value>))
 				   and the `rgb(var(--accent-rgb) / X)` slash form below both parse. */
-				--accent-rgb: 139 92 246;
+				--accent-rgb: 27 86 255;
 				--accent: rgb(var(--accent-rgb));
 				--accent-strong: color-mix(in srgb, var(--accent), #000 14%);
 				--accent-soft: rgb(var(--accent-rgb) / 0.12);
@@ -237,8 +241,8 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				--cursor-color: var(--accent);
 				--cursor-ring: rgb(var(--accent-rgb) / 0.5);
 				--dimmer-bg: rgba(255, 255, 255, 0);
-				--nav-bg: rgba(255, 255, 255, 0.7);
-				--nav-bg-scroll: rgba(255, 255, 255, 0.95);
+				--nav-bg: rgba(255, 255, 255, 0.3);
+				--nav-bg-scroll: rgba(255, 255, 255, 0.7);
 			}
 
 			/* Color schemes — orthogonal to light/dark. A preset only swaps the accent
@@ -246,7 +250,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			   remapped Tailwind violet+purple utilities) follows via the cascade — no
 			   JS re-init needed. Static attribute selectors → no Tailwind safelist. */
 			html[data-scheme="violet"] { --accent-rgb: 139 92 246; }  /* default brand */
-			html[data-scheme="ocean"]  { --accent-rgb: 59 130 246; }
+			html[data-scheme="ocean"]  { --accent-rgb: 27 86 255; }  /* home blueprint blue #1b56ff */
 			/* The bright accents need DARK ink for legible white-less labels on their fill. */
 			html[data-scheme="ember"]  { --accent-rgb: 249 115 22;  --accent-ink: #0a0a0a; }
 			html[data-scheme="forest"] { --accent-rgb: 16 185 129;  --accent-ink: #0a0a0a; }
@@ -258,7 +262,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			   (kept vivid in dark mode) so accent-as-text clears AA on white AND white-on-fill
 			   stays legible; ink returns to white since the fill is now dark enough. Violet is
 			   left unchanged to preserve the default's established look. */
-			html[data-scheme="ocean"].light-mode  { --accent-rgb: 37 99 235; }   /* blue-600 */
+			html[data-scheme="ocean"].light-mode  { --accent-rgb: 27 86 255; }   /* home blueprint blue #1b56ff (AA 4.83:1 on cream) */
 			html[data-scheme="ember"].light-mode  { --accent-rgb: 194 65 12;  --accent-ink: #fff; }  /* orange-700 */
 			html[data-scheme="forest"].light-mode { --accent-rgb: 4 120 87;   --accent-ink: #fff; }  /* emerald-700 */
 			html[data-scheme="rose"].light-mode   { --accent-rgb: 225 29 72; }  /* rose-600 */

@@ -39,7 +39,7 @@ const labelParts = (label: string) => {
 // the html[data-scheme=…] palette blocks in Layout.astro and to window.setScheme.
 const schemes = [
   { id: 'violet', hex: '#8b5cf6', label: 'Violet' },
-  { id: 'ocean',  hex: '#3b82f6', label: 'Ocean'  },
+  { id: 'ocean',  hex: '#1b56ff', label: 'Ocean'  },
   { id: 'ember',  hex: '#f97316', label: 'Ember'  },
   { id: 'forest', hex: '#10b981', label: 'Forest' },
   { id: 'rose',   hex: '#f43f5e', label: 'Rose'   },
@@ -205,8 +205,8 @@ const schemes = [
     right: 0;
     z-index: 100;
     background: var(--nav-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-bottom: 1px solid var(--bp-hair);
     transition: transform 0.3s ease;
   }
@@ -225,17 +225,22 @@ const schemes = [
   .bp-nav-progress-rule { position: absolute; inset: 0; background: var(--bp-acc); transform: scaleX(0); transform-origin: left center; }
   .bp-nav-progress-tip { position: absolute; left: 0; bottom: 0; width: 2px; height: 6px; background: var(--bp-acc); }
   .bp-nav.menu-open .bp-nav-progress { display: none; }
-  /* Blueprint homepage: the nav is part of the drafting sheet — sticky in flow,
-     with the sheet-tinted glass the mockup specifies. */
+  /* Blueprint homepage: fixed overlay like every other page (inherits the base
+     position: fixed; z-index: 100), but with the sheet-tinted glass the mockup
+     specifies. Overlaying — not sticky-in-flow — lets the drafting sheet (grid +
+     lamp glow) reach the true top edge behind the translucent nav; the homepage
+     pads main's top to clear it. */
   :global(html.bp-home) .bp-nav {
-    --nav-bg: rgba(10, 14, 20, 0.78);
-    --nav-bg-scroll: rgba(10, 14, 20, 0.92);
-    position: sticky;
-    z-index: 40;
+    --nav-bg: rgba(10, 14, 20, 0.55);
+    --nav-bg-scroll: rgba(10, 14, 20, 0.85);
   }
+  /* Light mode: translucent white glass — low alpha and NO backdrop blur at rest
+     (see .bp-nav) let the drafting sheet + the top of the constellation behind the
+     fixed nav read through sharply. Kept in sync with the site-wide light nav in
+     Layout.astro. */
   :global(html.bp-home body.light-mode) .bp-nav {
-    --nav-bg: rgba(244, 242, 236, 0.82);
-    --nav-bg-scroll: rgba(244, 242, 236, 0.94);
+    --nav-bg: rgba(255, 255, 255, 0.3);
+    --nav-bg-scroll: rgba(255, 255, 255, 0.7);
   }
 
   .bp-nav-wrap {
@@ -309,7 +314,7 @@ const schemes = [
 
   .bp-nav-cta { padding: 10px 20px; background: var(--bp-ink); color: var(--bp-bg); border-radius: 24px; font-size: 12px; letter-spacing: 0.1em; text-decoration: none; white-space: nowrap; text-transform: uppercase; transition: background 0.2s ease, color 0.2s ease; }
   .bp-nav-cta:hover { background: var(--bp-acc); color: #fff; }
-  .bp-nav-burger { display: none; width: 40px; height: 40px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: transparent; border: 1.5px solid var(--bp-hair); border-radius: 9px; cursor: pointer; }
+  .bp-nav-burger { display: none; width: 40px; height: 40px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: transparent; border: none; border-radius: 9px; cursor: pointer; }
   .bp-nav-burger span { display: block; width: 16px; height: 1.5px; background: var(--bp-ink); }
   .bp-nav-mobile { display: none; flex-direction: column; padding: 4px 0 14px; }
   .bp-nav-mobile a { padding: 12px clamp(20px, 5vw, 48px); font-size: 13px; letter-spacing: 0.16em; color: var(--bp-muted); text-decoration: none; }

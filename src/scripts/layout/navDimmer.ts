@@ -56,12 +56,15 @@ export function initNavDimmer() {
 			}
 			lastScrollY = scrollY;
 
+			// Nav stays blur-free in both states (see-through by request) so the drafting
+			// sheet (grid + constellation) reads sharply behind it; only the bg alpha steps
+			// up on scroll (var(--nav-bg) 0.3 → var(--nav-bg-scroll) 0.7) for legibility.
 			if (scrollY > 80) {
 				nav.style.background = 'var(--nav-bg-scroll)';
-				if (!isWindows) nav.style.backdropFilter = 'blur(32px)';
+				if (!isWindows) nav.style.backdropFilter = 'none';
 			} else {
 				nav.style.background = 'var(--nav-bg)';
-				if (!isWindows) nav.style.backdropFilter = 'blur(16px)';
+				if (!isWindows) nav.style.backdropFilter = 'none';
 			}
 		});
 	}, { passive: true });

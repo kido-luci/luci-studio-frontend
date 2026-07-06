@@ -4,7 +4,14 @@ import { isWindows, dot, ring } from './env';
 // Initialize theme from localStorage or system preference
 const initTheme = () => {
 	const savedTheme = localStorage.getItem('theme');
-	const theme = savedTheme || 'light';
+	// Priority: explicit user choice → OS preference → dark when the OS theme
+	// can't be read (matches the pre-paint script in Layout.astro).
+	const theme =
+		savedTheme === 'light' || savedTheme === 'dark'
+			? savedTheme
+			: window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+				? 'light'
+				: 'dark';
 
 	if (theme === 'light') {
 		document.body.classList.add('light-mode');
@@ -36,7 +43,7 @@ const toggleTheme = () => {
 // re-init is needed (unlike toggleTheme, which flips canvas opacity + cursor base).
 const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'] as const;
 type Scheme = (typeof SCHEMES)[number];
-const DEFAULT_SCHEME: Scheme = 'violet';
+const DEFAULT_SCHEME: Scheme = 'ocean';
 
 const isScheme = (v: string | null): v is Scheme =>
 	!!v && (SCHEMES as readonly string[]).includes(v);
