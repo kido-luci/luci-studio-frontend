@@ -126,13 +126,21 @@ const rest = GAMES.slice(1);
 
       <!-- page header -->
       <header class="bp-games-head">
-        <div class="bp-sec-head">
+        <div class="bp-sec-head" data-reveal>
           <span class="bp-dot" aria-hidden="true"></span>
           <span class="bp-mono bp-sec-label">ARCADE</span>
           <span class="bp-rule" aria-hidden="true"></span>
           <span class="bp-mono bp-sec-count">{String(totalGames).padStart(2, "0")} {totalGames === 1 ? "GAME" : "GAMES"}</span>
+          <span class="bp-gm-scan" aria-hidden="true">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="18" class="bp-gm-ring"></circle>
+              <circle cx="24" cy="24" r="9" class="bp-gm-ring"></circle>
+              <g class="bp-gm-sweep"><line x1="24" y1="24" x2="24" y2="6" class="bp-gm-beam"></line></g>
+              <circle cx="24" cy="24" r="1.6" class="bp-gm-core"></circle>
+            </svg>
+          </span>
         </div>
-        <h1 class="bp-display bp-games-title">Play a game<span class="bp-acc-dot">.</span></h1>
+        <h1 class="bp-display bp-games-title" data-reveal>Play a game<span class="bp-acc-dot">.</span></h1>
         <p class="bp-games-sub">Browser-native games built from scratch — instant play, no install, no account. Just open and go.</p>
       </header>
 
@@ -180,13 +188,13 @@ const rest = GAMES.slice(1);
       <!-- more games (grid grows as games are added) -->
       {rest.length > 0 && (
         <section class="bp-games-more">
-          <div class="bp-sec-head">
+          <div class="bp-sec-head" data-reveal>
             <span class="bp-dot" aria-hidden="true"></span>
             <span class="bp-mono bp-sec-label">MORE</span>
             <span class="bp-rule" aria-hidden="true"></span>
             <span class="bp-mono bp-sec-count">{String(rest.length).padStart(2, "0")} MORE</span>
           </div>
-          <h2 class="bp-display bp-games-h2">More games<span class="bp-acc-dot">.</span></h2>
+          <h2 class="bp-display bp-games-h2" data-reveal>More games<span class="bp-acc-dot">.</span></h2>
           <div class="bp-games-grid">
             {rest.map((game) => (
               <a href={game.href} target="_blank" rel="noopener noreferrer" class="game-card">
@@ -321,6 +329,17 @@ const rest = GAMES.slice(1);
   .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
   .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
   .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); white-space: nowrap; }
+  /* Radar instrument at the end of the ARCADE header rule — the beam sweeps
+     continuously (arcade radar). Frozen under reduced-motion / win-perf-mode. */
+  .bp-gm-scan { width: 26px; height: 26px; flex: none; }
+  .bp-gm-scan svg { display: block; width: 100%; height: 100%; }
+  .bp-gm-ring { fill: none; stroke: var(--bp-hair); stroke-width: 1.2; }
+  .bp-gm-beam { stroke: var(--bp-acc); stroke-width: 1.6; stroke-linecap: round; }
+  .bp-gm-core { fill: var(--bp-acc); }
+  .bp-gm-sweep { transform-box: view-box; transform-origin: 24px 24px; animation: bpGmSweep 4s linear infinite; }
+  @keyframes bpGmSweep { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .bp-gm-sweep { animation: none; } }
+  :global(body.win-perf-mode) .bp-gm-sweep { animation: none; }
 
   .bp-games-head { margin-bottom: clamp(30px, 5vw, 48px); }
   .bp-games-title { font-size: clamp(2.8rem, 8vw, 6rem); line-height: 0.98; margin: clamp(16px, 2.5vw, 24px) 0 0; }
