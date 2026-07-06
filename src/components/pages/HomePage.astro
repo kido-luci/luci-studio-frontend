@@ -547,11 +547,13 @@ const homepageSchema = {
        wash — solid blue on cream reads far heavier than on navy. */
     --bp-lamp: var(--bp-acc);
     --bp-lamp-hint: 20%;
+    --bp-lamp-size: 650px 500px;
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
     --bp-lamp: color-mix(in srgb, var(--bp-acc) 80%, transparent);
     --bp-lamp-hint: 12%;
+    --bp-lamp-size: 480px 370px;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
@@ -585,7 +587,7 @@ const homepageSchema = {
          hero label/copy stay legible (ramp tokens above). Kept compact
          (650×500) — a bigger ellipse floods half the hero. Plain gradient,
          no blur filter — win-perf-mode safe. */
-      radial-gradient(ellipse 650px 500px at 100% 0%, var(--bp-lamp), var(--bp-lamp-hint), transparent 75%);
+      radial-gradient(ellipse var(--bp-lamp-size) at 100% 0%, var(--bp-lamp), var(--bp-lamp-hint), transparent 75%);
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
