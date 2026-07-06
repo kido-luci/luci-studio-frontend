@@ -234,9 +234,11 @@ const schemes = [
     --nav-bg: rgba(10, 14, 20, 0.55);
     --nav-bg-scroll: rgba(10, 14, 20, 0.85);
   }
+  /* Light mode: plain white glass, a touch more transparent — kept in sync with
+     the site-wide light nav in Layout.astro (not sheet-cream), per request. */
   :global(html.bp-home body.light-mode) .bp-nav {
-    --nav-bg: rgba(244, 242, 236, 0.58);
-    --nav-bg-scroll: rgba(244, 242, 236, 0.88);
+    --nav-bg: rgba(255, 255, 255, 0.55);
+    --nav-bg-scroll: rgba(255, 255, 255, 0.85);
   }
 
   .bp-nav-wrap {
