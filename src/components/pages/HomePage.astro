@@ -563,6 +563,10 @@ const homepageSchema = {
     position: relative;
     background: var(--bp-bg);
     color: var(--bp-ink);
+    /* Clear the fixed nav overlay (~69px) so the hero isn't tucked under it. The
+       .bp-grid sheet is absolute inset:0, so it still fills from the true top
+       (behind the nav glass) — padding only shifts the in-flow content down. */
+    padding-top: 72px;
     font-family: "Space Grotesk", system-ui, sans-serif;
     /* overflow-x only (not `overflow: clip`) so it never becomes a scroll container
        that would trap the §04 sticky background. Matches the old layout, where only

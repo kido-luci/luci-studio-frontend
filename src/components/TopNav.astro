@@ -225,13 +225,14 @@ const schemes = [
   .bp-nav-progress-rule { position: absolute; inset: 0; background: var(--bp-acc); transform: scaleX(0); transform-origin: left center; }
   .bp-nav-progress-tip { position: absolute; left: 0; bottom: 0; width: 2px; height: 6px; background: var(--bp-acc); }
   .bp-nav.menu-open .bp-nav-progress { display: none; }
-  /* Blueprint homepage: the nav is part of the drafting sheet — sticky in flow,
-     with the sheet-tinted glass the mockup specifies. */
+  /* Blueprint homepage: fixed overlay like every other page (inherits the base
+     position: fixed; z-index: 100), but with the sheet-tinted glass the mockup
+     specifies. Overlaying — not sticky-in-flow — lets the drafting sheet (grid +
+     lamp glow) reach the true top edge behind the translucent nav; the homepage
+     pads main's top to clear it. */
   :global(html.bp-home) .bp-nav {
     --nav-bg: rgba(10, 14, 20, 0.78);
     --nav-bg-scroll: rgba(10, 14, 20, 0.92);
-    position: sticky;
-    z-index: 40;
   }
   :global(html.bp-home body.light-mode) .bp-nav {
     --nav-bg: rgba(244, 242, 236, 0.82);
