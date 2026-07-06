@@ -17,6 +17,37 @@ import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
 const locale = getLocaleFromUrl(Astro.url);
 const API_URL = import.meta.env.PUBLIC_API_URL || "";
 
+// Blueprint constellation: a field of twinkling points biased toward the
+// top-right corner (under the lamp glow). Positions are generated at BUILD time
+// with a fixed-seed PRNG so the layout is deterministic across rebuilds (no
+// per-build drift, no runtime JS). The linked "nodes" are curated in the template
+// SVG; these are the loose surrounding stars.
+const bpRand = (() => {
+  let s = 1337 >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+})();
+const bpStars = Array.from({ length: 40 }, () => {
+  const rx = Math.pow(bpRand(), 0.6); // 0 = hugging the right edge
+  const ry = Math.pow(bpRand(), 0.6); // 0 = hugging the top edge
+  const da = bpRand() * 6.283, dd = 6 + bpRand() * 10; // drift heading + 6–16px radius
+  return {
+    right: +(rx * 97).toFixed(1),
+    top: +(ry * 95).toFixed(1),
+    size: +(1 + bpRand() * 1.8).toFixed(1),
+    dur: +(2.6 + bpRand() * 2.8).toFixed(2),
+    dl: +(-bpRand() * 5).toFixed(2),
+    dx: +(Math.cos(da) * dd).toFixed(1), // drift vector (px), used by bp-star-drift
+    dy: +(Math.sin(da) * dd).toFixed(1),
+    ddur: +(9 + bpRand() * 8).toFixed(2), // 9–17s slow float, independent of the twinkle
+    ddl: +(-bpRand() * 17).toFixed(2), // negative offset desyncs each star's drift
+  };
+});
+
 const profile = await profileService.getProfile();
 const stats = profile?.portfolio_stats ?? [];
 
@@ -175,6 +206,50 @@ const homepageSchema = {
 
   <main class="bp" data-api-url={API_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
+
+    <!-- Blueprint constellation: a twinkling point-field in the top-right corner
+         with a few larger nodes linked by hairlines — a schematic star chart, on
+         theme for the drafting sheet. Anchored at top:0/right:0 so it sits behind
+         the translucent fixed nav; a radial mask fades it out toward centre so it
+         never crowds the hero copy. Points are baked at build time (fixed-seed PRNG
+         in the frontmatter); twinkle is pure CSS (staggered delays, no JS/rAF).
+         Gated for reduced-motion, win-perf-mode and mobile (see CSS). -->
+    <div class="bp-constellation" aria-hidden="true">
+      <svg class="bp-cst-lines" viewBox="0 0 440 300" preserveAspectRatio="none" fill="none">
+        <g class="bp-cst-edges">
+          <line x1="424" y1="24" x2="360" y2="60" />
+          <line x1="424" y1="24" x2="300" y2="40" />
+          <line x1="360" y1="60" x2="410" y2="108" />
+          <line x1="360" y1="60" x2="330" y2="128" />
+          <line x1="300" y1="40" x2="250" y2="90" />
+          <line x1="410" y1="108" x2="382" y2="172" />
+          <line x1="330" y1="128" x2="250" y2="90" />
+          <line x1="330" y1="128" x2="382" y2="172" />
+          <line x1="250" y1="90" x2="210" y2="150" />
+          <line x1="382" y1="172" x2="296" y2="210" />
+          <line x1="330" y1="128" x2="296" y2="210" />
+        </g>
+        <g class="bp-cst-nodes">
+          <circle cx="424" cy="24" r="2.8" style="--dur:3.8s;--dl:-0.2s" />
+          <circle cx="360" cy="60" r="3" style="--dur:4.4s;--dl:-1.4s" />
+          <circle cx="410" cy="108" r="2.4" style="--dur:4s;--dl:-2.6s" />
+          <circle cx="300" cy="40" r="2.6" style="--dur:3.4s;--dl:-0.9s" />
+          <circle cx="330" cy="128" r="2.6" style="--dur:4.6s;--dl:-3.1s" />
+          <circle cx="250" cy="90" r="2.2" style="--dur:3.6s;--dl:-1.9s" />
+          <circle cx="382" cy="172" r="2.4" style="--dur:4.2s;--dl:-2.2s" />
+          <circle cx="210" cy="150" r="2" style="--dur:5s;--dl:-0.5s" />
+          <circle cx="296" cy="210" r="2.2" style="--dur:4s;--dl:-3.6s" />
+        </g>
+      </svg>
+      {
+        bpStars.map((s) => (
+          <span
+            class="bp-star"
+            style={`right:${s.right}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;--dur:${s.dur}s;--dl:${s.dl}s;--dx:${s.dx}px;--dy:${s.dy}px;--ddur:${s.ddur}s;--ddl:${s.ddl}s`}
+          />
+        ))
+      }
+    </div>
 
     <!-- ===================== HERO ===================== -->
     <header class="bp-wrap bp-hero">
@@ -523,14 +598,14 @@ const homepageSchema = {
      ══════════════════════════════════════════════════════════════════════ */
   /* Blueprint tokens live on html.bp-home so BOTH the sticky nav and <main.bp>
      inherit them (the nav is a sibling of main, not a child). Dark by default;
-     the .light-mode variant paints the cream sheet. --bp-acc is a fixed blueprint
-     blue (matches the mockup), independent of the site's accent schemes; orange is
+     the .light-mode variant paints the cream sheet. --bp-acc follows the site accent
+     (var(--accent) — the default scheme is the blueprint blue), so schemes recolor it; orange is
      the fixed decorative secondary. The --nav-bg / --nav-bg-scroll overrides retune
      the glass the shared navDimmer toggles between on scroll. */
   :global(html.bp-home) {
     --bp-bg: #0a0e14;
     --bp-ink: var(--text-primary);
-    --bp-acc: #1b56ff;
+    --bp-acc: var(--accent);
     --bp-orange: #ff5b1a;
     --bp-line: rgba(255, 255, 255, 0.05);
     --bp-line2: rgba(255, 255, 255, 0.08);
@@ -539,9 +614,25 @@ const homepageSchema = {
     --bp-muted: color-mix(in srgb, var(--bp-ink) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
     --bp-hover: color-mix(in srgb, var(--bp-acc) 8%, transparent);
+    /* Desk-lamp glow ramp: peak color, a gradient interpolation hint, and a
+       transparent END that stays the SAME hue as the peak. The end is NOT the
+       bare `transparent` keyword — that resolves to transparent *black*, so the
+       fade drifts through muddy blue-grey; on the cream sheet that reads as a
+       dirty smudge (invisible on navy, hence dark looked fine). rgb(var(--accent-rgb) / 0)
+       is the accent hue at alpha 0, so the fade keeps that hue the whole way.
+       The gradient also interpolates `in oklab` (see .bp-grid) for a
+       perceptually smooth ramp with no grey midtone. The hint curves the
+       falloff. Light mode hides this glow entirely (--bp-lamp set to a
+       transparent blue below) so the cream sheet shows only the grid +
+       the twinkling constellation; dark mode keeps the blue corner pool. */
+    --bp-lamp: var(--bp-acc);
+    --bp-lamp-hint: 20%;
+    --bp-lamp-size: 650px 500px;
+    --bp-lamp-end: rgb(var(--accent-rgb) / 0); /* transparent accent (== --bp-acc, alpha 0) */
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
+    --bp-lamp: rgb(var(--accent-rgb) / 0); /* hide the corner glow on the cream sheet — the twinkling stars carry the corner alone */
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
@@ -551,6 +642,10 @@ const homepageSchema = {
     position: relative;
     background: var(--bp-bg);
     color: var(--bp-ink);
+    /* Clear the fixed nav overlay (~69px) so the hero isn't tucked under it. The
+       .bp-grid sheet is absolute inset:0, so it still fills from the true top
+       (behind the nav glass) — padding only shifts the in-flow content down. */
+    padding-top: 72px;
     font-family: "Space Grotesk", system-ui, sans-serif;
     /* overflow-x only (not `overflow: clip`) so it never becomes a scroll container
        that would trap the §04 sticky background. Matches the old layout, where only
@@ -566,13 +661,134 @@ const homepageSchema = {
     inset: 0;
     z-index: 0;
     pointer-events: none;
+    /* Desk-lamp glow's horizontal anchor: top-LEFT (0%) on desktop so it pairs
+       with the constellation (also top-left ≥900px, opposite the hero ring);
+       flipped to top-RIGHT (100%) at ≤900px where the ring moves up and both
+       accents shift to the free top-right corner (see media query below). */
+    --bp-lamp-x: 0%;
     background-image:
       linear-gradient(var(--bp-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
       linear-gradient(var(--bp-line2) 1px, transparent 1px),
-      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
-    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px),
+      /* Desk-lamp glow at the sheet's top corner (--bp-lamp-x: 0% desktop /
+         100% ≤900px), dissolving fast so the hero label/copy stay legible
+         (ramp tokens above). Kept compact (650×500) — a bigger ellipse floods
+         half the hero. Plain gradient, no blur filter — win-perf-mode safe.
+         `in oklab` + a same-hue transparent end (--bp-lamp-end) keep the fade
+         clean (no muddy grey), which is what made light mode look smudged before. */
+      radial-gradient(ellipse var(--bp-lamp-size) at var(--bp-lamp-x) 0% in oklab, var(--bp-lamp), var(--bp-lamp-hint), var(--bp-lamp-end) 75%);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
+
+  /* Blueprint constellation — a build-time twinkling point-field that shares the
+     hero's corner accent with the desk-lamp glow, sitting opposite the rotating
+     ring. Point + line coordinates and the star `right:%` offsets are all
+     authored for a top-RIGHT cluster. Base (desktop ≥900px, ring on the right):
+     `transform: scaleX(-1)` mirrors the whole field — mask included — to the
+     top-LEFT (only the anchor flips to `left: 0`; every coordinate below stays
+     as-is). At ≤900px the hero stacks and the ring moves up, so the field drops
+     the flip and returns to its authored top-RIGHT corner (see media query
+     below). z-index below the fixed nav (100) so it runs behind the translucent
+     glass; a radial mask fades it toward the centre so it never crowds the hero
+     copy. Colour tracks the active accent (--bp-acc). CSS-only twinkle (staggered
+     per-element delays, no JS/rAF). */
+  .bp-constellation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: scaleX(-1);
+    width: min(460px, 60vw);
+    height: 340px;
+    z-index: 2;
+    pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
+    mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
+  }
+  .bp-cst-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .bp-cst-edges line {
+    stroke: var(--bp-acc);
+    stroke-width: 0.75;
+    opacity: 0.16;
+    animation: bp-line-pulse 6s ease-in-out infinite;
+  }
+  /* Shared twinkle: fade + scale, staggered per element via --dur/--dl. */
+  .bp-cst-nodes circle,
+  .bp-star {
+    fill: var(--bp-acc);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: bp-twinkle var(--dur, 4s) ease-in-out infinite;
+    animation-delay: var(--dl, 0s);
+    will-change: opacity, transform;
+  }
+  .bp-star {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    background: var(--bp-acc);
+    /* Loose "dust" stars (no connecting lines) drift on a slow, independent
+       timeline (individual `translate`) while they twinkle (individual `scale`
+       + opacity) — two separate animations on distinct properties, so they
+       compose AND desync for an organic float. The 9 linked SVG nodes keep the
+       plain in-place twinkle (shared rule above) so their connectors stay put. */
+    animation:
+      bp-star-twinkle var(--dur, 4s) ease-in-out infinite var(--dl, 0s),
+      bp-star-drift var(--ddur, 12s) ease-in-out infinite var(--ddl, 0s);
+    will-change: translate, scale, opacity;
+  }
+  /* Light mode has no corner glow (see --bp-lamp above), so the stars stay the
+     default blueprint blue — blue-on-cream reads fine; no white flip needed. */
+  @keyframes bp-twinkle {
+    0%, 100% { opacity: 0.12; transform: scale(0.6); }
+    50% { opacity: 0.9; transform: scale(1); }
+  }
+  /* Loose-star twinkle via the individual `scale` property (not `transform`), so
+     it composes with the independent `translate` drift below instead of the two
+     fighting over a single `transform`. */
+  @keyframes bp-star-twinkle {
+    0%, 100% { opacity: 0.12; scale: 0.6; }
+    50% { opacity: 0.9; scale: 1; }
+  }
+  /* Slow wander: eased through a few fractions of the per-star drift vector
+     (--dx/--dy) and back, on its own long duration so it never syncs with the
+     twinkle. Individual `translate` composes with the `scale` above. */
+  @keyframes bp-star-drift {
+    0% { translate: 0 0; }
+    25% { translate: var(--dx, 8px) var(--dy, -6px); }
+    50% { translate: calc(var(--dx, 8px) * -0.35) calc(var(--dy, -6px) * 0.8); }
+    75% { translate: calc(var(--dx, 8px) * 0.65) calc(var(--dy, -6px) * -0.45); }
+    100% { translate: 0 0; }
+  }
+  /* Connector lines breathe faintly so the fixed node structure feels alive
+     alongside the drifting dust. */
+  @keyframes bp-line-pulse {
+    0%, 100% { opacity: 0.08; }
+    50% { opacity: 0.22; }
+  }
+  /* Gates: honour reduced-motion and freeze under win-perf-mode (Windows) like
+     the other homepage anims — a static, faint field in each case. */
+  @media (prefers-reduced-motion: reduce) {
+    .bp-cst-nodes circle,
+    .bp-star { animation: none; opacity: 0.5; }
+    .bp-cst-edges line { animation: none; }
+  }
+  /* ≤900px the hero stacks and the ring moves up, freeing the top-right corner:
+     shift BOTH accents there — the glow via --bp-lamp-x, and the constellation by
+     dropping its scaleX flip back to the authored top-RIGHT anchor. Constellation
+     now shows on mobile too (was display:none ≤768px). */
+  @media (max-width: 900px) {
+    .bp-grid { --bp-lamp-x: 100%; }
+    .bp-constellation { left: auto; right: 0; transform: none; }
+  }
+  :global(body.win-perf-mode) .bp-cst-nodes circle,
+  :global(body.win-perf-mode) .bp-star { animation: none; opacity: 0.5; }
+  :global(body.win-perf-mode) .bp-cst-edges line { animation: none; }
 
   .bp-wrap {
     position: relative;
@@ -978,6 +1194,17 @@ const homepageSchema = {
   .quilt-art-item.is-wide { grid-column: span 2; }
   .quilt-art-item.is-tall { grid-row: span 2; }
   .quilt-art-item.is-big { grid-column: span 2; grid-row: span 2; }
+  /* Mobile 2-col grid: the ratio-driven spans (.is-tall = half-width/2-row,
+     .is-wide/.is-big = full-width) strand cells that dense flow can't backfill — a
+     hole. Flatten every tile to 1×1 so the grid packs perfectly; when the total is
+     odd, the last tile spans the full width to fill the final row
+     (:last-child:nth-child(odd) matches the last tile only when the count is odd). */
+  @media (max-width: 639.98px) {
+    .quilt-art-item.is-tall,
+    .quilt-art-item.is-wide,
+    .quilt-art-item.is-big { grid-column: auto; grid-row: auto; }
+    .quilt-art-item:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  }
   .art-img-frame {
     height: 100%;
     border: 1px solid color-mix(in srgb, var(--bp-acc) 35%, transparent);
