@@ -176,6 +176,26 @@ const homepageSchema = {
   <main class="bp" data-api-url={API_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
 
+    <!-- Signal waveform: 12 bars hanging from the sheet's true top edge, animating
+         downward (transform-origin:top). Anchored at y=0 so they slip behind the
+         translucent fixed nav in the top-right corner. CSS-only — staggered
+         durations/delays fake the random "levels", no JS/rAF. Gated for
+         reduced-motion, win-perf-mode and mobile (see CSS). -->
+    <div class="bp-waveform" aria-hidden="true">
+      <span style="--d:3.2s;--dl:-0.4s"></span>
+      <span class="b" style="--d:3.8s;--dl:-1.2s"></span>
+      <span class="c" style="--d:2.8s;--dl:-0.7s"></span>
+      <span style="--d:4s;--dl:-2s"></span>
+      <span class="b" style="--d:3s;--dl:-0.2s"></span>
+      <span class="c" style="--d:3.6s;--dl:-1.5s"></span>
+      <span style="--d:2.8s;--dl:-0.9s"></span>
+      <span class="b" style="--d:4.2s;--dl:-0.5s"></span>
+      <span class="c" style="--d:3.4s;--dl:-1.8s"></span>
+      <span style="--d:3.9s;--dl:-0.3s"></span>
+      <span class="b" style="--d:2.9s;--dl:-1.1s"></span>
+      <span class="c" style="--d:4.4s;--dl:-2.3s"></span>
+    </div>
+
     <!-- ===================== HERO ===================== -->
     <header class="bp-wrap bp-hero">
       <div class="bp-hero-left">
@@ -601,6 +621,54 @@ const homepageSchema = {
       radial-gradient(ellipse var(--bp-lamp-size) at 100% 0% in oklab, var(--bp-lamp), var(--bp-lamp-hint), var(--bp-lamp-end) 75%);
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
+
+  /* Signal waveform — 12 bars hanging from the top edge into the top-right
+     corner, aligned to the content's right edge (same 1280 + gutter as the nav)
+     so they sit under the nav's controls. z-index below the fixed nav (100) so
+     they run behind the translucent glass. transform-origin:top => they grow
+     DOWN. Slow, desynced durations/delays read as random music "levels". */
+  .bp-waveform {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1280px;
+    padding: 0 clamp(20px, 5vw, 48px);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 5px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .bp-waveform span {
+    display: block;
+    width: 6px;
+    height: clamp(64px, 9vw, 104px);
+    border-radius: 0 0 3px 3px;
+    background: var(--bp-acc);
+    opacity: 0.8;
+    transform-origin: top;
+    will-change: transform;
+    animation: bp-wf-a var(--d, 3.2s) ease-in-out infinite;
+    animation-delay: var(--dl, 0s);
+  }
+  .bp-waveform span.b { animation-name: bp-wf-b; }
+  .bp-waveform span.c { animation-name: bp-wf-c; }
+  @keyframes bp-wf-a { 0%, 100% { transform: scaleY(0.16); } 50% { transform: scaleY(1); } }
+  @keyframes bp-wf-b { 0%, 100% { transform: scaleY(0.85); } 45% { transform: scaleY(0.26); } 80% { transform: scaleY(0.6); } }
+  @keyframes bp-wf-c { 0%, 100% { transform: scaleY(0.4); } 30% { transform: scaleY(1); } 70% { transform: scaleY(0.2); } }
+  /* Gates: honour reduced-motion, drop on mobile (avoids the burger/CTA zone),
+     and freeze under win-perf-mode (Windows) like the other homepage anims. */
+  @media (prefers-reduced-motion: reduce) {
+    .bp-waveform span { animation: none; transform: scaleY(0.45); }
+  }
+  @media (max-width: 768px) {
+    .bp-waveform { display: none; }
+  }
+  :global(body.win-perf-mode) .bp-waveform span { animation: none; transform: scaleY(0.45); }
 
   .bp-wrap {
     position: relative;
