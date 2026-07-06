@@ -43,7 +43,7 @@ const toggleTheme = () => {
 // re-init is needed (unlike toggleTheme, which flips canvas opacity + cursor base).
 const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'] as const;
 type Scheme = (typeof SCHEMES)[number];
-const DEFAULT_SCHEME: Scheme = 'violet';
+const DEFAULT_SCHEME: Scheme = 'ocean';
 
 const isScheme = (v: string | null): v is Scheme =>
 	!!v && (SCHEMES as readonly string[]).includes(v);

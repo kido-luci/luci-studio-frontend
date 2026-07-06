@@ -604,14 +604,14 @@ const homepageSchema = {
      ══════════════════════════════════════════════════════════════════════ */
   /* Blueprint tokens live on html.bp-home so BOTH the sticky nav and <main.bp>
      inherit them (the nav is a sibling of main, not a child). Dark by default;
-     the .light-mode variant paints the cream sheet. --bp-acc is a fixed blueprint
-     blue (matches the mockup), independent of the site's accent schemes; orange is
+     the .light-mode variant paints the cream sheet. --bp-acc follows the site accent
+     (var(--accent) — the default scheme is the blueprint blue), so schemes recolor it; orange is
      the fixed decorative secondary. The --nav-bg / --nav-bg-scroll overrides retune
      the glass the shared navDimmer toggles between on scroll. */
   :global(html.bp-home) {
     --bp-bg: #0a0e14;
     --bp-ink: var(--text-primary);
-    --bp-acc: #1b56ff;
+    --bp-acc: var(--accent);
     --bp-orange: #ff5b1a;
     --bp-line: rgba(255, 255, 255, 0.05);
     --bp-line2: rgba(255, 255, 255, 0.08);
@@ -624,8 +624,8 @@ const homepageSchema = {
        transparent END that stays the SAME hue as the peak. The end is NOT the
        bare `transparent` keyword — that resolves to transparent *black*, so the
        fade drifts through muddy blue-grey; on the cream sheet that reads as a
-       dirty smudge (invisible on navy, hence dark looked fine). rgba(27,86,255,0)
-       is blueprint blue #1b56ff at alpha 0, so the fade stays blue the whole way.
+       dirty smudge (invisible on navy, hence dark looked fine). rgb(var(--accent-rgb) / 0)
+       is the accent hue at alpha 0, so the fade keeps that hue the whole way.
        The gradient also interpolates `in oklab` (see .bp-grid) for a
        perceptually smooth ramp with no grey midtone. The hint curves the
        falloff. Light mode hides this glow entirely (--bp-lamp set to a
@@ -634,11 +634,11 @@ const homepageSchema = {
     --bp-lamp: var(--bp-acc);
     --bp-lamp-hint: 20%;
     --bp-lamp-size: 650px 500px;
-    --bp-lamp-end: rgba(27, 86, 255, 0); /* transparent blueprint blue (== --bp-acc, alpha 0) */
+    --bp-lamp-end: rgb(var(--accent-rgb) / 0); /* transparent accent (== --bp-acc, alpha 0) */
   }
   :global(html.bp-home.light-mode) {
     --bp-bg: #f4f2ec;
-    --bp-lamp: rgba(27, 86, 255, 0); /* hide the corner glow on the cream sheet — the twinkling stars carry the corner alone */
+    --bp-lamp: rgb(var(--accent-rgb) / 0); /* hide the corner glow on the cream sheet — the twinkling stars carry the corner alone */
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
     --bp-hair: rgba(22, 32, 43, 0.16);
