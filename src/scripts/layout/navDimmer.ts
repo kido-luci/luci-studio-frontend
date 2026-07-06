@@ -16,6 +16,22 @@ export function initNavDimmer() {
 		nav.style.background = 'var(--nav-bg-scroll)';
 	}
 
+	// Scroll-progress dimension rule along the nav's bottom edge (TopNav's
+	// .bp-nav-progress). Rule scales with document scroll progress; the tick
+	// tracks its leading edge. Runs before the class/style writes below so the
+	// layout reads (scrollHeight/clientWidth) never follow a same-frame write.
+	const progressRule = nav.querySelector('.bp-nav-progress-rule') as HTMLElement | null;
+	const progressTip = nav.querySelector('.bp-nav-progress-tip') as HTMLElement | null;
+	const updateProgress = (scrollY: number) => {
+		if (!progressRule || !progressTip) return;
+		const doc = document.documentElement;
+		const max = doc.scrollHeight - window.innerHeight;
+		const p = max > 0 ? Math.min(scrollY / max, 1) : 0;
+		progressRule.style.transform = `scaleX(${p})`;
+		progressTip.style.transform = `translateX(${p * (doc.clientWidth - 2)}px)`;
+	};
+	updateProgress(window.scrollY); // anchor links / restored scroll positions
+
 	let scrollRaf = false;
 	let lastScrollY = window.scrollY;
 	window.addEventListener('scroll', () => {
@@ -24,6 +40,8 @@ export function initNavDimmer() {
 		requestAnimationFrame(() => {
 			scrollRaf = false;
 			const scrollY = window.scrollY;
+
+			updateProgress(scrollY);
 
 			// Hide the nav on scroll-down, reveal it on scroll-up. Skipped while the
 			// mobile menu is open (it lives inside the nav — hiding it would strand
