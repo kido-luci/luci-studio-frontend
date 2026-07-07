@@ -167,6 +167,10 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
     <div class="max-w-4xl mx-auto bp-post-inner">
 
+      <!-- Reading paper: header + article ride a white sheet in light mode
+           (floats on the cream blueprint desk); a no-op passthrough in dark. -->
+      <div class="bd-sheet">
+
       <header class="bd-header" data-reveal>
         <a href={localizedHref(locale, '/blog')} class="bd-back">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -225,6 +229,8 @@ const structuredData = [articleSchema, breadcrumbSchema];
       <!-- Content -->
       <article class="prose-custom markdown-content" set:html={htmlContent}>
       </article>
+
+      </div><!-- /.bd-sheet -->
 
       <!-- Like + Support card -->
       <div class="support-card mt-24 rounded-3xl border border-white/10 bg-white/[0.02] px-6 py-12 md:px-12 flex flex-col items-center text-center gap-4">
@@ -588,6 +594,17 @@ const structuredData = [articleSchema, breadcrumbSchema];
     --bp-fig: #e8e6df;
     --bp-panel: #ffffff;
     --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
+  }
+  /* Reading paper — light mode only: the header + article sit on a white sheet
+     floating on the cream blueprint desk. Dark mode leaves .bd-sheet unstyled
+     (transparent passthrough), so the drafting-sheet look there is untouched. */
+  body.light-mode .bd-sheet {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid var(--bp-hair);
+    border-radius: 24px;
+    box-shadow: var(--bp-shadow);
+    padding: clamp(28px, 5vw, 64px);
   }
   .bp-post .bp-grid {
     position: absolute; top: 0; left: 0; right: 0; height: 640px; z-index: 0; pointer-events: none;
