@@ -20,9 +20,12 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
 
 <!--
   Layout:  [rail: dot + line] | [period label + card]
-  The rail line extends -16px below to bridge the .space-y-4 gap between items.
-  All content is always visible (no accordion); the scroll-reveal is driven by
-  `.tl-visible` on this wrapper, added by the IntersectionObserver in PortfolioPage.
+  The card is a "bento" of nested blueprint panels: a header panel (logo +
+  role/company/location + summary), then a two-column body — a Key-achievements
+  panel on the left and a stacked Gallery / Stack / Links column on the right.
+  The rail line extends -16px below to bridge the gap between items. All content
+  is always visible (no accordion); the scroll-reveal is driven by `.tl-visible`
+  on this wrapper, added by the IntersectionObserver in PortfolioPage.
 -->
 <div id={id} data-timeline-item={String(index)} class="tl-item">
 
@@ -39,27 +42,27 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
     <div class="tl-card-reveal">
       <div class="tl-card">
 
-        {/* Header */}
-        <div class="tl-head">
-          <div class="tl-icon">
-            {logo
-              ? <img src={logo} alt={`${company} logo`} loading="lazy" />
-              : <span>{monogram}</span>}
-          </div>
-          <div class="tl-headtext">
-            <h3 class="tl-role">{role}</h3>
-            <div class="tl-company">— {company}</div>
-            <div class="tl-loc">{location}</div>
-          </div>
-        </div>
+        {/* Body: [header + achievements] | gallery + stack + links */}
+        <div class="tl-body-grid">
+          {/* Left: header (logo/role/company/location + summary) merged with
+              Key achievements into a single card */}
+          <div class="tl-panel tl-panel--main">
+            <div class="tl-head">
+              <div class="tl-icon">
+                {logo
+                  ? <img src={logo} alt={`${company} logo`} loading="lazy" />
+                  : <span>{monogram}</span>}
+              </div>
+              <div class="tl-headtext">
+                <h3 class="tl-role">{role}</h3>
+                <div class="tl-company">— {company}</div>
+                <div class="tl-loc">{location}</div>
+              </div>
+            </div>
+            {desc && <p class="tl-summary">{desc}</p>}
 
-        <p class="tl-summary">{desc}</p>
+            <div class="tl-divider"></div>
 
-        <div class="tl-divider"></div>
-
-        {/* Two-column: achievements | media + stack + links */}
-        <div class="tl-grid">
-          <div class="tl-col-ach">
             <div class="tl-label">Key achievements</div>
             <ul class="tl-achlist">
               {details.map(item => (
@@ -71,24 +74,34 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
             </ul>
           </div>
 
-          <div class="tl-col-side">
-            {img
-              ? <div class="tl-media"><img src={img} alt={`${company} preview`} loading="lazy" /></div>
-              : <div class="tl-media tl-media--empty"><span>▦</span></div>}
-
-            <div class="tl-label">Stack</div>
-            <div class="tl-chips">
-              {tech.map(t => (<span class="tl-chip">{t}</span>))}
+          <div class="tl-side">
+            <div class="tl-panel tl-panel--gallery">
+              {img
+                ? <div class="tl-media"><img src={img} alt={`${company} preview`} loading="lazy" /></div>
+                : <div class="tl-media tl-media--empty"><span>▦</span></div>}
             </div>
 
-            {links.length > 0 && (
-              <div class="tl-links-block">
-                <div class="tl-label">Links</div>
-                <div class="tl-links">
-                  {links.map(l => (
-                    <a href={l.url} target="_blank" rel="noopener" class="tl-link">{l.label} ↗</a>
-                  ))}
-                </div>
+            {(tech.length > 0 || links.length > 0) && (
+              <div class="tl-panel tl-panel--meta">
+                {tech.length > 0 && (
+                  <div class="tl-meta-block">
+                    <div class="tl-label">Stack</div>
+                    <div class="tl-chips">
+                      {tech.map(t => (<span class="tl-chip">{t}</span>))}
+                    </div>
+                  </div>
+                )}
+
+                {links.length > 0 && (
+                  <div class="tl-meta-block">
+                    <div class="tl-label">Links</div>
+                    <div class="tl-links">
+                      {links.map(l => (
+                        <a href={l.url} target="_blank" rel="noopener" class="tl-link">{l.label} ↗</a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -100,10 +113,10 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
 </div>
 
 <style>
-  /* Blueprint timeline — drafting-sheet DNA. Accent follows the color scheme.
+  /* Blueprint timeline — drafting-sheet DNA rebuilt as a "bento" of nested panels.
      Structure + reveal classes (.tl-visible + .tl-dot/line/period/card-reveal)
      are unchanged, so PortfolioPage's IntersectionObserver still drives it.
-     Self-contained --bp-* tokens (light/dark) so the card reads on any sheet. */
+     Self-contained --bp-* tokens (light/dark) so the panels read on any sheet. */
   .tl-item {
     --bp-acc: var(--accent);
     --bp-ink: var(--text-primary);
@@ -114,6 +127,8 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
     --bp-bg: #0a0e14;
     --bp-fig: rgba(255, 255, 255, 0.05);
     --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
+    --bp-panel-hover: color-mix(in srgb, var(--bp-acc) 8%, var(--bp-panel));
+    --bp-shadow: none;
     --bp-mono: "IBM Plex Mono", ui-monospace, monospace;
     display: flex; gap: 20px;
   }
@@ -125,6 +140,7 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
     --bp-panel: #ffffff;
     --bp-muted: color-mix(in srgb, var(--text-primary) 62%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 45%, transparent);
+    --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
   }
 
   .tl-rail { flex: none; width: 16px; display: flex; flex-direction: column; align-items: center; padding-top: 3px; }
@@ -135,49 +151,61 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
   .tl-dot { width: 13px; height: 13px; border-radius: 50%; background: var(--bp-acc); box-shadow: 0 0 0 4px color-mix(in srgb, var(--bp-acc) 20%, transparent); }
   .tl-line { flex: 1; width: 1px; margin-top: 8px; margin-bottom: -16px; background: linear-gradient(to bottom, color-mix(in srgb, var(--bp-acc) 40%, transparent), var(--bp-hair) 42%, transparent); }
 
-  /* Card */
-  .tl-card { background: var(--bp-panel); border: 1px solid var(--bp-hair); border-radius: 14px; padding: 28px 30px; box-shadow: none; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
-  .tl-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--bp-acc) 40%, transparent); box-shadow: 0 18px 44px -26px color-mix(in srgb, var(--bp-acc) 40%, transparent); }
+  /* Card = bento container of panels (no border/bg of its own) */
+  .tl-card { display: flex; flex-direction: column; gap: 14px; }
 
-  /* Header */
+  /* Panel primitive — bordered blueprint sub-card */
+  .tl-panel { background: var(--bp-panel); border: 1px solid var(--bp-hair); border-radius: 14px; padding: 24px 26px; box-shadow: var(--bp-shadow); transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease; }
+  .tl-panel:hover { border-color: color-mix(in srgb, var(--bp-acc) 32%, transparent); background: var(--bp-panel-hover); }
+
+  /* Header panel */
   .tl-head { display: flex; align-items: flex-start; gap: 16px; }
-  .tl-icon { flex: none; width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: var(--bp-fig); border: 1px solid var(--bp-hair); display: flex; align-items: center; justify-content: center; font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 20px; color: var(--bp-ink); }
+  .tl-icon { flex: none; width: 56px; height: 56px; border-radius: 12px; overflow: hidden; background: var(--bp-fig); border: 1px solid var(--bp-hair); display: flex; align-items: center; justify-content: center; font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 22px; color: var(--bp-ink); }
   .tl-icon img { width: 100%; height: 100%; object-fit: cover; }
   .tl-headtext { flex: 1; min-width: 0; }
   .tl-role { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 1.6rem; line-height: 1.12; letter-spacing: -0.02em; color: var(--bp-ink); margin: 0; }
   .tl-company { font-weight: 600; font-size: 1rem; color: var(--bp-acc); margin-top: 5px; }
   .tl-loc { font-family: var(--bp-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bp-muted); margin-top: 9px; }
 
-  /* Summary + divider */
-  .tl-summary { font-size: 1rem; line-height: 1.55; color: var(--bp-muted); margin: 20px 0 0; max-width: 62ch; }
-  .tl-divider { height: 1px; background: var(--bp-hair); margin: 24px 0; }
+  /* Summary + divider inside the merged left card */
+  .tl-summary { font-size: 1.02rem; line-height: 1.55; color: var(--bp-muted); margin: 18px 0 0; max-width: 70ch; }
+  .tl-divider { height: 1px; background: var(--bp-hair); margin: 22px 0; }
 
-  /* Two-column grid */
-  .tl-grid { display: grid; grid-template-columns: 1.32fr 1fr; gap: 40px; }
-  .tl-col-ach, .tl-col-side { min-width: 0; }
-  .tl-label { font-family: var(--bp-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-muted); }
-  .tl-col-ach .tl-label { margin-bottom: 14px; }
-  .tl-col-side .tl-label { margin-bottom: 11px; }
+  /* Body grid: achievements (wide) | stacked side column. Columns stretch to
+     equal height so the shorter achievements card fills the row instead of
+     leaving a blank strip of sheet below it (the side column is always taller). */
+  .tl-body-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; align-items: stretch; }
+  .tl-panel--main { min-width: 0; }
+  .tl-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  /* Gallery = edge-to-edge cover image (no label, no inner padding); the panel's
+     own border + radius frame it. It grows to fill the right column's height so
+     the taller merged left card never leaves a blank below — the cover stretches. */
+  .tl-panel--gallery { padding: 0; overflow: hidden; display: flex; flex: 1; min-height: 210px; }
+  /* Stack + Links share one card, separated by a hairline */
+  .tl-panel--meta { display: flex; flex-direction: column; }
+  .tl-meta-block + .tl-meta-block { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--bp-hair); }
+
+  /* Labels */
+  .tl-label { font-family: var(--bp-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-muted); margin-bottom: 14px; }
 
   /* Achievements */
-  .tl-achlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-  .tl-ach { display: flex; gap: 12px; }
-  .tl-bullet { flex: none; width: 6px; height: 6px; background: var(--bp-acc); transform: rotate(45deg); margin-top: 7px; }
-  .tl-ach-text { font-size: 0.9rem; line-height: 1.5; color: var(--bp-muted); }
+  .tl-achlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+  .tl-ach { display: flex; gap: 13px; }
+  .tl-bullet { flex: none; width: 7px; height: 7px; background: var(--bp-acc); transform: rotate(45deg); margin-top: 7px; }
+  .tl-ach-text { font-size: 0.92rem; line-height: 1.55; color: var(--bp-muted); }
 
-  /* Media */
-  .tl-media { height: 188px; border-radius: 10px; overflow: hidden; border: 1px solid var(--bp-hair); margin-bottom: 20px; }
+  /* Gallery media — fills the panel; framed by the panel itself */
+  .tl-media { flex: 1; overflow: hidden; }
   .tl-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .tl-media--empty { display: flex; align-items: center; justify-content: center; background-color: var(--bp-fig); color: var(--bp-faint); font-size: 20px; background-image: repeating-linear-gradient(135deg, var(--bp-line2) 0 10px, transparent 10px 20px); }
 
-  /* Stack chips */
-  .tl-chips { display: flex; flex-wrap: wrap; gap: 7px; }
-  .tl-chip { font-family: var(--bp-mono); font-size: 11px; letter-spacing: 0.02em; color: var(--bp-muted); background: transparent; border: 1px solid var(--bp-hair); border-radius: 999px; padding: 6px 12px; }
+  /* Stack chips — rounded-rects */
+  .tl-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tl-chip { font-family: var(--bp-mono); font-size: 11.5px; letter-spacing: 0.02em; color: var(--bp-muted); background: transparent; border: 1px solid var(--bp-hair); border-radius: 8px; padding: 7px 12px; }
 
-  /* Links */
-  .tl-links-block { margin-top: 20px; }
-  .tl-links { display: flex; flex-wrap: wrap; gap: 7px; }
-  .tl-link { font-family: var(--bp-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--bp-acc); background: transparent; border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent); border-radius: 999px; padding: 7px 14px; text-decoration: none; transition: background 0.14s ease, color 0.14s ease; }
+  /* Links — rounded-rect buttons */
+  .tl-links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tl-link { font-family: var(--bp-mono); font-size: 11.5px; letter-spacing: 0.04em; color: var(--bp-acc); background: transparent; border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent); border-radius: 8px; padding: 8px 14px; text-decoration: none; transition: background 0.14s ease, color 0.14s ease; }
   .tl-link:hover { background: var(--bp-acc); color: #fff; }
 
   /* Scroll reveal (triggered by .tl-visible on the wrapper) */
@@ -202,11 +230,16 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
   .tl-visible .tl-period      { animation: tlPeriodIn 0.4s  cubic-bezier(0.16, 1, 0.3, 1)     0.12s both; }
   .tl-visible .tl-card-reveal { animation: tlCardIn   0.65s cubic-bezier(0.16, 1, 0.3, 1)     0.18s both; }
 
-  /* Mobile */
+  /* Tablet: collapse the two-column body to a single stack */
+  @media (max-width: 760px) {
+    .tl-body-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Mobile — drop the rail (dot + line) so the card uses the full width */
   @media (max-width: 640px) {
-    .tl-item { gap: 14px; }
-    .tl-card { padding: 24px 22px; border-radius: 12px; }
+    .tl-item { gap: 0; }
+    .tl-rail { display: none; }
+    .tl-panel { padding: 22px 20px; }
     .tl-role { font-size: 1.35rem; }
-    .tl-grid { grid-template-columns: 1fr; gap: 28px; }
   }
 </style>
