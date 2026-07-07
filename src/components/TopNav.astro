@@ -328,5 +328,10 @@ const schemes = [
     .bp-nav-burger { display: flex; }
     .bp-nav.menu-open .bp-nav-mobile { display: flex; }
     .bp-nav.menu-open { border-bottom-color: var(--bp-line2); }
+    /* Open "show more" dropdown → solid nav surface so the menu links read
+       cleanly. The bar is translucent-by-design at rest; only the OPEN menu goes
+       opaque. !important beats the inline background navDimmer.ts writes on scroll. */
+    .bp-nav.menu-open { background: #0a0a0a !important; }
+    :global(body.light-mode) .bp-nav.menu-open { background: #fff !important; }
   }
 </style>
