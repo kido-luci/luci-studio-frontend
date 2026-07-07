@@ -594,28 +594,31 @@ const structuredData = [articleSchema, breadcrumbSchema];
     --bp-fig: #e8e6df;
     --bp-panel: #ffffff;
     --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
+    /* Whole-page warm wash: a soft white glow centred on the viewport radiates
+       out to the cream drafting desk at the edges (radial). Viewport-fixed so the
+       glow stays centred while scrolling — on a tall article a non-fixed radial
+       would centre mid-page and the fade would be imperceptible. --bp-bg stays a
+       solid token for the panel/fig derivations; only the paint is the gradient. */
+    background: radial-gradient(ellipse at 50% 42%, #ffffff 0%, #ffffff 25%, #f4f2ec 82%) fixed;
   }
-  /* Reading paper — light mode only: the header + article sit on a white sheet
-     floating on the cream blueprint desk. Dark mode leaves .bd-sheet unstyled
-     (transparent passthrough), so the drafting-sheet look there is untouched. */
+  /* Light mode: header + article read directly on the page — no floating white
+     card, just a comfortable horizontal inset from the column edges. Dark mode
+     leaves .bd-sheet unstyled (transparent passthrough). */
   body.light-mode .bd-sheet {
     position: relative;
-    background: #ffffff;
-    border: 1px solid var(--bp-hair);
-    border-radius: 24px;
-    box-shadow: var(--bp-shadow);
-    padding: clamp(28px, 5vw, 64px);
+    padding: 0 clamp(4px, 2vw, 24px);
   }
+  /* Drafting grid spans the whole page (both themes) — top:0→bottom:0, no fade
+     mask. Faint lines (--bp-line/2) sit under the content (z-index 0 < inner 1);
+     opaque panels (support card / comments) cover it where they land. */
   .bp-post .bp-grid {
-    position: absolute; top: 0; left: 0; right: 0; height: 640px; z-index: 0; pointer-events: none;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0; pointer-events: none;
     background-image:
       linear-gradient(var(--bp-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
       linear-gradient(var(--bp-line2) 1px, transparent 1px),
       linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
-            mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
   }
   .bp-post-inner { position: relative; z-index: 1; }
   .bd-acc-dot { color: var(--bp-acc); }
