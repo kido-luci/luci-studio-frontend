@@ -1333,6 +1333,38 @@ const homepageSchema = {
   import { initHomeScrollAnimations } from "../../scripts/homeScrollAnimations";
   initHomeScrollAnimations();
 </script>
+<script>
+  import { initBpGlow } from "../../scripts/bpGlow";
+  initBpGlow();
+</script>
+
+<!-- PROTOTYPE (units.gr-inspired): scramble-in for the mono section labels — the
+     IBM Plex Mono eyebrows decode like a terminal readout as they scroll into
+     view. Mono font → fixed advance width, so the scramble never reflows text.
+     Skipped under reduced motion; label text is restored verbatim at the end. -->
+<script is:inline defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrambleTextPlugin.min.js" integrity="sha384-QsPhgdP78a1erQNT34dj/oyh7uPCXUnT/FkptUa/56LnSGsbTBmdiAOfB7j+8K4A" crossorigin="anonymous"></script>
+<script is:inline>
+  (function () {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var tries = 0;
+    (function boot() {
+      var g = window.gsap, ST = window.ScrollTrigger, SC = window.ScrambleTextPlugin;
+      if (!g || !ST || !SC) { if (tries++ < 100) setTimeout(boot, 80); return; }
+      g.registerPlugin(SC);
+      document.querySelectorAll(".bp-sec-label, .bp-sec-count").forEach(function (el) {
+        var text = el.textContent;
+        ST.create({
+          trigger: el,
+          start: "top 88%",
+          once: true,
+          onEnter: function () {
+            g.to(el, { duration: 0.9, scrambleText: { text: text, chars: "01/—·+×", speed: 0.35 } });
+          },
+        });
+      });
+    })();
+  })();
+</script>
 
 <script is:inline>
   // §01 COVER/DEMO toggle — mirrors the /games featured card: the cover crossfades
