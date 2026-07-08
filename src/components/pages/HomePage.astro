@@ -525,6 +525,9 @@ const homepageSchema = {
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
+    <!-- §02–§05 form the sticky-stacking sheet deck (desktop + no-reduced-motion;
+         see .bp-stack CSS). Falls back to normal document flow otherwise. -->
+    <div class="bp-stack">
     <!-- ===================== §02 CAPABILITIES ===================== -->
     <section class="bp-wrap bp-section" id="capabilities">
       <div class="bp-sec-head" data-reveal>
@@ -713,6 +716,7 @@ const homepageSchema = {
         )}
       </div>
     </section>
+    </div><!-- /.bp-stack -->
 
     <SiteFooter locale={locale} />
   </main>
@@ -940,6 +944,57 @@ const homepageSchema = {
   .bp-section {
     padding-top: clamp(52px, 8vw, 88px);
     padding-bottom: clamp(52px, 8vw, 88px);
+  }
+
+  /* ══ Phase 2 — sticky-stacking sheet deck (§02–§05) ══════════════════════
+     Desktop + no-reduced-motion only: the four sections after the games rail
+     become opaque, full-bleed drafting sheets that pin at the top and stack
+     over one another as you scroll — each new sheet rises and covers the pinned
+     one beneath it. Pure CSS `position: sticky` (no GSAP pin), so it never
+     fights Lenis, the games-rail ScrollTrigger pin, or the fixed art lightbox.
+     Every rule lives inside the guarded query, so mobile / reduced-motion keep
+     the normal document flow untouched. */
+  @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+    .bp-stack > section {
+      position: sticky;
+      top: 0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      /* clear the fixed nav for a sheet's top-most content while it's pinned */
+      padding-top: max(88px, 8vh);
+      padding-bottom: 8vh;
+    }
+    /* Opaque full-bleed sheet + its own drafting grid, painted behind the
+       content. The section is a sticky stacking context, so z-index:-1 sits
+       behind THIS sheet's content yet still above the sheet stacked under it.
+       100vw is safe — main.bp is overflow-x: clip (no horizontal scrollbar).
+       The upward shadow lifts the sheet off the one it covers. §04 (art) has
+       its own photographic background, so it's excluded here. */
+    .bp-stack > section:not(.bp-art)::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 100vw;
+      height: 100%;
+      transform: translateX(-50%);
+      z-index: -1;
+      background-color: var(--bp-bg);
+      background-image:
+        linear-gradient(var(--bp-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bp-line) 1px, transparent 1px);
+      background-size: 36px 36px;
+      box-shadow: 0 -24px 50px -18px rgba(0, 0, 0, 0.5);
+    }
+    /* §04 art: fill the pinned sheet and drop any nested sticky parallax
+       (sticky-inside-sticky double-pins) — the bg wrap just fills statically. */
+    .bp-stack > .bp-art { box-shadow: 0 -24px 50px -18px rgba(0, 0, 0, 0.5); }
+    .bp-stack > .bp-art .bp-art-bg,
+    .bp-stack > .bp-art .bp-art-bg-wrap { position: absolute; inset: 0; }
+    /* Connectors between stacked sheets have no gap to bridge — hide them. */
+    .bp-stack > .bp-conn-wrap { display: none; }
   }
 
   /* §01's title row gets the same fixed-dark drafting band as the closing CTA
