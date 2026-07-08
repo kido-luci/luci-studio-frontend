@@ -1222,8 +1222,7 @@ const homepageSchema = {
     overflow: hidden;
     margin-top: 22px;
     padding: 9px 0;
-    border-top: 1px solid var(--bp-hair);
-    border-bottom: 1px solid var(--bp-hair);
+    background: rgb(var(--accent-rgb));
   }
   .bp-rail-marquee-track {
     display: flex;
@@ -1238,9 +1237,9 @@ const homepageSchema = {
     white-space: nowrap;
     font-size: 11px;
     letter-spacing: 0.16em;
-    color: var(--bp-muted);
+    color: var(--accent-ink, #fff);
   }
-  .bp-rail-marquee-sep { color: var(--bp-acc); font-size: 9px; }
+  .bp-rail-marquee-sep { color: var(--accent-ink, #fff); opacity: 0.55; font-size: 9px; }
   @keyframes bp-marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
