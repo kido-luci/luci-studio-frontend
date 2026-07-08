@@ -13,6 +13,7 @@ import { galleryService } from "../../services/gallery";
 import { profileService } from "../../services/profile";
 import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
 import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
+import { GAMES } from "../../data/games";
 
 const locale = getLocaleFromUrl(Astro.url);
 const API_URL = import.meta.env.PUBLIC_API_URL || "";
@@ -395,6 +396,52 @@ const homepageSchema = {
               {w.desc && <p class="bp-work-desc">{w.desc}</p>}
             </a>
           ))}
+        </div>
+      </div>
+    </section>
+
+    <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
+
+    <!-- ===================== ANNEX A — GAMES REGISTER (horizontal rail) =====================
+         units.gr-inspired pinned horizontal rail: on desktop the section pins and
+         vertical scroll drags the card track sideways (homeGamesRail.ts adds
+         .is-pinned + the GSAP scrub). Default CSS is a native overflow-x swipe
+         strip, which is also the mobile / reduced-motion / no-CDN fallback.
+         Unnumbered on purpose — an drafting-sheet ANNEX, so §02–§05 keep their
+         numbers while this is trialled. Data: src/data/games.ts (shared with /games). -->
+    <section class="bp-section bp-rail-sec" id="games-rail">
+      <div class="bp-wrap">
+        <div class="bp-sec-head" data-reveal>
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">ANNEX A — GAMES REGISTER</span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-count">{String(GAMES.length).padStart(2, "0")} GAMES</span>
+        </div>
+        <div class="bp-sec-title-row" data-reveal>
+          <h2 class="bp-display bp-h2" data-ml9>Play something.</h2>
+          <a href="/games/" class="bp-mono bp-more">ALL GAMES →</a>
+        </div>
+      </div>
+      <div class="bp-rail-viewport">
+        <div class="bp-rail-track">
+          {GAMES.map((g, i) => (
+            <a href={g.href} class="bp-rail-card" target="_blank" rel="noopener noreferrer">
+              <div class="bp-fig">
+                <img src={g.image} alt={`${g.title} — ${g.tagline}`} loading="lazy" decoding="async" />
+                <span class="bp-mono bp-callout">fig.G{i + 1} — {g.slug}</span>
+                <span class="bp-mono bp-node">◦</span>
+              </div>
+              <div class="bp-work-meta">
+                <span class="bp-display bp-rail-title">{g.title}</span>
+                {g.beta && <span class="bp-mono bp-badge">BETA</span>}
+              </div>
+              <p class="bp-rail-tagline">{g.tagline}</p>
+            </a>
+          ))}
+          <a href="/games/" class="bp-rail-card bp-rail-card--all">
+            <span class="bp-display bp-rail-all">All games →</span>
+            <span class="bp-mono bp-rail-all-sub">FULL CATALOG · /GAMES</span>
+          </a>
         </div>
       </div>
     </section>
@@ -1080,6 +1127,56 @@ const homepageSchema = {
   .bp-work-year { font-size: 11px; color: var(--bp-muted); margin-left: auto; }
   .bp-work-desc { margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
 
+  /* ── ANNEX A — GAMES REGISTER: horizontal rail ──
+     Default = native overflow-x swipe strip (mobile / reduced-motion / no-CDN
+     fallback). homeGamesRail.ts adds .is-pinned on desktop: the section pins
+     to the viewport and GSAP scrubs the track sideways with page scroll.
+     Full-bleed on purpose — the rail breaking out of the bp-wrap column is the
+     layout-variance beat between two contained sections. */
+  .bp-rail-sec { position: relative; z-index: 1; }
+  .bp-rail-track {
+    display: flex;
+    align-items: stretch;
+    gap: 22px;
+    padding: 26px clamp(20px, 5vw, 48px) 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+  .bp-rail-card {
+    flex: 0 0 auto;
+    width: clamp(270px, 26vw, 360px);
+    display: block;
+    text-decoration: none;
+    scroll-snap-align: start;
+  }
+  .bp-rail-card:hover .bp-fig { transform: translateY(-4px); border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent); }
+  .bp-rail-title { font-size: clamp(1.1rem, 2vw, 1.35rem); }
+  .bp-rail-tagline { margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--bp-muted); }
+  /* Closing plate — striped like an empty fig, links to the full catalog. */
+  .bp-rail-card--all {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    width: clamp(220px, 20vw, 300px);
+    border: 1px solid var(--bp-hair);
+    border-radius: 10px;
+    padding: 22px;
+    background-image: repeating-linear-gradient(45deg, var(--bp-line2) 0, var(--bp-line2) 1px, transparent 1px, transparent 12px);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+  .bp-rail-card--all:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent); }
+  .bp-rail-all { font-size: clamp(1.15rem, 2vw, 1.4rem); color: var(--bp-ink); }
+  .bp-rail-all-sub { font-size: 10px; letter-spacing: 0.08em; color: var(--bp-muted); }
+  /* Pinned mode (desktop, JS-added): fill the viewport and centre the content;
+     GSAP translates the track instead of the strip scrolling. */
+  .bp-rail-sec.is-pinned { min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; }
+  .bp-rail-sec.is-pinned .bp-rail-viewport { overflow: hidden; }
+  .bp-rail-sec.is-pinned .bp-rail-track { overflow: visible; width: max-content; scroll-snap-type: none; }
+
   /* §01 demo card — COVER/DEMO toggle (Faldrop): the cover image crossfades to an
      autoplaying, muted, looping gameplay <video> (same treatment as /games). */
   .bp-fig-cover-img,
@@ -1336,6 +1433,10 @@ const homepageSchema = {
 <script>
   import { initBpGlow } from "../../scripts/bpGlow";
   initBpGlow();
+</script>
+<script>
+  import { initHomeGamesRail } from "../../scripts/homeGamesRail";
+  initHomeGamesRail();
 </script>
 
 <!-- PROTOTYPE (units.gr-inspired): scramble-in for the mono section labels — the
