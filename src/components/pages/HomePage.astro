@@ -455,8 +455,24 @@ const homepageSchema = {
                   <div class="bp-rail-spec-row"><dt>HOST</dt><dd>{g.host.split(".")[0]}.·.com</dd></div>
                 </dl>
               </a>
+            ) : variant === "tall" ? (
+              <a href={g.href} class="bp-rail-card bp-rail-card--tall" target="_blank" rel="noopener noreferrer">
+                {g.beta && <span class="bp-mono bp-rail-chip">BETA</span>}
+                <span class="bp-rail-tall-fig">
+                  <img src={g.image} alt={`${g.title} — ${g.tagline}`} loading="lazy" decoding="async" />
+                </span>
+                <span class="bp-rail-tall-body">
+                  <span class="bp-display bp-rail-spec-title">{g.title}</span>
+                  <span class="bp-rail-blurb">{g.blurb}</span>
+                </span>
+                <span class="bp-rail-tall-foot bp-mono">
+                  <span class="bp-rail-dot" aria-hidden="true"></span>
+                  {g.host.toUpperCase()}
+                  <span class="bp-rail-arr">↗</span>
+                </span>
+              </a>
             ) : (
-              <a href={g.href} class={`bp-rail-card bp-rail-card--photo${variant === "tall" ? " bp-rail-card--tall" : ""}`} target="_blank" rel="noopener noreferrer">
+              <a href={g.href} class="bp-rail-card bp-rail-card--photo" target="_blank" rel="noopener noreferrer">
                 <img src={g.image} alt={`${g.title} — ${g.tagline}`} loading="lazy" decoding="async" />
                 <span class="bp-rail-tb">
                   <span class="bp-mono bp-rail-fignum">fig.G{i + 1}</span>
@@ -1198,7 +1214,6 @@ const homepageSchema = {
     flex-direction: column;
     width: clamp(280px, 24vw, 360px);
   }
-  .bp-rail-card--tall { grid-row: span 2; width: clamp(360px, 30vw, 460px); }
   .bp-rail-card--photo img {
     flex: 1;
     min-height: 0;
@@ -1206,6 +1221,50 @@ const homepageSchema = {
     object-fit: cover;
     display: block;
   }
+  /* Tall plates (span 2) — /games-card anatomy: BETA chip over the artwork,
+     title + blurb body, then a host footer row with the accent dot and ↗. */
+  .bp-rail-card--tall {
+    grid-row: span 2;
+    width: clamp(360px, 30vw, 460px);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .bp-rail-chip {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 1;
+    padding: 5px 12px;
+    border-radius: 8px;
+    background: var(--bp-acc);
+    color: var(--accent-ink, #fff);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+  .bp-rail-tall-fig { display: block; flex: 0 0 46%; min-height: 0; }
+  .bp-rail-tall-fig img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bp-rail-tall-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 20px;
+  }
+  .bp-rail-blurb { font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
+  .bp-rail-tall-foot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--bp-hair);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--bp-muted);
+    white-space: nowrap;
+  }
+  .bp-rail-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
   .bp-rail-tb {
     display: flex;
     align-items: center;
