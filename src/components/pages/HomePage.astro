@@ -551,39 +551,47 @@ const homepageSchema = {
         ))}
       </div>
     </section>
+    </div><!-- /.bp-stack (§02) -->
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-    <!-- ===================== §03 WRITING ===================== -->
-    <section class="bp-wrap bp-section" id="blog">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">§03 — WRITING</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">LATEST</span>
+    <!-- ===================== §03 WRITING — scroll-jacked rail (pulled out of the
+         sheet stack; pins + scrubs its card track sideways like the games rail,
+         homeBlogRail. Falls back to a native overflow-x swipe strip). ========= -->
+    <section class="bp-section bp-rail-sec bp-blog-rail" id="blog">
+      <div class="bp-wrap">
+        <div class="bp-sec-head" data-reveal>
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">§03 — WRITING</span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-count">LATEST</span>
+        </div>
+        <div class="bp-sec-title-row" data-reveal>
+          <h2 class="bp-display bp-h2" data-ml9>From the blog.</h2>
+          <a href={localizedHref(locale, "/blog")} class="bp-mono bp-more">ALL POSTS →</a>
+        </div>
       </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>From the blog.</h2>
-        <a href={localizedHref(locale, "/blog")} class="bp-mono bp-more">ALL POSTS →</a>
-      </div>
-      <div class="bp-write-cards">
-        {writing.map((p) => (
-          <a href={localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`)} class="bp-write-card" data-reveal>
-            <span class="bp-write-card-fig">
-              {p.img && <img src={p.img} alt={p.title} loading="lazy" decoding="async" />}
-            </span>
-            <span class="bp-write-card-body">
-              <span class="bp-mono bp-write-card-meta">{p.ym} · {p.topic}</span>
-              <span class="bp-write-card-title">{p.title}</span>
-              <span class="bp-mono bp-write-card-read">{p.read}</span>
-            </span>
-          </a>
-        ))}
+      <div class="bp-rail-viewport">
+        <div class="bp-write-cards">
+          {writing.map((p) => (
+            <a href={localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`)} class="bp-write-card" data-reveal>
+              <span class="bp-write-card-fig">
+                {p.img && <img src={p.img} alt={p.title} loading="lazy" decoding="async" />}
+              </span>
+              <span class="bp-write-card-body">
+                <span class="bp-mono bp-write-card-meta">{p.ym} · {p.topic}</span>
+                <span class="bp-write-card-title">{p.title}</span>
+                <span class="bp-mono bp-write-card-read">{p.read}</span>
+              </span>
+            </a>
+          ))}
+        </div>
       </div>
     </section>
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
+    <div class="bp-stack">
     <!-- ===================== §04 ART ===================== -->
     <section class="bp-section bp-art" id="art">
       <div class="bp-art-bg-wrap" aria-hidden="true"><div id="art-bg" class="bp-art-bg"></div></div>
@@ -1010,12 +1018,6 @@ const homepageSchema = {
     .bp-stack > #capabilities .bp-cap-row { padding: 32px 0; }
     .bp-stack > #capabilities .bp-cap-title { font-size: clamp(1.6rem, 3vw, 2.5rem); }
     .bp-stack > #capabilities .bp-cap-desc { font-size: 16px; }
-    /* blog: force the cards into a single full-width row of taller cards so the
-       card strip fills the sheet instead of wrapping into a short block. */
-    /* blog rail fills the pinned sheet: wider, taller cards in the scroll strip. */
-    .bp-stack > #blog .bp-write-card { flex-basis: clamp(280px, 24vw, 340px); }
-    .bp-stack > #blog .bp-write-card-fig { aspect-ratio: 4 / 5; }
-    .bp-stack > #blog .bp-write-card-title { font-size: 1.1rem; }
     .bp-stack > #studio .bp-studio-statement { font-size: clamp(1.55rem, 3vw, 2.35rem); }
     .bp-stack > #studio .bp-stat-row { padding: 22px 0; }
     .bp-stack > #studio .bp-stat-num { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
@@ -1039,7 +1041,6 @@ const homepageSchema = {
       pointer-events: none;
     }
     .bp-stack > #capabilities::after { content: "02"; }
-    .bp-stack > #blog::after { content: "03"; }
     .bp-stack > #studio::after { content: "05"; }
   }
 
@@ -1555,23 +1556,21 @@ const homepageSchema = {
   .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
   .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-muted); white-space: nowrap; }
 
-  /* ── §03 WRITING — horizontal scroll rail of cover cards (swipe/scroll like
-     the games rail; inside the sticky sheet, so it's a native overflow-x strip,
-     not a scroll-jacked pin). ── */
+  /* ── §03 WRITING — scroll-jacked rail of cover cards (pin + scrub like the
+     games rail; homeBlogRail). Default layout is a vertical card list: the
+     fallback for mobile / reduced-motion / no-JS, where native lazy loads the
+     covers fine on vertical scroll. The pinned state (desktop) re-lays the cards
+     into a horizontal scrub track (its off-screen covers are eager-warmed by the
+     rail engine). ── */
   .bp-write-cards {
     display: flex;
+    flex-direction: column;
     gap: 20px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 12px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--bp-hair) transparent;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 48px);
   }
   .bp-write-card {
-    flex: 0 0 clamp(240px, 22vw, 300px);
-    scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     border: 1px solid var(--bp-hair);
@@ -1590,6 +1589,13 @@ const homepageSchema = {
   .bp-write-card-title { font-size: 1.05rem; font-weight: 600; color: var(--bp-ink); line-height: 1.28; letter-spacing: -0.01em; }
   .bp-write-card:hover .bp-write-card-title { color: var(--bp-acc); }
   .bp-write-card-read { font-size: 11px; color: var(--bp-faint); margin-top: auto; }
+  /* Pinned rail (desktop): the viewport clips (shared .bp-rail-sec.is-pinned
+     rule) and homeBlogRail slides this track sideways. Cards become fixed-width,
+     taller (4:5) plates laid in a row. */
+  .bp-blog-rail.is-pinned .bp-write-cards { flex-direction: row; width: max-content; max-width: none; margin: 0; padding: 4px clamp(20px, 5vw, 48px); gap: 22px; }
+  .bp-blog-rail.is-pinned .bp-write-card { flex: 0 0 clamp(280px, 24vw, 340px); }
+  .bp-blog-rail.is-pinned .bp-write-card-fig { aspect-ratio: 4 / 5; }
+  .bp-blog-rail.is-pinned .bp-write-card-title { font-size: 1.1rem; }
 
   /* ── §04 ART (quilt grid + lightbox subsystem) ── */
   /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
@@ -1767,30 +1773,9 @@ const homepageSchema = {
   initBpGlow();
 </script>
 <script>
-  import { initHomeGamesRail } from "../../scripts/homeGamesRail";
+  import { initHomeGamesRail, initHomeBlogRail } from "../../scripts/homeGamesRail";
   initHomeGamesRail();
-</script>
-<script is:inline>
-  // §03 blog is a horizontal scroll strip — native loading="lazy" only fires on
-  // vertical scroll, so its horizontally-clipped cover cards never load. Pre-warm
-  // them to eager when the section approaches, using GSAP ScrollTrigger (the same
-  // mechanism the games rail uses, and reliable where a bare IntersectionObserver
-  // isn't here). GSAP is a site-wide CDN global; poll until it's ready.
-  (function () {
-    var sec = document.getElementById('blog');
-    if (!sec) return;
-    var warm = function () {
-      sec.querySelectorAll('.bp-write-card img[loading="lazy"]').forEach(function (i) { i.loading = 'eager'; });
-    };
-    var tries = 0;
-    var boot = function () {
-      var gsap = window.gsap, ST = window.ScrollTrigger;
-      if (!gsap || !ST) { if (tries++ < 100) { setTimeout(boot, 80); } else { warm(); } return; }
-      gsap.registerPlugin(ST);
-      ST.create({ trigger: sec, start: 'top 170%', once: true, onEnter: warm });
-    };
-    boot();
-  })();
+  initHomeBlogRail();
 </script>
 
 <!-- PROTOTYPE (units.gr-inspired): scramble-in for the mono section labels — the
