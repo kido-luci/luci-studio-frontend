@@ -140,6 +140,8 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" integrity="sha384-P8VzCVnT9NBUkMrpcIZrJbA7EBjJvh/fJS6PmP+4nLIM284DtsImIv8D0fFjIkeh" crossorigin="anonymous"></script>
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" integrity="sha384-xb96EMJeax+NLXMC88ZBa1xAeAW+kn+horHh/zFlbMLG2UPWhMJJSlv7fi57hS+Q" crossorigin="anonymous"></script>
+		<!-- PROTOTYPE: Lenis smooth scroll (units.gr-inspired) — init in scripts/layout/smoothScroll.ts -->
+		<script defer is:inline src="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.min.js" integrity="sha384-ClD7pCgIUz5M81HT8aZmMxCsWmfsycmBiwL5gy1pUbdWHvICIbea22N9sTtAFotA" crossorigin="anonymous"></script>
 
 		<script is:inline>
 			// Initialize theme + color scheme immediately to prevent flash
@@ -613,6 +615,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		import { initMagnetic } from '../scripts/layout/magnetic';
 		import { initNavDimmer } from '../scripts/layout/navDimmer';
 		import { initTimelineToggle, initPortfolioNav } from '../scripts/layout/timeline';
+		import { initSmoothScroll } from '../scripts/layout/smoothScroll';
 
 		applyWinPerfMode();
 		initCookieConsent();
@@ -626,6 +629,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		initNavDimmer();
 		initTimelineToggle();
 		initPortfolioNav();
+		initSmoothScroll();
 		</script>
 	</body>
 </html>
