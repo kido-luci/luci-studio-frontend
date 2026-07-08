@@ -39,6 +39,10 @@ export function initHomeGamesRail() {
 		});
 		// Distance the track must travel = its overflow past the viewport.
 		// Function-valued (with invalidateOnRefresh) so resizes re-measure.
+		// SCROLL_RATIO stretches the pinned scroll span relative to the travel
+		// (2 = you scroll two pixels for one pixel of sideways drag) so the
+		// bento glides past at a browsable pace instead of whipping by.
+		const SCROLL_RATIO = 2;
 		const dist = () => Math.max(0, track.scrollWidth - viewport.clientWidth);
 		gsap.to(track, {
 			x: () => -dist(),
@@ -46,7 +50,7 @@ export function initHomeGamesRail() {
 			scrollTrigger: {
 				trigger: section,
 				start: 'top top',
-				end: () => '+=' + dist(),
+				end: () => '+=' + dist() * SCROLL_RATIO,
 				scrub: true,
 				pin: true,
 				anticipatePin: 1,
