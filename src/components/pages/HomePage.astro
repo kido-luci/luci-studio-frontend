@@ -21,6 +21,21 @@ import { GAMES } from "../../data/games";
 // spans both rows; "sm" is a half-height photo plate; "spec" is a tinted
 // text plate with hairline spec rows (TYPE / STATUS / HOST). Order-sensitive:
 // index i pairs with GAMES[i].
+// Tech ticker between the rail header and the bento — the page's ONE marquee.
+// Every entry is the real games stack (PixiJS v8 renderer, TS + Vite builds,
+// procedural Web Audio, Workers + D1 leaderboards), no invented tech.
+const RAIL_TECH = [
+  "PIXIJS V8",
+  "TYPESCRIPT",
+  "VITE",
+  "WEBGL",
+  "WEB AUDIO",
+  "CLOUDFLARE WORKERS",
+  "D1 LEADERBOARDS",
+  "60 FPS",
+  "ZERO INSTALL",
+];
+
 const RAIL_LAYOUT: ReadonlyArray<"tall" | "sm" | "spec"> = [
   "tall", // G1 faldrop — flagship, full-height photo
   "sm",   // G2 stakrise
@@ -438,6 +453,23 @@ const homepageSchema = {
         <div class="bp-sec-title-row" data-reveal>
           <h2 class="bp-display bp-h2" data-ml9>Play something.</h2>
           <a href="/games/" class="bp-mono bp-more">ALL GAMES →</a>
+        </div>
+      </div>
+      <!-- Tech ticker — full-bleed hairline strip, CSS-only infinite marquee
+           (two identical sequences, translateX(-50%) loop). Decorative
+           (aria-hidden); freezes to a static strip under reduced motion. -->
+      <div class="bp-rail-marquee" aria-hidden="true">
+        <div class="bp-rail-marquee-track">
+          {[0, 1].map(() => (
+            <span class="bp-rail-marquee-seq bp-mono">
+              {RAIL_TECH.map((t) => (
+                <Fragment>
+                  <span>{t}</span>
+                  <span class="bp-rail-marquee-sep">◇</span>
+                </Fragment>
+              ))}
+            </span>
+          ))}
         </div>
       </div>
       <div class="bp-rail-viewport">
@@ -1183,6 +1215,39 @@ const homepageSchema = {
      out of the bp-wrap column is the layout-variance beat between two
      contained sections. */
   .bp-rail-sec { position: relative; z-index: 1; --rail-h: clamp(440px, 58vh, 600px); }
+  /* Tech ticker — hairline-ruled full-bleed strip; the track holds two
+     identical sequences and loops translateX(-50%), so the scroll is seamless.
+     Transform-only (win-perf safe); parked static under reduced motion. */
+  .bp-rail-marquee {
+    overflow: hidden;
+    margin-top: 22px;
+    padding: 9px 0;
+    border-top: 1px solid var(--bp-hair);
+    border-bottom: 1px solid var(--bp-hair);
+  }
+  .bp-rail-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: bp-marquee 38s linear infinite;
+  }
+  .bp-rail-marquee-seq {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    padding-right: 26px;
+    white-space: nowrap;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--bp-muted);
+  }
+  .bp-rail-marquee-sep { color: var(--bp-acc); font-size: 9px; }
+  @keyframes bp-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bp-rail-marquee-track { animation: none; }
+  }
   .bp-rail-track {
     display: grid;
     grid-auto-flow: column;
