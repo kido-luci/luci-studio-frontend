@@ -15,8 +15,6 @@ interface RailOpts {
 function initRail(opts: RailOpts) {
 	const section = document.getElementById(opts.sectionId);
 	if (!section) return;
-	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-	if (window.matchMedia('(max-width: 900px)').matches) return;
 
 	let tries = 0;
 	const boot = () => {
@@ -30,21 +28,7 @@ function initRail(opts: RailOpts) {
 		const viewport = section.querySelector(opts.viewportSel) as HTMLElement | null;
 		if (!track || !viewport) return;
 		gsap.registerPlugin(ScrollTrigger);
-		section.classList.add('is-pinned');
-		// Pre-warm the plate images one viewport before the rail pins: lazy images
-		// inside a horizontally-scrubbed track otherwise never load (native lazy
-		// only fires on vertical scroll). Flipping to eager here keeps the initial
-		// page load light but the scrub fully painted.
-		ScrollTrigger.create({
-			trigger: section,
-			start: 'top 160%',
-			once: true,
-			onEnter: () => {
-				section.querySelectorAll('img[loading="lazy"]').forEach((img) => {
-					(img as HTMLImageElement).loading = 'eager';
-				});
-			},
-		});
+
 		// Distance the track must travel = its overflow past the viewport.
 		// Function-valued (with invalidateOnRefresh) so resizes re-measure.
 		// scrollRatio stretches the pinned scroll span relative to the travel
@@ -52,18 +36,51 @@ function initRail(opts: RailOpts) {
 		// glide past at a browsable pace instead of whipping by.
 		const SCROLL_RATIO = opts.scrollRatio ?? 2;
 		const dist = () => Math.max(0, track.scrollWidth - viewport.clientWidth);
-		gsap.to(track, {
-			x: () => -dist(),
-			ease: 'none',
-			scrollTrigger: {
+
+		// Pin + scrub only while the desktop query matches. gsap.matchMedia sets the
+		// whole context up when you cross above 901px and tears it down when you drop
+		// below — reverting the pin/track transform and (via the cleanup) dropping
+		// .is-pinned — so dragging the window across the breakpoint flips cleanly
+		// between the pinned rail and the mobile vertical list instead of stranding a
+		// half-pinned track. Below 901px / reduced-motion the context never runs, so
+		// the section keeps its default CSS vertical list.
+		const mm = gsap.matchMedia();
+		mm.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
+			section.classList.add('is-pinned');
+			// Pre-warm the plate images one viewport before the rail pins: lazy images
+			// inside a horizontally-scrubbed track otherwise never load (native lazy
+			// only fires on vertical scroll). Flipping to eager here keeps the initial
+			// page load light but the scrub fully painted.
+			ScrollTrigger.create({
 				trigger: section,
-				start: 'top top',
-				end: () => '+=' + dist() * SCROLL_RATIO,
-				scrub: true,
-				pin: true,
-				anticipatePin: 1,
-				invalidateOnRefresh: true,
-			},
+				start: 'top 160%',
+				once: true,
+				onEnter: () => {
+					section.querySelectorAll('img[loading="lazy"]').forEach((img) => {
+						(img as HTMLImageElement).loading = 'eager';
+					});
+				},
+			});
+			gsap.to(track, {
+				x: () => -dist(),
+				ease: 'none',
+				scrollTrigger: {
+					trigger: section,
+					start: 'top top',
+					end: () => '+=' + dist() * SCROLL_RATIO,
+					scrub: true,
+					pin: true,
+					anticipatePin: 1,
+					invalidateOnRefresh: true,
+				},
+			});
+			// Cleanup when the query stops matching: gsap.matchMedia reverts the tween
+			// and its pinned ScrollTrigger automatically; we only undo the manual DOM
+			// mutations (the class, and any leftover track transform).
+			return () => {
+				section.classList.remove('is-pinned');
+				gsap.set(track, { clearProps: 'x' });
+			};
 		});
 	};
 	boot();
