@@ -8,6 +8,7 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SiteFooter from "../SiteFooter.astro";
+import PostCard from "../PostCard.astro";
 import { postService } from "../../services/posts";
 import { galleryService } from "../../services/gallery";
 import { profileService } from "../../services/profile";
@@ -147,13 +148,19 @@ const writing = rawPosts
   .slice(0, 10)
   .map((rawP) => {
     const p = localized(rawP, locale);
+    const tags = p.topics && p.topics.length > 0 ? p.topics : ["Engineering"];
     return {
       id: p.id,
       title: p.title,
-      ym: (p.created_at || "").slice(0, 7),
+      subtitle: p.subtitle || "",
+      // Slug from the canonical (English) title so it matches the built page.
+      slug: buildPostSlug(rawP.title, rawP.id),
+      tags,
+      date: formatDate(p.created_at, locale),
       read: readTimeFor(p, locale),
-      topic: p.topics && p.topics.length > 0 ? p.topics[0] : "Engineering",
-      img: p.cover_image_url || null,
+      img: p.cover_image_url || "",
+      views: p.views ?? 0,
+      likes: p.likes ?? 0,
     };
   });
 
@@ -570,16 +577,19 @@ const homepageSchema = {
       <div class="bp-rail-viewport">
         <div class="bp-write-cards">
           {writing.map((p) => (
-            <a href={localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`)} class="bp-write-card" data-reveal>
-              <span class="bp-write-card-fig">
-                {p.img && <img src={p.img} alt={p.title} loading="lazy" decoding="async" />}
-              </span>
-              <span class="bp-write-card-body">
-                <span class="bp-mono bp-write-card-meta">{p.ym} · {p.topic}</span>
-                <span class="bp-write-card-title">{p.title}</span>
-                <span class="bp-mono bp-write-card-read">{p.read}</span>
-              </span>
-            </a>
+            <PostCard
+              href={localizedHref(locale, `/blog/${p.slug}/`)}
+              title={p.title}
+              subtitle={p.subtitle}
+              tags={p.tags}
+              date={p.date}
+              read={p.read}
+              img={p.img}
+              id={p.id}
+              views={p.views}
+              likes={p.likes}
+              variant="blueprint"
+            />
           ))}
         </div>
       </div>
@@ -1557,6 +1567,10 @@ const homepageSchema = {
      covers fine on vertical scroll. The pinned state (desktop) re-lays the cards
      into a horizontal scrub track (its off-screen covers are eager-warmed by the
      rail engine). ── */
+  /* The cards themselves are the shared <PostCard variant="blueprint"> — the same
+     card as /blog (own scoped styles). This track only lays them out: a vertical
+     list by default (mobile / reduced-motion / no-JS fallback), re-flowed into a
+     horizontal scrub row when the rail pins on desktop. */
   .bp-write-cards {
     display: flex;
     flex-direction: column;
@@ -1565,32 +1579,12 @@ const homepageSchema = {
     margin: 0 auto;
     padding: 0 clamp(20px, 5vw, 48px);
   }
-  .bp-write-card {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--bp-hair);
-    border-radius: 10px;
-    overflow: hidden;
-    background: var(--bp-card);
-    text-decoration: none;
-    transition: transform 0.25s ease, border-color 0.25s ease;
-  }
-  .bp-write-card:hover { transform: translateY(-4px); border-color: var(--accent-border); }
-  .bp-write-card-fig { display: block; aspect-ratio: 16 / 10; overflow: hidden; background: var(--bp-line2); }
-  .bp-write-card-fig img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
-  .bp-write-card:hover .bp-write-card-fig img { transform: scale(1.05); }
-  .bp-write-card-body { display: flex; flex-direction: column; gap: 9px; padding: 14px 16px 16px; flex: 1; }
-  .bp-write-card-meta { font-size: 10.5px; letter-spacing: 0.07em; color: var(--bp-muted); text-transform: uppercase; }
-  .bp-write-card-title { font-size: 1.05rem; font-weight: 600; color: var(--bp-ink); line-height: 1.28; letter-spacing: -0.01em; }
-  .bp-write-card:hover .bp-write-card-title { color: var(--bp-acc); }
-  .bp-write-card-read { font-size: 11px; color: var(--bp-faint); margin-top: auto; }
   /* Pinned rail (desktop): the viewport clips (shared .bp-rail-sec.is-pinned
-     rule) and homeBlogRail slides this track sideways. Cards become fixed-width,
-     taller (4:5) plates laid in a row. */
+     rule) and homeBlogRail slides this track sideways. Cards become fixed-width
+     plates in a row; align-items:stretch (flex default) keeps them equal height.
+     PostCard is a child component, so its root needs :global to be reachable. */
   .bp-blog-rail.is-pinned .bp-write-cards { flex-direction: row; width: max-content; max-width: none; margin: 0; padding: 4px clamp(20px, 5vw, 48px); gap: 22px; }
-  .bp-blog-rail.is-pinned .bp-write-card { flex: 0 0 clamp(280px, 24vw, 340px); }
-  .bp-blog-rail.is-pinned .bp-write-card-fig { aspect-ratio: 4 / 5; }
-  .bp-blog-rail.is-pinned .bp-write-card-title { font-size: 1.1rem; }
+  .bp-blog-rail.is-pinned .bp-write-cards > :global(.tb-card-link) { flex: 0 0 clamp(300px, 24vw, 350px); }
 
   /* ── §04 ART (quilt grid + lightbox subsystem) ── */
   /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
