@@ -153,6 +153,7 @@ const writing = rawPosts
       ym: (p.created_at || "").slice(0, 7),
       read: readTimeFor(p, locale),
       topic: p.topics && p.topics.length > 0 ? p.topics[0] : "Engineering",
+      img: p.cover_image_url || null,
     };
   });
 
@@ -565,13 +566,17 @@ const homepageSchema = {
         <h2 class="bp-display bp-h2" data-ml9>From the blog.</h2>
         <a href={localizedHref(locale, "/blog")} class="bp-mono bp-more">ALL POSTS →</a>
       </div>
-      <div class="bp-write-list">
+      <div class="bp-write-cards">
         {writing.map((p) => (
-          <a href={localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`)} class="bp-write-row" data-reveal>
-            <span class="bp-mono bp-write-date">{p.ym}</span>
-            <span class="bp-write-title">{p.title}</span>
-            <span class="bp-mono bp-badge bp-write-topic">{p.topic}</span>
-            <span class="bp-mono bp-write-read">{p.read}</span>
+          <a href={localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`)} class="bp-write-card" data-reveal>
+            <span class="bp-write-card-fig">
+              {p.img && <img src={p.img} alt={p.title} loading="lazy" decoding="async" />}
+            </span>
+            <span class="bp-write-card-body">
+              <span class="bp-mono bp-write-card-meta">{p.ym} · {p.topic}</span>
+              <span class="bp-write-card-title">{p.title}</span>
+              <span class="bp-mono bp-write-card-read">{p.read}</span>
+            </span>
           </a>
         ))}
       </div>
@@ -1005,8 +1010,11 @@ const homepageSchema = {
     .bp-stack > #capabilities .bp-cap-row { padding: 32px 0; }
     .bp-stack > #capabilities .bp-cap-title { font-size: clamp(1.6rem, 3vw, 2.5rem); }
     .bp-stack > #capabilities .bp-cap-desc { font-size: 16px; }
-    .bp-stack > #blog .bp-write-row { padding: 28px 0; }
-    .bp-stack > #blog .bp-write-title { font-size: clamp(1.2rem, 2.5vw, 1.75rem); }
+    /* blog: force the cards into a single full-width row of taller cards so the
+       card strip fills the sheet instead of wrapping into a short block. */
+    .bp-stack > #blog .bp-write-cards { grid-template-columns: repeat(5, 1fr); gap: 18px; }
+    .bp-stack > #blog .bp-write-card-fig { aspect-ratio: 4 / 5; }
+    .bp-stack > #blog .bp-write-card-title { font-size: 1.1rem; }
     .bp-stack > #studio .bp-studio-statement { font-size: clamp(1.55rem, 3vw, 2.35rem); }
     .bp-stack > #studio .bp-stat-row { padding: 22px 0; }
     .bp-stack > #studio .bp-stat-num { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
@@ -1546,24 +1554,31 @@ const homepageSchema = {
   .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
   .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-muted); white-space: nowrap; }
 
-  /* ── §03 WRITING ── */
-  .bp-write-list { border-top: 1px solid var(--bp-hair); }
-  .bp-write-row {
+  /* ── §03 WRITING — horizontal card row (cover image + title/meta) ── */
+  .bp-write-cards {
     display: grid;
-    grid-template-columns: 82px 1fr auto 56px;
-    align-items: center;
-    gap: 18px;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--bp-line2);
-    text-decoration: none;
-    transition: padding-left 0.25s ease;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
   }
-  .bp-write-row:hover { padding-left: 10px; }
-  .bp-write-date { font-size: 12px; color: var(--bp-muted); }
-  .bp-write-title { font-size: clamp(1rem, 2vw, 1.35rem); font-weight: 600; color: var(--bp-ink); letter-spacing: -0.01em; }
-  .bp-write-row:hover .bp-write-title { color: var(--bp-acc); }
-  .bp-write-topic { justify-self: start; }
-  .bp-write-read { font-size: 11px; color: var(--bp-muted); text-align: right; white-space: nowrap; }
+  .bp-write-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--bp-hair);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bp-card);
+    text-decoration: none;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+  }
+  .bp-write-card:hover { transform: translateY(-4px); border-color: var(--accent-border); }
+  .bp-write-card-fig { display: block; aspect-ratio: 16 / 10; overflow: hidden; background: var(--bp-line2); }
+  .bp-write-card-fig img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
+  .bp-write-card:hover .bp-write-card-fig img { transform: scale(1.05); }
+  .bp-write-card-body { display: flex; flex-direction: column; gap: 9px; padding: 14px 16px 16px; flex: 1; }
+  .bp-write-card-meta { font-size: 10.5px; letter-spacing: 0.07em; color: var(--bp-muted); text-transform: uppercase; }
+  .bp-write-card-title { font-size: 1.05rem; font-weight: 600; color: var(--bp-ink); line-height: 1.28; letter-spacing: -0.01em; }
+  .bp-write-card:hover .bp-write-card-title { color: var(--bp-acc); }
+  .bp-write-card-read { font-size: 11px; color: var(--bp-faint); margin-top: auto; }
 
   /* ── §04 ART (quilt grid + lightbox subsystem) ── */
   /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
@@ -1702,8 +1717,6 @@ const homepageSchema = {
     .bp-dir-item:nth-child(odd) { border-left: none; }
     .bp-dir-desc { display: none; }
     .bp-work-grid { grid-template-columns: 1fr; }
-    .bp-write-row { grid-template-columns: 62px 1fr auto; row-gap: 4px; }
-    .bp-write-read { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     .bp-svg-spin, .bp-orbit, .bp-svg-ping, .bp-compass-arm, .bp-compass-draw, .bp-scroll-arrow { animation: none !important; }
