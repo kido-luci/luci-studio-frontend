@@ -13,7 +13,6 @@ export function initNavDimmer() {
 	if (isWindows) {
 		nav.style.backdropFilter = 'none';
 		(nav.style as any).webkitBackdropFilter = 'none';
-		nav.style.background = 'var(--nav-bg-scroll)';
 	}
 
 	// Scroll-progress dimension rule along the nav's bottom edge (TopNav's
@@ -56,16 +55,11 @@ export function initNavDimmer() {
 			}
 			lastScrollY = scrollY;
 
-			// Nav stays blur-free in both states (see-through by request) so the drafting
-			// sheet (grid + constellation) reads sharply behind it; only the bg alpha steps
-			// up on scroll (var(--nav-bg) 0.3 → var(--nav-bg-scroll) 0.7) for legibility.
-			if (scrollY > 80) {
-				nav.style.background = 'var(--nav-bg-scroll)';
-				if (!isWindows) nav.style.backdropFilter = 'none';
-			} else {
-				nav.style.background = 'var(--nav-bg)';
-				if (!isWindows) nav.style.backdropFilter = 'none';
-			}
+			// Nav is transparent + borderless at the top; past 80px it gains the glass
+			// bg and its bottom border. Both live in CSS on .nav-scrolled (see TopNav)
+			// — a class toggle, not inline writes, so the top state is truly transparent
+			// and the bg/border fade in cleanly.
+			nav.classList.toggle('nav-scrolled', scrollY > 80);
 		});
 	}, { passive: true });
 }
