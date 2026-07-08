@@ -144,7 +144,7 @@ const rawPosts = await postService.getAll();
 const writing = rawPosts
   .filter((p) => !p.topics?.some((tp) => tp.toLowerCase().startsWith("art")))
   .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
-  .slice(0, 5)
+  .slice(0, 10)
   .map((rawP) => {
     const p = localized(rawP, locale);
     return {
@@ -1012,7 +1012,8 @@ const homepageSchema = {
     .bp-stack > #capabilities .bp-cap-desc { font-size: 16px; }
     /* blog: force the cards into a single full-width row of taller cards so the
        card strip fills the sheet instead of wrapping into a short block. */
-    .bp-stack > #blog .bp-write-cards { grid-template-columns: repeat(5, 1fr); gap: 18px; }
+    /* blog rail fills the pinned sheet: wider, taller cards in the scroll strip. */
+    .bp-stack > #blog .bp-write-card { flex-basis: clamp(280px, 24vw, 340px); }
     .bp-stack > #blog .bp-write-card-fig { aspect-ratio: 4 / 5; }
     .bp-stack > #blog .bp-write-card-title { font-size: 1.1rem; }
     .bp-stack > #studio .bp-studio-statement { font-size: clamp(1.55rem, 3vw, 2.35rem); }
@@ -1554,13 +1555,23 @@ const homepageSchema = {
   .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
   .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-muted); white-space: nowrap; }
 
-  /* ── §03 WRITING — horizontal card row (cover image + title/meta) ── */
+  /* ── §03 WRITING — horizontal scroll rail of cover cards (swipe/scroll like
+     the games rail; inside the sticky sheet, so it's a native overflow-x strip,
+     not a scroll-jacked pin). ── */
   .bp-write-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    display: flex;
     gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bp-hair) transparent;
   }
   .bp-write-card {
+    flex: 0 0 clamp(240px, 22vw, 300px);
+    scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     border: 1px solid var(--bp-hair);
@@ -1758,6 +1769,28 @@ const homepageSchema = {
 <script>
   import { initHomeGamesRail } from "../../scripts/homeGamesRail";
   initHomeGamesRail();
+</script>
+<script is:inline>
+  // §03 blog is a horizontal scroll strip — native loading="lazy" only fires on
+  // vertical scroll, so its horizontally-clipped cover cards never load. Pre-warm
+  // them to eager when the section approaches, using GSAP ScrollTrigger (the same
+  // mechanism the games rail uses, and reliable where a bare IntersectionObserver
+  // isn't here). GSAP is a site-wide CDN global; poll until it's ready.
+  (function () {
+    var sec = document.getElementById('blog');
+    if (!sec) return;
+    var warm = function () {
+      sec.querySelectorAll('.bp-write-card img[loading="lazy"]').forEach(function (i) { i.loading = 'eager'; });
+    };
+    var tries = 0;
+    var boot = function () {
+      var gsap = window.gsap, ST = window.ScrollTrigger;
+      if (!gsap || !ST) { if (tries++ < 100) { setTimeout(boot, 80); } else { warm(); } return; }
+      gsap.registerPlugin(ST);
+      ST.create({ trigger: sec, start: 'top 170%', once: true, onEnter: warm });
+    };
+    boot();
+  })();
 </script>
 
 <!-- PROTOTYPE (units.gr-inspired): scramble-in for the mono section labels — the
