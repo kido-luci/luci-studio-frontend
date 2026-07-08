@@ -226,7 +226,6 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				--cursor-color: white;
 				--cursor-ring: rgba(255, 255, 255, 0.4);
 				--dimmer-bg: rgba(0, 0, 0, 0);
-				--nav-bg: rgba(10, 10, 10, 0.65);
 				--nav-bg-scroll: rgba(10, 10, 10, 0.95);
 			}
 
@@ -243,7 +242,6 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				--cursor-color: var(--accent);
 				--cursor-ring: rgb(var(--accent-rgb) / 0.5);
 				--dimmer-bg: rgba(255, 255, 255, 0);
-				--nav-bg: rgba(255, 255, 255, 0.3);
 				--nav-bg-scroll: rgba(255, 255, 255, 0.95);
 			}
 
@@ -436,7 +434,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			   nav (blur 16→32px on scroll) is the worst offender. Cards (ProjectCard /
 			   TimelineItem) scroll away and only blur once per paint, so they keep theirs.
 			   Backgrounds here are already opaque enough to stay legible without the blur
-			   (--nav-bg/--nav-bg-scroll, mobile menu bg-black/95).
+			   (--nav-bg-scroll, mobile menu bg-black/95).
 			   !important beats both the inline style and the JS-set nav.style.backdropFilter. */
 			@media (max-width: 768px) {
 				nav,
