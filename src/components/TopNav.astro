@@ -204,11 +204,17 @@ const schemes = [
     left: 0;
     right: 0;
     z-index: 100;
-    background: var(--nav-bg);
+    /* Transparent + borderless at the very top; the glass bg and bottom border
+       fade in once scrolled (navDimmer toggles .nav-scrolled past 80px). */
+    background: transparent;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border-bottom: 1px solid var(--bp-hair);
-    transition: transform 0.3s ease;
+    border-bottom: 1px solid transparent;
+    transition: transform 0.3s ease, background-color 0.3s ease, border-bottom-color 0.3s ease;
+  }
+  .bp-nav.nav-scrolled {
+    background: var(--nav-bg-scroll);
+    border-bottom-color: var(--bp-hair);
   }
   /* Hide-on-scroll-down / reveal-on-scroll-up (toggled by navDimmer.ts).
      Never applied while the mobile dropdown is open — see navDimmer.ts. */
