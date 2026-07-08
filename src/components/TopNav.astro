@@ -237,7 +237,6 @@ const schemes = [
      lamp glow) reach the true top edge behind the translucent nav; the homepage
      pads main's top to clear it. */
   :global(html.bp-home) .bp-nav {
-    --nav-bg: rgba(10, 14, 20, 0.55);
     --nav-bg-scroll: rgba(10, 14, 20, 0.95);
   }
   /* Light mode: translucent white glass — low alpha and NO backdrop blur at rest
@@ -245,7 +244,6 @@ const schemes = [
      fixed nav read through sharply. Kept in sync with the site-wide light nav in
      Layout.astro. */
   :global(html.bp-home body.light-mode) .bp-nav {
-    --nav-bg: rgba(255, 255, 255, 0.3);
     --nav-bg-scroll: rgba(255, 255, 255, 0.95);
   }
 

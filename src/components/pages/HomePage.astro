@@ -8,6 +8,7 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SiteFooter from "../SiteFooter.astro";
+import PostCard from "../PostCard.astro";
 import { postService } from "../../services/posts";
 import { galleryService } from "../../services/gallery";
 import { profileService } from "../../services/profile";
@@ -144,15 +145,22 @@ const rawPosts = await postService.getAll();
 const writing = rawPosts
   .filter((p) => !p.topics?.some((tp) => tp.toLowerCase().startsWith("art")))
   .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
-  .slice(0, 5)
+  .slice(0, 10)
   .map((rawP) => {
     const p = localized(rawP, locale);
+    const tags = p.topics && p.topics.length > 0 ? p.topics : ["Engineering"];
     return {
       id: p.id,
       title: p.title,
-      ym: (p.created_at || "").slice(0, 7),
+      subtitle: p.subtitle || "",
+      // Slug from the canonical (English) title so it matches the built page.
+      slug: buildPostSlug(rawP.title, rawP.id),
+      tags,
+      date: formatDate(p.created_at, locale),
       read: readTimeFor(p, locale),
-      topic: p.topics && p.topics.length > 0 ? p.topics[0] : "Engineering",
+      img: p.cover_image_url || "",
+      views: p.views ?? 0,
+      likes: p.likes ?? 0,
     };
   });
 
@@ -550,32 +558,49 @@ const homepageSchema = {
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-    <!-- ===================== §03 WRITING ===================== -->
-    <section class="bp-wrap bp-section" id="blog">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">§03 — WRITING</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">LATEST</span>
+    <!-- ===================== §03 WRITING — scroll-jacked rail (pulled out of the
+         sheet stack; pins + scrubs its card track sideways like the games rail,
+         homeBlogRail. Falls back to a native overflow-x swipe strip). ========= -->
+    <section class="bp-section bp-rail-sec bp-blog-rail" id="blog">
+      <div class="bp-wrap">
+        <div class="bp-sec-head" data-reveal>
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">§03 — WRITING</span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-count">LATEST</span>
+        </div>
+        <div class="bp-sec-title-row" data-reveal>
+          <h2 class="bp-display bp-h2" data-ml9>From the blog.</h2>
+          <a href={localizedHref(locale, "/blog")} class="bp-mono bp-more">ALL POSTS →</a>
+        </div>
       </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>From the blog.</h2>
-        <a href={localizedHref(locale, "/blog")} class="bp-mono bp-more">ALL POSTS →</a>
-      </div>
-      <div class="bp-write-list">
-        {writing.map((p) => (
-          <a href={localizedHref(locale, `/blog/${buildPostSlug(p.title, p.id)}/`)} class="bp-write-row" data-reveal>
-            <span class="bp-mono bp-write-date">{p.ym}</span>
-            <span class="bp-write-title">{p.title}</span>
-            <span class="bp-mono bp-badge bp-write-topic">{p.topic}</span>
-            <span class="bp-mono bp-write-read">{p.read}</span>
-          </a>
-        ))}
+      <div class="bp-rail-viewport">
+        <div class="bp-write-cards">
+          {writing.map((p) => (
+            <PostCard
+              href={localizedHref(locale, `/blog/${p.slug}/`)}
+              title={p.title}
+              subtitle={p.subtitle}
+              tags={p.tags}
+              date={p.date}
+              read={p.read}
+              img={p.img}
+              id={p.id}
+              views={p.views}
+              likes={p.likes}
+              variant="blueprint"
+            />
+          ))}
+        </div>
       </div>
     </section>
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
+    <!-- §04–§05 form the sticky-stacking sheet deck (desktop + no-reduced-motion;
+         see .bp-stack CSS): art pins, then the studio sheet rises and covers it.
+         Falls back to normal document flow otherwise. -->
+    <div class="bp-stack">
     <!-- ===================== §04 ART ===================== -->
     <section class="bp-section bp-art" id="art">
       <div class="bp-art-bg-wrap" aria-hidden="true"><div id="art-bg" class="bp-art-bg"></div></div>
@@ -713,6 +738,7 @@ const homepageSchema = {
         )}
       </div>
     </section>
+    </div><!-- /.bp-stack -->
 
     <SiteFooter locale={locale} />
   </main>
@@ -730,8 +756,8 @@ const homepageSchema = {
      inherit them (the nav is a sibling of main, not a child). Dark by default;
      the .light-mode variant paints the cream sheet. --bp-acc follows the site accent
      (var(--accent) — the default scheme is the blueprint blue), so schemes recolor it; orange is
-     the fixed decorative secondary. The --nav-bg / --nav-bg-scroll overrides retune
-     the glass the shared navDimmer toggles between on scroll. */
+     the fixed decorative secondary. The --nav-bg-scroll override retunes
+     the scrolled glass the shared navDimmer toggles on. */
   :global(html.bp-home) {
     --bp-bg: #0a0e14;
     --bp-ink: var(--text-primary);
@@ -940,6 +966,87 @@ const homepageSchema = {
   .bp-section {
     padding-top: clamp(52px, 8vw, 88px);
     padding-bottom: clamp(52px, 8vw, 88px);
+  }
+
+  /* ══ Phase 2 — sticky-stacking sheet deck (§02–§05) ══════════════════════
+     Desktop + no-reduced-motion only: the four sections after the games rail
+     become opaque, full-bleed drafting sheets that pin at the top and stack
+     over one another as you scroll — each new sheet rises and covers the pinned
+     one beneath it. Pure CSS `position: sticky` (no GSAP pin), so it never
+     fights Lenis, the games-rail ScrollTrigger pin, or the fixed art lightbox.
+     Every rule lives inside the guarded query, so mobile / reduced-motion keep
+     the normal document flow untouched. */
+  @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+    .bp-stack > section {
+      position: sticky;
+      top: 0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      /* clear the fixed nav for a sheet's top-most content while it's pinned */
+      padding-top: max(88px, 8vh);
+      padding-bottom: 8vh;
+    }
+    /* Opaque full-bleed sheet + its own drafting grid, painted behind the
+       content. The section is a sticky stacking context, so z-index:-1 sits
+       behind THIS sheet's content yet still above the sheet stacked under it.
+       100vw is safe — main.bp is overflow-x: clip (no horizontal scrollbar).
+       The upward shadow lifts the sheet off the one it covers. §04 (art) has
+       its own photographic background, so it's excluded here. */
+    .bp-stack > section:not(.bp-art)::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 100vw;
+      height: 100%;
+      transform: translateX(-50%);
+      z-index: -1;
+      background-color: var(--bp-bg);
+      background-image:
+        linear-gradient(var(--bp-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bp-line) 1px, transparent 1px);
+      background-size: 36px 36px;
+      box-shadow: 0 -24px 50px -18px rgba(0, 0, 0, 0.5);
+    }
+    /* §04 art: fill the pinned sheet and drop any nested sticky parallax
+       (sticky-inside-sticky double-pins) — the bg wrap just fills statically. */
+    .bp-stack > .bp-art { box-shadow: 0 -24px 50px -18px rgba(0, 0, 0, 0.5); }
+    .bp-stack > .bp-art .bp-art-bg,
+    .bp-stack > .bp-art .bp-art-bg-wrap { position: absolute; inset: 0; }
+    /* Connectors between stacked sheets have no gap to bridge — hide them. */
+    .bp-stack > .bp-conn-wrap { display: none; }
+
+    /* Fill the full-viewport sheet: the §05 studio text sheet carries little
+       content, so scaled-up type + roomier rows keep it from floating as a small
+       centered block in a sea of empty sheet. §04 (art) is dense already and
+       untouched. */
+    .bp-stack > section:not(.bp-art) .bp-sec-head { margin-bottom: clamp(30px, 4vw, 48px); }
+    .bp-stack > section:not(.bp-art) .bp-h2 { font-size: clamp(2.6rem, 6.5vw, 4.6rem); }
+    .bp-stack > #studio .bp-studio-statement { font-size: clamp(1.55rem, 3vw, 2.35rem); }
+    .bp-stack > #studio .bp-stat-row { padding: 22px 0; }
+    .bp-stack > #studio .bp-stat-num { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
+
+    /* Giant faint sheet number — a drafting-sheet index that fills the negative
+       space with blueprint identity instead of emptiness. Sits behind the
+       content (z-index:-1, above the ::before grid). Ink-based so it re-tints
+       per theme; bleeds off the right edge. */
+    .bp-stack > section:not(.bp-art)::after {
+      position: absolute;
+      top: 50%;
+      right: clamp(8px, 3vw, 48px);
+      transform: translateY(-50%);
+      z-index: -1;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-weight: 700;
+      font-size: clamp(220px, 42vh, 480px);
+      line-height: 0.78;
+      letter-spacing: -0.05em;
+      color: color-mix(in srgb, var(--bp-ink) 7%, transparent);
+      pointer-events: none;
+    }
+    .bp-stack > #studio::after { content: "05"; }
   }
 
   /* §01's title row gets the same fixed-dark drafting band as the closing CTA
@@ -1454,24 +1561,30 @@ const homepageSchema = {
   .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
   .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-muted); white-space: nowrap; }
 
-  /* ── §03 WRITING ── */
-  .bp-write-list { border-top: 1px solid var(--bp-hair); }
-  .bp-write-row {
-    display: grid;
-    grid-template-columns: 82px 1fr auto 56px;
-    align-items: center;
-    gap: 18px;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--bp-line2);
-    text-decoration: none;
-    transition: padding-left 0.25s ease;
+  /* ── §03 WRITING — scroll-jacked rail of cover cards (pin + scrub like the
+     games rail; homeBlogRail). Default layout is a vertical card list: the
+     fallback for mobile / reduced-motion / no-JS, where native lazy loads the
+     covers fine on vertical scroll. The pinned state (desktop) re-lays the cards
+     into a horizontal scrub track (its off-screen covers are eager-warmed by the
+     rail engine). ── */
+  /* The cards themselves are the shared <PostCard variant="blueprint"> — the same
+     card as /blog (own scoped styles). This track only lays them out: a vertical
+     list by default (mobile / reduced-motion / no-JS fallback), re-flowed into a
+     horizontal scrub row when the rail pins on desktop. */
+  .bp-write-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 5vw, 48px);
   }
-  .bp-write-row:hover { padding-left: 10px; }
-  .bp-write-date { font-size: 12px; color: var(--bp-muted); }
-  .bp-write-title { font-size: clamp(1rem, 2vw, 1.35rem); font-weight: 600; color: var(--bp-ink); letter-spacing: -0.01em; }
-  .bp-write-row:hover .bp-write-title { color: var(--bp-acc); }
-  .bp-write-topic { justify-self: start; }
-  .bp-write-read { font-size: 11px; color: var(--bp-muted); text-align: right; white-space: nowrap; }
+  /* Pinned rail (desktop): the viewport clips (shared .bp-rail-sec.is-pinned
+     rule) and homeBlogRail slides this track sideways. Cards become fixed-width
+     plates in a row; align-items:stretch (flex default) keeps them equal height.
+     PostCard is a child component, so its root needs :global to be reachable. */
+  .bp-blog-rail.is-pinned .bp-write-cards { flex-direction: row; width: max-content; max-width: none; margin: 0; padding: 4px clamp(20px, 5vw, 48px); gap: 22px; }
+  .bp-blog-rail.is-pinned .bp-write-cards > :global(.tb-card-link) { flex: 0 0 clamp(300px, 24vw, 350px); }
 
   /* ── §04 ART (quilt grid + lightbox subsystem) ── */
   /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
@@ -1610,8 +1723,6 @@ const homepageSchema = {
     .bp-dir-item:nth-child(odd) { border-left: none; }
     .bp-dir-desc { display: none; }
     .bp-work-grid { grid-template-columns: 1fr; }
-    .bp-write-row { grid-template-columns: 62px 1fr auto; row-gap: 4px; }
-    .bp-write-read { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     .bp-svg-spin, .bp-orbit, .bp-svg-ping, .bp-compass-arm, .bp-compass-draw, .bp-scroll-arrow { animation: none !important; }
@@ -1651,8 +1762,9 @@ const homepageSchema = {
   initBpGlow();
 </script>
 <script>
-  import { initHomeGamesRail } from "../../scripts/homeGamesRail";
+  import { initHomeGamesRail, initHomeBlogRail } from "../../scripts/homeGamesRail";
   initHomeGamesRail();
+  initHomeBlogRail();
 </script>
 
 <!-- PROTOTYPE (units.gr-inspired): scramble-in for the mono section labels — the
