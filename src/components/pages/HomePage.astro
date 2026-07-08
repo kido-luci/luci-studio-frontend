@@ -140,12 +140,12 @@ const selectedWork = [
   },
 ];
 
-// §03 WRITING — latest 5 posts (art-topic posts excluded, same rule as before).
+// §03 WRITING — latest 8 posts (art-topic posts excluded); mobile caps to 4 via CSS.
 const rawPosts = await postService.getAll();
 const writing = rawPosts
   .filter((p) => !p.topics?.some((tp) => tp.toLowerCase().startsWith("art")))
   .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
-  .slice(0, 10)
+  .slice(0, 8)
   .map((rawP) => {
     const p = localized(rawP, locale);
     const tags = p.topics && p.topics.length > 0 ? p.topics : ["Engineering"];
@@ -1530,6 +1530,12 @@ const homepageSchema = {
      PostCard is a child component, so its root needs :global to be reachable. */
   .bp-blog-rail.is-pinned .bp-write-cards { flex-direction: row; width: max-content; max-width: none; margin: 0; padding: 4px clamp(20px, 5vw, 48px); gap: 22px; }
   .bp-blog-rail.is-pinned .bp-write-cards > :global(.tb-card-link) { flex: 0 0 clamp(300px, 24vw, 350px); }
+  /* Mobile / vertical-list fallback (≤900px — the rail doesn't pin there): cap the
+     single-column stack at 4 cards so it stays short. The desktop pinned rail
+     (≥901px) still scrubs all 8 sideways. */
+  @media (max-width: 900px) {
+    .bp-write-cards > :global(.tb-card-link:nth-child(n + 5)) { display: none; }
+  }
 
   /* ── §04 ART (quilt grid + lightbox subsystem) ── */
   /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
