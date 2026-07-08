@@ -995,6 +995,43 @@ const homepageSchema = {
     .bp-stack > .bp-art .bp-art-bg-wrap { position: absolute; inset: 0; }
     /* Connectors between stacked sheets have no gap to bridge — hide them. */
     .bp-stack > .bp-conn-wrap { display: none; }
+
+    /* Fill the full-viewport sheet: the three text sheets (§02/§03/§05) carry
+       little content, so scaled-up type + roomier rows keep them from floating
+       as a small centered block in a sea of empty sheet. §04 (art) is dense
+       already and untouched. */
+    .bp-stack > section:not(.bp-art) .bp-sec-head { margin-bottom: clamp(30px, 4vw, 48px); }
+    .bp-stack > section:not(.bp-art) .bp-h2 { font-size: clamp(2.6rem, 6.5vw, 4.6rem); }
+    .bp-stack > #capabilities .bp-cap-row { padding: 32px 0; }
+    .bp-stack > #capabilities .bp-cap-title { font-size: clamp(1.6rem, 3vw, 2.5rem); }
+    .bp-stack > #capabilities .bp-cap-desc { font-size: 16px; }
+    .bp-stack > #blog .bp-write-row { padding: 28px 0; }
+    .bp-stack > #blog .bp-write-title { font-size: clamp(1.2rem, 2.5vw, 1.75rem); }
+    .bp-stack > #studio .bp-studio-statement { font-size: clamp(1.55rem, 3vw, 2.35rem); }
+    .bp-stack > #studio .bp-stat-row { padding: 22px 0; }
+    .bp-stack > #studio .bp-stat-num { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
+
+    /* Giant faint sheet number — a drafting-sheet index that fills the negative
+       space with blueprint identity instead of emptiness. Sits behind the
+       content (z-index:-1, above the ::before grid). Ink-based so it re-tints
+       per theme; bleeds off the right edge. */
+    .bp-stack > section:not(.bp-art)::after {
+      position: absolute;
+      top: 50%;
+      right: clamp(8px, 3vw, 48px);
+      transform: translateY(-50%);
+      z-index: -1;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-weight: 700;
+      font-size: clamp(220px, 42vh, 480px);
+      line-height: 0.78;
+      letter-spacing: -0.05em;
+      color: color-mix(in srgb, var(--bp-ink) 7%, transparent);
+      pointer-events: none;
+    }
+    .bp-stack > #capabilities::after { content: "02"; }
+    .bp-stack > #blog::after { content: "03"; }
+    .bp-stack > #studio::after { content: "05"; }
   }
 
   /* §01's title row gets the same fixed-dark drafting band as the closing CTA
