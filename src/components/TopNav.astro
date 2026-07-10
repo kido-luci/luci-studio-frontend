@@ -11,7 +11,7 @@ const enHref = switchLocalePath(Astro.url.pathname, 'en');
 const viHref = switchLocalePath(Astro.url.pathname, 'vi');
 
 interface Props {
-  active?: 'home' | 'blog' | 'portfolio' | 'lab' | 'games' | null;
+  active?: 'home' | 'blog' | 'portfolio' | 'lab' | 'games' | 'videos' | null;
   ctaLabel?: string;
   ctaHref?: string;
 }
@@ -23,6 +23,7 @@ const { active = null, ctaLabel = t('nav.cta'), ctaHref = '/#contact' } = Astro.
 const links = [
   { key: 'home', label: 'HOME',          href: localizedHref(locale, '/') },
   { key: 'blog', label: 'BLOG / SERIES', href: localizedHref(locale, '/blog') },
+  { key: 'videos', label: 'VIDEOS',      href: '/videos' },
   { key: 'lab',  label: 'APPS / TOOLS',  href: localizedHref(locale, '/lab') },
   { key: 'games', label: 'GAMES',        href: '/games' },
 ];
