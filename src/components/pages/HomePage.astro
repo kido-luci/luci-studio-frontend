@@ -18,6 +18,7 @@ import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
 import { buildSeriesViews } from "../../utils/series";
 import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
 import { GAMES } from "../../data/games";
+import { VIDEOS, CHANNEL_URL } from "../../data/videos";
 
 // ANNEX A rail — bento arrangement (units.gr-style): the track is a 2-row
 // column-flow grid, and each game gets a hand-picked plate variant so the
@@ -51,6 +52,10 @@ const RAIL_LAYOUT: ReadonlyArray<"tall" | "sm" | "spec"> = [
   "sm",   // G8 starcull
   "sm",   // G9 orbfall (pairs with the closing All-games plate)
 ];
+
+// Typed as number so the `=== 1` plural check type-checks (VIDEOS is `as const`,
+// so its .length is the literal 2, which TS would flag against `=== 1`).
+const videoCount: number = VIDEOS.length;
 
 const locale = getLocaleFromUrl(Astro.url);
 const API_URL = import.meta.env.PUBLIC_API_URL || "";
@@ -235,6 +240,7 @@ const directory = [
   { n: "03", label: "GAMES", desc: "Browser games, 60fps", href: "/games/", ext: false, orange: false },
   { n: "04", label: "APPS", desc: "Cross-platform & open source", href: "#work", ext: false, orange: false },
   { n: "05", label: "ART", desc: "Pen, pencil & digital", href: "#art", ext: false, orange: true },
+  { n: "06", label: "VIDEOS", desc: "Gameplay & coding walkthroughs", href: "/videos/", ext: false, orange: false },
 ];
 const capabilities = [
   { n: "01", title: "Cross-platform apps", desc: "One Flutter codebase → Android, iOS, macOS, Windows & Web. Local-first, offline-ready.", tag: "Flutter · Dart · BLoC", orange: false },
@@ -390,7 +396,7 @@ const homepageSchema = {
         <span class="bp-dot" aria-hidden="true"></span>
         <span class="bp-mono bp-sec-label">DIRECTORY</span>
         <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">05 SECTIONS</span>
+        <span class="bp-mono bp-sec-count">06 SECTIONS</span>
       </div>
       <div class="bp-dir">
         {directory.map((d, i) => (
@@ -557,6 +563,59 @@ const homepageSchema = {
     </section>
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
+
+    <!-- ===================== ANNEX B — SCREENING ROOM (video band) =============
+         Off-site video content (YouTube) surfaced on the home as a STATIC grid —
+         deliberately not another pinned rail, so it reads as a different layout
+         family from the games/writing bento rails. Cards link out; nothing is
+         embedded. Unnumbered ANNEX (like GAMES REGISTER) so §02–§05 keep their
+         numbers. Data: src/data/videos.ts (shared with /videos). -->
+    <section class="bp-section bp-wrap bp-vid-sec" id="videos">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">ANNEX B — SCREENING ROOM</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-count">{String(videoCount).padStart(2, "0")} {videoCount === 1 ? "VIDEO" : "VIDEOS"}</span>
+      </div>
+      <div class="bp-sec-title-row" data-reveal>
+        <h2 class="bp-display bp-h2" data-ml9>Watch something.</h2>
+        <a href="/videos/" class="bp-mono bp-more">ALL VIDEOS →</a>
+      </div>
+
+      <!-- channel strip -->
+      <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" class="bp-vid-channel" data-reveal>
+        <span class="bp-vid-channel-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+            <path d="M21.6 7.2a2.5 2.5 0 0 0-1.76-1.77C18.28 5 12 5 12 5s-6.28 0-7.84.43A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.76 1.77C5.72 19 12 19 12 19s6.28 0 7.84-.43a2.5 2.5 0 0 0 1.76-1.77A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8ZM10 15.2V8.8L15.6 12 10 15.2Z"/>
+          </svg>
+        </span>
+        <span class="bp-vid-channel-body">
+          <span class="bp-mono bp-vid-channel-eyebrow">YOUTUBE CHANNEL</span>
+          <span class="bp-display bp-vid-channel-handle">@the-luci-studio</span>
+        </span>
+        <span class="bp-mono bp-vid-channel-cta">View channel ↗</span>
+      </a>
+
+      <!-- static video grid -->
+      <div class="bp-vid-grid">
+        {VIDEOS.map((v) => (
+          <a href={v.href} target="_blank" rel="noopener noreferrer" class="bp-vid-card" data-reveal>
+            <div class="bp-vid-media">
+              <img src={v.img} alt={v.title} loading="lazy" width="1280" height="720" />
+              <span class="bp-mono bp-vid-platform">{v.platform}</span>
+            </div>
+            <div class="bp-vid-body">
+              <span class="bp-mono bp-vid-tag">{v.tag}</span>
+              <div class="bp-display bp-vid-title">{v.title}</div>
+            </div>
+            <div class="bp-mono bp-vid-foot">
+              <span class="bp-vid-host"><span class="bp-vid-dot"></span>{v.host}</span>
+              <span class="bp-vid-arrow">↗</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
 
     <!-- ===================== §02 CAPABILITIES ===================== -->
     <section class="bp-wrap bp-section" id="capabilities">
@@ -1244,7 +1303,7 @@ const homepageSchema = {
   /* ── DIRECTORY ── */
   .bp-dir {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     border-top: 1.5px solid var(--bp-hair);
     border-bottom: 1.5px solid var(--bp-hair);
   }
@@ -1754,6 +1813,106 @@ const homepageSchema = {
   .bp-conn { position: relative; width: 1px; height: 44px; background: linear-gradient(var(--bp-hair), color-mix(in srgb, var(--bp-hair) 35%, transparent)); display: block; }
   .bp-conn::before { content: ""; position: absolute; top: 0; left: 50%; width: 10px; height: 1px; margin-left: -5px; background: color-mix(in srgb, var(--bp-acc) 50%, transparent); }
   .bp-conn::after { content: ""; position: absolute; bottom: -1.5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--bp-acc); }
+
+  /* ── ANNEX B — SCREENING ROOM (video band) ──
+     Static grid mirroring the /videos card anatomy (blueprint DNA), scoped to
+     the home. Distinct layout family from the pinned games/writing rails.
+     YouTube brand-red appears ONLY on platform-identifying bits (play mark +
+     platform badge); all page chrome stays on the site accent. */
+  .bp-vid-sec {
+    --bp-vid-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg, #0a0e14));
+    --bp-vid-screen: #0a0e14;
+    --bp-vid-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
+  }
+  :global(html.bp-home.light-mode) .bp-vid-sec {
+    --bp-vid-panel: #ffffff;
+    --bp-vid-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
+  }
+
+  .bp-vid-channel {
+    display: flex; align-items: center; gap: 18px;
+    margin-top: clamp(22px, 3vw, 32px);
+    text-decoration: none; color: inherit;
+    background: var(--bp-vid-panel);
+    border: 1px solid var(--bp-hair);
+    border-radius: 14px;
+    padding: clamp(16px, 2.4vw, 24px) clamp(18px, 3vw, 30px);
+    box-shadow: var(--bp-vid-shadow);
+    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
+  }
+  .bp-vid-channel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 22px 48px -28px color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    border-color: color-mix(in srgb, var(--bp-acc) 40%, transparent);
+  }
+  /* YouTube brand red on the play mark only — page chrome stays on site accent. */
+  .bp-vid-channel-mark { width: 40px; height: 40px; flex: none; color: #ff0000; }
+  .bp-vid-channel-mark svg { display: block; width: 100%; height: 100%; }
+  .bp-vid-channel-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .bp-vid-channel-eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bp-muted); }
+  .bp-vid-channel-handle { font-size: clamp(1.1rem, 2.2vw, 1.4rem); line-height: 1.1; color: var(--bp-ink); }
+  .bp-vid-channel-cta {
+    margin-left: auto; flex: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 999px;
+    background: var(--bp-acc); color: var(--accent-ink);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    transition: opacity 0.2s;
+  }
+  .bp-vid-channel:hover .bp-vid-channel-cta { opacity: 0.88; }
+
+  .bp-vid-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 22px;
+    margin-top: 22px;
+  }
+  .bp-vid-card {
+    display: flex; flex-direction: column;
+    text-decoration: none; color: inherit;
+    background: var(--bp-vid-panel);
+    border: 1px solid var(--bp-hair);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
+  }
+  .bp-vid-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 44px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
+  }
+  .bp-vid-media { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--bp-vid-screen); }
+  .bp-vid-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1); }
+  .bp-vid-card:hover .bp-vid-media img { transform: scale(1.04); }
+  .bp-vid-platform {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 5px;
+    /* #dd0000 (not #ff0000): white-on-red at ~5:1 keeps the 9px label WCAG AA */
+    color: #fff; background: #dd0000;
+  }
+  .bp-vid-body { padding: 18px 20px 14px; flex: 1; }
+  .bp-vid-tag {
+    display: inline-block;
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 5px;
+    border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent);
+    color: var(--bp-acc);
+  }
+  .bp-vid-title { margin-top: 12px; font-size: 1.1rem; line-height: 1.3; color: var(--bp-ink); }
+  .bp-vid-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; border-top: 1px solid var(--bp-hair);
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-muted);
+  }
+  .bp-vid-host { display: flex; align-items: center; gap: 8px; }
+  .bp-vid-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); }
+  .bp-vid-arrow { font-size: 14px; }
+
+  @media (max-width: 640px) {
+    .bp-vid-channel { flex-wrap: wrap; }
+    .bp-vid-channel-cta { margin-left: 0; }
+  }
 
   /* ── keyframes ── */
   @keyframes lu-spin { to { transform: rotate(360deg); } }
