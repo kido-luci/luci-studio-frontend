@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Blueprint (bp-) shared tokens ─────────────────────────────────────────
+   The drafting-sheet surface (paper `--bp-bg` + hairline `--bp-hair`) and the
+   two type faces (`.bp-mono` / `.bp-display` / `--bp-mono`) were duplicated in
+   ~17 component/page scoped <style> blocks. Only the universal, identical-
+   everywhere values live here once. Per-page divergent tokens
+   (`--bp-muted`/`--bp-faint`/`--bp-card`/`--bp-panel-hover`/`--bp-lamp*`/…) and
+   TopNav's own set stay local — do NOT move those here.
+   Light-mode triggers mirror the originals exactly: `body.light-mode` for the
+   page/card wrappers, `html.bp-home.light-mode` for the homepage. */
+.bp-blog, .bp-games, .bp-lab, .bp-legal, .bp-portfolio, .bp-post,
+.bp-sd, .bp-series, .bp-videos,
+.tb-card-link--bp, .repo-card--bp, .bpc, .tl-item,
+html.bp-home {
+  --bp-bg: #0a0e14;
+  --bp-hair: rgba(255, 255, 255, 0.14);
+}
+body.light-mode :is(.bp-blog, .bp-games, .bp-lab, .bp-legal, .bp-portfolio,
+  .bp-post, .bp-sd, .bp-series, .bp-videos,
+  .tb-card-link--bp, .repo-card--bp, .bpc, .tl-item),
+html.bp-home.light-mode {
+  --bp-bg: #f4f2ec;
+  --bp-hair: rgba(22, 32, 43, 0.16);
+}
+
+:root { --bp-mono: "IBM Plex Mono", ui-monospace, monospace; }
+.bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.bp-display { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink); }

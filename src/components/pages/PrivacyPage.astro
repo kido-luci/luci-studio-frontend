@@ -94,12 +94,10 @@ const lastUpdated = 'June 23, 2026';
      terms / privacy / license). Line grid header band + §-header + Space Grotesk
      title + IBM Plex Mono labels; the legal copy stays a readable document. */
   .bp-legal {
-    --bp-bg: #0a0e14;
     --bp-ink: var(--text-primary);
     --bp-acc: var(--accent);
     --bp-line: rgba(255, 255, 255, 0.05);
     --bp-line2: rgba(255, 255, 255, 0.08);
-    --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-fig: rgba(255, 255, 255, 0.05);
     --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
@@ -114,10 +112,8 @@ const lastUpdated = 'June 23, 2026';
     font-family: "Space Grotesk", system-ui, sans-serif;
   }
   :global(body.light-mode) .bp-legal {
-    --bp-bg: #f4f2ec;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
-    --bp-hair: rgba(22, 32, 43, 0.16);
     --bp-fig: #e8e6df;
   }
   .bp-legal .bp-grid {
@@ -132,8 +128,6 @@ const lastUpdated = 'June 23, 2026';
             mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);
   }
   .bp-legal-inner { position: relative; z-index: 1; max-width: 48rem; margin: 0 auto; padding-left: clamp(20px, 5vw, 40px); padding-right: clamp(20px, 5vw, 40px); }
-  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
-  .bp-display { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink); }
   .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
   .bp-sec-head { display: flex; align-items: center; gap: 14px; }
   .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }

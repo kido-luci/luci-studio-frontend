@@ -850,13 +850,11 @@ const homepageSchema = {
      the fixed decorative secondary. The --nav-bg-scroll override retunes
      the scrolled glass the shared navDimmer toggles on. */
   :global(html.bp-home) {
-    --bp-bg: #0a0e14;
     --bp-ink: var(--text-primary);
     --bp-acc: var(--accent);
     --bp-orange: #ff5b1a;
     --bp-line: rgba(255, 255, 255, 0.05);
     --bp-line2: rgba(255, 255, 255, 0.08);
-    --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-card: rgba(255, 255, 255, 0.035);
     --bp-muted: color-mix(in srgb, var(--bp-ink) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--bp-ink) 42%, transparent);
@@ -878,11 +876,9 @@ const homepageSchema = {
     --bp-lamp-end: rgb(var(--accent-rgb) / 0); /* transparent accent (== --bp-acc, alpha 0) */
   }
   :global(html.bp-home.light-mode) {
-    --bp-bg: #f4f2ec;
     --bp-lamp: rgb(var(--accent-rgb) / 0); /* hide the corner glow on the cream sheet — the twinkling stars carry the corner alone */
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
-    --bp-hair: rgba(22, 32, 43, 0.16);
     --bp-card: #e8e6df;
   }
   .bp {
@@ -1131,7 +1127,6 @@ const homepageSchema = {
   }
 
   /* ── shared motif atoms ── */
-  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
   .bp-display {
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-weight: 700;

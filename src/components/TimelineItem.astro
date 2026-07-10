@@ -122,20 +122,15 @@ const monogram = (company || role || "?").trim().charAt(0).toUpperCase();
     --bp-ink: var(--text-primary);
     --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
-    --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-line2: rgba(255, 255, 255, 0.08);
-    --bp-bg: #0a0e14;
     --bp-fig: rgba(255, 255, 255, 0.05);
     --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
     --bp-panel-hover: color-mix(in srgb, var(--bp-acc) 8%, var(--bp-panel));
     --bp-shadow: none;
-    --bp-mono: "IBM Plex Mono", ui-monospace, monospace;
     display: flex; gap: 20px;
   }
   :global(body.light-mode) .tl-item {
-    --bp-hair: rgba(22, 32, 43, 0.16);
     --bp-line2: rgba(22, 32, 43, 0.08);
-    --bp-bg: #f4f2ec;
     --bp-fig: #e8e6df;
     --bp-panel: #ffffff;
     --bp-muted: color-mix(in srgb, var(--text-primary) 62%, transparent);
