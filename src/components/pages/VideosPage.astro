@@ -1,0 +1,247 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import TopNav from "../TopNav.astro";
+import SiteFooter from "../SiteFooter.astro";
+
+// Off-site content directory (same link-out model as GamesPage): everything
+// here is hosted on a third-party platform and linked out. YouTube-only for
+// now — add entries to VIDEOS to grow the grid; the `platform` field keeps
+// the card shape reusable if other platforms join later.
+const CHANNEL_URL = "https://www.youtube.com/@the-luci-studio";
+
+const VIDEOS = [
+  {
+    title: "Free 2.5D falling-block puzzle in your browser — Faldrop gameplay",
+    href: "https://www.youtube.com/watch?v=40pVuVSa9b8",
+    img: "https://i.ytimg.com/vi/40pVuVSa9b8/maxresdefault.jpg",
+    platform: "YouTube",
+    host: "youtube.com",
+    tag: "Gameplay",
+  },
+  {
+    title: "LeetCode 27. Remove Element in Dart — two pointers, O(n) / O(1)",
+    href: "https://www.youtube.com/watch?v=o8rysXvbtqQ",
+    img: "https://i.ytimg.com/vi/o8rysXvbtqQ/maxresdefault.jpg",
+    platform: "YouTube",
+    host: "youtube.com",
+    tag: "Coding",
+  },
+];
+
+const totalVideos: number = VIDEOS.length;
+---
+
+<Layout
+  title="Videos · Luci Studio"
+  description="Gameplay runs and coding walkthroughs from Luci Studio, hosted on YouTube — new uploads land here."
+>
+  <TopNav />
+
+  <main class="bp-videos">
+    <div class="bp-grid" aria-hidden="true"></div>
+    <div class="bp-wrap">
+
+      <!-- page header -->
+      <header class="bp-videos-head">
+        <div class="bp-sec-head" data-reveal>
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">OFF-SITE</span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-count">{String(totalVideos).padStart(2, "0")} {totalVideos === 1 ? "VIDEO" : "VIDEOS"}</span>
+        </div>
+        <h1 class="bp-display bp-videos-title" data-reveal>Videos<span class="bp-acc-dot">.</span></h1>
+        <p class="bp-videos-sub">Gameplay runs and coding walkthroughs from the studio, hosted on YouTube — new uploads land here.</p>
+      </header>
+
+      <!-- channel strip -->
+      <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" class="vid-channel" data-reveal>
+        <span class="vid-channel-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+            <path d="M21.6 7.2a2.5 2.5 0 0 0-1.76-1.77C18.28 5 12 5 12 5s-6.28 0-7.84.43A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.76 1.77C5.72 19 12 19 12 19s6.28 0 7.84-.43a2.5 2.5 0 0 0 1.76-1.77A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8ZM10 15.2V8.8L15.6 12 10 15.2Z"/>
+          </svg>
+        </span>
+        <span class="vid-channel-body">
+          <span class="bp-mono vid-channel-eyebrow">YOUTUBE CHANNEL</span>
+          <span class="bp-display vid-channel-handle">@the-luci-studio</span>
+        </span>
+        <span class="bp-mono vid-channel-cta">View channel ↗</span>
+      </a>
+
+      <!-- video grid -->
+      <div class="bp-videos-grid">
+        {VIDEOS.map((v) => (
+          <a href={v.href} target="_blank" rel="noopener noreferrer" class="vid-card" data-reveal>
+            <div class="vid-card-media">
+              <img src={v.img} alt={v.title} loading="lazy" width="1280" height="720" />
+              <span class="bp-mono vid-card-platform">{v.platform}</span>
+            </div>
+            <div class="vid-card-body">
+              <span class="bp-mono vid-card-tag">{v.tag}</span>
+              <div class="bp-display vid-card-title">{v.title}</div>
+            </div>
+            <div class="bp-mono vid-card-footer">
+              <span class="vid-card-host"><span class="vid-card-dot"></span>{v.host}</span>
+              <span class="vid-card-arrow">↗</span>
+            </div>
+          </a>
+        ))}
+      </div>
+
+    </div>
+
+    <SiteFooter locale="en" />
+  </main>
+</Layout>
+
+<style>
+  /* /videos — blueprint drafting-sheet DNA (same atom set as /games): line
+     grid + §-header + Space Grotesk display + IBM Plex Mono. Cards link out
+     to the hosting platform; nothing is embedded. */
+  .bp-videos {
+    --bp-bg: #0a0e14;
+    --bp-ink: var(--text-primary);
+    --bp-acc: var(--accent);
+    --bp-line: rgba(255, 255, 255, 0.05);
+    --bp-line2: rgba(255, 255, 255, 0.08);
+    --bp-hair: rgba(255, 255, 255, 0.14);
+    --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
+    --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
+    --bp-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
+    --bp-screen: #0a0e14;
+
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--bp-bg);
+    color: var(--bp-ink);
+    padding-top: clamp(120px, 15vh, 168px);
+    padding-bottom: clamp(72px, 12vw, 128px);
+    overflow-x: clip;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+  }
+  :global(body.light-mode) .bp-videos {
+    --bp-bg: #f4f2ec;
+    --bp-line: rgba(22, 32, 43, 0.05);
+    --bp-line2: rgba(22, 32, 43, 0.08);
+    --bp-hair: rgba(22, 32, 43, 0.16);
+    --bp-panel: #ffffff;
+    --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
+  }
+
+  .bp-videos .bp-grid {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(var(--bp-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
+      linear-gradient(var(--bp-line2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 85%);
+            mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 85%);
+  }
+
+  .bp-wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding-left: clamp(20px, 5vw, 40px); padding-right: clamp(20px, 5vw, 40px); }
+  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .bp-display { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink); }
+  .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
+
+  .bp-sec-head { display: flex; align-items: center; gap: 14px; }
+  .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
+  .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
+  .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
+  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); white-space: nowrap; }
+
+  .bp-videos-head { margin-bottom: clamp(30px, 5vw, 48px); }
+  .bp-videos-title { font-size: clamp(2.8rem, 8vw, 6rem); line-height: 0.98; margin: clamp(16px, 2.5vw, 24px) 0 0; }
+  .bp-videos-sub { margin: 1.4rem 0 0; max-width: 34rem; font-size: 1.05rem; line-height: 1.6; color: var(--bp-muted); }
+
+  /* ── Channel strip — compact blueprint panel linking to the channel ── */
+  .vid-channel {
+    display: flex; align-items: center; gap: 18px;
+    text-decoration: none; color: inherit;
+    background: var(--bp-panel);
+    border: 1px solid var(--bp-hair);
+    border-radius: 14px;
+    padding: clamp(18px, 2.5vw, 26px) clamp(20px, 3vw, 32px);
+    box-shadow: var(--bp-shadow);
+    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
+  }
+  .vid-channel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 22px 48px -28px color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    border-color: color-mix(in srgb, var(--bp-acc) 40%, transparent);
+  }
+  .vid-channel-mark { width: 42px; height: 42px; flex: none; color: var(--bp-acc); }
+  .vid-channel-mark svg { display: block; width: 100%; height: 100%; }
+  .vid-channel-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .vid-channel-eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bp-muted); }
+  .vid-channel-handle { font-size: clamp(1.15rem, 2.4vw, 1.5rem); line-height: 1.1; }
+  .vid-channel-cta {
+    margin-left: auto; flex: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 999px;
+    background: var(--bp-acc); color: var(--accent-ink);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    transition: opacity 0.2s;
+  }
+  .vid-channel:hover .vid-channel-cta { opacity: 0.88; }
+
+  /* ── Video cards ── */
+  .bp-videos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 22px;
+    margin-top: clamp(28px, 4vw, 40px);
+  }
+  /* Cap card width when the grid has a single row of few items so 2 videos
+     don't stretch into two enormous plates on wide screens. */
+  @media (min-width: 1024px) {
+    .bp-videos-grid { grid-template-columns: repeat(auto-fit, minmax(340px, 480px)); }
+  }
+  .vid-card {
+    display: flex; flex-direction: column;
+    text-decoration: none; color: inherit;
+    background: var(--bp-panel);
+    border: 1px solid var(--bp-hair);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
+  }
+  .vid-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 44px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
+  }
+  .vid-card-media { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--bp-screen); }
+  .vid-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1); }
+  .vid-card:hover .vid-card-media img { transform: scale(1.04); }
+  .vid-card-platform {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 5px;
+    color: #fff; background: rgba(10, 14, 20, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  .vid-card-body { padding: 20px 22px 16px; flex: 1; }
+  .vid-card-tag {
+    display: inline-block;
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 5px;
+    border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent);
+    color: var(--bp-acc);
+  }
+  .vid-card-title { margin-top: 12px; font-size: 1.15rem; line-height: 1.3; color: var(--bp-ink); }
+  .vid-card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 22px; border-top: 1px solid var(--bp-hair);
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-muted);
+  }
+  .vid-card-host { display: flex; align-items: center; gap: 8px; }
+  .vid-card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); }
+  .vid-card-arrow { font-size: 14px; }
+
+  @media (max-width: 640px) {
+    .vid-channel { flex-wrap: wrap; }
+    .vid-channel-cta { margin-left: 0; }
+  }
+</style>
