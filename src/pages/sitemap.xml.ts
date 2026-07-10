@@ -27,6 +27,7 @@ export const GET: APIRoute = async () => {
     const staticPages: UrlEntry[] = [
         { loc: `${SITE_URL}/`, lastmod: new Date().toISOString().split('T')[0], priority: '1.0', changefreq: 'weekly' },
         { loc: `${SITE_URL}/blog/`, lastmod: new Date().toISOString().split('T')[0], priority: '0.9', changefreq: 'daily' },
+        { loc: `${SITE_URL}/videos/`, lastmod: new Date().toISOString().split('T')[0], priority: '0.5', changefreq: 'monthly' },
         { loc: `${SITE_URL}/terms/`, lastmod: '2026-05-13', priority: '0.3', changefreq: 'yearly' },
         { loc: `${SITE_URL}/privacy/`, lastmod: '2026-05-13', priority: '0.3', changefreq: 'yearly' },
     ];
