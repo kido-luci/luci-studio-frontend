@@ -1,0 +1,38 @@
+---
+// Fixed AdSense slot. Renders one <ins class="adsbygoogle"> per enabled ad unit
+// assigned to this placement — or nothing at all while ads are dormant (global
+// toggle off, no publisher ID, or the unit has no AdSense slot ID yet). The
+// async loader script lives in Layout.astro's <head>, gated on the same config.
+// Placement values must stay in sync with the backend's whitelist
+// (ads_handler.go) and the /admin/ads placement select.
+import { adsService } from '../services/ads';
+
+interface Props {
+    placement: 'post-top' | 'post-bottom' | 'blog-list' | 'home' | 'videos';
+}
+
+const { placement } = Astro.props;
+const config = await adsService.getConfig();
+const units = config.enabled
+    ? config.units.filter((u) => u.placement === placement && u.slot_id)
+    : [];
+---
+
+{units.map((unit) => (
+    <div class="ad-slot" data-placement={placement}>
+        <ins
+            class="adsbygoogle"
+            style="display:block"
+            data-ad-client={config.publisher_id}
+            data-ad-slot={unit.slot_id}
+            data-ad-format={unit.format || 'auto'}
+            data-full-width-responsive="true"></ins>
+        <script is:inline>(window.adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+))}
+
+<style>
+    .ad-slot {
+        margin: 2.5rem 0;
+    }
+</style>
