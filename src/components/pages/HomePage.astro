@@ -1018,12 +1018,13 @@ const homepageSchema = {
       padding-top: max(88px, 8vh);
       padding-bottom: 8vh;
     }
-    /* Fill the pinned sheet and drop any nested sticky parallax
-       (sticky-inside-sticky double-pins) — the bg wrap just fills statically.
-       The upward shadow lifts the sheet off the section above it. */
+    /* The upward shadow lifts the sheet off the section above it. The base
+       sticky bg (sticky 100vh photo inside the clip-path wrapper) is kept on
+       desktop too: §04 is the deck's only sheet now, so its own sticky never
+       engages and there is no sticky-inside-sticky double-pin — while an
+       absolute bg would keep its base height:100vh and leave any gallery
+       overflow past the first viewport uncovered. */
     .bp-stack > .bp-art { box-shadow: 0 -24px 50px -18px rgba(0, 0, 0, 0.5); }
-    .bp-stack > .bp-art .bp-art-bg,
-    .bp-stack > .bp-art .bp-art-bg-wrap { position: absolute; inset: 0; }
   }
 
   /* §01's title row gets the same fixed-dark drafting band as the closing CTA
