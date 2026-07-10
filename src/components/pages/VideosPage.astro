@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SiteFooter from "../SiteFooter.astro";
+import AdSlot from "../AdSlot.astro";
 import { CHANNEL_URL, VIDEOS } from "../../data/videos";
 
 // Off-site content directory (same link-out model as GamesPage): everything
@@ -66,6 +67,8 @@ const totalVideos: number = VIDEOS.length;
           </a>
         ))}
       </div>
+
+      <AdSlot placement="videos" />
 
     </div>
 
