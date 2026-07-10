@@ -7,7 +7,7 @@ const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
 const SITE_URL = 'https://luci-studio.com';
-const lastUpdated = 'June 23, 2026';
+const lastUpdated = 'July 10, 2026';
 ---
 
 <Layout
@@ -45,6 +45,16 @@ const lastUpdated = 'June 23, 2026';
           <h2>Information You Provide</h2>
           <p>
             If you comment, contact Luci Studio by email, use Google login, or send messages to the AI chat, the site may process the information needed to provide those features. This can include your comment text, display identity from Google, email address if provided, and chat messages.
+          </p>
+        </section>
+
+        <section>
+          <h2>Email Newsletter</h2>
+          <p>
+            If you subscribe to the newsletter, Luci Studio collects your email address for one purpose: to email you when a new post is published. Subscription uses double opt-in — you are only added after clicking the confirmation link sent to your address — and only your email and subscription status are stored (no tracking pixels or additional profiling).
+          </p>
+          <p>
+            Every newsletter email includes a one-click unsubscribe link; you can withdraw at any time, which stops all further emails. Emails are delivered through <a href="https://resend.com" target="_blank" rel="noopener">Resend</a>, a third-party email provider that processes your address solely to send these messages.
           </p>
         </section>
 
