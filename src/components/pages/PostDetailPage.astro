@@ -567,18 +567,15 @@ const structuredData = [articleSchema, breadcrumbSchema];
 
   /* ── Blueprint post page (drafting-sheet DNA — prose + comments kept intact) ── */
   .bp-post {
-    --bp-bg: #0a0e14;
     --bp-ink: var(--text-primary);
     --bp-acc: var(--accent);
     --bp-line: rgba(255, 255, 255, 0.05);
     --bp-line2: rgba(255, 255, 255, 0.08);
-    --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-fig: rgba(255, 255, 255, 0.05);
     --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
     --bp-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg));
     --bp-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
-    --bp-mono: "IBM Plex Mono", ui-monospace, monospace;
     /* Comment zone rides the blueprint tokens (both themes): hairline dividers +
        a faint ink-tint panel for nested surfaces (reply forms). */
     --comment-divider: var(--bp-hair);
@@ -587,10 +584,8 @@ const structuredData = [articleSchema, breadcrumbSchema];
     background: var(--bp-bg);
   }
   body.light-mode .bp-post {
-    --bp-bg: #f4f2ec;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
-    --bp-hair: rgba(22, 32, 43, 0.16);
     --bp-fig: #e8e6df;
     --bp-panel: #ffffff;
     --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
