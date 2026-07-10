@@ -1,0 +1,207 @@
+---
+// Newsletter subscribe form — one email input + submit, dropped into the
+// site footer so it renders on every page (incl. the end of a blog post,
+// since SiteFooter already sits there). Self-contained: reads its own
+// PUBLIC_API_URL (same idiom as BlogIndexPage/PostDetailPage/HomePage) and
+// carries its own scoped styles, so it can sit inside any `.bp-footer-cols`
+// flex row without depending on the host component's classes.
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
+---
+
+<div class="subscribe">
+  <span class="bp-mono subscribe-head">NEWSLETTER</span>
+  <p class="subscribe-copy">
+    Get an email when I publish a new post. Unsubscribe anytime. <a href="/privacy" class="subscribe-link">Privacy</a>
+  </p>
+  <form id="subscribe-form" data-api-url={API_URL} novalidate>
+    <label for="subscribe-email" class="subscribe-label">Email</label>
+    <div class="subscribe-row">
+      <input
+        id="subscribe-email"
+        name="email"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        placeholder="you@email.com"
+        required
+        class="subscribe-input"
+      />
+      <button id="subscribe-submit" type="submit" class="subscribe-submit" aria-label="Subscribe to the newsletter">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <!-- Honeypot: real users never see or fill this. A non-empty value on
+         submit means a bot filled every field — no-op silently. -->
+    <div class="subscribe-hp" aria-hidden="true">
+      <label for="subscribe-website">Website</label>
+      <input id="subscribe-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+    <p id="subscribe-status" class="subscribe-status" role="status" aria-live="polite"></p>
+  </form>
+</div>
+
+<style>
+  .subscribe {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1 1 240px;
+    max-width: 320px;
+  }
+  .subscribe-head {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--bp-muted);
+  }
+  .subscribe-copy {
+    margin: -4px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--bp-muted);
+  }
+  .subscribe-link {
+    color: var(--bp-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+  }
+  .subscribe-link:hover {
+    color: var(--bp-acc);
+  }
+  .subscribe-label {
+    font-family: var(--bp-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bp-faint);
+  }
+  .subscribe-row {
+    display: flex;
+    gap: 8px;
+  }
+  .subscribe-input {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--bp-hair);
+    background: transparent;
+    color: var(--bp-ink);
+    font-family: var(--bp-mono);
+    font-size: 13px;
+    transition: border-color 0.2s ease;
+  }
+  .subscribe-input::placeholder {
+    color: var(--bp-faint);
+  }
+  .subscribe-input:focus {
+    outline: none;
+    border-color: var(--bp-acc);
+  }
+  .subscribe-input:disabled {
+    opacity: 0.6;
+  }
+  .subscribe-submit {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    border: none;
+    background: var(--bp-acc);
+    color: var(--accent-ink);
+    cursor: pointer;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+  }
+  .subscribe-submit:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+  .subscribe-submit:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .subscribe-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .subscribe-status {
+    margin: 0;
+    min-height: 14px;
+    font-family: var(--bp-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--bp-muted);
+  }
+  .subscribe-status[data-state="success"] {
+    color: var(--bp-acc);
+  }
+  .subscribe-status[data-state="error"] {
+    color: #f43f5e;
+  }
+  body.light-mode .subscribe-status[data-state="error"] {
+    color: #be123c; /* rose-700 — clears WCAG AA (~6:1) on the cream --bp-bg */
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#subscribe-form');
+
+  if (form) {
+    const apiUrl = form.dataset.apiUrl || '';
+    const emailInput = form.querySelector<HTMLInputElement>('#subscribe-email');
+    const honeypot = form.querySelector<HTMLInputElement>('#subscribe-website');
+    const submitBtn = form.querySelector<HTMLButtonElement>('#subscribe-submit');
+    const statusEl = form.querySelector<HTMLElement>('#subscribe-status');
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const setStatus = (state: 'pending' | 'success' | 'error' | '', message: string) => {
+      if (!statusEl) return;
+      statusEl.textContent = message;
+      if (state) statusEl.dataset.state = state;
+      else delete statusEl.dataset.state;
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!emailInput || !submitBtn) return;
+
+      // Honeypot filled → bot. Silently no-op (no state change, no request).
+      if (honeypot && honeypot.value.trim() !== '') return;
+
+      const email = emailInput.value.trim();
+      if (!EMAIL_RE.test(email)) {
+        setStatus('error', 'Enter a valid email address.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      emailInput.disabled = true;
+      form.setAttribute('aria-busy', 'true');
+      setStatus('pending', 'Sending…');
+
+      fetch(`${apiUrl}/subscribers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error(`subscribe ${res.status}`);
+          setStatus('success', "Almost there — check your email to confirm your subscription.");
+          emailInput.value = '';
+        })
+        .catch(() => {
+          setStatus('error', 'Something went wrong — please try again.');
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          emailInput.disabled = false;
+          form.removeAttribute('aria-busy');
+        });
+    });
+  }
+</script>
