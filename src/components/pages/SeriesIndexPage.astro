@@ -99,12 +99,10 @@ const SITE_URL = 'https://luci-studio.com';
      shared nav on this page; the drafting-sheet bg still flips with light/dark.
      ══════════════════════════════════════════════════════════════════════ */
   .bp-series {
-    --bp-bg: #0a0e14;
     --bp-ink: var(--text-primary);
     --bp-acc: var(--accent);
     --bp-line: rgba(255, 255, 255, 0.05);
     --bp-line2: rgba(255, 255, 255, 0.08);
-    --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
 
@@ -117,10 +115,8 @@ const SITE_URL = 'https://luci-studio.com';
     overflow-x: clip;
   }
   :global(body.light-mode) .bp-series {
-    --bp-bg: #f4f2ec;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
-    --bp-hair: rgba(22, 32, 43, 0.16);
   }
 
   /* Drafting grid: fine 36px + major 180px, faded toward the bottom. */
@@ -144,7 +140,6 @@ const SITE_URL = 'https://luci-studio.com';
     padding-left: clamp(20px, 5vw, 48px);
     padding-right: clamp(20px, 5vw, 48px);
   }
-  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
   .bp-display {
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink);

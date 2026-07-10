@@ -206,12 +206,10 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
      story / count-up / timeline reveal JS hooks (data-story-*, .count-up,
      .timeline-container) are unchanged. */
   .bp-portfolio {
-    --bp-bg: #0a0e14;
     --bp-ink: var(--text-primary);
     --bp-acc: var(--accent);
     --bp-line: rgba(255, 255, 255, 0.05);
     --bp-line2: rgba(255, 255, 255, 0.08);
-    --bp-hair: rgba(255, 255, 255, 0.14);
     --bp-fig: rgba(255, 255, 255, 0.05);
     --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
@@ -230,10 +228,8 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
     font-family: "Space Grotesk", system-ui, sans-serif;
   }
   :global(body.light-mode) .bp-portfolio {
-    --bp-bg: #f4f2ec;
     --bp-line: rgba(22, 32, 43, 0.05);
     --bp-line2: rgba(22, 32, 43, 0.08);
-    --bp-hair: rgba(22, 32, 43, 0.16);
     --bp-fig: #e8e6df;
     --bp-panel: #ffffff;
     --bp-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
@@ -253,8 +249,6 @@ const wideSkills = numberedSkills.filter((x) => x.cat.wide);
   }
 
   .bp-wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding-left: clamp(20px, 5vw, 40px); padding-right: clamp(20px, 5vw, 40px); }
-  .bp-mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
-  .bp-display { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; color: var(--bp-ink); }
   .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
   .bp-sec-head { display: flex; align-items: center; gap: 14px; }
   .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
