@@ -2,32 +2,12 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SiteFooter from "../SiteFooter.astro";
+import { CHANNEL_URL, VIDEOS } from "../../data/videos";
 
 // Off-site content directory (same link-out model as GamesPage): everything
 // here is hosted on a third-party platform and linked out. YouTube-only for
-// now — add entries to VIDEOS to grow the grid; the `platform` field keeps
-// the card shape reusable if other platforms join later.
-const CHANNEL_URL = "https://www.youtube.com/@the-luci-studio";
-
-const VIDEOS = [
-  {
-    title: "Free 2.5D falling-block puzzle in your browser — Faldrop gameplay",
-    href: "https://www.youtube.com/watch?v=40pVuVSa9b8",
-    img: "https://i.ytimg.com/vi/40pVuVSa9b8/maxresdefault.jpg",
-    platform: "YouTube",
-    host: "youtube.com",
-    tag: "Gameplay",
-  },
-  {
-    title: "LeetCode 27. Remove Element in Dart — two pointers, O(n) / O(1)",
-    href: "https://www.youtube.com/watch?v=o8rysXvbtqQ",
-    img: "https://i.ytimg.com/vi/o8rysXvbtqQ/maxresdefault.jpg",
-    platform: "YouTube",
-    host: "youtube.com",
-    tag: "Coding",
-  },
-];
-
+// now. Data lives in src/data/videos.ts (shared with the homepage SCREENING
+// ROOM band) — add entries there and both surfaces pick them up.
 const totalVideos: number = VIDEOS.length;
 ---
 
