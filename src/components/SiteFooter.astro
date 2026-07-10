@@ -7,6 +7,7 @@
 // already being in scope — every page in the blueprint rollout defines them.
 import FooterLinks from "./FooterLinks.astro";
 import SubscribeForm from "./SubscribeForm.astro";
+import PushOptIn from "./PushOptIn.astro";
 import { profileService } from "../services/profile";
 import { localizedHref, type Locale } from "../i18n";
 
@@ -91,7 +92,10 @@ const makeLinks = [
         <a href={l.url} target="_blank" rel="noopener" class="bp-footer-link">{l.label}</a>
       ))}
     </div>
-    <SubscribeForm />
+    <div class="newsletter-col">
+      <SubscribeForm />
+      <PushOptIn />
+    </div>
   </div>
   <div class="bp-wrap bp-footer-base">
     <span class="bp-mono bp-footer-copy">{profile?.copyright ?? "© 2026 LUCI STUDIO — ALL RIGHTS RESERVED"}</span>
@@ -160,6 +164,11 @@ const makeLinks = [
   .bp-footer-logo span { font-size: 18px; letter-spacing: 0.02em; color: var(--bp-ink); }
   .bp-footer-blurb { margin-top: 14px; font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
   .bp-footer-col { display: flex; flex-direction: column; gap: 12px; }
+  /* Wraps SubscribeForm + PushOptIn so push sits directly under the email
+     form as one NEWSLETTER column — SubscribeForm's own `.subscribe` sizing
+     (meant for a row flex-item) is neutralized here since it's now nested. */
+  .newsletter-col { flex: 1 1 240px; max-width: 320px; display: flex; flex-direction: column; gap: 14px; }
+  .newsletter-col :global(.subscribe) { flex: none; max-width: none; }
   .bp-footer-head { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-muted); margin-bottom: 4px; }
   :global(.bp-footer-link) { font-size: 14px; color: var(--bp-muted); text-decoration: none; transition: color 0.2s ease; }
   :global(.bp-footer-link:hover) { color: var(--bp-acc); }

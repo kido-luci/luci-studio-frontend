@@ -1,0 +1,190 @@
+---
+// Browser push opt-in — a quiet secondary control that sits beside the
+// newsletter SubscribeForm in the footer's NEWSLETTER column ("or get
+// browser alerts"). Self-contained: reads its own PUBLIC_API_URL (same
+// idiom as SubscribeForm) and stays hidden everywhere the Push API isn't
+// supported (most iOS Safari included) — no fallback UI, no nagging.
+const API_URL = import.meta.env.PUBLIC_API_URL || '';
+---
+
+<div class="push-optin" data-api-url={API_URL} hidden>
+  <button id="push-toggle" type="button" class="push-btn" aria-pressed="false">
+    <span class="push-icon" aria-hidden="true">🔔</span>
+    <span id="push-label" class="push-label">Notify me of new posts</span>
+  </button>
+  <p id="push-status" class="push-status" role="status" aria-live="polite"></p>
+</div>
+
+<style>
+  .push-optin {
+    margin-top: -2px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .push-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--bp-hair);
+    background: transparent;
+    color: var(--bp-muted);
+    font-family: var(--bp-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .push-btn:hover:not(:disabled) {
+    border-color: var(--bp-acc);
+    color: var(--bp-ink);
+  }
+  .push-btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+  .push-btn[aria-pressed="true"] {
+    border-color: var(--bp-acc);
+    color: var(--bp-acc);
+  }
+  .push-icon {
+    font-size: 12px;
+    line-height: 1;
+  }
+  .push-status {
+    margin: 0;
+    min-height: 14px;
+    font-family: var(--bp-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--bp-muted);
+  }
+  .push-status[data-state="error"] {
+    color: #f43f5e;
+  }
+  body.light-mode .push-status[data-state="error"] {
+    color: #be123c; /* rose-700 — clears WCAG AA (~6:1) on the cream --bp-bg */
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('.push-optin');
+
+  if (root) {
+    const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+    if (supported) {
+      const apiUrl = root.dataset.apiUrl || '';
+      const btn = root.querySelector<HTMLButtonElement>('#push-toggle');
+      const labelEl = root.querySelector<HTMLElement>('#push-label');
+      const statusEl = root.querySelector<HTMLElement>('#push-status');
+
+      if (btn && labelEl) {
+        const setStatus = (state: 'pending' | 'error' | '', message: string) => {
+          if (!statusEl) return;
+          statusEl.textContent = message;
+          if (state) statusEl.dataset.state = state;
+          else delete statusEl.dataset.state;
+        };
+
+        const setSubscribedUI = (subscribed: boolean) => {
+          btn.setAttribute('aria-pressed', String(subscribed));
+          labelEl.textContent = subscribed ? 'Subscribed — tap to turn off' : 'Notify me of new posts';
+        };
+
+        // base64url (VAPID public key format) → Uint8Array, as required by
+        // PushManager.subscribe's applicationServerKey.
+        const urlBase64ToUint8Array = (base64String: string): Uint8Array<ArrayBuffer> => {
+          const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+          const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+          const rawData = window.atob(base64);
+          const outputArray = new Uint8Array(rawData.length);
+          for (let i = 0; i < rawData.length; i++) {
+            outputArray[i] = rawData.charCodeAt(i);
+          }
+          return outputArray;
+        };
+
+        root.hidden = false;
+
+        if (Notification.permission === 'denied') {
+          // Respect a prior denial — disable, don't nag.
+          btn.disabled = true;
+          setStatus('', 'Blocked in your browser settings.');
+        } else {
+          // Reflect an existing subscription (e.g. from a previous visit).
+          navigator.serviceWorker
+            .getRegistration()
+            .then((reg) => (reg ? reg.pushManager.getSubscription() : null))
+            .then((sub) => {
+              if (sub) setSubscribedUI(true);
+            })
+            .catch(() => {});
+        }
+
+        btn.addEventListener('click', async () => {
+          if (btn.disabled) return;
+          btn.disabled = true;
+          let keepDisabled = false; // stays disabled only when the browser blocked us
+
+          try {
+            const existingReg = await navigator.serviceWorker.getRegistration();
+            const existingSub = existingReg ? await existingReg.pushManager.getSubscription() : null;
+
+            if (existingSub) {
+              await existingSub.unsubscribe();
+              fetch(`${apiUrl}/push/unsubscribe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ endpoint: existingSub.endpoint }),
+              }).catch(() => {});
+              setSubscribedUI(false);
+              setStatus('', '');
+              return;
+            }
+
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+              if (permission === 'denied') {
+                keepDisabled = true;
+                setStatus('', 'Blocked in your browser settings.');
+                return;
+              }
+              setStatus('', '');
+              return;
+            }
+
+            setStatus('pending', 'Subscribing…');
+
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            const keyRes = await fetch(`${apiUrl}/push/vapid-public-key`);
+            if (!keyRes.ok) throw new Error(`vapid key ${keyRes.status}`);
+            const { key } = (await keyRes.json()) as { key: string };
+
+            const subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(key),
+            });
+
+            const subRes = await fetch(`${apiUrl}/push/subscribe`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(subscription.toJSON()),
+            });
+            if (!subRes.ok) throw new Error(`subscribe ${subRes.status}`);
+
+            setSubscribedUI(true);
+            setStatus('', '');
+          } catch {
+            setStatus('error', 'Something went wrong — please try again.');
+          } finally {
+            btn.disabled = keepDisabled;
+          }
+        });
+      }
+    }
+  }
+</script>
