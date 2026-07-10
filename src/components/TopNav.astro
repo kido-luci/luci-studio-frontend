@@ -11,7 +11,7 @@ const enHref = switchLocalePath(Astro.url.pathname, 'en');
 const viHref = switchLocalePath(Astro.url.pathname, 'vi');
 
 interface Props {
-  active?: 'home' | 'blog' | 'portfolio' | 'lab' | 'games' | null;
+  active?: 'home' | 'blog' | 'portfolio' | 'lab' | 'games' | 'videos' | null;
   ctaLabel?: string;
   ctaHref?: string;
 }
@@ -25,6 +25,7 @@ const links = [
   { key: 'blog', label: 'BLOG / SERIES', href: localizedHref(locale, '/blog') },
   { key: 'lab',  label: 'APPS / TOOLS',  href: localizedHref(locale, '/lab') },
   { key: 'games', label: 'GAMES',        href: '/games' },
+  { key: 'videos', label: 'VIDEOS',      href: '/videos' },
 ];
 
 // "X / Y" labels render on a diagonal: first word hugs the top-left, an
