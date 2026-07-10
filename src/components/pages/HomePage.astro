@@ -143,12 +143,12 @@ const selectedWork = [
   },
 ];
 
-// §03 WRITING — latest 8 posts (art-topic posts excluded); mobile caps to 4 via CSS.
+// §03 WRITING — latest 6 posts (art-topic posts excluded); mobile caps to 4 via CSS.
 const rawPosts = await postService.getAll();
 const writing = rawPosts
   .filter((p) => !p.topics?.some((tp) => tp.toLowerCase().startsWith("art")))
   .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
-  .slice(0, 8)
+  .slice(0, 6)
   .map((rawP) => {
     const p = localized(rawP, locale);
     const tags = p.topics && p.topics.length > 0 ? p.topics : ["Engineering"];
