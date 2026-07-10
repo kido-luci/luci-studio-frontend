@@ -4,6 +4,7 @@ import TopNav from "../TopNav.astro";
 import SeriesCard from "../SeriesCard.astro";
 import PostCard from "../PostCard.astro";
 import SiteFooter from "../SiteFooter.astro";
+import AdSlot from "../AdSlot.astro";
 import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
 import { buildSeriesViews } from "../../utils/series";
@@ -200,6 +201,8 @@ const allTopics = [...topicCounts.keys()].sort(
         </div>
         <p id="posts-count" class="bp-mono bp-pag-count"></p>
       </div>
+
+      <AdSlot placement="blog-list" />
 
       <!-- Series strip (end of page) -->
       {playlists.length > 0 && (
