@@ -189,16 +189,13 @@ const totalVideos: number = VIDEOS.length;
   .vid-channel:hover .vid-channel-cta { opacity: 0.88; }
 
   /* ── Video cards ── */
+  /* Cards flex to fill the wrap (no max-width cap) so the grid's outer edges
+     always line up with the full-width channel strip above, at any video count. */
   .bp-videos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
     gap: 22px;
     margin-top: clamp(28px, 4vw, 40px);
-  }
-  /* Cap card width when the grid has a single row of few items so 2 videos
-     don't stretch into two enormous plates on wide screens. */
-  @media (min-width: 1024px) {
-    .bp-videos-grid { grid-template-columns: repeat(auto-fit, minmax(340px, 480px)); }
   }
   .vid-card {
     display: flex; flex-direction: column;
