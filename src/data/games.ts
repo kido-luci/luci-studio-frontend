@@ -35,7 +35,7 @@ export const GAMES = [
     href: 'https://sumfall.luci-studio.com',
     host: 'sumfall.luci-studio.com',
     tags: ['Puzzle', 'Browser', 'No install'],
-    beta: true,
+    beta: false,
   },
   {
     slug: 'huefall',
