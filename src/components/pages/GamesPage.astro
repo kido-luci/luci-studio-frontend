@@ -11,12 +11,12 @@ import { getPlayCounts, playsFor } from "../../services/games";
 
 const totalGames: number = GAMES.length;
 const featured = GAMES[0];
-const rest = GAMES.slice(1);
 // Two shelves below the featured hero, driven by each game's `beta` flag:
 // stable releases first, then the beta lab. A shelf hides itself when empty.
+// The featured game is listed on its shelf too, so each shelf is complete.
 const sections = [
-  { label: "AVAILABLE", heading: "Available games", note: null, items: rest.filter((g) => !g.beta) },
-  { label: "BETA", heading: "Beta games", note: "Fully playable and live — still being tuned and iterated.", items: rest.filter((g) => g.beta) },
+  { label: "AVAILABLE", heading: "Available games", note: null, items: GAMES.filter((g) => !g.beta) },
+  { label: "BETA", heading: "Beta games", note: "Fully playable and live — still being tuned and iterated.", items: GAMES.filter((g) => g.beta) },
 ].filter((s) => s.items.length > 0);
 
 // Real per-game play counts, baked in at build time (see services/games.ts).
