@@ -19,6 +19,7 @@ import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
 import { buildSeriesViews } from "../../utils/series";
 import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
 import { GAMES } from "../../data/games";
+import { getPlayCounts, playsFor } from "../../services/games";
 import { VIDEOS, CHANNEL_URL } from "../../data/videos";
 
 // ANNEX A rail — bento arrangement (units.gr-style): the track is a 2-row
@@ -53,6 +54,10 @@ const RAIL_LAYOUT: ReadonlyArray<"tall" | "sm" | "spec"> = [
   "sm",   // G8 starcull
   "sm",   // G9 orbfall (pairs with the closing All-games plate)
 ];
+
+// Real per-game play counts, baked in at build time (shared with /games via the
+// module-cached fetch in services/games.ts). Rendered on each rail card below.
+const plays = await getPlayCounts();
 
 // Typed as number so the `=== 1` plural check type-checks (VIDEOS is `as const`,
 // so its .length is the literal 2, which TS would flag against `=== 1`).
@@ -516,6 +521,7 @@ const homepageSchema = {
         <div class="bp-rail-track">
           {GAMES.map((g, i) => {
             const variant = RAIL_LAYOUT[i] ?? "sm";
+            const p = playsFor(plays, g.slug);
             return variant === "spec" ? (
               <a href={g.href} class={`bp-rail-card bp-rail-card--spec${i > 3 ? " is-orange" : ""}`} target="_blank" rel="noopener noreferrer">
                 <span class="bp-mono bp-rail-fignum">fig.G{i + 1} — {g.slug}</span>
@@ -524,12 +530,16 @@ const homepageSchema = {
                 <dl class="bp-rail-specs bp-mono">
                   <div class="bp-rail-spec-row"><dt>TYPE</dt><dd>{g.tags[0]}</dd></div>
                   <div class="bp-rail-spec-row"><dt>STATUS</dt><dd>{g.beta ? "BETA" : "LIVE"}</dd></div>
+                  <div class="bp-rail-spec-row"><dt>PLAYS</dt><dd>{p ? p.value : "NEW"}</dd></div>
                   <div class="bp-rail-spec-row"><dt>HOST</dt><dd>{g.host.split(".")[0]}.·.com</dd></div>
                 </dl>
               </a>
             ) : variant === "tall" ? (
               <a href={g.href} class="bp-rail-card bp-rail-card--tall" target="_blank" rel="noopener noreferrer">
                 {g.beta && <span class="bp-mono bp-rail-chip">BETA</span>}
+                {p
+                  ? <span class="bp-mono bp-rail-plays">{p.label}</span>
+                  : <span class="bp-mono bp-rail-plays bp-rail-plays--new">New</span>}
                 <span class="bp-rail-tall-fig">
                   <img src={g.image} alt={`${g.title} — ${g.tagline}`} loading="lazy" decoding="async" />
                 </span>
@@ -545,6 +555,9 @@ const homepageSchema = {
               </a>
             ) : (
               <a href={g.href} class="bp-rail-card bp-rail-card--photo" target="_blank" rel="noopener noreferrer">
+                {p
+                  ? <span class="bp-mono bp-rail-plays">{p.label}</span>
+                  : <span class="bp-mono bp-rail-plays bp-rail-plays--new">New</span>}
                 <img src={g.image} alt={`${g.title} — ${g.tagline}`} loading="lazy" decoding="async" />
                 <span class="bp-rail-tb">
                   <span class="bp-mono bp-rail-fignum">fig.G{i + 1}</span>
@@ -1418,6 +1431,7 @@ const homepageSchema = {
   .bp-rail-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent); }
   /* Photo plates — image fills, a drawing title-block strip sits at the foot. */
   .bp-rail-card--photo {
+    position: relative;
     display: flex;
     flex-direction: column;
     width: clamp(280px, 24vw, 360px);
@@ -1473,6 +1487,21 @@ const homepageSchema = {
     white-space: nowrap;
   }
   .bp-rail-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
+  /* Play-count pill overlaid top-right on the media plates (tall + photo); the
+     spec plate carries the count as a PLAYS spec row instead. Real count once a
+     game clears the floor, else a "New" tag (see services/games.ts). */
+  .bp-rail-plays {
+    position: absolute; top: 14px; right: 14px; z-index: 1;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 9px; border-radius: 8px;
+    background: rgba(10, 14, 20, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    font-size: 10px; letter-spacing: 0.06em; color: #fff; white-space: nowrap;
+  }
+  .bp-rail-plays::before { content: "▷"; font-size: 8px; color: var(--bp-acc); }
+  .bp-rail-plays--new { color: rgba(255, 255, 255, 0.82); }
+  .bp-rail-plays--new::before { content: none; }
   .bp-rail-tb {
     display: flex;
     align-items: center;
