@@ -24,7 +24,7 @@ export const en: Record<string, string> = {
 
   // cookie banner (Layout.astro)
   'cookie.title': 'Cookie Settings',
-  'cookie.body': 'Luci Studio uses local storage for required features like theme, likes, login, and chat history.',
+  'cookie.body': 'Luci Studio uses local storage for required features like theme, likes, and login.',
   'cookie.privacy': 'Privacy',
   'cookie.terms': 'Terms',
   'cookie.reject': 'Reject optional',

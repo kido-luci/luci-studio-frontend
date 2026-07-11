@@ -7,12 +7,12 @@ const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
 const SITE_URL = 'https://luci-studio.com';
-const lastUpdated = 'June 23, 2026';
+const lastUpdated = 'July 11, 2026';
 ---
 
 <Layout
   title="Privacy Policy | Luci Studio"
-  description="Privacy Policy for Luci Studio, including local storage, comments, AI chat, and Google login."
+  description="Privacy Policy for Luci Studio, including local storage, comments, and Google login."
   canonical={`${SITE_URL}/privacy/`}
   keywords="Luci Studio privacy, privacy policy, local storage, Google login"
   ogImage={`${SITE_URL}/images/og/privacy.png`}
@@ -38,7 +38,7 @@ const lastUpdated = 'June 23, 2026';
         <section>
           <h2>Overview</h2>
           <p>
-            Luci Studio is a creative engineering space. This policy explains how the site handles information from visitors, commenters, AI chat users, and Google sign-in users.
+            Luci Studio is a creative engineering space. This policy explains how the site handles information from visitors, commenters, and Google sign-in users.
           </p>
           <p>
             This policy is provided for general information and is not legal advice.
@@ -48,21 +48,21 @@ const lastUpdated = 'June 23, 2026';
         <section>
           <h2>Information You Provide</h2>
           <p>
-            If you comment, contact Luci Studio by email, use Google login, or send messages to the AI chat, the site may process the information needed to provide those features. This can include your comment text, display identity from Google, email address if provided, and chat messages.
+            If you comment, contact Luci Studio by email, or use Google login, the site may process the information needed to provide those features. This can include your comment text, display identity from Google, and email address if provided.
           </p>
         </section>
 
         <section>
           <h2>Local Storage and Required Features</h2>
           <p>
-            The site uses browser local storage for required and user-requested features, including theme preference, liked posts, viewed-post or session markers, Google OAuth user token, chat history, and chat configuration.
+            The site uses browser local storage for required and user-requested features, including theme preference, liked and saved posts, viewed-post or session markers, and the Google OAuth user token.
           </p>
         </section>
 
         <section>
           <h2>Third-Party Services and Media</h2>
           <p>
-            Pages may load content or services from third parties, including Google login, hosted images and media, fonts, and CDNs. These providers may receive technical information such as IP address, browser details, referrer, and requested URLs.
+            Pages may load content or services from third parties, including Google login, hosted images and media, fonts, and CDNs. These providers may receive technical information such as IP address, browser details, referrer, and requested URLs. The site also uses privacy-focused, cookieless analytics (Cloudflare Web Analytics) to measure aggregate traffic, and error monitoring (Sentry) that may receive technical details about your browser when an error occurs.
           </p>
         </section>
 
