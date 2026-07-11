@@ -7,7 +7,7 @@ import "../../styles/lab-cards.css";
 // as ToolsPage). The catalog lives in src/data/games.ts (shared with the
 // homepage GAMES REGISTER rail) — add entries there to grow the grid.
 import { GAMES } from "../../data/games";
-import { getPlayCounts } from "../../services/games";
+import { getPlayCounts, playsFor } from "../../services/games";
 
 const totalGames: number = GAMES.length;
 const featured = GAMES[0];
@@ -15,14 +15,9 @@ const rest = GAMES.slice(1);
 
 // Real per-game play counts, baked in at build time (see services/games.ts).
 const plays = await getPlayCounts();
-const PLAY_FLOOR = 25; // below this a card shows "New" instead of a tiny count
-const numberFmt = new Intl.NumberFormat("en-US");
-// A formatted count once a game clears the floor, else null → the slot reads
+// Formatted "N plays" once a game clears the floor, else null → the slot reads
 // "New" so a cold-start beta never advertises "0 plays".
-const playsLabel = (slug: string): string | null => {
-  const n = plays[slug];
-  return typeof n === "number" && n >= PLAY_FLOOR ? `${numberFmt.format(n)} plays` : null;
-};
+const playsLabel = (slug: string): string | null => playsFor(plays, slug)?.label ?? null;
 ---
 
 <Layout
