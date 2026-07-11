@@ -7,10 +7,17 @@ import "../../styles/lab-cards.css";
 // as ToolsPage). The catalog lives in src/data/games.ts (shared with the
 // homepage GAMES REGISTER rail) — add entries there to grow the grid.
 import { GAMES } from "../../data/games";
+import { getPlayCounts, playsFor } from "../../services/games";
 
 const totalGames: number = GAMES.length;
 const featured = GAMES[0];
 const rest = GAMES.slice(1);
+
+// Real per-game play counts, baked in at build time (see services/games.ts).
+const plays = await getPlayCounts();
+// Formatted "N plays" once a game clears the floor, else null → the slot reads
+// "New" so a cold-start beta never advertises "0 plays".
+const playsLabel = (slug: string): string | null => playsFor(plays, slug)?.label ?? null;
 ---
 
 <Layout
@@ -80,7 +87,12 @@ const rest = GAMES.slice(1);
             {featured.tags.map((tag) => (<span class="bp-mono game-tag">{tag}</span>))}
           </div>
           <span class="bp-mono game-feature-cta">Play now ↗</span>
-          <span class="bp-mono game-feature-host"><span class="game-feature-dot"></span>{featured.host}</span>
+          <div class="game-feature-meta">
+            <span class="bp-mono game-feature-host"><span class="game-feature-dot"></span>{featured.host}</span>
+            {playsLabel(featured.slug)
+              ? <span class="bp-mono game-plays">{playsLabel(featured.slug)}</span>
+              : <span class="bp-mono game-new">New</span>}
+          </div>
         </div>
       </a>
 
@@ -101,6 +113,9 @@ const rest = GAMES.slice(1);
                 <div class="game-card-body">
                   <div class="bp-display game-card-title">{game.title}</div>
                   <div class="game-card-desc">{game.blurb}</div>
+                  {playsLabel(game.slug)
+                    ? <span class="bp-mono game-plays">{playsLabel(game.slug)}</span>
+                    : <span class="bp-mono game-new">New</span>}
                 </div>
                 <div class="bp-mono game-card-footer">
                   <span class="game-card-host"><span class="game-card-dot"></span>{game.host}</span>
@@ -320,8 +335,22 @@ const rest = GAMES.slice(1);
     transition: opacity 0.2s;
   }
   .game-feature:hover .game-feature-cta { opacity: 0.88; }
-  .game-feature-host { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-muted); }
+  .game-feature-meta { margin-top: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .game-feature-host { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-muted); }
   .game-feature-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); }
+
+  /* Play-count stat (real, baked in at build) / "New" fallback below the floor.
+     Shared by the featured meta row and the grid card bodies. */
+  .game-plays { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-muted); }
+  .game-plays::before { content: "▷"; font-size: 9px; color: var(--bp-acc); }
+  .game-new {
+    display: inline-flex; align-items: center;
+    padding: 3px 9px; border-radius: 5px;
+    border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent);
+    font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--bp-acc);
+  }
+  .game-card-body .game-plays, .game-card-body .game-new { margin-top: 14px; }
 
   @media (max-width: 760px) {
     .game-feature { grid-template-columns: 1fr; }
