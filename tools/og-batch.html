@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Per-page OG images — luci-studio blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* CSS is the proven blueprint sheet from tools/cover.html — kept in sync with it.
+     This file renders ONE card per landing page, selected via ?key=<page>, and is
+     screenshotted at 1200x630 by tools/og-gen.mjs into public/images/og/. */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --blue:   #1b56ff;   /* luci-studio blueprint blue  */
+    --orange: #f2542d;   /* luci-studio vermilion        */
+    --orange-ink: #d8431f;/* darker orange for small text */
+    --paper:  #efeee8;   /* warm drafting-sheet cream    */
+    --ink:    #101a29;   /* near-black navy — headlines  */
+    --ink-soft: #545c6a; /* body/secondary text          */
+    --ink-faint:#9aa1ac; /* mono annotations             */
+    --line:   rgba(16,26,41,0.08);  /* grid + rules      */
+  }
+
+  html, body { background: var(--paper); }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+  }
+
+  /* Screenshot THIS element at 1200x630 for an OG image. Inner sizes use cqw
+     (1cqw = 1% card width) so it stays pixel-proportional. */
+  .card {
+    container-type: inline-size;
+    width: 1200px;
+    height: 630px;
+    flex-shrink: 0;      /* never let a narrow window shrink the card — keeps screenshots exactly 1200x630 */
+    position: relative;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  /* drafting grid */
+  .card::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--line) 0.1cqw, transparent 0.1cqw),
+      linear-gradient(90deg, var(--line) 0.1cqw, transparent 0.1cqw);
+    background-size: 3.2cqw 3.2cqw;
+  }
+  /* sheet frame */
+  .card::after {
+    content: "";
+    position: absolute; inset: 2.3cqw;
+    border: 0.1cqw solid rgba(16,26,41,0.14);
+    pointer-events: none;
+  }
+
+  /* corner registration ticks */
+  .tick { position: absolute; width: 2.2cqw; height: 2.2cqw; z-index: 3; }
+  .tick::before, .tick::after { content: ""; position: absolute; background: var(--blue); }
+  .tick::before { width: 100%; height: 0.14cqw; top: 0; }
+  .tick::after  { height: 100%; width: 0.14cqw; left: 0; }
+  .tick.tl { top: 2.9cqw; left: 2.9cqw; }
+  .tick.tr { top: 2.9cqw; right: 2.9cqw; transform: scaleX(-1); }
+  .tick.bl { bottom: 2.9cqw; left: 2.9cqw; transform: scaleY(-1); }
+  .tick.br { bottom: 2.9cqw; right: 2.9cqw; transform: scale(-1); }
+
+  .inner {
+    position: relative; z-index: 2;
+    height: 100%;
+    padding: 5.6cqw 6.4cqw;
+    display: grid;
+    grid-template-columns: 1.12fr 0.88fr;
+    gap: 3.6cqw;
+    align-items: center;
+  }
+  /* title-led layout: single centered column, no figure */
+  .card[data-layout="title"] .inner {
+    grid-template-columns: 1fr;
+    padding: 5.6cqw 8cqw;
+  }
+  .card[data-layout="title"] .right { display: none; }
+  .card[data-layout="title"] .left { gap: 2.2cqw; max-width: 88cqw; }
+  /* title-led covers get more room — bump the default size (cfg.titleSize still wins) */
+  .card[data-layout="title"] .title { font-size: 8.4cqw; }
+
+  /* ---------- left column ---------- */
+  .left { display: flex; flex-direction: column; gap: 1.8cqw; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.5cqw; font-weight: 600; letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--blue);
+    display: flex; align-items: center; gap: 0.9cqw;
+  }
+  .eyebrow .sq { width: 1.15cqw; height: 1.15cqw; background: var(--orange); }
+  .eyebrow .sep { color: var(--ink-faint); }
+  .eyebrow .coord { color: var(--ink-faint); }
+
+  /* Sentence-case title — matches the blog's Space Grotesk 700 header convention.
+     cfg.titleSize overrides for long titles. */
+  .title {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 7cqw;
+    line-height: 0.95;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .title .tdot { color: var(--blue); }
+
+  .subtitle {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 2cqw; font-weight: 500; line-height: 1.3;
+    color: var(--ink-soft);
+    max-width: 46cqw;
+    text-wrap: balance;
+  }
+  .card[data-layout="title"] .subtitle { max-width: 64cqw; }
+
+  /* dimension rule under the title block */
+  .dimline {
+    display: flex; align-items: center; gap: 1cqw;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.4cqw; font-weight: 500; letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    margin-top: 0.2cqw;
+  }
+  .dimline .cap { width: 0.12cqw; height: 1.9cqw; background: rgba(16,26,41,0.28); flex-shrink: 0; }
+  .dimline .rule { flex: 1; height: 0.12cqw; background: rgba(16,26,41,0.18); }
+
+  .meta { display: flex; align-items: center; gap: 2.2cqw; margin-top: 0.4cqw; flex-wrap: wrap; }
+  .m {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.7cqw; font-weight: 600; letter-spacing: 0.03em;
+    display: inline-flex; align-items: center; gap: 0.6cqw;
+  }
+  .m-tag { color: var(--ink); padding-bottom: 0.2cqw; }
+  .m-tag.t0 { border-bottom: 0.2cqw solid var(--blue); }
+  .m-tag.t1 { color: var(--orange-ink); border-bottom: 0.2cqw solid var(--orange); }
+  .m-tag .mark { color: var(--blue); }
+  .m-tag.t1 .mark { color: var(--orange); }
+
+  /* ---------- right column: drafting schematic ---------- */
+  .right { position: relative; }
+  .schematic {
+    position: relative;
+    border: 0.12cqw solid rgba(16,26,41,0.20);
+    padding: 3cqw 2.6cqw 2.4cqw;
+    background: rgba(255,255,255,0.35);
+  }
+  .fig {
+    position: absolute; top: -1cqw; left: 1.5cqw;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.3cqw; font-weight: 600; letter-spacing: 0.12em;
+    color: var(--blue); background: var(--paper); padding: 0 0.8cqw;
+  }
+  .nlabel {
+    position: absolute; top: -1cqw; right: 1.5cqw;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.3cqw; font-weight: 600; letter-spacing: 0.06em;
+    color: var(--ink-faint); background: var(--paper); padding: 0 0.8cqw;
+  }
+  .sch-cap {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.45cqw; color: var(--ink-soft); margin-bottom: 1.6cqw; letter-spacing: 0.02em;
+  }
+  .sch-cap b { color: var(--orange-ink); font-weight: 700; }
+
+  .figbox { width: 100%; }
+  .figbox svg { display: block; width: 100%; height: auto; }
+  .figbox svg text {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    fill: var(--ink-soft);
+  }
+  .fig-stroke  { stroke: var(--blue); }
+  .fig-accent  { stroke: var(--orange); }
+  .fig-fill    { fill: rgba(255,255,255,0.9); }
+  .fig-fillb   { fill: rgba(27,86,255,0.08); }
+  .fig-filla   { fill: rgba(242,84,45,0.10); }
+
+  .sch-note {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.3cqw; color: var(--ink-faint); letter-spacing: 0.03em;
+    margin-top: 1.6cqw; display: flex; align-items: center; gap: 0.8cqw;
+  }
+  .sch-note::before { content: "▸"; color: var(--blue); }
+
+  /* ---------- brand lockup (real logo asset, embedded as data URI) ---------- */
+  .brand {
+    position: absolute; z-index: 3;
+    right: 4.2cqw; bottom: 3.1cqw;
+    display: flex; align-items: center; gap: 1cqw;
+    white-space: nowrap;
+  }
+  .brand .mark { width: 2.9cqw; height: 2.9cqw; border-radius: 0.7cqw; display: block; }
+  .brand .wm {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.7cqw; font-weight: 700; letter-spacing: 0.005em;
+    color: var(--ink);
+  }
+  .brand .wm::after { content: "."; color: var(--blue); }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <span class="tick tl"></span><span class="tick tr"></span>
+    <span class="tick bl"></span><span class="tick br"></span>
+
+    <div class="inner">
+      <div class="left">
+        <div class="eyebrow">
+          <span class="sq"></span>
+          <span id="category">Studio</span>
+          <span class="sep">·</span><span class="coord" id="coord">N 10°49'</span>
+        </div>
+
+        <h1 class="title"><span id="title">Page title</span><span class="tdot">.</span></h1>
+
+        <p class="subtitle" id="subtitle">Subtitle</p>
+
+        <div class="dimline">
+          <span class="cap"></span>
+          <span class="rule"></span>
+        </div>
+
+        <div class="meta" id="meta"></div>
+      </div>
+
+      <div class="right">
+        <div class="schematic">
+          <span class="fig" id="fig">FIG.01</span>
+          <span class="nlabel" id="nlabel"></span>
+          <div class="sch-cap" id="schCap"></div>
+          <div class="figbox" id="figbox"></div>
+          <div class="sch-note" id="note"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand"><img class="mark" src="data:image/png;base64,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" alt="Luci Studio" /><span class="wm" id="brandText">luci studio</span></div>
+  </div>
+
+<script>
+  /* =======================================================================
+     One entry per blog landing page. og-gen.mjs opens this file with
+     ?key=<name> and screenshots the .card at 1200x630 into public/images/og/.
+     Copy here is the OG card copy — edit freely, then re-run og-gen.mjs.
+     ======================================================================= */
+  const PAGES = {
+    home: {
+      layout: "figure", category: "Studio",
+      title: "Creative engineering",
+      subtitle: "Tech blog, digital art & cross-platform apps.",
+      figure: "nodes", figLabel: "FIG.01 — STUDIO",
+      figCorner: "index", figCaption: "engineering · art · apps",
+      figNote: "one-person studio",
+    },
+    blog: {
+      layout: "figure", category: "Journal",
+      title: "Blog",
+      subtitle: "Notes on engineering, tools & shipping on the edge.",
+      figure: "stack", figLabel: "FIG.02 — INDEX",
+      figCorner: "posts", figCaption: "posts · series · tags",
+      figNote: "updated continuously",
+    },
+    lab: {
+      layout: "figure", category: "Experiments",
+      title: "Lab",
+      subtitle: "Live prototypes, demos & interactive toys.",
+      figure: "grid", figLabel: "FIG.03 — BENCH",
+      figCorner: "wip", figCaption: "prototypes · demos",
+      figNote: "interactive · live",
+    },
+    games: {
+      layout: "figure", category: "Arcade",
+      title: "Games",
+      subtitle: "Browser games built in TypeScript & PixiJS.",
+      figure: "grid", figLabel: "FIG.04 — ARCADE",
+      figCorner: "play", figCaption: "canvas · webgl",
+      figNote: "play in the browser",
+    },
+    videos: {
+      layout: "figure", category: "Screening room",
+      title: "Videos",
+      subtitle: "Devlogs, walkthroughs & build sessions.",
+      figure: "nodes", figLabel: "FIG.05 — REEL",
+      figCorner: "watch", figCaption: "devlogs · walkthroughs",
+      figNote: "on youtube",
+    },
+    portfolio: {
+      layout: "figure", category: "Portfolio",
+      title: "Portfolio",
+      subtitle: "Selected work — apps, tools & systems.",
+      figure: "stack", figLabel: "FIG.06 — WORK",
+      figCorner: "case", figCaption: "apps · tools · systems",
+      figNote: "selected projects",
+    },
+    series: {
+      layout: "figure", category: "Collections",
+      title: "Series",
+      subtitle: "Multi-part guides & deep-dive collections.",
+      figure: "stack", figLabel: "FIG.07 — SET",
+      figCorner: "guides", figCaption: "multi-part guides",
+      figNote: "deep dives",
+    },
+    license: {
+      layout: "title", category: "Legal",
+      title: "License",
+      subtitle: "Usage terms for the content & code on Luci Studio.",
+    },
+    privacy: {
+      layout: "title", category: "Legal",
+      title: "Privacy",
+      subtitle: "How your data is handled on Luci Studio.",
+    },
+    terms: {
+      layout: "title", category: "Legal",
+      title: "Terms of use",
+      subtitle: "The terms for using Luci Studio.",
+    },
+    "og-default": {
+      layout: "figure", category: "Luci Studio",
+      title: "Creative engineering",
+      subtitle: "Tech blog, digital art & cross-platform apps.",
+      figure: "nodes", figLabel: "FIG.00 — STUDIO",
+      figCorner: "", figCaption: "engineering · art · apps",
+      figNote: "luci-studio.com",
+    },
+  };
+
+  const DEFAULTS = {
+    coord: "N 10°49'",   // studio geo-tag (kept from the site DNA)
+    brand: "luci studio",
+    titleSize: "",
+  };
+  /* ===================================================================== */
+
+  /* ---- generic blueprint schematics (SVG, palette-driven via CSS classes) ---- */
+  const FIGURES = {
+    // small directed node graph — good for systems, pipelines, algorithms
+    nodes: `
+      <svg viewBox="0 0 220 150" role="img" aria-label="node graph schematic">
+        <g fill="none" stroke-width="1.6" class="fig-stroke">
+          <line x1="42" y1="34" x2="110" y2="75"/>
+          <line x1="42" y1="116" x2="110" y2="75"/>
+          <line x1="110" y1="75" x2="182" y2="40"/>
+          <line class="fig-accent" x1="110" y1="75" x2="182" y2="112"/>
+        </g>
+        <g stroke-width="2.4">
+          <circle cx="42"  cy="34"  r="15" class="fig-stroke fig-fill"/>
+          <circle cx="42"  cy="116" r="15" class="fig-stroke fig-fill"/>
+          <circle cx="110" cy="75"  r="17" class="fig-stroke fig-fillb"/>
+          <circle cx="182" cy="40"  r="15" class="fig-stroke fig-fill"/>
+          <circle cx="182" cy="112" r="15" class="fig-accent fig-filla"/>
+        </g>
+        <g font-size="11" text-anchor="middle" dominant-baseline="central">
+          <text x="42" y="34">a</text><text x="42" y="116">b</text>
+          <text x="110" y="75">c</text><text x="182" y="40">d</text>
+          <text x="182" y="112">e</text>
+        </g>
+      </svg>`,
+    // stacked layers — good for architecture, request flow, tiers
+    stack: `
+      <svg viewBox="0 0 220 150" role="img" aria-label="layered stack schematic">
+        <g stroke-width="2.2">
+          <rect x="30" y="16"  width="160" height="30" rx="4" class="fig-stroke fig-fill"/>
+          <rect x="30" y="58"  width="160" height="30" rx="4" class="fig-stroke fig-fillb"/>
+          <rect x="30" y="100" width="160" height="30" rx="4" class="fig-accent fig-filla"/>
+        </g>
+        <g fill="none" stroke-width="1.4" class="fig-stroke" stroke-dasharray="3 3">
+          <line x1="110" y1="46" x2="110" y2="58"/>
+          <line x1="110" y1="88" x2="110" y2="100"/>
+        </g>
+        <g font-size="11" dominant-baseline="central">
+          <text x="44" y="31">client</text>
+          <text x="44" y="73">api</text>
+          <text x="44" y="115">store</text>
+        </g>
+      </svg>`,
+    // cell grid — good for data, arrays, matrices, tables
+    grid: `
+      <svg viewBox="0 0 220 150" role="img" aria-label="cell grid schematic">
+        <g stroke-width="2.2">
+          <rect x="24"  y="30" width="40" height="40" rx="3" class="fig-stroke fig-fill"/>
+          <rect x="70"  y="30" width="40" height="40" rx="3" class="fig-stroke fig-fillb"/>
+          <rect x="116" y="30" width="40" height="40" rx="3" class="fig-stroke fig-fill"/>
+          <rect x="162" y="30" width="40" height="40" rx="3" class="fig-accent fig-filla"/>
+          <rect x="24"  y="80" width="40" height="40" rx="3" class="fig-stroke fig-fillb"/>
+          <rect x="70"  y="80" width="40" height="40" rx="3" class="fig-stroke fig-fill"/>
+          <rect x="116" y="80" width="40" height="40" rx="3" class="fig-accent fig-filla"/>
+          <rect x="162" y="80" width="40" height="40" rx="3" class="fig-stroke fig-fill"/>
+        </g>
+        <g font-size="10" text-anchor="middle" fill="var(--ink-faint)">
+          <text x="44" y="136">0</text><text x="90" y="136">1</text>
+          <text x="136" y="136">2</text><text x="182" y="136">3</text>
+        </g>
+      </svg>`,
+  };
+
+  function el(id) { return document.getElementById(id); }
+
+  function render(cfg) {
+    const card = el("card");
+    card.setAttribute("data-layout", cfg.layout === "title" ? "title" : "figure");
+
+    el("category").textContent = cfg.category;
+    el("coord").textContent = cfg.coord;
+    el("title").textContent = cfg.title;
+    el("brandText").textContent = cfg.brand;
+
+    const sub = el("subtitle");
+    if (cfg.subtitle) { sub.textContent = cfg.subtitle; sub.style.display = ""; }
+    else sub.style.display = "none";
+
+    if (cfg.titleSize) el("title").parentElement.style.fontSize = cfg.titleSize;
+
+    // landing OG cards carry no read-time/date/tags — meta stays empty
+    el("meta").innerHTML = "";
+
+    // schematic (figure layout only)
+    if (card.getAttribute("data-layout") === "figure") {
+      el("fig").textContent = cfg.figLabel || "FIG.01";
+      const corner = el("nlabel");
+      if (cfg.figCorner) { corner.textContent = cfg.figCorner; corner.style.display = ""; }
+      else corner.style.display = "none";
+
+      const cap = el("schCap");
+      if (cfg.figCaption) { cap.textContent = cfg.figCaption; cap.style.display = ""; }
+      else cap.style.display = "none";
+
+      el("figbox").innerHTML = FIGURES[cfg.figure] || FIGURES.nodes;
+
+      const note = el("note");
+      if (cfg.figNote) { note.textContent = cfg.figNote; note.style.display = ""; }
+      else note.style.display = "none";
+    }
+  }
+
+  const key = new URLSearchParams(location.search).get("key") || "home";
+  const page = PAGES[key];
+  if (!page) {
+    document.body.innerHTML = '<pre style="font:16px monospace;padding:2rem">Unknown ?key=' +
+      key + '. Valid: ' + Object.keys(PAGES).join(", ") + '</pre>';
+  } else {
+    render({ ...DEFAULTS, ...page });
+  }
+  // signal readiness for the screenshot script (fonts settled + card painted)
+  document.fonts.ready.then(() => { document.documentElement.setAttribute("data-og-ready", "1"); });
+</script>
+</body>
+</html>
