@@ -272,6 +272,7 @@
       figure: "stack", figLabel: "FIG.02 — INDEX",
       figCorner: "posts", figCaption: "posts · series · tags",
       figNote: "updated continuously",
+      stackLabels: ["idea", "draft", "post"],
     },
     lab: {
       layout: "figure", category: "Experiments",
@@ -304,6 +305,7 @@
       figure: "stack", figLabel: "FIG.06 — WORK",
       figCorner: "case", figCaption: "apps · tools · systems",
       figNote: "selected projects",
+      stackLabels: ["app", "tool", "system"],
     },
     series: {
       layout: "figure", category: "Collections",
@@ -312,6 +314,7 @@
       figure: "stack", figLabel: "FIG.07 — SET",
       figCorner: "guides", figCaption: "multi-part guides",
       figNote: "deep dives",
+      stackLabels: ["01", "02", "03"],
     },
     license: {
       layout: "title", category: "Legal",
@@ -369,8 +372,12 @@
           <text x="182" y="112">e</text>
         </g>
       </svg>`,
-    // stacked layers — good for architecture, request flow, tiers
-    stack: `
+    // stacked layers — good for architecture, request flow, tiers.
+    // Labels are per-page (cfg.stackLabels) so the three stack cards read
+    // distinctly; falls back to the generic client/api/store tiers.
+    stack: (labels) => {
+      const [a, b, c] = labels && labels.length === 3 ? labels : ["client", "api", "store"];
+      return `
       <svg viewBox="0 0 220 150" role="img" aria-label="layered stack schematic">
         <g stroke-width="2.2">
           <rect x="30" y="16"  width="160" height="30" rx="4" class="fig-stroke fig-fill"/>
@@ -382,11 +389,12 @@
           <line x1="110" y1="88" x2="110" y2="100"/>
         </g>
         <g font-size="11" dominant-baseline="central">
-          <text x="44" y="31">client</text>
-          <text x="44" y="73">api</text>
-          <text x="44" y="115">store</text>
+          <text x="44" y="31">${a}</text>
+          <text x="44" y="73">${b}</text>
+          <text x="44" y="115">${c}</text>
         </g>
-      </svg>`,
+      </svg>`;
+    },
     // cell grid — good for data, arrays, matrices, tables
     grid: `
       <svg viewBox="0 0 220 150" role="img" aria-label="cell grid schematic">
@@ -438,7 +446,8 @@
       if (cfg.figCaption) { cap.textContent = cfg.figCaption; cap.style.display = ""; }
       else cap.style.display = "none";
 
-      el("figbox").innerHTML = FIGURES[cfg.figure] || FIGURES.nodes;
+      const fig = FIGURES[cfg.figure] || FIGURES.nodes;
+      el("figbox").innerHTML = typeof fig === "function" ? fig(cfg.stackLabels) : fig;
 
       const note = el("note");
       if (cfg.figNote) { note.textContent = cfg.figNote; note.style.display = ""; }
