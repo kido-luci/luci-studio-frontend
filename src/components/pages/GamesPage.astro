@@ -12,6 +12,12 @@ import { getPlayCounts, playsFor } from "../../services/games";
 const totalGames: number = GAMES.length;
 const featured = GAMES[0];
 const rest = GAMES.slice(1);
+// Two shelves below the featured hero, driven by each game's `beta` flag:
+// stable releases first, then the beta lab. A shelf hides itself when empty.
+const sections = [
+  { label: "AVAILABLE", heading: "Available games", note: null, items: rest.filter((g) => !g.beta) },
+  { label: "BETA", heading: "Beta games", note: "Fully playable and live — still being tuned and iterated.", items: rest.filter((g) => g.beta) },
+].filter((s) => s.items.length > 0);
 
 // Real per-game play counts, baked in at build time (see services/games.ts).
 const plays = await getPlayCounts();
@@ -100,18 +106,19 @@ const playsLabel = (slug: string): string | null => playsFor(plays, slug)?.label
         </div>
       </a>
 
-      <!-- more games (grid grows as games are added) -->
-      {rest.length > 0 && (
+      <!-- game shelves: AVAILABLE (stable) then BETA (grids grow as games are added) -->
+      {sections.map((sec) => (
         <section class="bp-games-more">
           <div class="bp-sec-head" data-reveal>
             <span class="bp-dot" aria-hidden="true"></span>
-            <span class="bp-mono bp-sec-label">MORE</span>
+            <span class="bp-mono bp-sec-label">{sec.label}</span>
             <span class="bp-rule" aria-hidden="true"></span>
-            <span class="bp-mono bp-sec-count">{String(rest.length).padStart(2, "0")} MORE</span>
+            <span class="bp-mono bp-sec-count">{String(sec.items.length).padStart(2, "0")} {sec.items.length === 1 ? "GAME" : "GAMES"}</span>
           </div>
-          <h2 class="bp-display bp-games-h2" data-reveal>More games<span class="bp-acc-dot">.</span></h2>
+          <h2 class="bp-display bp-games-h2" data-reveal>{sec.heading}<span class="bp-acc-dot">.</span></h2>
+          {sec.note && <p class="bp-games-secnote">{sec.note}</p>}
           <div class="bp-games-grid">
-            {rest.map((game) => (
+            {sec.items.map((game) => (
               <a href={game.href} target="_blank" rel="noopener noreferrer" class="game-card">
                 <div class="game-card-media">{game.beta && <span class="game-beta bp-mono">Beta</span>}<img src={game.image} alt={`${game.title} — ${game.tagline}`} loading="lazy" width="1200" height="630" /></div>
                 <div class="game-card-body">
@@ -129,7 +136,7 @@ const playsLabel = (slug: string): string | null => playsFor(plays, slug)?.label
             ))}
           </div>
         </section>
-      )}
+      ))}
 
     </div>
 
@@ -258,7 +265,10 @@ const playsLabel = (slug: string): string | null => playsFor(plays, slug)?.label
   .bp-games-sub { margin: 1.4rem 0 0; max-width: 34rem; font-size: 1.05rem; line-height: 1.6; color: var(--bp-muted); }
   .bp-games-more { padding-top: clamp(56px, 9vw, 96px); }
   .bp-games-h2 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.0; margin: clamp(14px, 2vw, 20px) 0 0; }
-  .bp-games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 22px; margin-top: clamp(28px, 4vw, 40px); }
+  .bp-games-secnote { margin: 1rem 0 0; max-width: 34rem; font-size: 0.95rem; line-height: 1.6; color: var(--bp-muted); }
+  /* auto-fill (not auto-fit) so a sparse shelf keeps card-sized tracks instead
+     of stretching one card across the full row. */
+  .bp-games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 22px; margin-top: clamp(28px, 4vw, 40px); }
 
   /* ── Featured game — blueprint panel (media left, body right) ── */
   .game-feature {
