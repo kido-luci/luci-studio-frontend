@@ -55,6 +55,11 @@ const RAIL_LAYOUT: ReadonlyArray<"tall" | "sm" | "spec"> = [
   "sm",   // G9 orbfall (pairs with the closing All-games plate)
 ];
 
+// The home rail is a preview of the catalog — cap it at the first 12 games; the
+// full list lives on /games (linked via the "ALL GAMES →" more-link and the
+// closing all-games card). RAIL_LAYOUT still pairs index i with RAIL_GAMES[i].
+const RAIL_GAMES = GAMES.slice(0, 12);
+
 // Real per-game play counts, baked in at build time (shared with /games via the
 // module-cached fetch in services/games.ts). Rendered on each rail card below.
 const plays = await getPlayCounts();
@@ -497,7 +502,7 @@ const homepageSchema = {
           <span class="bp-dot" aria-hidden="true"></span>
           <span class="bp-mono bp-sec-label">ANNEX A — GAMES REGISTER</span>
           <span class="bp-rule" aria-hidden="true"></span>
-          <span class="bp-mono bp-sec-count">{String(GAMES.length).padStart(2, "0")} GAMES</span>
+          <span class="bp-mono bp-sec-count">{String(RAIL_GAMES.length).padStart(2, "0")} GAMES</span>
         </div>
         <div class="bp-sec-title-row" data-reveal>
           <h2 class="bp-display bp-h2" data-ml9>Play something.</h2>
@@ -523,7 +528,7 @@ const homepageSchema = {
       </div>
       <div class="bp-rail-viewport">
         <div class="bp-rail-track">
-          {GAMES.map((g, i) => {
+          {RAIL_GAMES.map((g, i) => {
             const variant = RAIL_LAYOUT[i] ?? "sm";
             const p = playsFor(plays, g.slug);
             return variant === "spec" ? (
