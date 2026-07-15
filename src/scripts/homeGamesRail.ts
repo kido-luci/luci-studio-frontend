@@ -37,30 +37,34 @@ function initRail(opts: RailOpts) {
 		const SCROLL_RATIO = opts.scrollRatio ?? 2;
 		const dist = () => Math.max(0, track.scrollWidth - viewport.clientWidth);
 
+		// Pre-warm the plate covers one viewport before the rail enters. The track
+		// is a horizontal scroller in BOTH modes (native overflow-x swipe on mobile /
+		// reduced-motion, GSAP-scrubbed transform when pinned on desktop), and lazy
+		// <img>s don't reliably load off a sideways scroll/translate — so flip them to
+		// eager here, once, regardless of the pin branch below. Keeps the initial page
+		// load light but the whole rail painted once it's near. (Runs on every viewport
+		// and under reduced motion — eager-loading isn't motion.)
+		ScrollTrigger.create({
+			trigger: section,
+			start: 'top 160%',
+			once: true,
+			onEnter: () => {
+				section.querySelectorAll('img[loading="lazy"]').forEach((img) => {
+					(img as HTMLImageElement).loading = 'eager';
+				});
+			},
+		});
+
 		// Pin + scrub only while the desktop query matches. gsap.matchMedia sets the
 		// whole context up when you cross above 901px and tears it down when you drop
 		// below — reverting the pin/track transform and (via the cleanup) dropping
 		// .is-pinned — so dragging the window across the breakpoint flips cleanly
-		// between the pinned rail and the mobile vertical list instead of stranding a
+		// between the pinned rail and the native swipe strip instead of stranding a
 		// half-pinned track. Below 901px / reduced-motion the context never runs, so
-		// the section keeps its default CSS vertical list.
+		// the section keeps its default CSS overflow-x swipe strip.
 		const mm = gsap.matchMedia();
 		mm.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
 			section.classList.add('is-pinned');
-			// Pre-warm the plate images one viewport before the rail pins: lazy images
-			// inside a horizontally-scrubbed track otherwise never load (native lazy
-			// only fires on vertical scroll). Flipping to eager here keeps the initial
-			// page load light but the scrub fully painted.
-			ScrollTrigger.create({
-				trigger: section,
-				start: 'top 160%',
-				once: true,
-				onEnter: () => {
-					section.querySelectorAll('img[loading="lazy"]').forEach((img) => {
-						(img as HTMLImageElement).loading = 'eager';
-					});
-				},
-			});
 			gsap.to(track, {
 				x: () => -dist(),
 				ease: 'none',
