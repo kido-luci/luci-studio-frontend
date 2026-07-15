@@ -1636,31 +1636,18 @@ const homepageSchema = {
   .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
   .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-muted); white-space: nowrap; }
 
-  /* ── §03 WRITING — scroll-jacked rail of cover cards (pin + scrub like the
-     games rail; homeBlogRail). Default layout is a vertical card list: the
-     fallback for mobile / reduced-motion / no-JS, where native lazy loads the
-     covers fine on vertical scroll. The pinned state (desktop) re-lays the cards
-     into a horizontal scrub track (its off-screen covers are eager-warmed by the
-     rail engine). ── */
-  /* The cards themselves are the shared <PostCard variant="blueprint"> — the same
-     card as /blog (own scoped styles). This track only lays them out: a vertical
-     list by default (mobile / reduced-motion / no-JS fallback), re-flowed into a
-     horizontal scrub row when the rail pins on desktop. */
+  /* ── §03 WRITING — horizontal rail of cover cards (pin + scrub like the games
+     rail; homeBlogRail). The 2-row bento plate layout is the DEFAULT and scrolls
+     natively (overflow-x swipe) on mobile / reduced-motion / no-JS; on desktop
+     the rail engine pins the section and GSAP-scrubs the track sideways instead
+     (its off-screen covers are eager-warmed by the rail engine). Post cards are
+     full-height plates (grid-row: span 2), the featured series cards are half-
+     height plates (span 1) that pair two-per-column at the end. ── */
+  /* The cards themselves are the shared <PostCard/SeriesCard variant="blueprint">
+     — the same cards as /blog (own scoped styles). This track only lays them out
+     into the plate bento; the pinned block below just swaps native scroll for the
+     GSAP scrub. Cards are child components, so their roots need :global. */
   .bp-write-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 clamp(20px, 5vw, 48px);
-  }
-  /* Pinned rail (desktop): the viewport clips (shared .bp-rail-sec.is-pinned
-     rule) and homeBlogRail slides this track sideways. The mobile vertical list
-     re-flows into the SAME 2-row column-flow bento as the games register: post
-     cards are full-height plates (grid-row: span 2), the featured series cards
-     are half-height plates (span 1) that pair two-per-column at the end. Cards
-     are child components, so their roots need :global to be reachable. */
-  .bp-blog-rail.is-pinned .bp-write-cards {
     display: grid;
     grid-auto-flow: column;
     grid-template-rows: repeat(2, minmax(0, 1fr));
@@ -1668,14 +1655,25 @@ const homepageSchema = {
     gap: 18px;
     height: var(--rail-h);
     box-sizing: content-box;
-    width: max-content;
-    max-width: none;
     margin: 0;
     padding: 26px clamp(20px, 5vw, 48px) 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
   }
-  .bp-blog-rail.is-pinned .bp-write-cards > :global(.tb-card-link) {
+  /* Pinned rail (desktop, JS-added): the viewport clips (shared .bp-rail-sec
+     .is-pinned rule) and homeBlogRail slides this track sideways, so the track
+     stops native-scrolling and grows to its full content width. */
+  .bp-blog-rail.is-pinned .bp-write-cards {
+    overflow: visible;
+    width: max-content;
+    scroll-snap-type: none;
+  }
+  .bp-blog-rail .bp-write-cards > :global(.tb-card-link) {
     grid-row: span 2;
     width: clamp(300px, 24vw, 360px);
+    scroll-snap-align: start;
   }
   /* Post plates keep the blueprint's landscape cover (16/10) rather than filling
      the plate with a tall portrait crop. The blog rail runs a shorter --rail-h
@@ -1685,7 +1683,7 @@ const homepageSchema = {
   .bp-rail-sec.bp-blog-rail { --rail-h: clamp(470px, 52vh, 560px); }
   /* Series plates — half-height (span 1), compact vertical form: cover fills the
      top, meta/title/tags below, so a pair stacks flush in one column. */
-  .bp-blog-rail.is-pinned .bp-write-cards > :global(.bpc) {
+  .bp-blog-rail .bp-write-cards > :global(.bpc) {
     grid-row: span 1;
     width: clamp(300px, 24vw, 360px);
     height: 100%;
@@ -1694,6 +1692,7 @@ const homepageSchema = {
     gap: 0;
     padding: 0;
     overflow: hidden;
+    scroll-snap-align: start;
     /* Fill with the active scheme accent (shows behind the body, under the
        full-bleed cover). Body text flips to --accent-ink below to stay legible. */
     background: rgb(var(--accent-rgb));
@@ -1702,38 +1701,34 @@ const homepageSchema = {
   /* Full-bleed cover: the fig fills the top of the card edge-to-edge (no inset,
      no own border); the card's overflow:hidden + radius clips its corners. The
      body carries its own padding since the card padding is now 0. */
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-fig) { min-height: 0; height: 100%; border: none; border-radius: 0; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-fig) { min-height: 0; height: 100%; border: none; border-radius: 0; }
   /* No dark gradient scrim over the cover in the rail — show the image clean. */
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-fig)::after { display: none; }
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-body) { padding: 0.55rem 12px 12px; justify-content: flex-start; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-fig)::after { display: none; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-body) { padding: 0.55rem 12px 12px; justify-content: flex-start; }
   /* On the accent fill, flip the body text/border to the on-accent ink colour. */
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-title),
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-meta),
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-meta-kicker),
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-stat),
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-tag) { color: var(--accent-ink, #fff); }
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-sep) { color: color-mix(in srgb, var(--accent-ink, #fff) 55%, transparent); }
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-tag) { border-color: color-mix(in srgb, var(--accent-ink, #fff) 45%, transparent); }
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-desc),
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-arrow) { display: none; }
-  /* Hide the "read the series" CTA on the §03 series cards (desktop bento + the
-     mobile stack) — the whole card is already the link. */
+  .bp-blog-rail .bp-write-cards :global(.bpc-title),
+  .bp-blog-rail .bp-write-cards :global(.bpc-meta),
+  .bp-blog-rail .bp-write-cards :global(.bpc-meta-kicker),
+  .bp-blog-rail .bp-write-cards :global(.bpc-stat),
+  .bp-blog-rail .bp-write-cards :global(.bpc-tag) { color: var(--accent-ink, #fff); }
+  .bp-blog-rail .bp-write-cards :global(.bpc-sep) { color: color-mix(in srgb, var(--accent-ink, #fff) 55%, transparent); }
+  .bp-blog-rail .bp-write-cards :global(.bpc-tag) { border-color: color-mix(in srgb, var(--accent-ink, #fff) 45%, transparent); }
+  .bp-blog-rail .bp-write-cards :global(.bpc-desc),
+  .bp-blog-rail .bp-write-cards :global(.bpc-arrow) { display: none; }
+  /* Hide the "read the series" CTA on the §03 series cards — the whole card is
+     already the link. */
   .bp-write-cards :global(.bpc-cta) { display: none; }
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-meta) { margin-bottom: 0.4rem; }
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-title) { font-size: clamp(1.05rem, 1.15vw, 1.3rem); margin-bottom: 0.4rem; -webkit-line-clamp: 2; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-meta) { margin-bottom: 0.4rem; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-title) { font-size: clamp(1.05rem, 1.15vw, 1.3rem); margin-bottom: 0.4rem; -webkit-line-clamp: 2; }
   /* Tags on a single line (clip any overflow) so the body stays short and the
      cover (the grid's 1fr row) keeps more height. */
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-tags) { margin-top: 0.4rem; flex-wrap: nowrap; overflow: hidden; }
-  .bp-blog-rail.is-pinned .bp-write-cards :global(.bpc-tag) { flex: 0 0 auto; }
-  /* Mobile / vertical-list fallback (≤900px — the rail doesn't pin there): the
-     DOM order interleaves series + posts for the desktop bento, so here we (a)
-     reorder to posts-first with `order`, and (b) cap at 4 posts + 2 series. The
-     nth-child cutoffs are tied to the "series-pair, two posts" interleave above. */
+  .bp-blog-rail .bp-write-cards :global(.bpc-tags) { margin-top: 0.4rem; flex-wrap: nowrap; overflow: hidden; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-tag) { flex: 0 0 auto; }
+  /* Narrow viewports (≤900px): the rail never pins (min-width:901px) so it stays
+     the native overflow-x swipe strip — same plate bento, scrolled by finger.
+     Trim --rail-h a touch so the two plate rows don't dominate a short screen. */
   @media (max-width: 900px) {
-    .bp-write-cards > :global(.tb-card-link) { order: 0; }
-    .bp-write-cards > :global(.bpc) { order: 1; }
-    .bp-write-cards > :global(.tb-card-link:nth-child(n + 9)) { display: none; }
-    .bp-write-cards > :global(.bpc:nth-child(n + 5)) { display: none; }
+    .bp-rail-sec.bp-blog-rail { --rail-h: clamp(380px, 56vh, 480px); }
   }
 
   /* ── §04 ART (quilt grid + lightbox subsystem) ── */
