@@ -74,7 +74,7 @@ PUBLIC_API_URL=http://localhost:3000
 - All other global CSS lives in `Layout.astro` (`<style is:global>`) — over 600 lines of custom styles
 - Theme system (light default / dark toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
 
-**Background**: none. Each page draws its own "blueprint" drafting-grid background in its component CSS. A 2D `<canvas>` particle field used to run site-wide (the drifting `-`/`o` shapes) but was **retired** in v1.45.0 — `particles.ts` / `canvasBackground.ts` and the `#canvas-bg` / `#bg-dimmer` elements are gone; `navDimmer.ts` now only styles the nav on scroll (glass bg + hide-on-scroll). (Also removed earlier: Vanta/Three.js/p5.js — only a stale `--vanta-bg` CSS var name remains.)
+**Background**: none. Each page draws its own "blueprint" drafting-grid background in its component CSS. A 2D `<canvas>` particle field used to run site-wide (the drifting `-`/`o` shapes) but was **retired** in v1.45.0 — `particles.ts` / `canvasBackground.ts` and the `#canvas-bg` / `#bg-dimmer` elements are gone; `navDimmer.ts` now only styles the nav on scroll (glass bg + hide-on-scroll). (Also removed earlier: Vanta/Three.js/p5.js — only a stale `--vanta-bg` CSS var name remains.) One exception: the homepage layers a WebGL2 ambient glow under its grid (`src/scripts/bpGlow.ts` — raw fragment shader, no Three.js; ~30fps idle throttle, on mobile too since v1.66.0; skipped on reduced-motion, missing WebGL2, or `localStorage bpGlow="off"`) plus a tsParticles "links" constellation in the hero.
 
 **Third-party libraries** (via CDN):
 - GSAP + ScrollTrigger + SplitText (jsDelivr, in `Layout.astro`) — scroll reveals, hero/section text animations
