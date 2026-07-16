@@ -693,6 +693,41 @@ const homepageSchema = {
       </div>
     </section>
 
+    <!-- ===================== ANNEX D — LIVE TELEMETRY (instrument strip; four
+         client-side live readouts linking to the live.luci-studio.com widgets.
+         DOM fully server-rendered — src/scripts/homeLiveTelemetry.ts only fills
+         text + toggles state classes; fetch starts on viewport entry). ======= -->
+    <section class="bp-wrap bp-section" id="live">
+      <div class="bp-sec-head" data-reveal>
+        <span class="bp-dot" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-label">ANNEX D — LIVE TELEMETRY</span>
+        <span class="bp-rule" aria-hidden="true"></span>
+        <span class="bp-mono bp-sec-count">04 INSTRUMENTS · 24/7</span>
+      </div>
+      <div class="bp-sec-title-row" data-reveal>
+        <h2 class="bp-display bp-h2" data-ml9>Track something.</h2>
+        <a href="https://live.luci-studio.com/" target="_blank" rel="noopener noreferrer" class="bp-mono bp-more">ALL WIDGETS →</a>
+      </div>
+      <div class="bp-live-strip" data-reveal>
+        {[
+          { key: "clock", label: "STUDIO CLOCK", href: "https://live.luci-studio.com/" },
+          { key: "iss", label: "ISS POSITION", href: "https://live.luci-studio.com/iss/" },
+          { key: "quake", label: "LAST QUAKE (24H)", href: "https://live.luci-studio.com/quakes/" },
+          { key: "fx", label: "EUR → USD", href: "https://live.luci-studio.com/currency/" },
+        ].map((inst) => (
+          <a href={inst.href} target="_blank" rel="noopener noreferrer" class="bp-live-inst" data-live-inst={inst.key}>
+            <span class="bp-live-head">
+              <span class="bp-mono bp-live-label">{inst.label}</span>
+              <span class="bp-live-dot" aria-hidden="true"></span>
+            </span>
+            <span class="bp-mono bp-live-value" data-live-value>——</span>
+            <span class="bp-mono bp-live-sub" data-live-sub>SYNCING…</span>
+          </a>
+        ))}
+      </div>
+      <p class="bp-mono bp-live-credit" data-reveal>DATA: USGS · WHERETHEISS.AT · FRANKFURTER (ECB)</p>
+    </section>
+
     <!-- ===================== §02 CAPABILITIES ===================== -->
     <section class="bp-wrap bp-section" id="capabilities">
       <div class="bp-sec-head" data-reveal>
@@ -1460,6 +1495,53 @@ const homepageSchema = {
     .bp-tools-list li:nth-child(n + 4) { display: none; }
   }
 
+  /* ── ANNEX D — LIVE TELEMETRY (instrument strip) ── */
+  .bp-live-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1.5px solid var(--bp-hair);
+    border-bottom: 1.5px solid var(--bp-hair);
+  }
+  .bp-live-inst {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 22px 24px;
+    text-decoration: none;
+    color: var(--bp-ink);
+    border-left: 1px solid var(--bp-line2);
+    transition: background 0.25s ease;
+  }
+  .bp-live-inst:first-child { border-left: none; }
+  .bp-live-inst:hover { background: var(--bp-hover); }
+  .bp-live-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .bp-live-label { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); }
+  .bp-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-faint); flex: 0 0 auto; }
+  .bp-live-inst.is-live .bp-live-dot { background: var(--bp-acc); animation: bp-live-blink 1.6s ease-in-out infinite; }
+  .bp-live-inst.is-off .bp-live-dot { background: var(--bp-faint); animation: none; }
+  .bp-live-value {
+    font-size: clamp(1rem, 1.7vw, 1.35rem);
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    min-height: 1.4em;
+  }
+  .bp-live-inst.is-off .bp-live-value { color: var(--bp-muted); }
+  .bp-live-sub { font-size: 11px; letter-spacing: 0.1em; color: var(--bp-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bp-live-credit { margin-top: 12px; font-size: 10px; letter-spacing: 0.12em; color: var(--bp-faint); }
+  @keyframes bp-live-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bp-live-inst .bp-live-dot { animation: none !important; }
+  }
+  @media (max-width: 900px) {
+    .bp-live-strip { grid-template-columns: repeat(2, 1fr); }
+    .bp-live-inst { padding: 18px 16px 20px; }
+    .bp-live-inst:nth-child(odd) { border-left: none; }
+    .bp-live-inst:nth-child(n + 3) { border-top: 1px solid var(--bp-line2); }
+  }
+
   /* ── §01 SELECTED WORK ── */
   .bp-work-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(20px, 3vw, 30px); }
   .bp-work-card { text-decoration: none; display: block; }
@@ -2136,6 +2218,10 @@ const homepageSchema = {
 <script>
   import { initBpGlow } from "../../scripts/bpGlow";
   initBpGlow();
+</script>
+<script>
+  import { initHomeLiveTelemetry } from "../../scripts/homeLiveTelemetry";
+  initHomeLiveTelemetry();
 </script>
 <script>
   import { initHomeGamesRail, initHomeBlogRail } from "../../scripts/homeGamesRail";
