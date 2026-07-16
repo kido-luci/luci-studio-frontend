@@ -8,7 +8,9 @@
 //   2. a slow "ink drift" blob wandering mid-sheet (lissajous),
 //   3. a subtle ember that lags behind the cursor.
 // Raw WebGL2 — no three.js (deliberately removed from this site) — a single
-// fullscreen triangle at HALF resolution (soft glow → upscaling is invisible).
+// fullscreen triangle at HALF resolution (soft glow → upscaling is invisible),
+// throttled to ~30fps while the pointer is idle (the blobs drift too slowly
+// for the halved rate to show; saves battery on laptops).
 // Dark mode composites with mix-blend-mode:screen (light added to the sheet);
 // light mode flips to multiply with a darker ink colour (a wash sunk into the
 // paper). Colour tracks --accent-rgb live (same contract as the tsParticles
@@ -185,6 +187,14 @@ export function initBpGlow() {
   applyLamp();
   lampMq.addEventListener('change', applyLamp);
 
+  // Idle throttle — after 3s without pointer movement, draw every ≥30ms
+  // (~30fps); any movement restores full rate on the next frame. A mouseless
+  // load starts throttled.
+  const IDLE_AFTER = 3000;
+  const IDLE_FRAME_MS = 30;
+  let lastMove = -IDLE_AFTER;
+  let lastDraw = 0;
+
   // Cursor ember target — lerped each frame so the glow trails the pointer.
   // Starts parked at the lamp corner so a mouseless load shows no stray blob.
   let tx = 0;
@@ -194,6 +204,7 @@ export function initBpGlow() {
   window.addEventListener(
     'pointermove',
     (e) => {
+      lastMove = performance.now();
       const aspect = window.innerWidth / window.innerHeight;
       tx = (e.clientX / window.innerWidth) * aspect;
       ty = 1 - e.clientY / window.innerHeight;
@@ -208,18 +219,22 @@ export function initBpGlow() {
     canvas.remove(); // fall back to the CSS lamp; no restore dance needed
   });
 
+  const dbg = { canvas, frames: 0 };
   const t0 = performance.now();
   const frame = (now: number) => {
     if (dead) return;
+    requestAnimationFrame(frame);
+    if (now - lastMove > IDLE_AFTER && now - lastDraw < IDLE_FRAME_MS) return;
+    lastDraw = now;
+    dbg.frames++;
     mx += (tx - mx) * 0.045;
     my += (ty - my) * 0.045;
     gl.uniform2f(uRes, w, h);
     gl.uniform1f(uT, (now - t0) / 1000);
     gl.uniform2f(uMouse, mx, my);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    requestAnimationFrame(frame);
   };
   host.prepend(canvas); // before .bp-grid → the grid lines draw over the glow
   requestAnimationFrame(frame);
-  (window as any).__bpGlow = { canvas }; // dev/verify handle
+  (window as any).__bpGlow = dbg; // dev/verify handle
 }
