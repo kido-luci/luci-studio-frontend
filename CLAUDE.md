@@ -62,7 +62,7 @@ PUBLIC_API_URL=http://localhost:3000
 - `/` — Portfolio homepage: hardcoded project/experience content + a dynamic blog feed fetched from the backend at build time
 - `/blog/` (index) and `/blog/[slug]` — post pages via `getStaticPaths()`; slug `{title-slug}-{id}` (e.g. `my-post-123`)
 - `/blog/series/` and `/blog/series/[slug]` — series index + per-series pages
-- `/portfolio`, `/lab`, `/art/[slug]`, `/privacy`, `/terms`, `404`, and `sitemap.xml.ts`
+- `/portfolio`, `/lab`, `/privacy`, `/terms`, `404`, and `sitemap.xml.ts` (there is no `/art` route — art lives in the homepage §04 gallery mosaic + lightbox only)
 
 **Data flow**:
 - `src/services/posts.ts` — REST client for the backend API (`getAll()` → `GET /posts`, `getByID(id)` → `GET /posts/{id}`)
