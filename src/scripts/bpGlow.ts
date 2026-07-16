@@ -14,9 +14,10 @@
 // Dark mode composites with mix-blend-mode:screen (light added to the sheet);
 // light mode flips to multiply with a darker ink colour (a wash sunk into the
 // paper). Colour tracks --accent-rgb live (same contract as the tsParticles
-// constellation). Skipped on mobile (≤768px, the retired particle canvas
-// precedent), reduced-motion (the static CSS lamp remains), missing WebGL2,
-// or the localStorage escape hatch bpGlow="off" (A/B: set + reload).
+// constellation). Runs on mobile too (touch has no fine pointer, so the idle
+// throttle pins it at ~30fps); skipped on reduced-motion (the static CSS lamp
+// remains), missing WebGL2, or the localStorage escape hatch bpGlow="off"
+// (A/B: set + reload).
 
 const VERT = `#version 300 es
 void main() {
@@ -82,7 +83,6 @@ export function initBpGlow() {
   const host = document.querySelector('main.bp');
   if (!host) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (window.matchMedia('(max-width: 768px)').matches) return;
   try {
     if (localStorage.getItem('bpGlow') === 'off') return;
   } catch { /* private mode */ }
@@ -196,21 +196,34 @@ export function initBpGlow() {
   let lastDraw = 0;
 
   // Cursor ember target — lerped each frame so the glow trails the pointer.
-  // Starts parked at the lamp corner so a mouseless load shows no stray blob.
+  // Parked at the lamp corner (re-parked on resize/rotation, tracking the
+  // ≤900px anchor flip) so it folds into the lamp until a fine pointer moves.
+  // Touch devices never attach the listener → they stay parked and the idle
+  // throttle above holds them at ~30fps for the whole visit.
+  let parked = true;
   let tx = 0;
   let ty = 1.04;
+  const park = () => {
+    tx = (lampMq.matches ? 1 : 0) * (window.innerWidth / window.innerHeight);
+    ty = 1.04;
+  };
+  park();
   let mx = tx;
   let my = ty;
-  window.addEventListener(
-    'pointermove',
-    (e) => {
-      lastMove = performance.now();
-      const aspect = window.innerWidth / window.innerHeight;
-      tx = (e.clientX / window.innerWidth) * aspect;
-      ty = 1 - e.clientY / window.innerHeight;
-    },
-    { passive: true },
-  );
+  window.addEventListener('resize', () => { if (parked) park(); }, { passive: true });
+  if (window.matchMedia('(pointer: fine)').matches) {
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        parked = false;
+        lastMove = performance.now();
+        const aspect = window.innerWidth / window.innerHeight;
+        tx = (e.clientX / window.innerWidth) * aspect;
+        ty = 1 - e.clientY / window.innerHeight;
+      },
+      { passive: true },
+    );
+  }
 
   let dead = false;
   canvas.addEventListener('webglcontextlost', (e) => {
