@@ -235,13 +235,18 @@ const artItems: { img: string; label: string; year: string; date: string; topic:
 // (URL/title/likes/views) still comes from the gallery API at build time: a
 // piece deleted from the DB drops out here, and a newly added piece stays off
 // the homepage mosaic until this map (and the .art-mosaic widths) is re-tuned.
+// Rows are grouped by native resolution, not just ratio: the first row holds
+// the tallest/highest-res scans (they can afford big tiles), the second the
+// low-res pieces — its larger ratio sum makes that row shorter, so no image is
+// ever displayed above its native size (the 600×501 Paint shot stays small
+// instead of becoming the widest, blurriest tile).
 const ART_ORDER: { id: string; ar: string }[] = [
   { id: "53", ar: "600 / 1100" }, // Manga - a Student Girl
-  { id: "51", ar: "600 / 501" }, // Portrail of a Girl - Microsoft Paint
-  { id: "64", ar: "600 / 840" }, // Portrait of a Girl - Blue Pen
   { id: "48", ar: "600 / 939" }, // Sagiri Izumi
-  { id: "54", ar: "600 / 592" }, // Portrait of a Girl 2 - Blue Pen
+  { id: "64", ar: "600 / 840" }, // Portrait of a Girl - Blue Pen
   { id: "57", ar: "600 / 773" }, // Deep feeling - Blue pen
+  { id: "54", ar: "600 / 592" }, // Portrait of a Girl 2 - Blue Pen
+  { id: "51", ar: "600 / 501" }, // Portrail of a Girl - Microsoft Paint
 ];
 const artById = new Map(artItems.map((a) => [String(a.id), a]));
 const curated = ART_ORDER.flatMap((o) => {
@@ -1783,19 +1788,19 @@ const homepageSchema = {
      Rows: (1,2)(3,4)(5,6) below 768px, (1,2,3)(4,5,6) from 768px up. */
   .art-mosaic { display: flex; flex-wrap: wrap; gap: 1rem; }
   .art-mosaic-item { position: relative; flex-shrink: 0; }
-  .art-mosaic-item:nth-child(1) { flex: 0.5455 0 calc((100% - 1rem) * 0.312); }
-  .art-mosaic-item:nth-child(2) { flex: 1.1976 0 calc((100% - 1rem) * 0.686); }
-  .art-mosaic-item:nth-child(3) { flex: 0.7143 0 calc((100% - 1rem) * 0.527); }
-  .art-mosaic-item:nth-child(4) { flex: 0.639 0 calc((100% - 1rem) * 0.471); }
-  .art-mosaic-item:nth-child(5) { flex: 1.0135 0 calc((100% - 1rem) * 0.565); }
-  .art-mosaic-item:nth-child(6) { flex: 0.7762 0 calc((100% - 1rem) * 0.433); }
+  .art-mosaic-item:nth-child(1) { flex: 0.5455 0 calc((100% - 1rem) * 0.460); }
+  .art-mosaic-item:nth-child(2) { flex: 0.639 0 calc((100% - 1rem) * 0.539); }
+  .art-mosaic-item:nth-child(3) { flex: 0.7143 0 calc((100% - 1rem) * 0.479); }
+  .art-mosaic-item:nth-child(4) { flex: 0.7762 0 calc((100% - 1rem) * 0.520); }
+  .art-mosaic-item:nth-child(5) { flex: 1.0135 0 calc((100% - 1rem) * 0.458); }
+  .art-mosaic-item:nth-child(6) { flex: 1.1976 0 calc((100% - 1rem) * 0.541); }
   @media (min-width: 768px) {
-    .art-mosaic-item:nth-child(1) { flex-basis: calc((100% - 2rem) * 0.221); }
-    .art-mosaic-item:nth-child(2) { flex-basis: calc((100% - 2rem) * 0.486); }
-    .art-mosaic-item:nth-child(3) { flex-basis: calc((100% - 2rem) * 0.29); }
-    .art-mosaic-item:nth-child(4) { flex-basis: calc((100% - 2rem) * 0.262); }
-    .art-mosaic-item:nth-child(5) { flex-basis: calc((100% - 2rem) * 0.416); }
-    .art-mosaic-item:nth-child(6) { flex-basis: calc((100% - 2rem) * 0.319); }
+    .art-mosaic-item:nth-child(1) { flex-basis: calc((100% - 2rem) * 0.287); }
+    .art-mosaic-item:nth-child(2) { flex-basis: calc((100% - 2rem) * 0.336); }
+    .art-mosaic-item:nth-child(3) { flex-basis: calc((100% - 2rem) * 0.376); }
+    .art-mosaic-item:nth-child(4) { flex-basis: calc((100% - 2rem) * 0.259); }
+    .art-mosaic-item:nth-child(5) { flex-basis: calc((100% - 2rem) * 0.339); }
+    .art-mosaic-item:nth-child(6) { flex-basis: calc((100% - 2rem) * 0.400); }
   }
   .art-img-frame {
     height: 100%;
