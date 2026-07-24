@@ -1,0 +1,211 @@
+---
+import PostCard from "../PostCard.astro";
+import SeriesCard from "../SeriesCard.astro";
+import { postService } from "../../services/posts";
+import { playlistService } from "../../services/playlists";
+import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
+import { buildSeriesViews } from "../../utils/series";
+import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
+
+const locale = getLocaleFromUrl(Astro.url);
+
+// §03 WRITING — latest 6 posts (art-topic posts excluded); mobile caps to 4 via CSS.
+const rawPosts = await postService.getAll();
+const writing = rawPosts
+  .filter((p) => !p.topics?.some((tp) => tp.toLowerCase().startsWith("art")))
+  .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
+  .slice(0, 6)
+  .map((rawP) => {
+    const p = localized(rawP, locale);
+    const tags = p.topics && p.topics.length > 0 ? p.topics : ["Engineering"];
+    return {
+      id: p.id,
+      title: p.title,
+      subtitle: p.subtitle || "",
+      // Slug from the canonical (English) title so it matches the built page.
+      slug: buildPostSlug(rawP.title, rawP.id),
+      tags,
+      date: formatDate(p.created_at, locale),
+      read: readTimeFor(p, locale),
+      img: p.cover_image_url || "",
+      views: p.views ?? 0,
+      likes: p.likes ?? 0,
+    };
+  });
+
+// §03 WRITING — series cards join the post cards in one 2-row scrub bento (the
+// post cards are full-height plates, these are half-height plates that pair up),
+// so the rail fills the viewport like the games register. Same view-model the
+// /blog + /blog/series strips use (buildSeriesViews aggregates per-series stats
+// from the already-fetched posts — no extra round-trip beyond the playlists
+// fetch). Newest first; up to 6 series → three stacked pairs in the interleave.
+const rawPlaylists = await playlistService.getAll();
+const featuredSeries = buildSeriesViews(rawPlaylists, rawPosts).slice(0, 6);
+
+// Interleave order drives the column-flow bento: a stacked series pair, then two
+// post plates, repeated ("start with the stacked series, then two blog cards").
+// Once the series run out the remaining posts trail at the end. (Grid places two
+// consecutive span-1 series in one column; each span-2 post takes its own.)
+const blogRailItems: Array<{ kind: "series" | "post"; data: any; sidx?: number }> = [];
+let __pi = 0, __si = 0;
+while (__pi < writing.length || __si < featuredSeries.length) {
+  for (let k = 0; k < 2 && __si < featuredSeries.length; k++, __si++)
+    blogRailItems.push({ kind: "series", data: featuredSeries[__si], sidx: __si + 1 });
+  for (let k = 0; k < 2 && __pi < writing.length; k++, __pi++)
+    blogRailItems.push({ kind: "post", data: writing[__pi] });
+}
+---
+
+<!-- ===================== §03 WRITING — scroll-jacked rail (pulled out of the
+     sheet stack; pins + scrubs its card track sideways like the games rail,
+     homeBlogRail. Falls back to a native overflow-x swipe strip). ========= -->
+<section class="bp-section bp-rail-sec bp-blog-rail" id="blog">
+  <div class="bp-wrap">
+    <div class="bp-sec-head" data-reveal>
+      <span class="bp-dot" aria-hidden="true"></span>
+      <span class="bp-mono bp-sec-label">§03 — WRITING</span>
+      <span class="bp-rule" aria-hidden="true"></span>
+      <span class="bp-mono bp-sec-count">LATEST</span>
+    </div>
+    <div class="bp-sec-title-row" data-reveal>
+      <h2 class="bp-display bp-h2" data-ml9>From the blog.</h2>
+      <a href={localizedHref(locale, "/blog")} class="bp-mono bp-more">ALL POSTS →</a>
+    </div>
+  </div>
+  <div class="bp-rail-viewport">
+    <!-- One 2-row bento scrub track (mirrors the games rail): post cards are
+         full-height plates (grid-row: span 2), the featured series cards are
+         half-height plates (span 1) that pair up two-per-column at the end. -->
+    <div class="bp-write-cards">
+      {blogRailItems.map((it) => (
+        it.kind === "post" ? (
+          <PostCard
+            href={localizedHref(locale, `/blog/${it.data.slug}/`)}
+            title={it.data.title}
+            subtitle={it.data.subtitle}
+            tags={it.data.tags}
+            date={it.data.date}
+            read={it.data.read}
+            img={it.data.img}
+            id={it.data.id}
+            views={it.data.views}
+            likes={it.data.likes}
+            variant="blueprint"
+          />
+        ) : (
+          <SeriesCard series={it.data} variant="blueprint" index={it.sidx} />
+        )
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Crisp blueprint headings — cancel the site's light-mode heading drop-shadow
+     filter. Scoped to THIS component's own .bp-display elements only; each home
+     section component carries its own copy for its headings. */
+  :global(body.light-mode) .bp-display { filter: none !important; }
+
+  /* ── §03 WRITING — horizontal rail of cover cards (pin + scrub like the games
+     rail; homeBlogRail). The 2-row bento plate layout is the DEFAULT and scrolls
+     natively (overflow-x swipe) on mobile / reduced-motion / no-JS; on desktop
+     the rail engine pins the section and GSAP-scrubs the track sideways instead
+     (its off-screen covers are eager-warmed by the rail engine). Post cards are
+     full-height plates (grid-row: span 2), the featured series cards are half-
+     height plates (span 1) that pair two-per-column at the end. The shared
+     .bp-rail-sec pin/height base and the .bp-rail-viewport clip live in
+     HomePage.astro (reach form) since HomeGamesRail's ANNEX A rail needs them
+     too. ── */
+  /* The cards themselves are the shared <PostCard/SeriesCard variant="blueprint">
+     — the same cards as /blog (own scoped styles). This track only lays them out
+     into the plate bento; the pinned block below just swaps native scroll for the
+     GSAP scrub. Cards are child components, so their roots need :global. */
+  .bp-write-cards {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    grid-auto-columns: max-content;
+    gap: 18px;
+    height: var(--rail-h);
+    box-sizing: content-box;
+    margin: 0;
+    padding: 26px clamp(20px, 5vw, 48px) 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+  /* Pinned rail (desktop, JS-added): the viewport clips (shared .bp-rail-sec
+     .is-pinned rule) and homeBlogRail slides this track sideways, so the track
+     stops native-scrolling and grows to its full content width. */
+  .bp-blog-rail.is-pinned .bp-write-cards {
+    overflow: visible;
+    width: max-content;
+    scroll-snap-type: none;
+  }
+  .bp-blog-rail .bp-write-cards > :global(.tb-card-link) {
+    grid-row: span 2;
+    width: clamp(300px, 24vw, 360px);
+    scroll-snap-align: start;
+  }
+  /* Post plates keep the blueprint's landscape cover (16/10) rather than filling
+     the plate with a tall portrait crop. The blog rail runs a shorter --rail-h
+     than the games register (below) so the plate height ≈ cover + body — a
+     compact cover with no empty body gap. (Trade-off: shorter plates → a little
+     more top/bottom band than the fill-the-plate version.) */
+  .bp-rail-sec.bp-blog-rail { --rail-h: clamp(470px, 52vh, 560px); }
+  /* Series plates — half-height (span 1), compact vertical form: cover fills the
+     top, meta/title/tags below, so a pair stacks flush in one column. */
+  .bp-blog-rail .bp-write-cards > :global(.bpc) {
+    grid-row: span 1;
+    width: clamp(300px, 24vw, 360px);
+    height: 100%;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    scroll-snap-align: start;
+    /* Fill with the active scheme accent (shows behind the body, under the
+       full-bleed cover). Body text flips to --accent-ink below to stay legible. */
+    background: rgb(var(--accent-rgb));
+    border-color: rgb(var(--accent-rgb));
+  }
+  /* Full-bleed cover: the fig fills the top of the card edge-to-edge (no inset,
+     no own border); the card's overflow:hidden + radius clips its corners. The
+     body carries its own padding since the card padding is now 0. */
+  .bp-blog-rail .bp-write-cards :global(.bpc-fig) { min-height: 0; height: 100%; border: none; border-radius: 0; }
+  /* No dark gradient scrim over the cover in the rail — show the image clean. */
+  .bp-blog-rail .bp-write-cards :global(.bpc-fig)::after { display: none; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-body) { padding: 0.55rem 12px 12px; justify-content: flex-start; }
+  /* On the accent fill, flip the body text/border to the on-accent ink colour. */
+  .bp-blog-rail .bp-write-cards :global(.bpc-title),
+  .bp-blog-rail .bp-write-cards :global(.bpc-meta),
+  .bp-blog-rail .bp-write-cards :global(.bpc-meta-kicker),
+  .bp-blog-rail .bp-write-cards :global(.bpc-stat),
+  .bp-blog-rail .bp-write-cards :global(.bpc-tag) { color: var(--accent-ink, #fff); }
+  .bp-blog-rail .bp-write-cards :global(.bpc-sep) { color: color-mix(in srgb, var(--accent-ink, #fff) 55%, transparent); }
+  .bp-blog-rail .bp-write-cards :global(.bpc-tag) { border-color: color-mix(in srgb, var(--accent-ink, #fff) 45%, transparent); }
+  .bp-blog-rail .bp-write-cards :global(.bpc-desc),
+  .bp-blog-rail .bp-write-cards :global(.bpc-arrow) { display: none; }
+  /* Hide the "read the series" CTA on the §03 series cards — the whole card is
+     already the link. */
+  .bp-write-cards :global(.bpc-cta) { display: none; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-meta) { margin-bottom: 0.4rem; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-title) { font-size: clamp(1.05rem, 1.15vw, 1.3rem); margin-bottom: 0.4rem; -webkit-line-clamp: 2; }
+  /* Tags on a single line (clip any overflow) so the body stays short and the
+     cover (the grid's 1fr row) keeps more height. */
+  .bp-blog-rail .bp-write-cards :global(.bpc-tags) { margin-top: 0.4rem; flex-wrap: nowrap; overflow: hidden; }
+  .bp-blog-rail .bp-write-cards :global(.bpc-tag) { flex: 0 0 auto; }
+  /* Narrow viewports (≤900px): the rail never pins (min-width:901px) so it stays
+     the native overflow-x swipe strip — same plate bento, scrolled by finger.
+     Trim --rail-h a touch so the two plate rows don't dominate a short screen. */
+  @media (max-width: 900px) {
+    .bp-rail-sec.bp-blog-rail { --rail-h: clamp(380px, 56vh, 480px); }
+  }
+</style>
+
+<script>
+  import { initHomeBlogRail } from "../../scripts/homeGamesRail";
+  initHomeBlogRail();
+</script>
