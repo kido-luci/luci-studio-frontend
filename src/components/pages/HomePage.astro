@@ -300,15 +300,26 @@ const homepageSchema = {
   <Fragment slot="head">
     <!-- Mark the homepage: (1) home-anim gates the scroll-reveal hidden states so
          JS-off / GSAP-fail / reduced-motion all fall back to visible content; (2)
-         bp-home suppresses the shared particle canvas (the blueprint grid is the bg).
-         Inline + in <head> so both land before first paint. -->
-    <script is:inline>document.documentElement.classList.add('home-anim');document.documentElement.classList.add('bp-home');</script>
+         bp-home suppresses the shared particle canvas (the blueprint grid is the bg);
+         (3) ocean-on arms the 3D ocean hero band (cheap probe: WebGL2 API present +
+         no oceanHero="off" kill switch) so the hero lays out single-column from the
+         first paint — no post-load swap/CLS. The scene script demotes the class if
+         real GL init later fails, restoring the constellation + ring fallback.
+         Inline + in <head> so all land before first paint. -->
+    <script is:inline>document.documentElement.classList.add('home-anim');document.documentElement.classList.add('bp-home');(function(){try{if(localStorage.getItem('oceanHero')==='off')return;}catch(e){}if('WebGL2RenderingContext' in window)document.documentElement.classList.add('ocean-on');})();</script>
   </Fragment>
 
   <TopNav active="home" ctaHref="#contact" />
 
   <main class="bp" data-api-url={API_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
+
+    <!-- Ocean hero band (html.ocean-on only): the three.js underwater scene —
+         sky window offset right, shadowed god rays, fish school. Sits AFTER
+         .bp-grid at the same z-index so the water paints over the grid within
+         the band; a CSS mask dissolves its bottom edge back into the drafting
+         sheet. Scene module: src/scripts/oceanHero.ts (loader at file end). -->
+    <div class="bp-ocean" aria-hidden="true"><canvas></canvas></div>
 
     <!-- Blueprint constellation: a twinkling point-field in the top-right corner
          with a few larger nodes linked by hairlines — a schematic star chart, on
@@ -318,12 +329,6 @@ const homepageSchema = {
          in the frontmatter); twinkle is pure CSS (staggered delays, no JS/rAF).
          Gated for reduced-motion, win-perf-mode and mobile (see CSS). -->
     <div class="bp-constellation" aria-hidden="true">
-      <!-- TRIAL (feat/bp-lamp-glow): the tsParticles "links" constellation mounts
-           into this box when the CDN lib loads (init script at file end). It fills
-           the same masked corner; while active (html.bp-tsp-on) it replaces the CSS
-           star field below. Falls back to the CSS field under reduced-motion,
-           win-perf-mode, no-CDN, or localStorage bpStars="css". -->
-      <div id="bp-tsp" class="bp-tsp-mount"></div>
       <svg class="bp-cst-lines" viewBox="0 0 440 300" preserveAspectRatio="none" fill="none">
         <g class="bp-cst-edges">
           <line x1="424" y1="24" x2="360" y2="60" />
@@ -1063,15 +1068,79 @@ const homepageSchema = {
     -webkit-mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
     mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
   }
-  /* TRIAL — tsParticles mount + CSS↔lib swap. The lib canvas fills this same
-     masked corner box; when it loads (html.bp-tsp-on) the CSS star field hides so
-     only one renders at a time. Both are kept side-by-side so reverting the trial
-     is just dropping the mount + scripts; the CSS field is the untouched fallback. */
-  .bp-tsp-mount { position: absolute; inset: 0; pointer-events: none; }
-  .bp-tsp-mount canvas { width: 100% !important; height: 100% !important; }
-  :global(html:not(.bp-tsp-on)) .bp-tsp-mount { display: none; }
-  :global(html.bp-tsp-on) .bp-cst-lines,
-  :global(html.bp-tsp-on) .bp-star { display: none; }
+  /* ── Ocean hero band (html.ocean-on) ─────────────────────────────────────
+     The three.js water fills the first viewport behind the hero copy: same
+     z-index as .bp-grid but LATER in the DOM, so the water paints over the
+     grid inside the band while .bp-wrap content (z-index:1) stays on top. A
+     bottom mask dissolves the water back into the drafting sheet, and the
+     whole band is display:none when the scene is off — the constellation +
+     hero ring below are the untouched fallback look. */
+  .bp-ocean {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100dvh;
+    z-index: 0;
+    pointer-events: none;
+    display: none;
+    /* Deep-water base from the FIRST paint (the scene's fog colour): the
+       band must already be dark while three.js idle-loads — the top nav and
+       hero copy are light-ink over this band in BOTH themes. */
+    background: #06121d;
+  }
+  .bp-ocean canvas { width: 100%; height: 100%; display: block; }
+  /* Theme-INDEPENDENT floor (user call 2026-07-24): the scene sinks into the
+     fixed deep-water colour instead of mask-fading into the theme paper —
+     the old transparent mask exposed cream in light mode, a white fog eating
+     the bottom of the scene. The band now ends on its own dark edge against
+     the page, same convention as the other full-bleed dark sheets
+     (.bp-work-band / .bp-cta). */
+  .bp-ocean::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent 66%, #06121d 92%);
+  }
+  :global(html.ocean-on) .bp-ocean { display: block; }
+  /* The scene replaces both hero ornaments: the corner constellation and the
+     right-column ring diagram (the sky window + shaft own that side now). The
+     text column takes the full width and the band gets viewport presence. */
+  :global(html.ocean-on) .bp-constellation { display: none; }
+  :global(html.ocean-on) .bp-hero-right { display: none; }
+  :global(html.ocean-on) .bp-hero {
+    grid-template-columns: 1fr;
+    min-height: calc(100dvh - 190px);
+    align-content: center;
+  }
+  /* Phones (user-spotted on device): a 100dvh band left a dead stretch of
+     water UNDER the copy on tall viewports. Fixed composition instead of
+     centring: window at the top, copy anchored to the BOTTOM of a shorter
+     band, and the slack collects in the middle where the shaft + fish live —
+     scene depth instead of trailing void. The next section peeks in under
+     the fold on the theme paper. */
+  @media (max-width: 700px) {
+    .bp-ocean { height: 88dvh; }
+    :global(html.ocean-on) .bp-hero {
+      min-height: calc(88dvh - 150px);
+      align-content: end;
+    }
+  }
+  /* The ocean band is THEME-INDEPENDENT (always the deep-water palette), so
+     the hero copy must stay light-on-dark in BOTH modes: re-point the local
+     blueprint tokens exactly like .bp-work-band does for its dark sheet.
+     --bp-bg only feeds the solid button's text/hover here. */
+  :global(html.ocean-on) .bp-hero {
+    --bp-ink: #eceae3;
+    --bp-muted: rgba(236, 234, 227, 0.72);
+    --bp-faint: rgba(236, 234, 227, 0.5);
+    --bp-bg: #0d1520;
+  }
+  :global(html.ocean-on body.light-mode) .bp-hero .bp-display { filter: none !important; }
+  /* Single-column hero: cap the text column so the dimension rule and
+     tagline stop short of the light shaft instead of slicing across it. */
+  :global(html.ocean-on) .bp-hero-left { max-width: 620px; }
   .bp-cst-lines {
     position: absolute;
     inset: 0;
@@ -2216,8 +2285,18 @@ const homepageSchema = {
   initHomeScrollAnimations();
 </script>
 <script>
-  import { initBpGlow } from "../../scripts/bpGlow";
-  initBpGlow();
+  // Ocean hero: dynamic import so the three.js stack is a code-split chunk
+  // fetched on the homepage only, after the page settles (idle) — never on
+  // the LCP path. The head probe already set html.ocean-on (or didn't — then
+  // this never loads).
+  if (document.documentElement.classList.contains("ocean-on")) {
+    const boot = () => import("../../scripts/oceanHero").then((m) => m.initOceanHero());
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(() => boot(), { timeout: 2000 });
+    } else {
+      setTimeout(boot, 300);
+    }
+  }
 </script>
 <script>
   import { initHomeLiveTelemetry } from "../../scripts/homeLiveTelemetry";
@@ -2325,77 +2404,4 @@ const homepageSchema = {
   })();
 </script>
 
-<!-- ── JS constellation: tsParticles "links" network in the corner box ───────────
-     Mounts in #bp-tsp inside .bp-constellation (reuses its radial mask). Loads the
-     slim bundle (~43kB gzip, has the particle-links interaction) from the same CDN as
-     GSAP; reads --accent-rgb so the dots + links track the active colour scheme, and
-     recolours live on scheme / light-dark change. Decorative (no hover/click). Skips —
-     leaving the CSS star field as the fallback — under reduced-motion, win-perf-mode,
-     or localStorage bpStars="css" (A/B escape hatch: set it + reload for the CSS
-     version, remove it for the lib). -->
-<script is:inline defer src="https://cdn.jsdelivr.net/npm/@tsparticles/slim@3/tsparticles.slim.bundle.min.js"></script>
-<script is:inline>
-  (function () {
-    // Read the live accent as an rgb() string tsParticles can parse. --accent-rgb is
-    // space-separated channels ("27 86 255") so the site's scheme + light-mode
-    // darkening flow straight through; fall back to the blueprint blue if unset.
-    function accent() {
-      var v = getComputedStyle(document.documentElement).getPropertyValue("--accent-rgb").trim();
-      return v ? "rgb(" + v.split(/\s+/).join(",") + ")" : "#1b56ff";
-    }
-    var OPTS = {
-      fullScreen: { enable: false },
-      detectRetina: true,
-      fpsLimit: 60,
-      pauseOnBlur: true,
-      pauseOnOutsideViewport: true,
-      background: { color: "transparent" },
-      particles: {
-        number: { value: 46, density: { enable: false } },
-        color: { value: accent() },
-        shape: { type: "circle" },
-        opacity: { value: { min: 0.12, max: 0.85 }, animation: { enable: true, speed: 0.9, sync: false } },
-        size: { value: { min: 1, max: 2.6 } },
-        links: { enable: true, color: accent(), distance: 118, opacity: 0.18, width: 0.7 },
-        move: { enable: true, speed: 0.5, direction: "none", random: true, straight: false, outModes: { default: "out" } }
-      },
-      interactivity: { events: { onHover: { enable: false }, onClick: { enable: false } } },
-      motion: { reduce: { value: true, factor: 4 } }
-    };
-    // (Re)load the field with the current accent colour — used both for the first
-    // paint and to recolour when the scheme changes.
-    function apply() {
-      OPTS.particles.color.value = accent();
-      OPTS.particles.links.color = accent();
-      return window.tsParticles.load({ id: "bp-tsp", options: OPTS });
-    }
-    function start() {
-      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      var winPerf = document.body && document.body.classList.contains("win-perf-mode");
-      var forceCss = false;
-      try { forceCss = localStorage.getItem("bpStars") === "css"; } catch (e) {}
-      if (reduce || winPerf || forceCss) return; // keep the CSS star field (fallback)
-      // The slim .bundle only BUNDLES its plugins — it doesn't auto-register them;
-      // loadSlim(tsParticles) must run first or the particle-links interaction (the
-      // whole point — the constellation lines) is silently dropped. Add the swap
-      // class only once the lib is actually up, so the CSS field stays visible until
-      // the canvas is ready (no empty-corner flash).
-      window.loadSlim(window.tsParticles).then(function () {
-        document.documentElement.classList.add("bp-tsp-on");
-        return apply();
-      }).then(function () {
-        // Recolour live when the scheme or light/dark toggles (both move --accent-rgb).
-        var last = accent();
-        new MutationObserver(function () {
-          var c = accent();
-          if (c !== last) { last = c; apply(); }
-        }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-scheme", "class"] });
-      });
-    }
-    var n = 0;
-    (function wait() {
-      if (window.tsParticles && window.loadSlim) { start(); return; }
-      if (n++ < 120) setTimeout(wait, 50);
-    })();
-  })();
-</script>
+
