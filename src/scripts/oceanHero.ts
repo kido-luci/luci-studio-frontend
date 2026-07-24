@@ -77,6 +77,20 @@ const RAYS_MAX_DENSITY = 0.55;
 const SNOW_COLOR = 0x6f8ca3;
 const FISH_EMISSIVE = 0x14242f;
 
+/** Soft radial sprite texture (asset-free) for the window's light bleed. */
+function glowTexture(): THREE.CanvasTexture {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 128;
+  const ctx = cv.getContext('2d')!;
+  const g = ctx.createRadialGradient(64, 64, 2, 64, 64, 64);
+  g.addColorStop(0, 'rgba(255,255,255,0.85)');
+  g.addColorStop(0.4, 'rgba(255,255,255,0.22)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(cv);
+}
+
 export function initOceanHero(): void {
   const wrap = document.querySelector<HTMLElement>('.bp-ocean');
   const canvas = wrap?.querySelector('canvas');
@@ -159,6 +173,24 @@ export function initOceanHero(): void {
   sky.position.set(WIN_X, SURFACE_Y + 3, WIN_Z);
   rig.add(sky);
 
+  // Soft light bleed at the aperture — additive halo so the window reads as a
+  // glowing underwater light source, not a hard-edged white cut-out. Sits just
+  // under the surface, sized a touch past the hole; brightness follows the
+  // opening (applyOpen).
+  const glowMat = new THREE.SpriteMaterial({
+    map: glowTexture(),
+    color: SKY_COLOR,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    depthTest: false,
+    fog: false,
+    opacity: 0,
+  });
+  const glow = new THREE.Sprite(glowMat);
+  glow.position.set(WIN_X, SURFACE_Y - 0.2, WIN_Z);
+  glow.scale.set(WIN_W * 1.35, WIN_D * 1.7, 1); // hugs the window, no big cloud
+  rig.add(glow);
+
   // No mechanical lid. Every hinged flap, under this oblique upper-right sun,
   // leans over its own aperture as it swings and shadows it for most of the
   // motion — the light "popped" on at the end instead of opening. Instead the
@@ -184,8 +216,13 @@ export function initOceanHero(): void {
   const hemi = new THREE.HemisphereLight(HEMI_SKY, HEMI_GROUND, HEMI_INTENSITY);
   scene.add(hemi);
 
-  // ── Post: shadow-raymarched god rays (three-good-godrays).
-  const composer = new EffectComposer(renderer, { frameBufferType: THREE.HalfFloatType });
+  // ── Post: shadow-raymarched god rays (three-good-godrays). multisampling
+  // (WebGL2 MSAA on the render target) cleans the hard bright-window edge —
+  // renderer antialias is ignored once the composer owns the buffer.
+  const composer = new EffectComposer(renderer, {
+    frameBufferType: THREE.HalfFloatType,
+    multisampling: coarse ? 2 : 4,
+  });
   const renderPass = new RenderPass(scene, camera);
   renderPass.renderToScreen = false;
   composer.addPass(renderPass);
@@ -402,6 +439,7 @@ export function initOceanHero(): void {
     godraysPass.setParams({ ...GODRAYS_BASE, maxDensity: e * RAYS_MAX_DENSITY });
     sun.intensity = e * SUN_INTENSITY;
     skyMat.color.copy(skyDim).lerp(skyBright, e);
+    glowMat.opacity = e * 0.24;
   };
 
   // ── Static path (reduced motion): open pose, fish scattered, one frame.
