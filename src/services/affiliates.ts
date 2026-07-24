@@ -1,4 +1,4 @@
-import { BASE_URL } from '../lib/apiClient';
+import { BASE_URL, cachedGetAll } from '../lib/apiClient';
 import type { LocaleOverlay } from '../i18n';
 
 export interface AffiliateLink {
@@ -31,20 +31,10 @@ export interface AffiliateCardVM {
 }
 
 export const affiliateService = {
-    // Active affiliate links for the sponsored card, fetched at build time.
+    // Active affiliate links for the sponsored card, fetched once per build.
     // Non-critical: any failure (endpoint not yet deployed, network, etc.) returns
     // an empty list so the blog build never fails over an affiliate fetch.
-    async getActive(): Promise<AffiliateLink[]> {
-        try {
-            const response = await fetch(`${BASE_URL}/affiliate-links/public`);
-            if (!response.ok) throw new Error(`GET /affiliate-links/public failed with ${response.status}`);
-            const data = await response.json();
-            return Array.isArray(data) ? data : [];
-        } catch (error) {
-            console.error('Failed to fetch affiliate links:', error);
-            return [];
-        }
-    },
+    getActive: cachedGetAll<AffiliateLink>('/affiliate-links/public'),
 
     // Tracked redirect URL for a link — the backend counts the click then 302s to
     // the real destination. base should be PUBLIC_API_URL (no trailing slash).

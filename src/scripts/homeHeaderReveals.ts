@@ -1,3 +1,5 @@
+import { whenReady } from './whenReady';
+
 export function initHomeHeaderReveals() {
   // ML9 "Coffee Mornings" — chars rise from behind a per-char mask with a slight tilt,
   // settling with an expo decel. Triggered once per header on scroll into view.
@@ -25,10 +27,7 @@ export function initHomeHeaderReveals() {
         });
       });
     };
-    if (ready()) run();
-    else {
-      const id = setInterval(() => { if (ready()) { clearInterval(id); run(); } }, 30);
-    }
+    whenReady(ready, run);
   })();
 
 

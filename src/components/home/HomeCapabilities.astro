@@ -1,0 +1,60 @@
+---
+const capabilities = [
+  { n: "01", title: "Cross-platform apps", desc: "One Flutter codebase → Android, iOS, macOS, Windows & Web. Local-first, offline-ready.", tag: "Flutter · Dart · BLoC", orange: false },
+  { n: "02", title: "Browser tools & games", desc: "Fast, offline-capable micro-tools and games — zero install, all client-side.", tag: "Canvas · TS · WASM", orange: false },
+  { n: "03", title: "Technical writing", desc: "Deep-dives and engineering notes on Flutter, Dart and systems that people actually read.", tag: "Blog · Series", orange: false },
+  { n: "04", title: "Digital art", desc: "Hand-drawn and digital pieces — portraits, manga studies, ink.", tag: "Pen · Pencil · Digital", orange: true },
+];
+---
+
+<!-- ===================== §02 CAPABILITIES ===================== -->
+<section class="bp-wrap bp-section" id="capabilities">
+  <div class="bp-sec-head" data-reveal>
+    <span class="bp-dot" aria-hidden="true"></span>
+    <span class="bp-mono bp-sec-label">§02 — CAPABILITIES</span>
+    <span class="bp-rule" aria-hidden="true"></span>
+    <span class="bp-mono bp-sec-count">04 DISCIPLINES</span>
+  </div>
+  <div class="bp-sec-title-row" data-reveal>
+    <h2 class="bp-display bp-h2" data-ml9>What I build.</h2>
+  </div>
+  <div class="bp-cap-list">
+    {capabilities.map((c) => (
+      <div class={`bp-cap-row${c.orange ? " is-orange" : ""}`} data-reveal>
+        <span class="bp-mono bp-cap-num">{c.n}</span>
+        <span class="bp-display bp-cap-title">{c.title}</span>
+        <p class="bp-cap-desc">{c.desc}</p>
+        <span class="bp-mono bp-cap-tag">{c.tag}</span>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  /* Crisp light-mode headings — cancel the site-wide heading drop-shadow for
+     this section's .bp-display elements (mirrors HomePage's own scoped rule). */
+  :global(body.light-mode) .bp-display { filter: none !important; }
+  /* ── §02 CAPABILITIES ── */
+  .bp-cap-list { border-top: 1px solid var(--bp-hair); }
+  .bp-cap-row {
+    display: grid;
+    grid-template-columns: 44px minmax(180px, 1.1fr) 2fr auto;
+    align-items: baseline;
+    gap: 18px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--bp-line2);
+    transition: padding-left 0.25s ease;
+  }
+  .bp-cap-row:hover { padding-left: 10px; }
+  .bp-cap-num { font-size: 13px; color: var(--bp-acc); }
+  .bp-cap-row.is-orange .bp-cap-num { color: var(--bp-orange); }
+  .bp-cap-title { font-size: clamp(1.35rem, 2.6vw, 2rem); }
+  .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
+  .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-muted); white-space: nowrap; }
+
+  @media (max-width: 900px) {
+    .bp-cap-row { grid-template-columns: 40px 1fr; row-gap: 6px; }
+    .bp-cap-desc { grid-column: 2; }
+    .bp-cap-tag { grid-column: 2; }
+  }
+</style>

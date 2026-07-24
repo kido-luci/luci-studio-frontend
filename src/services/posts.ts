@@ -1,7 +1,5 @@
-import { BASE_URL } from '../lib/apiClient';
+import { cachedGetAll, fetchOne, FAIL_FAST } from '../lib/apiClient';
 import type { LocaleOverlay } from '../i18n';
-
-const failFast = import.meta.env.PROD && import.meta.env.ALLOW_EMPTY_POSTS !== '1';
 
 export interface Post {
     id: string;
@@ -18,42 +16,11 @@ export interface Post {
     translations?: LocaleOverlay | null;
 }
 
-// Module-scoped cache of the in-flight getAll promise. Astro shares module
-// state across all pages within a single build, so this dedupes build-time
-// callers (/blog, /blog/[slug] getStaticPaths, /blog/series/[slug], etc.)
-// into one network round-trip. Reset on error so a transient failure doesn't
-// poison subsequent retries.
-let getAllPromise: Promise<Post[]> | null = null;
-
 export const postService = {
-    async getAll(): Promise<Post[]> {
-        if (getAllPromise) return getAllPromise;
-        getAllPromise = (async () => {
-            try {
-                const response = await fetch(`${BASE_URL}/posts`);
-                if (!response.ok) throw new Error(`GET /posts failed with ${response.status}`);
-                const data = await response.json();
-                return Array.isArray(data) ? data : (data || []);
-            } catch (error) {
-                console.error('Failed to fetch posts:', error);
-                getAllPromise = null;
-                if (failFast) throw error;
-                return [];
-            }
-        })();
-        return getAllPromise;
-    },
+    // Build-time cached: /blog, /blog/[slug] getStaticPaths, /blog/series/[slug],
+    // etc. share one network round-trip. Fails the prod build on fetch errors.
+    getAll: cachedGetAll<Post>('/posts', { failFast: FAIL_FAST }),
 
-    async getByID(id: string | number): Promise<Post | null> {
-        try {
-            const response = await fetch(`${BASE_URL}/posts/${id}`);
-            if (response.status === 404) return null;
-            if (!response.ok) throw new Error(`GET /posts/${id} failed with ${response.status}`);
-            return response.json();
-        } catch (error) {
-            console.error(`Failed to fetch post ${id}:`, error);
-            if (failFast) throw error;
-            return null;
-        }
-    }
+    getByID: (id: string | number): Promise<Post | null> =>
+        fetchOne<Post>(`/posts/${id}`, { failFast: FAIL_FAST }),
 };

@@ -9,66 +9,17 @@ import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SiteFooter from "../SiteFooter.astro";
 import AdSlot from "../AdSlot.astro";
-import PostCard from "../PostCard.astro";
-import SeriesCard from "../SeriesCard.astro";
-import { postService } from "../../services/posts";
-import { galleryService } from "../../services/gallery";
-import { profileService } from "../../services/profile";
-import { playlistService } from "../../services/playlists";
-import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
-import { buildSeriesViews } from "../../utils/series";
-import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
-import { GAMES } from "../../data/games";
-import { getPlayCounts, playsFor } from "../../services/games";
-import { VIDEOS, CHANNEL_URL } from "../../data/videos";
-import { TOOL_ENGINES, TOOLS_URL } from "../../data/tools";
-
-// ANNEX A rail — bento arrangement (units.gr-style): the track is a 2-row
-// column-flow grid, and each game gets a hand-picked plate variant so the
-// rhythm alternates tall photo / stacked pair / spec-sheet plate. "tall"
-// spans both rows; "sm" is a half-height photo plate; "spec" is a tinted
-// text plate with hairline spec rows (TYPE / STATUS / HOST). Order-sensitive:
-// index i pairs with GAMES[i].
-// Tech ticker between the rail header and the bento — the page's ONE marquee.
-// Every entry is the real games stack (PixiJS v8 renderer, TS + Vite builds,
-// procedural Web Audio, Workers + D1 leaderboards), no invented tech.
-const RAIL_TECH = [
-  "PIXIJS V8",
-  "TYPESCRIPT",
-  "VITE",
-  "WEBGL",
-  "WEB AUDIO",
-  "CLOUDFLARE WORKERS",
-  "D1 LEADERBOARDS",
-  "60 FPS",
-  "ZERO INSTALL",
-];
-
-const RAIL_LAYOUT: ReadonlyArray<"tall" | "sm" | "spec"> = [
-  "tall", // G1 faldrop — flagship, full-height photo
-  "sm",   // G2 stakrise
-  "spec", // G3 sumfall — spec plate under stakrise
-  "sm",   // G4 huefall
-  "sm",   // G5 slithgrid
-  "tall", // G6 voltbreak — neon shot carries a big plate
-  "spec", // G7 skyrend — orange spec plate
-  "sm",   // G8 starcull
-  "sm",   // G9 orbfall (pairs with the closing All-games plate)
-];
-
-// The home rail is a preview of the catalog — cap it at the first 12 games; the
-// full list lives on /games (linked via the "ALL GAMES →" more-link and the
-// closing all-games card). RAIL_LAYOUT still pairs index i with RAIL_GAMES[i].
-const RAIL_GAMES = GAMES.slice(0, 12);
-
-// Real per-game play counts, baked in at build time (shared with /games via the
-// module-cached fetch in services/games.ts). Rendered on each rail card below.
-const plays = await getPlayCounts();
-
-// Typed as number so the `=== 1` plural check type-checks (VIDEOS is `as const`,
-// so its .length is the literal 2, which TS would flag against `=== 1`).
-const videoCount: number = VIDEOS.length;
-const toolCount: number = TOOL_ENGINES.reduce((n, e) => n + e.tools.length, 0);
+import { getLocaleFromUrl } from "../../i18n";
+import HomeCapabilities from "../home/HomeCapabilities.astro";
+import HomeDirectory from "../home/HomeDirectory.astro";
+import HomeTools from "../home/HomeTools.astro";
+import HomeVideos from "../home/HomeVideos.astro";
+import HomeTelemetry from "../home/HomeTelemetry.astro";
+import HomeStudio from "../home/HomeStudio.astro";
+import HomeWork from "../home/HomeWork.astro";
+import HomeArt from "../home/HomeArt.astro";
+import HomeGamesRail from "../home/HomeGamesRail.astro";
+import HomeBlogRail from "../home/HomeBlogRail.astro";
 
 const locale = getLocaleFromUrl(Astro.url);
 const API_URL = import.meta.env.PUBLIC_API_URL || "";
@@ -104,176 +55,6 @@ const bpStars = Array.from({ length: 40 }, () => {
   };
 });
 
-const profile = await profileService.getProfile();
-const stats = profile?.portfolio_stats ?? [];
-
-// §01 SELECTED WORK — a hand-picked set (app · game · open source · writing series).
-// Cover-less items fall back to the striped drafting-fig pattern. `ext` opens
-// external links in a new tab; the series link stays in-tab.
-const selectedWork = [
-  {
-    n: "01",
-    title: "MemoirMe",
-    badge: "APP",
-    year: "2024",
-    desc: "Zero-knowledge RSA/AES encrypted diary with geolocation mapping, AI features, and cross-platform sync.",
-    img: "https://media.luci-studio.com/MEMOIRME.webp",
-    href: "https://memoirme.app/",
-    fig: "app screenshot",
-    ext: true,
-    demo: "",
-  },
-  {
-    n: "02",
-    title: "Faldrop",
-    badge: "GAME",
-    year: "2026",
-    desc: "A 2.5D block-stacker — extruded-cube pieces, combos and a global leaderboard, at 60fps on one canvas.",
-    img: "https://faldrop.luci-studio.com/og-image.png",
-    href: "https://faldrop.luci-studio.com",
-    fig: "game capture",
-    ext: true,
-    demo: "/videos/faldrop-demo.mp4",
-  },
-  {
-    n: "03",
-    title: "Flutter Starter Template",
-    badge: "OPEN SOURCE",
-    year: "2026",
-    desc: "A production-ready Flutter foundation: modular Clean Architecture, offline-first sync, JWT auth, Firebase, and a Go reference backend.",
-    img: "/images/flutter-starter-template.webp",
-    href: "https://github.com/kido-luci/flutter-starter-template",
-    fig: "repo preview",
-    ext: true,
-    demo: "",
-  },
-  {
-    n: "04",
-    title: "Flutter & Dart",
-    badge: "SERIES",
-    year: "2026",
-    desc: "A written series — Flutter architecture, state management, testing, DI and advanced Dart concepts.",
-    img: "https://media.luci-studio.com/posts/covers/1779710466887355000.jpg",
-    href: localizedHref(locale, "/blog/series/flutter-dart-1b6c8568/"),
-    fig: "series cover",
-    ext: false,
-    demo: "",
-  },
-];
-
-// §03 WRITING — latest 6 posts (art-topic posts excluded); mobile caps to 4 via CSS.
-const rawPosts = await postService.getAll();
-const writing = rawPosts
-  .filter((p) => !p.topics?.some((tp) => tp.toLowerCase().startsWith("art")))
-  .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
-  .slice(0, 6)
-  .map((rawP) => {
-    const p = localized(rawP, locale);
-    const tags = p.topics && p.topics.length > 0 ? p.topics : ["Engineering"];
-    return {
-      id: p.id,
-      title: p.title,
-      subtitle: p.subtitle || "",
-      // Slug from the canonical (English) title so it matches the built page.
-      slug: buildPostSlug(rawP.title, rawP.id),
-      tags,
-      date: formatDate(p.created_at, locale),
-      read: readTimeFor(p, locale),
-      img: p.cover_image_url || "",
-      views: p.views ?? 0,
-      likes: p.likes ?? 0,
-    };
-  });
-
-// §03 WRITING — series cards join the post cards in one 2-row scrub bento (the
-// post cards are full-height plates, these are half-height plates that pair up),
-// so the rail fills the viewport like the games register. Same view-model the
-// /blog + /blog/series strips use (buildSeriesViews aggregates per-series stats
-// from the already-fetched posts — no extra round-trip beyond the playlists
-// fetch). Newest first; up to 6 series → three stacked pairs in the interleave.
-const rawPlaylists = await playlistService.getAll();
-const featuredSeries = buildSeriesViews(rawPlaylists, rawPosts).slice(0, 6);
-
-// Interleave order drives the column-flow bento: a stacked series pair, then two
-// post plates, repeated ("start with the stacked series, then two blog cards").
-// Once the series run out the remaining posts trail at the end. (Grid places two
-// consecutive span-1 series in one column; each span-2 post takes its own.)
-const blogRailItems: Array<{ kind: "series" | "post"; data: any; sidx?: number }> = [];
-let __pi = 0, __si = 0;
-while (__pi < writing.length || __si < featuredSeries.length) {
-  for (let k = 0; k < 2 && __si < featuredSeries.length; k++, __si++)
-    blogRailItems.push({ kind: "series", data: featuredSeries[__si], sidx: __si + 1 });
-  for (let k = 0; k < 2 && __pi < writing.length; k++, __pi++)
-    blogRailItems.push({ kind: "post", data: writing[__pi] });
-}
-
-// §04 ART — live gallery (kept masonry + lightbox subsystem). Fallback keeps the
-// section populated if the gallery API is empty at build time.
-const galleryItems = await galleryService.getAll();
-const artItems: { img: string; label: string; year: string; date: string; topic: string; id?: string; likes?: number; views?: number }[] =
-  galleryItems.length > 0
-    ? galleryItems.map((rawG) => {
-        const g = localized(rawG, locale);
-        return {
-          img: g.cover_image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800",
-          label: g.title,
-          year: new Date(g.created_at).getFullYear().toString(),
-          date: formatDate(g.created_at, locale),
-          topic: "Art",
-          id: g.id,
-          likes: g.likes ?? 0,
-          views: g.views ?? 0,
-        };
-      })
-    : [
-        { img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200", label: "Neon Currents", year: "2024", date: "Jan 2024", topic: "Digital Art" },
-        { img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800", label: "Deep Space", year: "2024", date: "Mar 2024", topic: "Digital Art" },
-        { img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800", label: "Bloom", year: "2024", date: "Jun 2024", topic: "Illustration" },
-      ];
-
-// Hand-curated mosaic arrangement — hardcoded order + native aspect ratio per
-// piece, rendered as justified rows (widths ∝ ratios per row → equal-height,
-// full-width, crop-free rows with no grid holes; see .art-mosaic CSS). Data
-// (URL/title/likes/views) still comes from the gallery API at build time: a
-// piece deleted from the DB drops out here, and a newly added piece stays off
-// the homepage mosaic until this map (and the .art-mosaic widths) is re-tuned.
-// Rows are grouped by native resolution, not just ratio: the first row holds
-// the tallest/highest-res scans (they can afford big tiles), the second the
-// low-res pieces — its larger ratio sum makes that row shorter, so no image is
-// ever displayed above its native size (the 600×501 Paint shot stays small
-// instead of becoming the widest, blurriest tile).
-const ART_ORDER: { id: string; ar: string }[] = [
-  { id: "53", ar: "600 / 1100" }, // Manga - a Student Girl
-  { id: "48", ar: "600 / 939" }, // Sagiri Izumi
-  { id: "64", ar: "600 / 840" }, // Portrait of a Girl - Blue Pen
-  { id: "57", ar: "600 / 773" }, // Deep feeling - Blue pen
-  { id: "54", ar: "600 / 592" }, // Portrait of a Girl 2 - Blue Pen
-  { id: "51", ar: "600 / 501" }, // Portrail of a Girl - Microsoft Paint
-];
-const artById = new Map(artItems.map((a) => [String(a.id), a]));
-const curated = ART_ORDER.flatMap((o) => {
-  const a = artById.get(o.id);
-  return a ? [{ ...a, ar: o.ar }] : [];
-});
-// Fallback (gallery API empty/changed at build): render whatever we have with a
-// neutral ratio — flex-grow closes any short row, so the grid still has no holes.
-const artPieces = curated.length > 0 ? curated : artItems.map((a) => ({ ...a, ar: "4 / 3" }));
-
-// Static blueprint copy — kept as data so the JSX stays free of raw "&" text nodes.
-const directory = [
-  { n: "01", label: "BLOG", desc: "Engineering notes & deep-dives", href: localizedHref(locale, "/blog"), ext: false, orange: false },
-  { n: "02", label: "TOOLS", desc: "Free browser micro-tools", href: "#tools", ext: false, orange: false },
-  { n: "03", label: "GAMES", desc: "Browser games, 60fps", href: "/games/", ext: false, orange: false },
-  { n: "04", label: "APPS", desc: "Cross-platform & open source", href: "#work", ext: false, orange: false },
-  { n: "05", label: "ART", desc: "Pen, pencil & digital", href: "#art", ext: false, orange: true },
-  { n: "06", label: "VIDEOS", desc: "Gameplay & coding walkthroughs", href: "/videos/", ext: false, orange: false },
-];
-const capabilities = [
-  { n: "01", title: "Cross-platform apps", desc: "One Flutter codebase → Android, iOS, macOS, Windows & Web. Local-first, offline-ready.", tag: "Flutter · Dart · BLoC", orange: false },
-  { n: "02", title: "Browser tools & games", desc: "Fast, offline-capable micro-tools and games — zero install, all client-side.", tag: "Canvas · TS · WASM", orange: false },
-  { n: "03", title: "Technical writing", desc: "Deep-dives and engineering notes on Flutter, Dart and systems that people actually read.", tag: "Blog · Series", orange: false },
-  { n: "04", title: "Digital art", desc: "Hand-drawn and digital pieces — portraits, manga studies, ink.", tag: "Pen · Pencil · Digital", orange: true },
-];
 const SITE_URL = "https://luci-studio.com";
 const homepageSchema = {
   "@context": "https://schema.org",
@@ -425,382 +206,29 @@ const homepageSchema = {
       </a>
     </header>
 
-    <!-- ===================== DIRECTORY ===================== -->
-    <section class="bp-wrap bp-section" id="directory">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">DIRECTORY</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">06 SECTIONS</span>
-      </div>
-      <div class="bp-dir">
-        {directory.map((d, i) => (
-          <a
-            href={d.href}
-            class={`bp-dir-item${d.orange ? " is-orange" : ""}`}
-            data-reveal
-            data-delay={String((i % 6) + 1)}
-            {...(d.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          >
-            <span class="bp-mono bp-dir-num">{d.n}</span>
-            <span class="bp-display bp-dir-title">{d.label}</span>
-            <span class="bp-mono bp-dir-desc">{d.desc}</span>
-          </a>
-        ))}
-      </div>
-    </section>
+    <HomeDirectory />
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-    <!-- ===================== §01 SELECTED WORK ===================== -->
-    <section class="bp-section" id="work">
-      <div class="bp-work-band">
-        <div class="bp-wrap">
-          <div class="bp-sec-head" data-reveal>
-            <span class="bp-dot" aria-hidden="true"></span>
-            <span class="bp-mono bp-sec-label">§01 — SELECTED WORK</span>
-            <span class="bp-rule" aria-hidden="true"></span>
-            <span class="bp-mono bp-sec-count">{String(selectedWork.length).padStart(2, "0")} PROJECTS</span>
-          </div>
-          <div class="bp-sec-title-row" data-reveal>
-            <h2 class="bp-display bp-h2" data-ml9>Things I've shipped.</h2>
-            <a href={localizedHref(locale, "/lab")} class="bp-mono bp-more">ALL WORK →</a>
-          </div>
-        </div>
-      </div>
-      <div class="bp-wrap">
-        <div class="bp-work-grid">
-          {selectedWork.map((w) => (
-            <a
-              href={w.href || "#work"}
-              class={`bp-work-card${w.demo ? " bp-work-card--demo" : ""}`}
-              data-reveal
-              {...(w.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            >
-              <div class={`bp-fig${w.img || w.demo ? "" : " bp-fig--striped"}`}>
-                {w.demo ? (
-                  <Fragment>
-                    <div class="bp-fig-toggle bp-mono" role="group" aria-label="Preview mode">
-                      <span class="is-active" role="button" tabindex="0" data-fmode="cover">COVER</span>
-                      <span role="button" tabindex="0" data-fmode="demo">DEMO</span>
-                    </div>
-                    <img class="bp-fig-cover-img" src={w.img} alt={w.title} loading="lazy" />
-                    <video class="bp-fig-video" muted loop playsinline preload="none" aria-label={`${w.title} gameplay demo`}>
-                      <source src={w.demo} type="video/mp4" />
-                    </video>
-                  </Fragment>
-                ) : (
-                  w.img && <img src={w.img} alt={w.title} loading="lazy" />
-                )}
-                <span class="bp-mono bp-callout">fig.{w.n} — {w.fig} · 16:10</span>
-                <span class="bp-mono bp-node">◦</span>
-              </div>
-              <div class="bp-work-meta">
-                <span class="bp-display bp-work-title">{w.title}</span>
-                <span class="bp-mono bp-badge">{w.badge}</span>
-                {w.year && <span class="bp-mono bp-work-year">{w.year}</span>}
-              </div>
-              {w.desc && <p class="bp-work-desc">{w.desc}</p>}
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
+    <HomeWork />
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-    <!-- ===================== ANNEX A — GAMES REGISTER (horizontal rail) =====================
-         units.gr-inspired pinned horizontal rail: on desktop the section pins and
-         vertical scroll drags the card track sideways (homeGamesRail.ts adds
-         .is-pinned + the GSAP scrub). Default CSS is a native overflow-x swipe
-         strip, which is also the mobile / reduced-motion / no-CDN fallback.
-         Unnumbered on purpose — an drafting-sheet ANNEX, so §02–§05 keep their
-         numbers while this is trialled. Data: src/data/games.ts (shared with /games). -->
-    <section class="bp-section bp-rail-sec" id="games-rail">
-      <div class="bp-wrap">
-        <div class="bp-sec-head" data-reveal>
-          <span class="bp-dot" aria-hidden="true"></span>
-          <span class="bp-mono bp-sec-label">ANNEX A — GAMES REGISTER</span>
-          <span class="bp-rule" aria-hidden="true"></span>
-          <span class="bp-mono bp-sec-count">{String(GAMES.length).padStart(2, "0")} GAMES</span>
-        </div>
-        <div class="bp-sec-title-row" data-reveal>
-          <h2 class="bp-display bp-h2" data-ml9>Play something.</h2>
-          <a href="/games/" class="bp-mono bp-more">ALL GAMES →</a>
-        </div>
-      </div>
-      <!-- Tech ticker — full-bleed hairline strip, CSS-only infinite marquee
-           (two identical sequences, translateX(-50%) loop). Decorative
-           (aria-hidden); freezes to a static strip under reduced motion. -->
-      <div class="bp-rail-marquee" aria-hidden="true">
-        <div class="bp-rail-marquee-track">
-          {[0, 1].map(() => (
-            <span class="bp-rail-marquee-seq bp-mono">
-              {RAIL_TECH.map((t) => (
-                <Fragment>
-                  <span>{t}</span>
-                  <span class="bp-rail-marquee-sep">◇</span>
-                </Fragment>
-              ))}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div class="bp-rail-viewport">
-        <div class="bp-rail-track">
-          {RAIL_GAMES.map((g, i) => {
-            const variant = RAIL_LAYOUT[i] ?? "sm";
-            const p = playsFor(plays, g.slug);
-            return variant === "spec" ? (
-              <a href={g.href} class={`bp-rail-card bp-rail-card--spec${i > 3 ? " is-orange" : ""}`} target="_blank" rel="noopener noreferrer">
-                <span class="bp-mono bp-rail-fignum">fig.G{i + 1} — {g.slug}</span>
-                <span class="bp-display bp-rail-spec-title">{g.title}</span>
-                <p class="bp-rail-tagline">{g.tagline}</p>
-                <dl class="bp-rail-specs bp-mono">
-                  <div class="bp-rail-spec-row"><dt>TYPE</dt><dd>{g.tags[0]}</dd></div>
-                  <div class="bp-rail-spec-row"><dt>STATUS</dt><dd>{g.beta ? "BETA" : "LIVE"}</dd></div>
-                  <div class="bp-rail-spec-row"><dt>PLAYS</dt><dd>{p ? p.value : "NEW"}</dd></div>
-                  <div class="bp-rail-spec-row"><dt>HOST</dt><dd>{g.host.split(".")[0]}.·.com</dd></div>
-                </dl>
-              </a>
-            ) : variant === "tall" ? (
-              <a href={g.href} class="bp-rail-card bp-rail-card--tall" target="_blank" rel="noopener noreferrer">
-                {g.beta && <span class="bp-mono bp-rail-chip">BETA</span>}
-                {p
-                  ? <span class="bp-mono bp-rail-plays">{p.label}</span>
-                  : <span class="bp-mono bp-rail-plays bp-rail-plays--new">New</span>}
-                <span class="bp-rail-tall-fig">
-                  <img src={g.image} alt={`${g.title} — ${g.tagline}`} loading="lazy" decoding="async" />
-                </span>
-                <span class="bp-rail-tall-body">
-                  <span class="bp-display bp-rail-spec-title">{g.title}</span>
-                  <span class="bp-rail-blurb">{g.blurb}</span>
-                </span>
-                <span class="bp-rail-tall-foot bp-mono">
-                  <span class="bp-rail-dot" aria-hidden="true"></span>
-                  {g.host.toUpperCase()}
-                  <span class="bp-rail-arr">↗</span>
-                </span>
-              </a>
-            ) : (
-              <a href={g.href} class="bp-rail-card bp-rail-card--photo" target="_blank" rel="noopener noreferrer">
-                {p
-                  ? <span class="bp-mono bp-rail-plays">{p.label}</span>
-                  : <span class="bp-mono bp-rail-plays bp-rail-plays--new">New</span>}
-                <img src={g.image} alt={`${g.title} — ${g.tagline}`} loading="lazy" decoding="async" />
-                <span class="bp-rail-tb">
-                  <span class="bp-mono bp-rail-fignum">fig.G{i + 1}</span>
-                  <span class="bp-display bp-rail-title">{g.title}</span>
-                  {g.beta && <span class="bp-mono bp-badge">BETA</span>}
-                  <span class="bp-mono bp-rail-arr">↗</span>
-                </span>
-              </a>
-            );
-          })}
-          <a href="/games/" class="bp-rail-card bp-rail-card--all">
-            <span class="bp-display bp-rail-all">All games →</span>
-            <span class="bp-mono bp-rail-all-sub">FULL CATALOG · /GAMES</span>
-          </a>
-        </div>
-      </div>
-    </section>
+    <HomeGamesRail />
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-    <!-- ===================== ANNEX B — SCREENING ROOM (video band) =============
-         Off-site video content (YouTube) surfaced on the home as a STATIC grid —
-         deliberately not another pinned rail, so it reads as a different layout
-         family from the games/writing bento rails. Cards link out; nothing is
-         embedded. Unnumbered ANNEX (like GAMES REGISTER) so §02–§05 keep their
-         numbers. Data: src/data/videos.ts (shared with /videos). -->
-    <section class="bp-section bp-wrap bp-vid-sec" id="videos">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">ANNEX B — SCREENING ROOM</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">{String(videoCount).padStart(2, "0")} {videoCount === 1 ? "VIDEO" : "VIDEOS"}</span>
-      </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>Watch something.</h2>
-        <a href="/videos/" class="bp-mono bp-more">ALL VIDEOS →</a>
-      </div>
+    <HomeVideos />
 
-      <!-- channel strip -->
-      <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" class="bp-vid-channel" data-reveal>
-        <span class="bp-vid-channel-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-            <path d="M21.6 7.2a2.5 2.5 0 0 0-1.76-1.77C18.28 5 12 5 12 5s-6.28 0-7.84.43A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.76 1.77C5.72 19 12 19 12 19s6.28 0 7.84-.43a2.5 2.5 0 0 0 1.76-1.77A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8ZM10 15.2V8.8L15.6 12 10 15.2Z"/>
-          </svg>
-        </span>
-        <span class="bp-vid-channel-body">
-          <span class="bp-mono bp-vid-channel-eyebrow">YOUTUBE CHANNEL</span>
-          <span class="bp-display bp-vid-channel-handle">@the-luci-studio</span>
-        </span>
-        <span class="bp-mono bp-vid-channel-cta">View channel ↗</span>
-      </a>
+    <HomeTools />
 
-      <!-- static video grid -->
-      <div class="bp-vid-grid">
-        {VIDEOS.map((v) => (
-          <a href={v.href} target="_blank" rel="noopener noreferrer" class="bp-vid-card" data-reveal>
-            <div class="bp-vid-media">
-              <img src={v.img} alt={v.title} loading="lazy" width="1280" height="720" />
-              <span class="bp-mono bp-vid-platform">{v.platform}</span>
-            </div>
-            <div class="bp-vid-body">
-              <span class="bp-mono bp-vid-tag">{v.tag}</span>
-              <div class="bp-display bp-vid-title">{v.title}</div>
-            </div>
-            <div class="bp-mono bp-vid-foot">
-              <span class="bp-vid-host"><span class="bp-vid-dot"></span>{v.host}</span>
-              <span class="bp-vid-arrow">↗</span>
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
+    <HomeTelemetry />
 
-    <!-- ===================== ANNEX C — TOOLS INDEX (parts-list index of the
-         tools.luci-studio.com portfolio. Data: src/data/tools.ts, a hardcoded
-         mirror of the tools-home catalog). ================================= -->
-    <section class="bp-wrap bp-section" id="tools">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">ANNEX C — TOOLS INDEX</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">{String(toolCount).padStart(2, "0")} TOOLS · {String(TOOL_ENGINES.length).padStart(2, "0")} ENGINES</span>
-      </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>Use something.</h2>
-        <a href={`${TOOLS_URL}/`} target="_blank" rel="noopener noreferrer" class="bp-mono bp-more">ALL {toolCount} TOOLS →</a>
-      </div>
-      <div class="bp-tools-index">
-        {TOOL_ENGINES.map((eng, i) => (
-          <div class="bp-tools-block" data-reveal data-delay={String((i % 6) + 1)}>
-            <a href={`${TOOLS_URL}/${eng.prefix}/`} target="_blank" rel="noopener noreferrer" class="bp-tools-eng">
-              <span class="bp-mono bp-tools-eng-name">{eng.name}</span>
-              <span class="bp-mono bp-tools-eng-count">{String(eng.tools.length).padStart(2, "0")}</span>
-            </a>
-            <ul class="bp-tools-list">
-              {eng.tools.slice(0, 5).map((t) => (
-                <li>
-                  <a href={`${TOOLS_URL}/${eng.prefix}/${t.slug}/`} target="_blank" rel="noopener noreferrer" class="bp-tools-row">
-                    <span class="bp-mono bp-tools-chip">{t.chip ?? t.specimen}</span>
-                    <span class="bp-tools-title">{t.title}</span>
-                    <span class="bp-mono bp-tools-arrow" aria-hidden="true">↗</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <a href={`${TOOLS_URL}/${eng.prefix}/`} target="_blank" rel="noopener noreferrer" class="bp-mono bp-tools-all">ALL {String(eng.tools.length).padStart(2, "0")} →</a>
-          </div>
-        ))}
-      </div>
-    </section>
-
-    <!-- ===================== ANNEX D — LIVE TELEMETRY (instrument strip; four
-         client-side live readouts linking to the live.luci-studio.com widgets.
-         DOM fully server-rendered — src/scripts/homeLiveTelemetry.ts only fills
-         text + toggles state classes; fetch starts on viewport entry). ======= -->
-    <section class="bp-wrap bp-section" id="live">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">ANNEX D — LIVE TELEMETRY</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">04 INSTRUMENTS · 24/7</span>
-      </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>Track something.</h2>
-        <a href="https://live.luci-studio.com/" target="_blank" rel="noopener noreferrer" class="bp-mono bp-more">ALL WIDGETS →</a>
-      </div>
-      <div class="bp-live-strip" data-reveal>
-        {[
-          { key: "clock", label: "STUDIO CLOCK", href: "https://live.luci-studio.com/" },
-          { key: "iss", label: "ISS POSITION", href: "https://live.luci-studio.com/iss/" },
-          { key: "quake", label: "LAST QUAKE (24H)", href: "https://live.luci-studio.com/quakes/" },
-          { key: "fx", label: "EUR → USD", href: "https://live.luci-studio.com/currency/" },
-        ].map((inst) => (
-          <a href={inst.href} target="_blank" rel="noopener noreferrer" class="bp-live-inst" data-live-inst={inst.key}>
-            <span class="bp-live-head">
-              <span class="bp-mono bp-live-label">{inst.label}</span>
-              <span class="bp-live-dot" aria-hidden="true"></span>
-            </span>
-            <span class="bp-mono bp-live-value" data-live-value>——</span>
-            <span class="bp-mono bp-live-sub" data-live-sub>SYNCING…</span>
-          </a>
-        ))}
-      </div>
-      <p class="bp-mono bp-live-credit" data-reveal>DATA: USGS · WHERETHEISS.AT · FRANKFURTER (ECB)</p>
-    </section>
-
-    <!-- ===================== §02 CAPABILITIES ===================== -->
-    <section class="bp-wrap bp-section" id="capabilities">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">§02 — CAPABILITIES</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">04 DISCIPLINES</span>
-      </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>What I build.</h2>
-      </div>
-      <div class="bp-cap-list">
-        {capabilities.map((c) => (
-          <div class={`bp-cap-row${c.orange ? " is-orange" : ""}`} data-reveal>
-            <span class="bp-mono bp-cap-num">{c.n}</span>
-            <span class="bp-display bp-cap-title">{c.title}</span>
-            <p class="bp-cap-desc">{c.desc}</p>
-            <span class="bp-mono bp-cap-tag">{c.tag}</span>
-          </div>
-        ))}
-      </div>
-    </section>
+    <HomeCapabilities />
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-    <!-- ===================== §03 WRITING — scroll-jacked rail (pulled out of the
-         sheet stack; pins + scrubs its card track sideways like the games rail,
-         homeBlogRail. Falls back to a native overflow-x swipe strip). ========= -->
-    <section class="bp-section bp-rail-sec bp-blog-rail" id="blog">
-      <div class="bp-wrap">
-        <div class="bp-sec-head" data-reveal>
-          <span class="bp-dot" aria-hidden="true"></span>
-          <span class="bp-mono bp-sec-label">§03 — WRITING</span>
-          <span class="bp-rule" aria-hidden="true"></span>
-          <span class="bp-mono bp-sec-count">LATEST</span>
-        </div>
-        <div class="bp-sec-title-row" data-reveal>
-          <h2 class="bp-display bp-h2" data-ml9>From the blog.</h2>
-          <a href={localizedHref(locale, "/blog")} class="bp-mono bp-more">ALL POSTS →</a>
-        </div>
-      </div>
-      <div class="bp-rail-viewport">
-        <!-- One 2-row bento scrub track (mirrors the games rail): post cards are
-             full-height plates (grid-row: span 2), the featured series cards are
-             half-height plates (span 1) that pair up two-per-column at the end. -->
-        <div class="bp-write-cards">
-          {blogRailItems.map((it) => (
-            it.kind === "post" ? (
-              <PostCard
-                href={localizedHref(locale, `/blog/${it.data.slug}/`)}
-                title={it.data.title}
-                subtitle={it.data.subtitle}
-                tags={it.data.tags}
-                date={it.data.date}
-                read={it.data.read}
-                img={it.data.img}
-                id={it.data.id}
-                views={it.data.views}
-                likes={it.data.likes}
-                variant="blueprint"
-              />
-            ) : (
-              <SeriesCard series={it.data} variant="blueprint" index={it.sidx} />
-            )
-          ))}
-        </div>
-      </div>
-    </section>
+    <HomeBlogRail />
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
@@ -808,144 +236,12 @@ const homepageSchema = {
          .bp-stack CSS): opaque, 100dvh, centered. Falls back to normal document
          flow otherwise. (§05 STUDIO scrolls normally, outside this wrapper.) -->
     <div class="bp-stack">
-    <!-- ===================== §04 ART ===================== -->
-    <section class="bp-section bp-art" id="art">
-      <div class="bp-art-bg-wrap" aria-hidden="true"><div id="art-bg" class="bp-art-bg"></div></div>
-      <div class="bp-wrap bp-art-inner">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot is-orange" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label is-orange">§04 — ART</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">{String(artPieces.length).padStart(2, "0")} PIECES</span>
-      </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>Hand-drawn & digital.</h2>
-        <p class="bp-art-note">Off-clock studies — pen, pencil and pixels.</p>
-      </div>
-
-      <div class="art-mosaic">
-        {artPieces.map((a) => {
-          const infoBar = (
-            <div class="px-3 py-2 flex items-start justify-between gap-2 bp-art-bar">
-              <div class="flex-1 min-w-0">
-                <p class="bp-art-bar-title line-clamp-2">{a.label}</p>
-                <p class="bp-mono bp-art-bar-meta truncate">{a.topic} · {a.date}</p>
-              </div>
-              {a.id != null && (
-                <button
-                  type="button"
-                  class="art-like-area flex items-center gap-1 cursor-pointer flex-shrink-0 group/like mt-0.5 bg-transparent border-0 p-0"
-                  data-id={String(a.id)}
-                  data-likes={String(a.likes ?? 0)}
-                  aria-label={`Like ${a.label}`}
-                >
-                  <svg class="art-like-icon w-3.5 h-3.5 group-hover/like:text-rose-400 transition-colors duration-200" style="color:rgba(255,255,255,0.82)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                  <span class="art-like-count bp-mono text-[10px] group-hover/like:text-rose-400 transition-colors duration-200" style="color:rgba(255,255,255,0.82)">{a.likes ?? 0}</span>
-                </button>
-              )}
-            </div>
-          );
-          const openable = a.id != null;
-          const frameClass = "art-img-frame relative block w-full overflow-hidden";
-          const frameInner = (
-            <Fragment>
-              <img src={a.img} alt={a.label} class="w-full h-full object-cover block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-            </Fragment>
-          );
-          return (
-            <div class="art-mosaic-item group" style={`aspect-ratio: ${a.ar};`} data-art-card>
-              {openable ? (
-                <button
-                  type="button"
-                  class={`${frameClass} cursor-pointer p-0 bg-transparent text-left`}
-                  data-art-open
-                  data-img={a.img}
-                  data-title={a.label}
-                  data-date={a.date}
-                  data-views={String(a.views ?? 0)}
-                  data-likes={String(a.likes ?? 0)}
-                  data-id={String(a.id)}
-                  aria-label={`View ${a.label}`}
-                >
-                  {frameInner}
-                </button>
-              ) : (
-                <div class={frameClass}>{frameInner}</div>
-              )}
-              {infoBar}
-            </div>
-          );
-        })}
-      </div>
-      </div>
-    </section>
-
-    <!-- ART LIGHTBOX (popup) -->
-    <div id="art-lightbox" class="art-lightbox" data-api-url={API_URL} aria-hidden="true" role="dialog" aria-modal="true" aria-label="Artwork viewer">
-      <div class="art-lightbox-bg" data-art-bgimg></div>
-      <button type="button" class="art-lightbox-close" data-art-close aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-      </button>
-      <figure class="art-lightbox-figure">
-        <img class="art-lightbox-img" data-art-img src="" alt="" />
-        <figcaption class="art-lightbox-caption">
-          <div class="flex items-center gap-3 mb-2 flex-wrap">
-            <span class="bp-mono text-[10px] text-gray-400" data-art-cap-date></span>
-            <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
-            <span class="bp-mono text-xs text-gray-400 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-              <span data-art-cap-views>—</span>
-            </span>
-            <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
-            <span class="bp-mono text-xs text-gray-400 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
-              <span data-art-cap-likes>—</span>
-            </span>
-          </div>
-          <h3 class="bp-display text-xl md:text-3xl leading-tight" data-art-cap-title></h3>
-        </figcaption>
-      </figure>
-    </div>
+      <HomeArt />
     </div><!-- /.bp-stack -->
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-    <!-- ===================== §05 STUDIO ===================== -->
-    <section class="bp-wrap bp-section" id="studio">
-      <div class="bp-sec-head bp-sec-head--inst" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">§05 — STUDIO</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-compass" aria-hidden="true">
-          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="24" cy="24" r="16" class="bp-compass-guide"></circle>
-            <circle cx="24" cy="24" r="16" class="bp-compass-draw"></circle>
-            <g class="bp-compass-arm"><line x1="24" y1="24" x2="40" y2="24"></line><circle cx="40" cy="24" r="2.4" class="bp-compass-tip"></circle></g>
-            <circle cx="24" cy="24" r="1.8" class="bp-compass-pivot"></circle>
-          </svg>
-        </span>
-      </div>
-      <div class="bp-studio">
-        <p class="bp-display bp-studio-statement" data-reveal>
-          I treat engineering as a craft — measure twice, ship once, and write down what I learn along the way. Small scope, production-grade standards, no deferred debt.
-        </p>
-        {stats.length > 0 && (
-          <div class="bp-stats" data-reveal>
-            {stats.map((s) => (
-              <div class="bp-stat-row">
-                <span class="bp-display bp-stat-num">{s.number}<em>{s.suffix}</em></span>
-                <span class="bp-stat-meta">
-                  <span class="bp-mono bp-stat-label">{s.label}</span>
-                  {s.sub && <span class="bp-mono bp-stat-sub">{s.sub}</span>}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+    <HomeStudio />
 
     <div class="bp-wrap">
       <AdSlot placement="home" />
@@ -1015,7 +311,11 @@ const homepageSchema = {
        html had overflow-x: clip. */
     overflow-x: clip;
   }
-  /* Crisp blueprint headings — cancel the site's light-mode heading drop-shadow filter. */
+  /* Crisp blueprint headings — cancel the site's light-mode heading drop-shadow
+     filter. Scoped to THIS component's own .bp-display elements only; each home
+     section component carries its own copy for its headings. (Deliberately NOT a
+     reach-into-children :global — that form also caught SiteFooter's
+     .bp-cta-title, which keeps the site-wide drop-shadow.) */
   :global(body.light-mode) .bp-display { filter: none !important; }
 
   /* Drafting grid: fine 36px + major 180px, spanning the whole sheet. */
@@ -1226,7 +526,20 @@ const homepageSchema = {
   :global(body.win-perf-mode) .bp-star { animation: none; opacity: 0.5; }
   :global(body.win-perf-mode) .bp-cst-edges line { animation: none; }
 
-  .bp-wrap {
+  /* Reach-into-children form (:global(:where(.bp) .X)): these atoms are used
+     both by markup that stays directly in this component (hero, §04 art) and by
+     markup now living in child section components (HomeDirectory/HomeWork/
+     HomeVideos/HomeTools/HomeTelemetry/HomeCapabilities/HomeStudio/
+     HomeGamesRail/HomeBlogRail). The zero-specificity :where(.bp) guard keeps
+     each rule page-local while :global() lets it match elements stamped with a
+     child's own Astro scope id. Deliberately (0,1,0): before the split these
+     atoms sat EARLIER in this style block than every section-specific rule, so
+     at the old equal (0,2,0) specificity they lost all cascade ties by source
+     order. Now that section rules live in child chunks (which Vite may emit in
+     any order), the atoms are kept one class WEAKER instead — any scoped rule
+     (min 0,2,0: class + cid attribute) in this or a child component still beats
+     them, order-independent, reproducing the pre-split cascade exactly. */
+  :global(:where(.bp) .bp-wrap) {
     position: relative;
     z-index: 1;
     max-width: 1280px;
@@ -1234,7 +547,7 @@ const homepageSchema = {
     padding-left: clamp(20px, 5vw, 48px);
     padding-right: clamp(20px, 5vw, 48px);
   }
-  .bp-section {
+  :global(:where(.bp) .bp-section) {
     padding-top: clamp(52px, 8vw, 88px);
     padding-bottom: clamp(52px, 8vw, 88px);
   }
@@ -1244,9 +557,17 @@ const homepageSchema = {
      full-viewport sheet, centered and clearing the fixed nav. Pure CSS
      `position: sticky` (no GSAP pin), so it never fights Lenis, the games-rail
      ScrollTrigger pin, or the fixed art lightbox. Guarded query, so mobile /
-     reduced-motion keep the normal document flow untouched. */
+     reduced-motion keep the normal document flow untouched.
+     .bp-stack stays in this component (<main class="bp">'s direct child); the
+     `section`/`.bp-art` it targets now live in HomeArt.astro, so both parts of
+     each selector are :global()-wrapped to reach across the component boundary
+     — `.bp-stack > :global(section)` compiles to `.bp-stack[cid] > section`
+     (one attribute weaker than the pre-split `.bp-stack[cid] > section[cid]`).
+     Nothing else sets position/min-height/padding on a `section` or `.bp-art`
+     element under `.bp-stack` at a competing specificity, so this still wins
+     the cascade the same way. */
   @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
-    .bp-stack > section {
+    .bp-stack > :global(section) {
       position: sticky;
       top: 0;
       min-height: 100dvh;
@@ -1263,87 +584,20 @@ const homepageSchema = {
        engages and there is no sticky-inside-sticky double-pin — while an
        absolute bg would keep its base height:100vh and leave any gallery
        overflow past the first viewport uncovered. */
-    .bp-stack > .bp-art { box-shadow: 0 -24px 50px -18px rgba(0, 0, 0, 0.5); }
-  }
-
-  /* §01's title row gets the same fixed-dark drafting band as the closing CTA
-     (SiteFooter's .bp-cta) — full-bleed, independent of light/dark mode. Only
-     the header (label + "Things I've shipped."); the work-card grid below it
-     stays on the page's own background. Re-pointing the blueprint tokens here
-     (rather than touching every child rule) is what keeps the existing
-     title/label styles legible without a rewrite — --bp-acc is already a
-     fixed blueprint-blue on this page, so it's untouched. */
-  .bp-work-band {
-    position: relative;
-    z-index: 1;
-    background: #11161d;
-    color: #eceae3;
-    overflow: hidden;
-    padding-top: clamp(40px, 6vw, 64px);
-    /* The band reaches half a card's height below the title so the work-card
-       grid (pulled up by the same amount, below) overlaps it — top half of the
-       cards sits on the dark sheet, bottom half on the page. --work-band-extra
-       (= half the first card's measured height) is set on the section by the
-       script below so both the band and its sibling grid-wrap can read it. */
-    padding-bottom: calc(clamp(40px, 6vw, 64px) + var(--work-band-extra, 0px));
-    margin-bottom: 0;
-    --bp-ink: #eceae3;
-    --bp-muted: rgba(236, 234, 227, 0.72);
-    --bp-faint: rgba(236, 234, 227, 0.5);
-    --bp-hair: rgba(236, 234, 227, 0.14);
-  }
-  .bp-work-band::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(rgba(236, 234, 227, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(236, 234, 227, 0.05) 1px, transparent 1px);
-    background-size: 36px 36px;
-    pointer-events: none;
-  }
-  .bp-work-band .bp-wrap { position: relative; z-index: 1; }
-  .bp-work-band .bp-sec-title-row { margin-bottom: 0; }
-  /* Overlap: lift the grid up by half a card so its top half straddles the dark
-     band; z-index above the band so the cards paint over the dark sheet. */
-  .bp-work-band + .bp-wrap {
-    position: relative;
-    z-index: 2;
-    margin-top: calc(-1 * var(--work-band-extra, 0px));
+    .bp-stack > :global(.bp-art) { box-shadow: 0 -24px 50px -18px rgba(0, 0, 0, 0.5); }
   }
 
   /* ── shared motif atoms ── */
-  .bp-display {
+  :global(:where(.bp) .bp-display) {
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em !important;
     color: var(--bp-ink);
   }
-  .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
-
-  .bp-sec-head {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+  :global(:where(.bp) .bp-sec-head) {
     margin-bottom: clamp(22px, 3vw, 34px);
   }
-  .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
-  .bp-dot.is-orange { background: var(--bp-orange); }
-  /* §05 header instrument: a small compass whose arm sweeps and traces its ring
-     (echoes the "measure twice" studio statement). Guarded like the hero SVG. */
-  .bp-sec-head--inst { position: relative; }
-  .bp-compass { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; pointer-events: none; }
-  .bp-compass svg { display: block; width: 100%; height: 100%; }
-  .bp-compass-guide { fill: none; stroke: var(--bp-hair); stroke-width: 1; }
-  .bp-compass-draw { fill: none; stroke: var(--bp-acc); stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 20 81; transform-box: view-box; transform-origin: center; animation: lu-spin 5s linear infinite; }
-  .bp-compass-arm { transform-box: view-box; transform-origin: center; animation: lu-spin 5s linear infinite; }
-  .bp-compass-arm line { stroke: var(--bp-ink); stroke-width: 1.2; stroke-opacity: 0.55; }
-  .bp-compass-tip { fill: var(--bp-orange); }
-  .bp-compass-pivot { fill: var(--bp-ink); fill-opacity: 0.6; }
-  .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; color: var(--bp-acc); white-space: nowrap; }
-  .bp-sec-label.is-orange { color: var(--bp-orange); }
-  .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
-  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); white-space: nowrap; }
-
-  .bp-sec-title-row {
+  :global(:where(.bp) .bp-sec-title-row) {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -1351,11 +605,11 @@ const homepageSchema = {
     flex-wrap: wrap;
     margin-bottom: clamp(26px, 4vw, 44px);
   }
-  .bp-h2 {
+  :global(:where(.bp) .bp-h2) {
     font-size: clamp(2.1rem, 6vw, 3.75rem);
     line-height: 1.0;
   }
-  .bp-more {
+  :global(:where(.bp) .bp-more) {
     font-size: 12px;
     letter-spacing: 0.08em;
     color: var(--bp-ink);
@@ -1365,9 +619,15 @@ const homepageSchema = {
     white-space: nowrap;
     transition: color 0.2s ease, border-color 0.2s ease;
   }
-  .bp-more:hover { color: var(--bp-acc); border-color: var(--bp-acc); }
+  :global(:where(.bp) .bp-more):hover { color: var(--bp-acc); border-color: var(--bp-acc); }
 
-  .bp-badge {
+  /* :global(:where(.bp) …) reach-into-children form (see the comment block
+     above .bp-wrap): .bp-badge marks up the §01 work-card badge (HomeWork.astro)
+     and the games-rail BETA chip (HomeGamesRail.astro) — neither instance lives
+     directly in this component anymore, so the plain scoped selector would
+     never match — the zero-specificity :where(.bp) guard keeps it page-local
+     while :global() lets it reach each child's own Astro scope id. */
+  :global(:where(.bp) .bp-badge) {
     display: inline-block;
     font-size: 10px;
     letter-spacing: 0.1em;
@@ -1479,646 +739,34 @@ const homepageSchema = {
   }
   .bp-scroll-arrow { width: 16px; height: 16px; animation: lu-bob 1.8s ease-in-out infinite; }
 
-  /* ── DIRECTORY ── */
-  .bp-dir {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    border-top: 1.5px solid var(--bp-hair);
-    border-bottom: 1.5px solid var(--bp-hair);
-  }
-  .bp-dir-item {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 22px 22px 24px;
-    text-decoration: none;
-    border-left: 1px solid var(--bp-line2);
-    transition: background 0.25s ease;
-  }
-  .bp-dir-item:first-child { border-left: none; }
-  .bp-dir-item:hover { background: var(--bp-hover); }
-  .bp-dir-item.is-orange:hover { background: color-mix(in srgb, var(--bp-orange) 8%, transparent); }
-  .bp-dir-num { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); }
-  .bp-dir-item.is-orange .bp-dir-num { color: var(--bp-orange); }
-  .bp-dir-title { font-size: clamp(1.05rem, 2.2vw, 1.4rem); }
-  .bp-dir-desc { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-muted); line-height: 1.5; }
-
-  /* ── ANNEX C — TOOLS INDEX (parts-list; blocks pack into CSS columns) ── */
-  .bp-tools-index {
-    columns: 3;
-    column-gap: 44px;
-    column-rule: 1px solid var(--bp-line2);
-  }
-  .bp-tools-block {
-    break-inside: avoid;
-    padding: 14px 0 20px;
-    border-top: 1px solid var(--bp-hair);
-  }
-  .bp-tools-eng {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    text-decoration: none;
-    color: var(--bp-ink);
-  }
-  .bp-tools-eng:hover .bp-tools-eng-name { color: var(--bp-acc); }
-  .bp-tools-eng-name { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; transition: color 0.2s ease; }
-  .bp-tools-eng-count { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); }
-  .bp-tools-list { list-style: none; margin: 10px 0 0; padding: 0; }
-  .bp-tools-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 0;
-    text-decoration: none;
-    color: var(--bp-ink);
-    transition: background 0.2s ease;
-  }
-  .bp-tools-row:hover { background: var(--bp-hover); }
-  .bp-tools-chip {
-    flex: 0 0 56px;
-    font-size: 10.5px;
-    letter-spacing: 0.04em;
-    color: var(--bp-muted);
-    border: 1px solid var(--bp-line2);
-    border-radius: 4px;
-    text-align: center;
-    padding: 1px 4px;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-  .bp-tools-title { font-size: 13.5px; line-height: 1.35; }
-  .bp-tools-row:hover .bp-tools-title { color: var(--bp-acc); }
-  .bp-tools-arrow { margin-left: auto; font-size: 11px; color: var(--bp-faint); opacity: 0; transition: opacity 0.15s ease; }
-  .bp-tools-row:hover .bp-tools-arrow { opacity: 1; }
-  .bp-tools-all { display: inline-block; margin-top: 8px; font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); text-decoration: none; }
-  .bp-tools-all:hover { text-decoration: underline; }
-  @media (max-width: 900px) {
-    .bp-tools-index { columns: 2; column-gap: 32px; }
-  }
-  @media (max-width: 640px) {
-    .bp-tools-index { columns: 1; }
-    /* single column would run ~70 rows; cap each engine at its top 3 (the
-       per-engine ALL NN → footer keeps the full count reachable) */
-    .bp-tools-list li:nth-child(n + 4) { display: none; }
-  }
-
-  /* ── ANNEX D — LIVE TELEMETRY (instrument strip) ── */
-  .bp-live-strip {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    border-top: 1.5px solid var(--bp-hair);
-    border-bottom: 1.5px solid var(--bp-hair);
-  }
-  .bp-live-inst {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 22px 22px 24px;
-    text-decoration: none;
-    color: var(--bp-ink);
-    border-left: 1px solid var(--bp-line2);
-    transition: background 0.25s ease;
-  }
-  .bp-live-inst:first-child { border-left: none; }
-  .bp-live-inst:hover { background: var(--bp-hover); }
-  .bp-live-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .bp-live-label { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); }
-  .bp-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-faint); flex: 0 0 auto; }
-  .bp-live-inst.is-live .bp-live-dot { background: var(--bp-acc); animation: bp-live-blink 1.6s ease-in-out infinite; }
-  .bp-live-inst.is-off .bp-live-dot { background: var(--bp-faint); animation: none; }
-  .bp-live-value {
-    font-size: clamp(1rem, 1.7vw, 1.35rem);
-    letter-spacing: 0.02em;
-    font-variant-numeric: tabular-nums;
-    min-height: 1.4em;
-  }
-  .bp-live-inst.is-off .bp-live-value { color: var(--bp-muted); }
-  .bp-live-sub { font-size: 11px; letter-spacing: 0.1em; color: var(--bp-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bp-live-credit { margin-top: 12px; font-size: 10px; letter-spacing: 0.12em; color: var(--bp-faint); }
-  @keyframes bp-live-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.25; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .bp-live-inst .bp-live-dot { animation: none !important; }
-  }
-  @media (max-width: 900px) {
-    .bp-live-strip { grid-template-columns: repeat(2, 1fr); }
-    .bp-live-inst { padding: 18px 16px 20px; }
-    .bp-live-inst:nth-child(odd) { border-left: none; }
-    .bp-live-inst:nth-child(n + 3) { border-top: 1px solid var(--bp-line2); }
-  }
-
-  /* ── §01 SELECTED WORK ── */
-  .bp-work-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(20px, 3vw, 30px); }
-  .bp-work-card { text-decoration: none; display: block; }
-  .bp-fig {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    background: var(--bp-card);
-    border: 1px solid var(--bp-hair);
-    border-radius: 10px;
-    overflow: hidden;
-    transition: transform 0.3s ease, border-color 0.3s ease;
-  }
-  .bp-fig img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .bp-fig--striped {
-    background-image: repeating-linear-gradient(45deg, var(--bp-line2) 0, var(--bp-line2) 1px, transparent 1px, transparent 12px);
-  }
-  .bp-work-card:hover .bp-fig { transform: translateY(-4px); border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent); }
-  .bp-callout { position: absolute; left: 14px; bottom: 12px; font-size: 10px; letter-spacing: 0.06em; color: var(--bp-muted); }
-  .bp-node { position: absolute; top: 10px; right: 14px; font-size: 12px; color: var(--bp-acc); }
-  .bp-work-meta { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
-  .bp-work-title { font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
-  .bp-work-year { font-size: 11px; color: var(--bp-muted); margin-left: auto; }
-  .bp-work-desc { margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
-
-  /* ── ANNEX A — GAMES REGISTER: bento rail ──
-     units.gr-style bento inside a horizontal rail: the track is a 2-row
-     column-flow grid mixing full-height photo plates, half-height photo
-     plates and tinted "spec sheet" text plates (RAIL_LAYOUT in the
-     frontmatter picks each game's variant). Default = native overflow-x
-     swipe strip (mobile / reduced-motion / no-CDN fallback);
-     homeGamesRail.ts adds .is-pinned on desktop and GSAP scrubs the track
-     sideways with page scroll. Full-bleed on purpose — the rail breaking
-     out of the bp-wrap column is the layout-variance beat between two
-     contained sections. */
-  .bp-rail-sec { position: relative; z-index: 1; --rail-h: clamp(440px, 66vh, 720px); }
-  /* Tech ticker — hairline-ruled full-bleed strip; the track holds two
-     identical sequences and loops translateX(-50%), so the scroll is seamless.
-     Transform-only (win-perf safe); parked static under reduced motion. */
-  .bp-rail-marquee {
-    overflow: hidden;
-    margin-top: 22px;
-    padding: 9px 0;
-    background: rgb(var(--accent-rgb));
-  }
-  .bp-rail-marquee-track {
-    display: flex;
-    width: max-content;
-    animation: bp-marquee 38s linear infinite;
-  }
-  .bp-rail-marquee-seq {
-    display: flex;
-    align-items: center;
-    gap: 26px;
-    padding-right: 26px;
-    white-space: nowrap;
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    color: var(--accent-ink, #fff);
-  }
-  .bp-rail-marquee-sep { color: var(--accent-ink, #fff); opacity: 0.55; font-size: 9px; }
-  @keyframes bp-marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .bp-rail-marquee-track { animation: none; }
-  }
-  .bp-rail-track {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(2, minmax(0, 1fr));
-    grid-auto-columns: max-content;
-    gap: 18px;
-    height: var(--rail-h);
-    box-sizing: content-box; /* height = card area; the padding rings around it */
-    padding: 26px clamp(20px, 5vw, 48px) 10px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
-    scrollbar-width: thin;
-  }
-  .bp-rail-card {
-    display: block;
-    text-decoration: none;
-    scroll-snap-align: start;
-    border: 1px solid var(--bp-hair);
-    border-radius: 10px;
-    overflow: hidden;
-    background: var(--bp-card);
-    transition: transform 0.3s ease, border-color 0.3s ease;
-  }
-  .bp-rail-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent); }
-  /* Photo plates — image fills, a drawing title-block strip sits at the foot. */
-  .bp-rail-card--photo {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: clamp(280px, 24vw, 360px);
-  }
-  .bp-rail-card--photo img {
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  /* Tall plates (span 2) — /games-card anatomy: BETA chip over the artwork,
-     title + blurb body, then a host footer row with the accent dot and ↗. */
-  .bp-rail-card--tall {
-    grid-row: span 2;
-    width: clamp(360px, 30vw, 460px);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-  }
-  .bp-rail-chip {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    z-index: 1;
-    padding: 5px 12px;
-    border-radius: 8px;
-    background: var(--bp-acc);
-    color: var(--accent-ink, #fff);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-  }
-  .bp-rail-tall-fig { display: block; flex: 0 0 46%; min-height: 0; }
-  .bp-rail-tall-fig img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .bp-rail-tall-body {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 18px 20px;
-  }
-  .bp-rail-blurb { font-size: 14px; line-height: 1.55; color: var(--bp-muted); }
-  .bp-rail-tall-foot {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 20px;
-    border-top: 1px solid var(--bp-hair);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    color: var(--bp-muted);
-    white-space: nowrap;
-  }
-  .bp-rail-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
-  /* Play-count pill overlaid top-right on the media plates (tall + photo); the
-     spec plate carries the count as a PLAYS spec row instead. Real count once a
-     game clears the floor, else a "New" tag (see services/games.ts). */
-  .bp-rail-plays {
-    position: absolute; top: 14px; right: 14px; z-index: 1;
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 9px; border-radius: 8px;
-    background: rgba(10, 14, 20, 0.62);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-    font-size: 10px; letter-spacing: 0.06em; color: #fff; white-space: nowrap;
-  }
-  .bp-rail-plays::before { content: "▷"; font-size: 8px; color: var(--bp-acc); }
-  .bp-rail-plays--new { color: rgba(255, 255, 255, 0.82); }
-  .bp-rail-plays--new::before { content: none; }
-  .bp-rail-tb {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    border-top: 1px solid var(--bp-hair);
-    background: var(--bp-card);
-  }
-  .bp-rail-fignum { font-size: 10px; letter-spacing: 0.06em; color: var(--bp-muted); white-space: nowrap; }
-  .bp-rail-title { font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--bp-ink); }
-  .bp-rail-arr { margin-left: auto; font-size: 13px; color: var(--bp-acc); }
-  /* Spec-sheet plates — tinted panel, hairline-underlined spec rows
-     (the blueprint answer to units.gr's coloured info cards). */
-  .bp-rail-card--spec {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 8px;
-    width: clamp(280px, 24vw, 360px);
-    padding: 20px;
-    background: color-mix(in srgb, var(--bp-acc) 10%, transparent);
-  }
-  .bp-rail-card--spec.is-orange { background: color-mix(in srgb, var(--bp-orange) 12%, transparent); }
-  .bp-rail-card--spec.is-orange:hover { border-color: color-mix(in srgb, var(--bp-orange) 50%, transparent); }
-  .bp-rail-spec-title { font-size: clamp(1.2rem, 2vw, 1.5rem); color: var(--bp-ink); }
-  .bp-rail-tagline { margin: 0; font-size: 13px; line-height: 1.5; color: var(--bp-muted); }
-  .bp-rail-specs { margin: 10px 0 0; }
-  .bp-rail-spec-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--bp-hair);
-    font-size: 10px;
-    letter-spacing: 0.07em;
-  }
-  .bp-rail-spec-row dt { color: var(--bp-faint); }
-  .bp-rail-spec-row dd { margin: 0; color: var(--bp-muted); text-align: right; }
-  /* Closing plate — striped like an empty fig, links to the full catalog. */
-  .bp-rail-card--all {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 10px;
-    width: clamp(240px, 20vw, 320px);
-    padding: 22px;
-    background-image: repeating-linear-gradient(45deg, var(--bp-line2) 0, var(--bp-line2) 1px, transparent 1px, transparent 12px);
-  }
-  .bp-rail-all { font-size: clamp(1.15rem, 2vw, 1.4rem); color: var(--bp-ink); }
-  .bp-rail-all-sub { font-size: 10px; letter-spacing: 0.08em; color: var(--bp-muted); }
+  /* ── ANNEX A / §03 rails — shared pin machinery ──
+     :global(:where(.bp) …) reach-into-children form (see the comment block
+     above .bp-wrap): the ANNEX A games rail and the §03 writing rail each
+     moved out to their own component (HomeGamesRail.astro / HomeBlogRail.astro)
+     but both still carry class .bp-rail-sec and both get a shared
+     .bp-rail-viewport clip, so this base pin/height machinery stays here,
+     reach-form, at its original file position — each rail's own card-track
+     styling (marquee + bento plates / .bp-write-cards bento) now lives with
+     its component. units.gr-style bento inside a horizontal rail: the track is
+     a 2-row column-flow grid; default = native overflow-x swipe strip (mobile
+     / reduced-motion / no-CDN fallback); homeGamesRail.ts adds .is-pinned on
+     desktop and GSAP scrubs the track sideways with page scroll. Full-bleed on
+     purpose — the rail breaking out of the bp-wrap column is the
+     layout-variance beat between two contained sections. */
+  :global(:where(.bp) .bp-rail-sec) { position: relative; z-index: 1; --rail-h: clamp(440px, 66vh, 720px); }
   /* Pinned mode (desktop, JS-added): fill the viewport and centre the content;
-     GSAP translates the track instead of the strip scrolling. */
-  .bp-rail-sec.is-pinned { min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; padding-top: 10px; padding-bottom: 10px; }
-  .bp-rail-sec.is-pinned .bp-rail-viewport { overflow: hidden; }
-  .bp-rail-sec.is-pinned .bp-rail-track { overflow: visible; width: max-content; scroll-snap-type: none; }
-  /* Narrow viewports: shorter rail so the swipe strip doesn't dominate. */
+     GSAP translates each rail's own track instead of the strip scrolling. The
+     .bp-rail-viewport clip is shared too; each rail's own track override
+     (.bp-rail-track for games, .bp-write-cards for blog) lives with its
+     component. */
+  :global(:where(.bp) .bp-rail-sec.is-pinned) { min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; padding-top: 10px; padding-bottom: 10px; }
+  :global(:where(.bp) .bp-rail-sec.is-pinned .bp-rail-viewport) { overflow: hidden; }
+  /* Narrow viewports: shorter rail so the swipe strip doesn't dominate (each
+     rail's own card-width overrides for narrow viewports live with its
+     component). */
   @media (max-width: 900px) {
-    .bp-rail-sec { --rail-h: clamp(360px, 52vh, 440px); }
-    .bp-rail-card--photo { width: clamp(230px, 62vw, 300px); }
-    .bp-rail-card--tall { width: clamp(280px, 74vw, 340px); }
-    .bp-rail-card--spec { width: clamp(230px, 62vw, 300px); }
+    :global(:where(.bp) .bp-rail-sec) { --rail-h: clamp(360px, 52vh, 440px); }
   }
-
-  /* §01 demo card — COVER/DEMO toggle (Faldrop): the cover image crossfades to an
-     autoplaying, muted, looping gameplay <video> (same treatment as /games). */
-  .bp-fig-cover-img,
-  .bp-fig-video {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    transition: opacity 0.3s ease;
-  }
-  .bp-fig-cover-img { object-fit: cover; opacity: 1; }
-  .bp-fig-video { object-fit: contain; opacity: 0; background: #0a0e14; }
-  .bp-work-card--demo.is-demo .bp-fig-cover-img { opacity: 0; }
-  .bp-work-card--demo.is-demo .bp-fig-video { opacity: 1; }
-  /* Don't lift the card while the demo is playing. */
-  .bp-work-card--demo.is-demo:hover .bp-fig { transform: none; }
-  .bp-fig-toggle {
-    position: absolute;
-    top: 12px;
-    left: 14px;
-    z-index: 4;
-    display: inline-flex;
-    border-radius: 7px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(10, 14, 20, 0.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  }
-  .bp-fig-toggle span {
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    padding: 5px 10px;
-    color: rgba(255, 255, 255, 0.75);
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.15s ease, color 0.15s ease;
-  }
-  .bp-fig-toggle span.is-active { background: var(--bp-acc); color: #fff; }
-  .bp-fig-toggle span:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
-
-  /* ── §02 CAPABILITIES ── */
-  .bp-cap-list { border-top: 1px solid var(--bp-hair); }
-  .bp-cap-row {
-    display: grid;
-    grid-template-columns: 44px minmax(180px, 1.1fr) 2fr auto;
-    align-items: baseline;
-    gap: 18px;
-    padding: 24px 0;
-    border-bottom: 1px solid var(--bp-line2);
-    transition: padding-left 0.25s ease;
-  }
-  .bp-cap-row:hover { padding-left: 10px; }
-  .bp-cap-num { font-size: 13px; color: var(--bp-acc); }
-  .bp-cap-row.is-orange .bp-cap-num { color: var(--bp-orange); }
-  .bp-cap-title { font-size: clamp(1.35rem, 2.6vw, 2rem); }
-  .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
-  .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-muted); white-space: nowrap; }
-
-  /* ── §03 WRITING — horizontal rail of cover cards (pin + scrub like the games
-     rail; homeBlogRail). The 2-row bento plate layout is the DEFAULT and scrolls
-     natively (overflow-x swipe) on mobile / reduced-motion / no-JS; on desktop
-     the rail engine pins the section and GSAP-scrubs the track sideways instead
-     (its off-screen covers are eager-warmed by the rail engine). Post cards are
-     full-height plates (grid-row: span 2), the featured series cards are half-
-     height plates (span 1) that pair two-per-column at the end. ── */
-  /* The cards themselves are the shared <PostCard/SeriesCard variant="blueprint">
-     — the same cards as /blog (own scoped styles). This track only lays them out
-     into the plate bento; the pinned block below just swaps native scroll for the
-     GSAP scrub. Cards are child components, so their roots need :global. */
-  .bp-write-cards {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(2, minmax(0, 1fr));
-    grid-auto-columns: max-content;
-    gap: 18px;
-    height: var(--rail-h);
-    box-sizing: content-box;
-    margin: 0;
-    padding: 26px clamp(20px, 5vw, 48px) 10px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
-    scrollbar-width: thin;
-  }
-  /* Pinned rail (desktop, JS-added): the viewport clips (shared .bp-rail-sec
-     .is-pinned rule) and homeBlogRail slides this track sideways, so the track
-     stops native-scrolling and grows to its full content width. */
-  .bp-blog-rail.is-pinned .bp-write-cards {
-    overflow: visible;
-    width: max-content;
-    scroll-snap-type: none;
-  }
-  .bp-blog-rail .bp-write-cards > :global(.tb-card-link) {
-    grid-row: span 2;
-    width: clamp(300px, 24vw, 360px);
-    scroll-snap-align: start;
-  }
-  /* Post plates keep the blueprint's landscape cover (16/10) rather than filling
-     the plate with a tall portrait crop. The blog rail runs a shorter --rail-h
-     than the games register (below) so the plate height ≈ cover + body — a
-     compact cover with no empty body gap. (Trade-off: shorter plates → a little
-     more top/bottom band than the fill-the-plate version.) */
-  .bp-rail-sec.bp-blog-rail { --rail-h: clamp(470px, 52vh, 560px); }
-  /* Series plates — half-height (span 1), compact vertical form: cover fills the
-     top, meta/title/tags below, so a pair stacks flush in one column. */
-  .bp-blog-rail .bp-write-cards > :global(.bpc) {
-    grid-row: span 1;
-    width: clamp(300px, 24vw, 360px);
-    height: 100%;
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) auto;
-    gap: 0;
-    padding: 0;
-    overflow: hidden;
-    scroll-snap-align: start;
-    /* Fill with the active scheme accent (shows behind the body, under the
-       full-bleed cover). Body text flips to --accent-ink below to stay legible. */
-    background: rgb(var(--accent-rgb));
-    border-color: rgb(var(--accent-rgb));
-  }
-  /* Full-bleed cover: the fig fills the top of the card edge-to-edge (no inset,
-     no own border); the card's overflow:hidden + radius clips its corners. The
-     body carries its own padding since the card padding is now 0. */
-  .bp-blog-rail .bp-write-cards :global(.bpc-fig) { min-height: 0; height: 100%; border: none; border-radius: 0; }
-  /* No dark gradient scrim over the cover in the rail — show the image clean. */
-  .bp-blog-rail .bp-write-cards :global(.bpc-fig)::after { display: none; }
-  .bp-blog-rail .bp-write-cards :global(.bpc-body) { padding: 0.55rem 12px 12px; justify-content: flex-start; }
-  /* On the accent fill, flip the body text/border to the on-accent ink colour. */
-  .bp-blog-rail .bp-write-cards :global(.bpc-title),
-  .bp-blog-rail .bp-write-cards :global(.bpc-meta),
-  .bp-blog-rail .bp-write-cards :global(.bpc-meta-kicker),
-  .bp-blog-rail .bp-write-cards :global(.bpc-stat),
-  .bp-blog-rail .bp-write-cards :global(.bpc-tag) { color: var(--accent-ink, #fff); }
-  .bp-blog-rail .bp-write-cards :global(.bpc-sep) { color: color-mix(in srgb, var(--accent-ink, #fff) 55%, transparent); }
-  .bp-blog-rail .bp-write-cards :global(.bpc-tag) { border-color: color-mix(in srgb, var(--accent-ink, #fff) 45%, transparent); }
-  .bp-blog-rail .bp-write-cards :global(.bpc-desc),
-  .bp-blog-rail .bp-write-cards :global(.bpc-arrow) { display: none; }
-  /* Hide the "read the series" CTA on the §03 series cards — the whole card is
-     already the link. */
-  .bp-write-cards :global(.bpc-cta) { display: none; }
-  .bp-blog-rail .bp-write-cards :global(.bpc-meta) { margin-bottom: 0.4rem; }
-  .bp-blog-rail .bp-write-cards :global(.bpc-title) { font-size: clamp(1.05rem, 1.15vw, 1.3rem); margin-bottom: 0.4rem; -webkit-line-clamp: 2; }
-  /* Tags on a single line (clip any overflow) so the body stays short and the
-     cover (the grid's 1fr row) keeps more height. */
-  .bp-blog-rail .bp-write-cards :global(.bpc-tags) { margin-top: 0.4rem; flex-wrap: nowrap; overflow: hidden; }
-  .bp-blog-rail .bp-write-cards :global(.bpc-tag) { flex: 0 0 auto; }
-  /* Narrow viewports (≤900px): the rail never pins (min-width:901px) so it stays
-     the native overflow-x swipe strip — same plate bento, scrolled by finger.
-     Trim --rail-h a touch so the two plate rows don't dominate a short screen. */
-  @media (max-width: 900px) {
-    .bp-rail-sec.bp-blog-rail { --rail-h: clamp(380px, 56vh, 480px); }
-  }
-
-  /* ── §04 ART (quilt grid + lightbox subsystem) ── */
-  /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
-     homeScrollAnimations.ts drifts #art-bg's background-position on scroll (same
-     mechanism as the old homepage). Section text flips light over the dark photo. */
-  /* No overflow:hidden here — it would create a scroll container and break the
-     child #art-bg's position:sticky. Clipping is handled by the wrapper's clip-path,
-     exactly like the old homepage. */
-  .bp-art { position: relative; }
-  .bp-art-bg-wrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; clip-path: inset(0); }
-  .bp-art-bg {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    height: 100vh;
-    background-image: url("https://media.luci-studio.com/ChatGPT%20Image%20May%205%2C%202026%2C%2011_03_29%20AM.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  .bp-art-bg::after { content: ""; position: absolute; inset: 0; background: rgba(6, 9, 14, 0.46); }
-  @media (max-width: 767px) {
-    .bp-art-bg { background-image: url("https://media.luci-studio.com/ef8036c5a8709482e3e4ecc1090cb8ae.jpg"); }
-  }
-  .bp-art-inner { position: relative; z-index: 1; }
-  .bp-art .bp-h2 { color: #fff; }
-  .bp-art .bp-sec-count,
-  .bp-art .bp-art-note { color: rgba(255, 255, 255, 0.62); }
-  .bp-art .bp-rule { background: rgba(255, 255, 255, 0.22); }
-  .bp-art-note { font-size: 13px; color: var(--bp-muted); max-width: 280px; }
-  /* Square-cell mosaic: uniform square base cells (row height = column width, set in
-     homeReveals.ts since 1fr columns are fluid), images object-cover to fill. Each
-     item spans whole cells by ratio — landscape → 2×1 (.is-wide), portrait → 1×2
-     (.is-tall), square → 1×1; the 2 most-viewed become 2×2 features (.is-big). Dense
-     flow packs them into a clean row/column-aligned grid. With JS off, cells fall
-     back to a fixed square-ish row height so the grid still renders. */
-  /* Justified-rows mosaic, hardcoded to the six curated pieces (see ART_ORDER):
-     per row, each tile's width is proportional to its image's native aspect
-     ratio, so rows are equal-height, full-width and crop-free — no holes by
-     construction. flex-basis percentages are floored slightly under a full row
-     (keeps wrapping deterministic against sub-pixel rounding) and flex-grow
-     (∝ ratio) absorbs the slack, which preserves uniform row height exactly.
-     Rows: (1,2)(3,4)(5,6) below 768px, (1,2,3)(4,5,6) from 768px up. */
-  .art-mosaic { display: flex; flex-wrap: wrap; gap: 1rem; }
-  .art-mosaic-item { position: relative; flex-shrink: 0; }
-  .art-mosaic-item:nth-child(1) { flex: 0.5455 0 calc((100% - 1rem) * 0.460); }
-  .art-mosaic-item:nth-child(2) { flex: 0.639 0 calc((100% - 1rem) * 0.539); }
-  .art-mosaic-item:nth-child(3) { flex: 0.7143 0 calc((100% - 1rem) * 0.479); }
-  .art-mosaic-item:nth-child(4) { flex: 0.7762 0 calc((100% - 1rem) * 0.520); }
-  .art-mosaic-item:nth-child(5) { flex: 1.0135 0 calc((100% - 1rem) * 0.458); }
-  .art-mosaic-item:nth-child(6) { flex: 1.1976 0 calc((100% - 1rem) * 0.541); }
-  @media (min-width: 768px) {
-    .art-mosaic-item:nth-child(1) { flex-basis: calc((100% - 2rem) * 0.287); }
-    .art-mosaic-item:nth-child(2) { flex-basis: calc((100% - 2rem) * 0.336); }
-    .art-mosaic-item:nth-child(3) { flex-basis: calc((100% - 2rem) * 0.376); }
-    .art-mosaic-item:nth-child(4) { flex-basis: calc((100% - 2rem) * 0.259); }
-    .art-mosaic-item:nth-child(5) { flex-basis: calc((100% - 2rem) * 0.339); }
-    .art-mosaic-item:nth-child(6) { flex-basis: calc((100% - 2rem) * 0.400); }
-  }
-  .art-img-frame {
-    height: 100%;
-    border: 1px solid color-mix(in srgb, var(--bp-acc) 35%, transparent);
-    border-radius: 10px;
-    transition: border-color 0.4s ease, box-shadow 0.4s ease;
-  }
-  [data-art-card]:hover .art-img-frame { border-color: var(--bp-orange); box-shadow: 0 10px 30px color-mix(in srgb, var(--bp-ink) 14%, transparent); }
-  /* Caption overlaid inside the image — hidden until hover/keyboard focus so
-     the artwork stays clean while browsing (the lightbox carries the full
-     caption); touch devices (no hover state; a tap opens the lightbox) keep a
-     slim always-on scrim instead. The bar itself never takes pointer events —
-     a click opens the lightbox — and the like button re-enables its own clicks
-     only while the bar is shown, so the invisible button can't swallow a tap. */
-  .bp-art-bar {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    z-index: 2;
-    pointer-events: none;
-    border-radius: 0 0 10px 10px;
-    background: linear-gradient(to top, rgba(6, 9, 14, 0.72) 0%, rgba(6, 9, 14, 0.34) 55%, transparent 100%);
-    text-shadow: 0 1px 6px rgba(6, 9, 14, 0.85);
-    opacity: 0;
-    transform: translateY(6px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
-  [data-art-card]:hover .bp-art-bar,
-  [data-art-card]:focus-within .bp-art-bar { opacity: 1; transform: none; }
-  [data-art-card]:hover .art-like-area,
-  [data-art-card]:focus-within .art-like-area { pointer-events: auto; }
-  @media (hover: none) {
-    .bp-art-bar {
-      opacity: 1;
-      transform: none;
-      background: linear-gradient(to top, rgba(6, 9, 14, 0.62) 0%, transparent 78%);
-    }
-    .art-like-area { pointer-events: auto; }
-  }
-  .bp-art-bar-title { font-weight: 700; font-size: 13px; line-height: 1.3; color: #fff; }
-  .bp-art-bar-meta { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); margin-top: 3px; }
-
-  @keyframes artFadeIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-  [data-art-card] { opacity: 0; }
-  [data-art-card].card-visible { animation: artFadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
-
-  .art-lightbox { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 4vh 4vw; background: rgba(6, 9, 14, 0.94); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s ease 0.3s; }
-  .art-lightbox.is-open { opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0s ease 0s; }
-  .art-lightbox-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: blur(80px) brightness(0.2) saturate(1.4); transform: scale(1.15); pointer-events: none; }
-  .art-lightbox-figure { position: relative; z-index: 10; margin: 0; display: flex; flex-direction: column; align-items: center; max-width: 100%; max-height: 92vh; transform: scale(0.96); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-  .art-lightbox.is-open .art-lightbox-figure { transform: scale(1); }
-  .art-lightbox-img { max-width: 100%; max-height: 78vh; width: auto; height: auto; object-fit: contain; border-radius: 0.5rem; box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8); }
-  .art-lightbox-caption { width: 100%; max-width: 64rem; padding: 1.25rem 0.25rem 0; text-align: left; }
-  .art-lightbox-caption h3 { color: #fff; }
-  .art-lightbox-close { position: absolute; top: 1.25rem; right: 1.25rem; z-index: 20; display: flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 9999px; color: #fff; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); transition: background 0.2s ease; }
-  .art-lightbox-close:hover { background: rgba(255, 255, 255, 0.22); }
-
-  /* ── §05 STUDIO ── */
-  .bp-studio { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(32px, 5vw, 60px); align-items: start; }
-  .bp-studio-statement { font-size: clamp(1.3rem, 2.6vw, 1.9rem); font-weight: 500; line-height: 1.35; letter-spacing: -0.01em !important; }
-  .bp-stats { display: flex; flex-direction: column; }
-  .bp-stat-row { display: flex; align-items: baseline; gap: 18px; padding: 16px 0; border-top: 1px solid var(--bp-hair); }
-  .bp-stat-num { font-size: clamp(2rem, 4vw, 3rem); min-width: 110px; letter-spacing: -0.02em !important; }
-  .bp-stat-num em { color: var(--bp-acc); font-style: normal; }
-  .bp-stat-meta { display: flex; flex-direction: column; gap: 3px; }
-  .bp-stat-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-muted); }
-  .bp-stat-sub { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-muted); }
 
   /* ── connectors (dimension lines between sections) ── */
   .bp-conn-wrap { position: relative; z-index: 1; display: flex; justify-content: center; padding: 6px 0; }
@@ -2129,107 +777,11 @@ const homepageSchema = {
   .bp-conn::before { content: ""; position: absolute; top: 0; left: 50%; width: 10px; height: 1px; margin-left: -5px; background: color-mix(in srgb, var(--bp-acc) 50%, transparent); }
   .bp-conn::after { content: ""; position: absolute; bottom: -1.5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--bp-acc); }
 
-  /* ── ANNEX B — SCREENING ROOM (video band) ──
-     Static grid mirroring the /videos card anatomy (blueprint DNA), scoped to
-     the home. Distinct layout family from the pinned games/writing rails.
-     YouTube brand-red appears ONLY on platform-identifying bits (play mark +
-     platform badge); all page chrome stays on the site accent. */
-  .bp-vid-sec {
-    --bp-vid-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg, #0a0e14));
-    --bp-vid-screen: #0a0e14;
-    --bp-vid-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
-  }
-  :global(html.bp-home.light-mode) .bp-vid-sec {
-    --bp-vid-panel: #ffffff;
-    --bp-vid-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
-  }
-
-  .bp-vid-channel {
-    display: flex; align-items: center; gap: 18px;
-    margin-top: clamp(22px, 3vw, 32px);
-    text-decoration: none; color: inherit;
-    background: var(--bp-vid-panel);
-    border: 1px solid var(--bp-hair);
-    border-radius: 14px;
-    padding: clamp(16px, 2.4vw, 24px) clamp(18px, 3vw, 30px);
-    box-shadow: var(--bp-vid-shadow);
-    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
-  }
-  .bp-vid-channel:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 22px 48px -28px color-mix(in srgb, var(--bp-acc) 45%, transparent);
-    border-color: color-mix(in srgb, var(--bp-acc) 40%, transparent);
-  }
-  /* YouTube brand red on the play mark only — page chrome stays on site accent. */
-  .bp-vid-channel-mark { width: 40px; height: 40px; flex: none; color: #ff0000; }
-  .bp-vid-channel-mark svg { display: block; width: 100%; height: 100%; }
-  .bp-vid-channel-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-  .bp-vid-channel-eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bp-muted); }
-  .bp-vid-channel-handle { font-size: clamp(1.1rem, 2.2vw, 1.4rem); line-height: 1.1; color: var(--bp-ink); }
-  .bp-vid-channel-cta {
-    margin-left: auto; flex: none;
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 20px; border-radius: 999px;
-    background: var(--bp-acc); color: var(--accent-ink);
-    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-    transition: opacity 0.2s;
-  }
-  .bp-vid-channel:hover .bp-vid-channel-cta { opacity: 0.88; }
-
-  .bp-vid-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-    gap: 22px;
-    margin-top: 22px;
-  }
-  .bp-vid-card {
-    display: flex; flex-direction: column;
-    text-decoration: none; color: inherit;
-    background: var(--bp-vid-panel);
-    border: 1px solid var(--bp-hair);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
-  }
-  .bp-vid-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 44px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
-    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
-  }
-  .bp-vid-media { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--bp-vid-screen); }
-  .bp-vid-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1); }
-  .bp-vid-card:hover .bp-vid-media img { transform: scale(1.04); }
-  .bp-vid-platform {
-    position: absolute; top: 12px; left: 12px; z-index: 2;
-    font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
-    padding: 4px 9px; border-radius: 5px;
-    /* #dd0000 (not #ff0000): white-on-red at ~5:1 keeps the 9px label WCAG AA */
-    color: #fff; background: #dd0000;
-  }
-  .bp-vid-body { padding: 18px 20px 14px; flex: 1; }
-  .bp-vid-tag {
-    display: inline-block;
-    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 4px 10px; border-radius: 5px;
-    border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent);
-    color: var(--bp-acc);
-  }
-  .bp-vid-title { margin-top: 12px; font-size: 1.1rem; line-height: 1.3; color: var(--bp-ink); }
-  .bp-vid-foot {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 20px; border-top: 1px solid var(--bp-hair);
-    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-muted);
-  }
-  .bp-vid-host { display: flex; align-items: center; gap: 8px; }
-  .bp-vid-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); }
-  .bp-vid-arrow { font-size: 14px; }
-
-  @media (max-width: 640px) {
-    .bp-vid-channel { flex-wrap: wrap; }
-    .bp-vid-channel-cta { margin-left: 0; }
-  }
-
-  /* ── keyframes ── */
+  /* ── keyframes ──
+     lu-spin is also duplicated verbatim in HomeStudio.astro's own <style> —
+     Astro scopes @keyframes names per component, so the compass ring/arm
+     there (a separate component now) needs its own copy of this keyframe
+     rather than referencing this one. */
   @keyframes lu-spin { to { transform: rotate(360deg); } }
   @keyframes lu-ping { 0% { transform: scale(1); opacity: 0.55; } 70% { opacity: 0; } 100% { transform: scale(3.4); opacity: 0; } }
   @keyframes lu-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
@@ -2239,28 +791,18 @@ const homepageSchema = {
     .bp-hero { grid-template-columns: 1fr; gap: 24px; }
     .bp-hero-right { order: -1; max-width: 300px; }
     .bp-scroll { display: none; }
-    .bp-studio { grid-template-columns: 1fr; }
-    .bp-cap-row { grid-template-columns: 40px 1fr; row-gap: 6px; }
-    .bp-cap-desc { grid-column: 2; }
-    .bp-cap-tag { grid-column: 2; }
   }
-  @media (max-width: 720px) {
-    .bp-dir { grid-template-columns: repeat(2, 1fr); }
-    .bp-dir-item { padding: 16px 14px 18px; }
-    .bp-dir-item:nth-child(odd) { border-left: none; }
-    .bp-dir-desc { display: none; }
-    .bp-work-grid { grid-template-columns: 1fr; }
-  }
+  /* .bp-compass-arm/.bp-compass-draw split out to HomeStudio.astro's own
+     reduced-motion / win-perf-mode rules (that markup now lives there); the
+     [data-art-card] rules that used to sit alongside this block split out to
+     HomeArt.astro's own reduced-motion query the same way (its markup moved
+     there too — the hero SVG rule below stays, since the hero markup stays). */
   @media (prefers-reduced-motion: reduce) {
-    .bp-svg-spin, .bp-orbit, .bp-svg-ping, .bp-compass-arm, .bp-compass-draw, .bp-scroll-arrow { animation: none !important; }
-    [data-art-card] { opacity: 1; }
-    [data-art-card].card-visible { animation: none; }
+    .bp-svg-spin, .bp-orbit, .bp-svg-ping, .bp-scroll-arrow { animation: none !important; }
   }
   :global(body.win-perf-mode) .bp-svg-spin,
   :global(body.win-perf-mode) .bp-orbit,
-  :global(body.win-perf-mode) .bp-svg-ping,
-  :global(body.win-perf-mode) .bp-compass-arm,
-  :global(body.win-perf-mode) .bp-compass-draw { animation: none; }
+  :global(body.win-perf-mode) .bp-svg-ping { animation: none; }
 </style>
 
 <!-- Home scroll-animation hidden initial-states — gated on html.home-anim so JS-off /
@@ -2298,15 +840,6 @@ const homepageSchema = {
     }
   }
 </script>
-<script>
-  import { initHomeLiveTelemetry } from "../../scripts/homeLiveTelemetry";
-  initHomeLiveTelemetry();
-</script>
-<script>
-  import { initHomeGamesRail, initHomeBlogRail } from "../../scripts/homeGamesRail";
-  initHomeGamesRail();
-  initHomeBlogRail();
-</script>
 
 <!-- PROTOTYPE (units.gr-inspired): scramble-in for the mono section labels — the
      IBM Plex Mono eyebrows decode like a terminal readout as they scroll into
@@ -2336,72 +869,5 @@ const homepageSchema = {
   })();
 </script>
 
-<script is:inline>
-  // §01 COVER/DEMO toggle — mirrors the /games featured card: the cover crossfades
-  // to a muted, looping gameplay video that autoplays. An IntersectionObserver
-  // auto-switches Cover -> Demo ~2s after the card scrolls into view (skipped on
-  // reduced motion, or if the visitor toggles first). preload stays 'none' until in view.
-  (function () {
-    var card = document.querySelector(".bp-work-card--demo");
-    if (!card) return;
-    var video = card.querySelector(".bp-fig-video");
-    var btns = card.querySelectorAll(".bp-fig-toggle [data-fmode]");
-    var userActed = false, autoTimer = null;
-    function setDemo(on) {
-      card.classList.toggle("is-demo", on);
-      btns.forEach(function (b) {
-        b.classList.toggle("is-active", (b.getAttribute("data-fmode") === "demo") === on);
-      });
-      if (video) { if (on) video.play().catch(function () {}); else video.pause(); }
-    }
-    btns.forEach(function (b) {
-      function handle(e) {
-        e.preventDefault(); e.stopPropagation();
-        userActed = true;
-        if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
-        setDemo(b.getAttribute("data-fmode") === "demo");
-      }
-      b.addEventListener("click", handle);
-      b.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") handle(e); });
-    });
-    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!reduce && "IntersectionObserver" in window && video) {
-      var io = new IntersectionObserver(function (entries, obs) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          obs.disconnect();
-          video.preload = "auto";
-          autoTimer = setTimeout(function () { if (!userActed) setDemo(true); }, 2000);
-        });
-      }, { threshold: 0.5 });
-      io.observe(card);
-    }
-  })();
-</script>
-
-<script is:inline>
-  // §01 dark band — set --work-band-extra to half the first work-card's
-  // rendered height (measured, not guessed: the card's height changes with
-  // viewport width and the grid's column count). It's set on the SECTION, not
-  // the band, so the band and its sibling grid-wrap can both inherit it — the
-  // band reaches down by it, the grid lifts up by it, and the cards overlap.
-  (function () {
-    var section = document.getElementById("work");
-    var firstCard = document.querySelector(".bp-work-grid .bp-work-card");
-    if (!section || !firstCard) return;
-    var raf = false;
-    function apply() {
-      raf = false;
-      section.style.setProperty("--work-band-extra", firstCard.offsetHeight / 2 + "px");
-    }
-    function schedule() {
-      if (raf) return;
-      raf = true;
-      requestAnimationFrame(apply);
-    }
-    schedule();
-    window.addEventListener("resize", schedule, { passive: true });
-  })();
-</script>
 
 

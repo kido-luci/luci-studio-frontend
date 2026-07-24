@@ -1,0 +1,76 @@
+---
+import { getLocaleFromUrl, localizedHref } from "../../i18n";
+
+const locale = getLocaleFromUrl(Astro.url);
+
+// Static blueprint copy — kept as data so the JSX stays free of raw "&" text nodes.
+const directory = [
+  { n: "01", label: "BLOG", desc: "Engineering notes & deep-dives", href: localizedHref(locale, "/blog"), ext: false, orange: false },
+  { n: "02", label: "TOOLS", desc: "Free browser micro-tools", href: "#tools", ext: false, orange: false },
+  { n: "03", label: "GAMES", desc: "Browser games, 60fps", href: "/games/", ext: false, orange: false },
+  { n: "04", label: "APPS", desc: "Cross-platform & open source", href: "#work", ext: false, orange: false },
+  { n: "05", label: "ART", desc: "Pen, pencil & digital", href: "#art", ext: false, orange: true },
+  { n: "06", label: "VIDEOS", desc: "Gameplay & coding walkthroughs", href: "/videos/", ext: false, orange: false },
+];
+---
+
+<!-- ===================== DIRECTORY ===================== -->
+<section class="bp-wrap bp-section" id="directory">
+  <div class="bp-sec-head" data-reveal>
+    <span class="bp-dot" aria-hidden="true"></span>
+    <span class="bp-mono bp-sec-label">DIRECTORY</span>
+    <span class="bp-rule" aria-hidden="true"></span>
+    <span class="bp-mono bp-sec-count">06 SECTIONS</span>
+  </div>
+  <div class="bp-dir">
+    {directory.map((d, i) => (
+      <a
+        href={d.href}
+        class={`bp-dir-item${d.orange ? " is-orange" : ""}`}
+        data-reveal
+        data-delay={String((i % 6) + 1)}
+        {...(d.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        <span class="bp-mono bp-dir-num">{d.n}</span>
+        <span class="bp-display bp-dir-title">{d.label}</span>
+        <span class="bp-mono bp-dir-desc">{d.desc}</span>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  /* Crisp light-mode headings — cancel the site-wide heading drop-shadow for
+     this section's .bp-display elements (mirrors HomePage's own scoped rule). */
+  :global(body.light-mode) .bp-display { filter: none !important; }
+  /* ── DIRECTORY ── */
+  .bp-dir {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    border-top: 1.5px solid var(--bp-hair);
+    border-bottom: 1.5px solid var(--bp-hair);
+  }
+  .bp-dir-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 22px 24px;
+    text-decoration: none;
+    border-left: 1px solid var(--bp-line2);
+    transition: background 0.25s ease;
+  }
+  .bp-dir-item:first-child { border-left: none; }
+  .bp-dir-item:hover { background: var(--bp-hover); }
+  .bp-dir-item.is-orange:hover { background: color-mix(in srgb, var(--bp-orange) 8%, transparent); }
+  .bp-dir-num { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); }
+  .bp-dir-item.is-orange .bp-dir-num { color: var(--bp-orange); }
+  .bp-dir-title { font-size: clamp(1.05rem, 2.2vw, 1.4rem); }
+  .bp-dir-desc { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-muted); line-height: 1.5; }
+
+  @media (max-width: 720px) {
+    .bp-dir { grid-template-columns: repeat(2, 1fr); }
+    .bp-dir-item { padding: 16px 14px 18px; }
+    .bp-dir-item:nth-child(odd) { border-left: none; }
+    .bp-dir-desc { display: none; }
+  }
+</style>
