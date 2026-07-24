@@ -13,15 +13,18 @@ import PostCard from "../PostCard.astro";
 import SeriesCard from "../SeriesCard.astro";
 import { postService } from "../../services/posts";
 import { galleryService } from "../../services/gallery";
-import { profileService } from "../../services/profile";
 import { playlistService } from "../../services/playlists";
 import { buildPostSlug, readTimeFor, formatDate } from "../../utils/blog";
 import { buildSeriesViews } from "../../utils/series";
 import { getLocaleFromUrl, localizedHref, localized } from "../../i18n";
 import { GAMES } from "../../data/games";
 import { getPlayCounts, playsFor } from "../../services/games";
-import { VIDEOS, CHANNEL_URL } from "../../data/videos";
-import { TOOL_ENGINES, TOOLS_URL } from "../../data/tools";
+import HomeCapabilities from "../home/HomeCapabilities.astro";
+import HomeDirectory from "../home/HomeDirectory.astro";
+import HomeTools from "../home/HomeTools.astro";
+import HomeVideos from "../home/HomeVideos.astro";
+import HomeTelemetry from "../home/HomeTelemetry.astro";
+import HomeStudio from "../home/HomeStudio.astro";
 
 // ANNEX A rail — bento arrangement (units.gr-style): the track is a 2-row
 // column-flow grid, and each game gets a hand-picked plate variant so the
@@ -65,10 +68,6 @@ const RAIL_GAMES = GAMES.slice(0, 12);
 // module-cached fetch in services/games.ts). Rendered on each rail card below.
 const plays = await getPlayCounts();
 
-// Typed as number so the `=== 1` plural check type-checks (VIDEOS is `as const`,
-// so its .length is the literal 2, which TS would flag against `=== 1`).
-const videoCount: number = VIDEOS.length;
-const toolCount: number = TOOL_ENGINES.reduce((n, e) => n + e.tools.length, 0);
 
 const locale = getLocaleFromUrl(Astro.url);
 const API_URL = import.meta.env.PUBLIC_API_URL || "";
@@ -103,9 +102,6 @@ const bpStars = Array.from({ length: 40 }, () => {
     ddl: +(-bpRand() * 17).toFixed(2), // negative offset desyncs each star's drift
   };
 });
-
-const profile = await profileService.getProfile();
-const stats = profile?.portfolio_stats ?? [];
 
 // §01 SELECTED WORK — a hand-picked set (app · game · open source · writing series).
 // Cover-less items fall back to the striped drafting-fig pattern. `ext` opens
@@ -259,21 +255,6 @@ const curated = ART_ORDER.flatMap((o) => {
 // neutral ratio — flex-grow closes any short row, so the grid still has no holes.
 const artPieces = curated.length > 0 ? curated : artItems.map((a) => ({ ...a, ar: "4 / 3" }));
 
-// Static blueprint copy — kept as data so the JSX stays free of raw "&" text nodes.
-const directory = [
-  { n: "01", label: "BLOG", desc: "Engineering notes & deep-dives", href: localizedHref(locale, "/blog"), ext: false, orange: false },
-  { n: "02", label: "TOOLS", desc: "Free browser micro-tools", href: "#tools", ext: false, orange: false },
-  { n: "03", label: "GAMES", desc: "Browser games, 60fps", href: "/games/", ext: false, orange: false },
-  { n: "04", label: "APPS", desc: "Cross-platform & open source", href: "#work", ext: false, orange: false },
-  { n: "05", label: "ART", desc: "Pen, pencil & digital", href: "#art", ext: false, orange: true },
-  { n: "06", label: "VIDEOS", desc: "Gameplay & coding walkthroughs", href: "/videos/", ext: false, orange: false },
-];
-const capabilities = [
-  { n: "01", title: "Cross-platform apps", desc: "One Flutter codebase → Android, iOS, macOS, Windows & Web. Local-first, offline-ready.", tag: "Flutter · Dart · BLoC", orange: false },
-  { n: "02", title: "Browser tools & games", desc: "Fast, offline-capable micro-tools and games — zero install, all client-side.", tag: "Canvas · TS · WASM", orange: false },
-  { n: "03", title: "Technical writing", desc: "Deep-dives and engineering notes on Flutter, Dart and systems that people actually read.", tag: "Blog · Series", orange: false },
-  { n: "04", title: "Digital art", desc: "Hand-drawn and digital pieces — portraits, manga studies, ink.", tag: "Pen · Pencil · Digital", orange: true },
-];
 const SITE_URL = "https://luci-studio.com";
 const homepageSchema = {
   "@context": "https://schema.org",
@@ -425,30 +406,7 @@ const homepageSchema = {
       </a>
     </header>
 
-    <!-- ===================== DIRECTORY ===================== -->
-    <section class="bp-wrap bp-section" id="directory">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">DIRECTORY</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">06 SECTIONS</span>
-      </div>
-      <div class="bp-dir">
-        {directory.map((d, i) => (
-          <a
-            href={d.href}
-            class={`bp-dir-item${d.orange ? " is-orange" : ""}`}
-            data-reveal
-            data-delay={String((i % 6) + 1)}
-            {...(d.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          >
-            <span class="bp-mono bp-dir-num">{d.n}</span>
-            <span class="bp-display bp-dir-title">{d.label}</span>
-            <span class="bp-mono bp-dir-desc">{d.desc}</span>
-          </a>
-        ))}
-      </div>
-    </section>
+    <HomeDirectory />
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
@@ -607,154 +565,13 @@ const homepageSchema = {
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-    <!-- ===================== ANNEX B — SCREENING ROOM (video band) =============
-         Off-site video content (YouTube) surfaced on the home as a STATIC grid —
-         deliberately not another pinned rail, so it reads as a different layout
-         family from the games/writing bento rails. Cards link out; nothing is
-         embedded. Unnumbered ANNEX (like GAMES REGISTER) so §02–§05 keep their
-         numbers. Data: src/data/videos.ts (shared with /videos). -->
-    <section class="bp-section bp-wrap bp-vid-sec" id="videos">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">ANNEX B — SCREENING ROOM</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">{String(videoCount).padStart(2, "0")} {videoCount === 1 ? "VIDEO" : "VIDEOS"}</span>
-      </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>Watch something.</h2>
-        <a href="/videos/" class="bp-mono bp-more">ALL VIDEOS →</a>
-      </div>
+    <HomeVideos />
 
-      <!-- channel strip -->
-      <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" class="bp-vid-channel" data-reveal>
-        <span class="bp-vid-channel-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-            <path d="M21.6 7.2a2.5 2.5 0 0 0-1.76-1.77C18.28 5 12 5 12 5s-6.28 0-7.84.43A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.76 1.77C5.72 19 12 19 12 19s6.28 0 7.84-.43a2.5 2.5 0 0 0 1.76-1.77A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8ZM10 15.2V8.8L15.6 12 10 15.2Z"/>
-          </svg>
-        </span>
-        <span class="bp-vid-channel-body">
-          <span class="bp-mono bp-vid-channel-eyebrow">YOUTUBE CHANNEL</span>
-          <span class="bp-display bp-vid-channel-handle">@the-luci-studio</span>
-        </span>
-        <span class="bp-mono bp-vid-channel-cta">View channel ↗</span>
-      </a>
+    <HomeTools />
 
-      <!-- static video grid -->
-      <div class="bp-vid-grid">
-        {VIDEOS.map((v) => (
-          <a href={v.href} target="_blank" rel="noopener noreferrer" class="bp-vid-card" data-reveal>
-            <div class="bp-vid-media">
-              <img src={v.img} alt={v.title} loading="lazy" width="1280" height="720" />
-              <span class="bp-mono bp-vid-platform">{v.platform}</span>
-            </div>
-            <div class="bp-vid-body">
-              <span class="bp-mono bp-vid-tag">{v.tag}</span>
-              <div class="bp-display bp-vid-title">{v.title}</div>
-            </div>
-            <div class="bp-mono bp-vid-foot">
-              <span class="bp-vid-host"><span class="bp-vid-dot"></span>{v.host}</span>
-              <span class="bp-vid-arrow">↗</span>
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
+    <HomeTelemetry />
 
-    <!-- ===================== ANNEX C — TOOLS INDEX (parts-list index of the
-         tools.luci-studio.com portfolio. Data: src/data/tools.ts, a hardcoded
-         mirror of the tools-home catalog). ================================= -->
-    <section class="bp-wrap bp-section" id="tools">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">ANNEX C — TOOLS INDEX</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">{String(toolCount).padStart(2, "0")} TOOLS · {String(TOOL_ENGINES.length).padStart(2, "0")} ENGINES</span>
-      </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>Use something.</h2>
-        <a href={`${TOOLS_URL}/`} target="_blank" rel="noopener noreferrer" class="bp-mono bp-more">ALL {toolCount} TOOLS →</a>
-      </div>
-      <div class="bp-tools-index">
-        {TOOL_ENGINES.map((eng, i) => (
-          <div class="bp-tools-block" data-reveal data-delay={String((i % 6) + 1)}>
-            <a href={`${TOOLS_URL}/${eng.prefix}/`} target="_blank" rel="noopener noreferrer" class="bp-tools-eng">
-              <span class="bp-mono bp-tools-eng-name">{eng.name}</span>
-              <span class="bp-mono bp-tools-eng-count">{String(eng.tools.length).padStart(2, "0")}</span>
-            </a>
-            <ul class="bp-tools-list">
-              {eng.tools.slice(0, 5).map((t) => (
-                <li>
-                  <a href={`${TOOLS_URL}/${eng.prefix}/${t.slug}/`} target="_blank" rel="noopener noreferrer" class="bp-tools-row">
-                    <span class="bp-mono bp-tools-chip">{t.chip ?? t.specimen}</span>
-                    <span class="bp-tools-title">{t.title}</span>
-                    <span class="bp-mono bp-tools-arrow" aria-hidden="true">↗</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <a href={`${TOOLS_URL}/${eng.prefix}/`} target="_blank" rel="noopener noreferrer" class="bp-mono bp-tools-all">ALL {String(eng.tools.length).padStart(2, "0")} →</a>
-          </div>
-        ))}
-      </div>
-    </section>
-
-    <!-- ===================== ANNEX D — LIVE TELEMETRY (instrument strip; four
-         client-side live readouts linking to the live.luci-studio.com widgets.
-         DOM fully server-rendered — src/scripts/homeLiveTelemetry.ts only fills
-         text + toggles state classes; fetch starts on viewport entry). ======= -->
-    <section class="bp-wrap bp-section" id="live">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">ANNEX D — LIVE TELEMETRY</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">04 INSTRUMENTS · 24/7</span>
-      </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>Track something.</h2>
-        <a href="https://live.luci-studio.com/" target="_blank" rel="noopener noreferrer" class="bp-mono bp-more">ALL WIDGETS →</a>
-      </div>
-      <div class="bp-live-strip" data-reveal>
-        {[
-          { key: "clock", label: "STUDIO CLOCK", href: "https://live.luci-studio.com/" },
-          { key: "iss", label: "ISS POSITION", href: "https://live.luci-studio.com/iss/" },
-          { key: "quake", label: "LAST QUAKE (24H)", href: "https://live.luci-studio.com/quakes/" },
-          { key: "fx", label: "EUR → USD", href: "https://live.luci-studio.com/currency/" },
-        ].map((inst) => (
-          <a href={inst.href} target="_blank" rel="noopener noreferrer" class="bp-live-inst" data-live-inst={inst.key}>
-            <span class="bp-live-head">
-              <span class="bp-mono bp-live-label">{inst.label}</span>
-              <span class="bp-live-dot" aria-hidden="true"></span>
-            </span>
-            <span class="bp-mono bp-live-value" data-live-value>——</span>
-            <span class="bp-mono bp-live-sub" data-live-sub>SYNCING…</span>
-          </a>
-        ))}
-      </div>
-      <p class="bp-mono bp-live-credit" data-reveal>DATA: USGS · WHERETHEISS.AT · FRANKFURTER (ECB)</p>
-    </section>
-
-    <!-- ===================== §02 CAPABILITIES ===================== -->
-    <section class="bp-wrap bp-section" id="capabilities">
-      <div class="bp-sec-head" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">§02 — CAPABILITIES</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-count">04 DISCIPLINES</span>
-      </div>
-      <div class="bp-sec-title-row" data-reveal>
-        <h2 class="bp-display bp-h2" data-ml9>What I build.</h2>
-      </div>
-      <div class="bp-cap-list">
-        {capabilities.map((c) => (
-          <div class={`bp-cap-row${c.orange ? " is-orange" : ""}`} data-reveal>
-            <span class="bp-mono bp-cap-num">{c.n}</span>
-            <span class="bp-display bp-cap-title">{c.title}</span>
-            <p class="bp-cap-desc">{c.desc}</p>
-            <span class="bp-mono bp-cap-tag">{c.tag}</span>
-          </div>
-        ))}
-      </div>
-    </section>
+    <HomeCapabilities />
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
@@ -912,40 +729,7 @@ const homepageSchema = {
 
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
-    <!-- ===================== §05 STUDIO ===================== -->
-    <section class="bp-wrap bp-section" id="studio">
-      <div class="bp-sec-head bp-sec-head--inst" data-reveal>
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">§05 — STUDIO</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-        <span class="bp-compass" aria-hidden="true">
-          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="24" cy="24" r="16" class="bp-compass-guide"></circle>
-            <circle cx="24" cy="24" r="16" class="bp-compass-draw"></circle>
-            <g class="bp-compass-arm"><line x1="24" y1="24" x2="40" y2="24"></line><circle cx="40" cy="24" r="2.4" class="bp-compass-tip"></circle></g>
-            <circle cx="24" cy="24" r="1.8" class="bp-compass-pivot"></circle>
-          </svg>
-        </span>
-      </div>
-      <div class="bp-studio">
-        <p class="bp-display bp-studio-statement" data-reveal>
-          I treat engineering as a craft — measure twice, ship once, and write down what I learn along the way. Small scope, production-grade standards, no deferred debt.
-        </p>
-        {stats.length > 0 && (
-          <div class="bp-stats" data-reveal>
-            {stats.map((s) => (
-              <div class="bp-stat-row">
-                <span class="bp-display bp-stat-num">{s.number}<em>{s.suffix}</em></span>
-                <span class="bp-stat-meta">
-                  <span class="bp-mono bp-stat-label">{s.label}</span>
-                  {s.sub && <span class="bp-mono bp-stat-sub">{s.sub}</span>}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+    <HomeStudio />
 
     <div class="bp-wrap">
       <AdSlot placement="home" />
@@ -1015,7 +799,11 @@ const homepageSchema = {
        html had overflow-x: clip. */
     overflow-x: clip;
   }
-  /* Crisp blueprint headings — cancel the site's light-mode heading drop-shadow filter. */
+  /* Crisp blueprint headings — cancel the site's light-mode heading drop-shadow
+     filter. Scoped to THIS component's own .bp-display elements only; each home
+     section component carries its own copy for its headings. (Deliberately NOT a
+     reach-into-children :global — that form also caught SiteFooter's
+     .bp-cta-title, which keeps the site-wide drop-shadow.) */
   :global(body.light-mode) .bp-display { filter: none !important; }
 
   /* Drafting grid: fine 36px + major 180px, spanning the whole sheet. */
@@ -1226,7 +1014,20 @@ const homepageSchema = {
   :global(body.win-perf-mode) .bp-star { animation: none; opacity: 0.5; }
   :global(body.win-perf-mode) .bp-cst-edges line { animation: none; }
 
-  .bp-wrap {
+  /* Reach-into-children form (:global(:where(.bp) .X)): these atoms are used
+     both by markup that stays directly in this component (hero, §01 work, games
+     rail, §03 writing rail, §04 art) and by markup now living in child section
+     components (HomeDirectory/HomeVideos/HomeTools/HomeTelemetry/
+     HomeCapabilities/HomeStudio). The zero-specificity :where(.bp) guard keeps
+     each rule page-local while :global() lets it match elements stamped with a
+     child's own Astro scope id. Deliberately (0,1,0): before the split these
+     atoms sat EARLIER in this style block than every section-specific rule, so
+     at the old equal (0,2,0) specificity they lost all cascade ties by source
+     order. Now that section rules live in child chunks (which Vite may emit in
+     any order), the atoms are kept one class WEAKER instead — any scoped rule
+     (min 0,2,0: class + cid attribute) in this or a child component still beats
+     them, order-independent, reproducing the pre-split cascade exactly. */
+  :global(:where(.bp) .bp-wrap) {
     position: relative;
     z-index: 1;
     max-width: 1280px;
@@ -1234,7 +1035,7 @@ const homepageSchema = {
     padding-left: clamp(20px, 5vw, 48px);
     padding-right: clamp(20px, 5vw, 48px);
   }
-  .bp-section {
+  :global(:where(.bp) .bp-section) {
     padding-top: clamp(52px, 8vw, 88px);
     padding-bottom: clamp(52px, 8vw, 88px);
   }
@@ -1311,30 +1112,19 @@ const homepageSchema = {
   }
 
   /* ── shared motif atoms ── */
-  .bp-display {
+  :global(:where(.bp) .bp-display) {
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em !important;
     color: var(--bp-ink);
   }
-  .bp-sec-head {
+  :global(:where(.bp) .bp-sec-head) {
     margin-bottom: clamp(22px, 3vw, 34px);
   }
   .bp-dot.is-orange { background: var(--bp-orange); }
-  /* §05 header instrument: a small compass whose arm sweeps and traces its ring
-     (echoes the "measure twice" studio statement). Guarded like the hero SVG. */
-  .bp-sec-head--inst { position: relative; }
-  .bp-compass { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; pointer-events: none; }
-  .bp-compass svg { display: block; width: 100%; height: 100%; }
-  .bp-compass-guide { fill: none; stroke: var(--bp-hair); stroke-width: 1; }
-  .bp-compass-draw { fill: none; stroke: var(--bp-acc); stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 20 81; transform-box: view-box; transform-origin: center; animation: lu-spin 5s linear infinite; }
-  .bp-compass-arm { transform-box: view-box; transform-origin: center; animation: lu-spin 5s linear infinite; }
-  .bp-compass-arm line { stroke: var(--bp-ink); stroke-width: 1.2; stroke-opacity: 0.55; }
-  .bp-compass-tip { fill: var(--bp-orange); }
-  .bp-compass-pivot { fill: var(--bp-ink); fill-opacity: 0.6; }
   .bp-sec-label.is-orange { color: var(--bp-orange); }
 
-  .bp-sec-title-row {
+  :global(:where(.bp) .bp-sec-title-row) {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -1342,11 +1132,11 @@ const homepageSchema = {
     flex-wrap: wrap;
     margin-bottom: clamp(26px, 4vw, 44px);
   }
-  .bp-h2 {
+  :global(:where(.bp) .bp-h2) {
     font-size: clamp(2.1rem, 6vw, 3.75rem);
     line-height: 1.0;
   }
-  .bp-more {
+  :global(:where(.bp) .bp-more) {
     font-size: 12px;
     letter-spacing: 0.08em;
     color: var(--bp-ink);
@@ -1356,7 +1146,7 @@ const homepageSchema = {
     white-space: nowrap;
     transition: color 0.2s ease, border-color 0.2s ease;
   }
-  .bp-more:hover { color: var(--bp-acc); border-color: var(--bp-acc); }
+  :global(:where(.bp) .bp-more):hover { color: var(--bp-acc); border-color: var(--bp-acc); }
 
   .bp-badge {
     display: inline-block;
@@ -1469,138 +1259,6 @@ const homepageSchema = {
     text-decoration: none;
   }
   .bp-scroll-arrow { width: 16px; height: 16px; animation: lu-bob 1.8s ease-in-out infinite; }
-
-  /* ── DIRECTORY ── */
-  .bp-dir {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    border-top: 1.5px solid var(--bp-hair);
-    border-bottom: 1.5px solid var(--bp-hair);
-  }
-  .bp-dir-item {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 22px 22px 24px;
-    text-decoration: none;
-    border-left: 1px solid var(--bp-line2);
-    transition: background 0.25s ease;
-  }
-  .bp-dir-item:first-child { border-left: none; }
-  .bp-dir-item:hover { background: var(--bp-hover); }
-  .bp-dir-item.is-orange:hover { background: color-mix(in srgb, var(--bp-orange) 8%, transparent); }
-  .bp-dir-num { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); }
-  .bp-dir-item.is-orange .bp-dir-num { color: var(--bp-orange); }
-  .bp-dir-title { font-size: clamp(1.05rem, 2.2vw, 1.4rem); }
-  .bp-dir-desc { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-muted); line-height: 1.5; }
-
-  /* ── ANNEX C — TOOLS INDEX (parts-list; blocks pack into CSS columns) ── */
-  .bp-tools-index {
-    columns: 3;
-    column-gap: 44px;
-    column-rule: 1px solid var(--bp-line2);
-  }
-  .bp-tools-block {
-    break-inside: avoid;
-    padding: 14px 0 20px;
-    border-top: 1px solid var(--bp-hair);
-  }
-  .bp-tools-eng {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    text-decoration: none;
-    color: var(--bp-ink);
-  }
-  .bp-tools-eng:hover .bp-tools-eng-name { color: var(--bp-acc); }
-  .bp-tools-eng-name { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; transition: color 0.2s ease; }
-  .bp-tools-eng-count { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); }
-  .bp-tools-list { list-style: none; margin: 10px 0 0; padding: 0; }
-  .bp-tools-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 0;
-    text-decoration: none;
-    color: var(--bp-ink);
-    transition: background 0.2s ease;
-  }
-  .bp-tools-row:hover { background: var(--bp-hover); }
-  .bp-tools-chip {
-    flex: 0 0 56px;
-    font-size: 10.5px;
-    letter-spacing: 0.04em;
-    color: var(--bp-muted);
-    border: 1px solid var(--bp-line2);
-    border-radius: 4px;
-    text-align: center;
-    padding: 1px 4px;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-  .bp-tools-title { font-size: 13.5px; line-height: 1.35; }
-  .bp-tools-row:hover .bp-tools-title { color: var(--bp-acc); }
-  .bp-tools-arrow { margin-left: auto; font-size: 11px; color: var(--bp-faint); opacity: 0; transition: opacity 0.15s ease; }
-  .bp-tools-row:hover .bp-tools-arrow { opacity: 1; }
-  .bp-tools-all { display: inline-block; margin-top: 8px; font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); text-decoration: none; }
-  .bp-tools-all:hover { text-decoration: underline; }
-  @media (max-width: 900px) {
-    .bp-tools-index { columns: 2; column-gap: 32px; }
-  }
-  @media (max-width: 640px) {
-    .bp-tools-index { columns: 1; }
-    /* single column would run ~70 rows; cap each engine at its top 3 (the
-       per-engine ALL NN → footer keeps the full count reachable) */
-    .bp-tools-list li:nth-child(n + 4) { display: none; }
-  }
-
-  /* ── ANNEX D — LIVE TELEMETRY (instrument strip) ── */
-  .bp-live-strip {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    border-top: 1.5px solid var(--bp-hair);
-    border-bottom: 1.5px solid var(--bp-hair);
-  }
-  .bp-live-inst {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 22px 22px 24px;
-    text-decoration: none;
-    color: var(--bp-ink);
-    border-left: 1px solid var(--bp-line2);
-    transition: background 0.25s ease;
-  }
-  .bp-live-inst:first-child { border-left: none; }
-  .bp-live-inst:hover { background: var(--bp-hover); }
-  .bp-live-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .bp-live-label { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); }
-  .bp-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-faint); flex: 0 0 auto; }
-  .bp-live-inst.is-live .bp-live-dot { background: var(--bp-acc); animation: bp-live-blink 1.6s ease-in-out infinite; }
-  .bp-live-inst.is-off .bp-live-dot { background: var(--bp-faint); animation: none; }
-  .bp-live-value {
-    font-size: clamp(1rem, 1.7vw, 1.35rem);
-    letter-spacing: 0.02em;
-    font-variant-numeric: tabular-nums;
-    min-height: 1.4em;
-  }
-  .bp-live-inst.is-off .bp-live-value { color: var(--bp-muted); }
-  .bp-live-sub { font-size: 11px; letter-spacing: 0.1em; color: var(--bp-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bp-live-credit { margin-top: 12px; font-size: 10px; letter-spacing: 0.12em; color: var(--bp-faint); }
-  @keyframes bp-live-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.25; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .bp-live-inst .bp-live-dot { animation: none !important; }
-  }
-  @media (max-width: 900px) {
-    .bp-live-strip { grid-template-columns: repeat(2, 1fr); }
-    .bp-live-inst { padding: 18px 16px 20px; }
-    .bp-live-inst:nth-child(odd) { border-left: none; }
-    .bp-live-inst:nth-child(n + 3) { border-top: 1px solid var(--bp-line2); }
-  }
 
   /* ── §01 SELECTED WORK ── */
   .bp-work-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(20px, 3vw, 30px); }
@@ -1874,24 +1532,6 @@ const homepageSchema = {
   .bp-fig-toggle span.is-active { background: var(--bp-acc); color: #fff; }
   .bp-fig-toggle span:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
 
-  /* ── §02 CAPABILITIES ── */
-  .bp-cap-list { border-top: 1px solid var(--bp-hair); }
-  .bp-cap-row {
-    display: grid;
-    grid-template-columns: 44px minmax(180px, 1.1fr) 2fr auto;
-    align-items: baseline;
-    gap: 18px;
-    padding: 24px 0;
-    border-bottom: 1px solid var(--bp-line2);
-    transition: padding-left 0.25s ease;
-  }
-  .bp-cap-row:hover { padding-left: 10px; }
-  .bp-cap-num { font-size: 13px; color: var(--bp-acc); }
-  .bp-cap-row.is-orange .bp-cap-num { color: var(--bp-orange); }
-  .bp-cap-title { font-size: clamp(1.35rem, 2.6vw, 2rem); }
-  .bp-cap-desc { font-size: 15px; line-height: 1.5; color: var(--bp-muted); }
-  .bp-cap-tag { font-size: 11px; letter-spacing: 0.04em; color: var(--bp-muted); white-space: nowrap; }
-
   /* ── §03 WRITING — horizontal rail of cover cards (pin + scrub like the games
      rail; homeBlogRail). The 2-row bento plate layout is the DEFAULT and scrolls
      natively (overflow-x swipe) on mobile / reduced-motion / no-JS; on desktop
@@ -2100,17 +1740,6 @@ const homepageSchema = {
   .art-lightbox-close { position: absolute; top: 1.25rem; right: 1.25rem; z-index: 20; display: flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 9999px; color: #fff; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); transition: background 0.2s ease; }
   .art-lightbox-close:hover { background: rgba(255, 255, 255, 0.22); }
 
-  /* ── §05 STUDIO ── */
-  .bp-studio { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(32px, 5vw, 60px); align-items: start; }
-  .bp-studio-statement { font-size: clamp(1.3rem, 2.6vw, 1.9rem); font-weight: 500; line-height: 1.35; letter-spacing: -0.01em !important; }
-  .bp-stats { display: flex; flex-direction: column; }
-  .bp-stat-row { display: flex; align-items: baseline; gap: 18px; padding: 16px 0; border-top: 1px solid var(--bp-hair); }
-  .bp-stat-num { font-size: clamp(2rem, 4vw, 3rem); min-width: 110px; letter-spacing: -0.02em !important; }
-  .bp-stat-num em { color: var(--bp-acc); font-style: normal; }
-  .bp-stat-meta { display: flex; flex-direction: column; gap: 3px; }
-  .bp-stat-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-muted); }
-  .bp-stat-sub { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-muted); }
-
   /* ── connectors (dimension lines between sections) ── */
   .bp-conn-wrap { position: relative; z-index: 1; display: flex; justify-content: center; padding: 6px 0; }
   /* Section connectors read as vertical drafting "dimension" marks: an extension
@@ -2120,107 +1749,11 @@ const homepageSchema = {
   .bp-conn::before { content: ""; position: absolute; top: 0; left: 50%; width: 10px; height: 1px; margin-left: -5px; background: color-mix(in srgb, var(--bp-acc) 50%, transparent); }
   .bp-conn::after { content: ""; position: absolute; bottom: -1.5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--bp-acc); }
 
-  /* ── ANNEX B — SCREENING ROOM (video band) ──
-     Static grid mirroring the /videos card anatomy (blueprint DNA), scoped to
-     the home. Distinct layout family from the pinned games/writing rails.
-     YouTube brand-red appears ONLY on platform-identifying bits (play mark +
-     platform badge); all page chrome stays on the site accent. */
-  .bp-vid-sec {
-    --bp-vid-panel: color-mix(in srgb, #ffffff 5%, var(--bp-bg, #0a0e14));
-    --bp-vid-screen: #0a0e14;
-    --bp-vid-shadow: 0 12px 34px -22px rgba(0, 0, 0, 0.7);
-  }
-  :global(html.bp-home.light-mode) .bp-vid-sec {
-    --bp-vid-panel: #ffffff;
-    --bp-vid-shadow: 0 1px 2px rgba(20, 21, 42, 0.05), 0 12px 30px -24px rgba(20, 21, 42, 0.3);
-  }
-
-  .bp-vid-channel {
-    display: flex; align-items: center; gap: 18px;
-    margin-top: clamp(22px, 3vw, 32px);
-    text-decoration: none; color: inherit;
-    background: var(--bp-vid-panel);
-    border: 1px solid var(--bp-hair);
-    border-radius: 14px;
-    padding: clamp(16px, 2.4vw, 24px) clamp(18px, 3vw, 30px);
-    box-shadow: var(--bp-vid-shadow);
-    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
-  }
-  .bp-vid-channel:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 22px 48px -28px color-mix(in srgb, var(--bp-acc) 45%, transparent);
-    border-color: color-mix(in srgb, var(--bp-acc) 40%, transparent);
-  }
-  /* YouTube brand red on the play mark only — page chrome stays on site accent. */
-  .bp-vid-channel-mark { width: 40px; height: 40px; flex: none; color: #ff0000; }
-  .bp-vid-channel-mark svg { display: block; width: 100%; height: 100%; }
-  .bp-vid-channel-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-  .bp-vid-channel-eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bp-muted); }
-  .bp-vid-channel-handle { font-size: clamp(1.1rem, 2.2vw, 1.4rem); line-height: 1.1; color: var(--bp-ink); }
-  .bp-vid-channel-cta {
-    margin-left: auto; flex: none;
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 20px; border-radius: 999px;
-    background: var(--bp-acc); color: var(--accent-ink);
-    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-    transition: opacity 0.2s;
-  }
-  .bp-vid-channel:hover .bp-vid-channel-cta { opacity: 0.88; }
-
-  .bp-vid-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-    gap: 22px;
-    margin-top: 22px;
-  }
-  .bp-vid-card {
-    display: flex; flex-direction: column;
-    text-decoration: none; color: inherit;
-    background: var(--bp-vid-panel);
-    border: 1px solid var(--bp-hair);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
-  }
-  .bp-vid-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 44px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
-    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
-  }
-  .bp-vid-media { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--bp-vid-screen); }
-  .bp-vid-media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1); }
-  .bp-vid-card:hover .bp-vid-media img { transform: scale(1.04); }
-  .bp-vid-platform {
-    position: absolute; top: 12px; left: 12px; z-index: 2;
-    font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
-    padding: 4px 9px; border-radius: 5px;
-    /* #dd0000 (not #ff0000): white-on-red at ~5:1 keeps the 9px label WCAG AA */
-    color: #fff; background: #dd0000;
-  }
-  .bp-vid-body { padding: 18px 20px 14px; flex: 1; }
-  .bp-vid-tag {
-    display: inline-block;
-    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 4px 10px; border-radius: 5px;
-    border: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent);
-    color: var(--bp-acc);
-  }
-  .bp-vid-title { margin-top: 12px; font-size: 1.1rem; line-height: 1.3; color: var(--bp-ink); }
-  .bp-vid-foot {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 20px; border-top: 1px solid var(--bp-hair);
-    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bp-muted);
-  }
-  .bp-vid-host { display: flex; align-items: center; gap: 8px; }
-  .bp-vid-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); }
-  .bp-vid-arrow { font-size: 14px; }
-
-  @media (max-width: 640px) {
-    .bp-vid-channel { flex-wrap: wrap; }
-    .bp-vid-channel-cta { margin-left: 0; }
-  }
-
-  /* ── keyframes ── */
+  /* ── keyframes ──
+     lu-spin is also duplicated verbatim in HomeStudio.astro's own <style> —
+     Astro scopes @keyframes names per component, so the compass ring/arm
+     there (a separate component now) needs its own copy of this keyframe
+     rather than referencing this one. */
   @keyframes lu-spin { to { transform: rotate(360deg); } }
   @keyframes lu-ping { 0% { transform: scale(1); opacity: 0.55; } 70% { opacity: 0; } 100% { transform: scale(3.4); opacity: 0; } }
   @keyframes lu-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
@@ -2230,28 +1763,20 @@ const homepageSchema = {
     .bp-hero { grid-template-columns: 1fr; gap: 24px; }
     .bp-hero-right { order: -1; max-width: 300px; }
     .bp-scroll { display: none; }
-    .bp-studio { grid-template-columns: 1fr; }
-    .bp-cap-row { grid-template-columns: 40px 1fr; row-gap: 6px; }
-    .bp-cap-desc { grid-column: 2; }
-    .bp-cap-tag { grid-column: 2; }
   }
   @media (max-width: 720px) {
-    .bp-dir { grid-template-columns: repeat(2, 1fr); }
-    .bp-dir-item { padding: 16px 14px 18px; }
-    .bp-dir-item:nth-child(odd) { border-left: none; }
-    .bp-dir-desc { display: none; }
     .bp-work-grid { grid-template-columns: 1fr; }
   }
+  /* .bp-compass-arm/.bp-compass-draw split out to HomeStudio.astro's own
+     reduced-motion / win-perf-mode rules (that markup now lives there). */
   @media (prefers-reduced-motion: reduce) {
-    .bp-svg-spin, .bp-orbit, .bp-svg-ping, .bp-compass-arm, .bp-compass-draw, .bp-scroll-arrow { animation: none !important; }
+    .bp-svg-spin, .bp-orbit, .bp-svg-ping, .bp-scroll-arrow { animation: none !important; }
     [data-art-card] { opacity: 1; }
     [data-art-card].card-visible { animation: none; }
   }
   :global(body.win-perf-mode) .bp-svg-spin,
   :global(body.win-perf-mode) .bp-orbit,
-  :global(body.win-perf-mode) .bp-svg-ping,
-  :global(body.win-perf-mode) .bp-compass-arm,
-  :global(body.win-perf-mode) .bp-compass-draw { animation: none; }
+  :global(body.win-perf-mode) .bp-svg-ping { animation: none; }
 </style>
 
 <!-- Home scroll-animation hidden initial-states — gated on html.home-anim so JS-off /
@@ -2288,10 +1813,6 @@ const homepageSchema = {
       setTimeout(boot, 300);
     }
   }
-</script>
-<script>
-  import { initHomeLiveTelemetry } from "../../scripts/homeLiveTelemetry";
-  initHomeLiveTelemetry();
 </script>
 <script>
   import { initHomeGamesRail, initHomeBlogRail } from "../../scripts/homeGamesRail";
