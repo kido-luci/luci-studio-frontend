@@ -497,8 +497,12 @@ export function initOceanHero(): void {
     applyOpen,
     step,
     openNow: () => {
-      t0 = -1e9;
+      // NOT t0=-1e9: the loop re-seeds any t0<0, which would re-close the
+      // doors on the next tick. Mark opened and pose the end state directly.
+      opened = true;
+      if (t0 < 0) t0 = 0;
       applyOpen(1);
+      renderer.shadowMap.needsUpdate = true;
     },
   };
   (window as any).__oceanHero = dbg;
