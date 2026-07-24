@@ -351,9 +351,20 @@ export function initOceanHero(): void {
     const aspect = w / h;
     composer.setSize(w, h);
     camera.aspect = aspect;
-    camera.fov = aspect < 0.8 ? 62 : 50;
+    // Portrait (phones, portrait tablets): the desktop framing put the window
+    // mid-frame ON TOP of the hero copy. Eyeball-tuned on 375x812: raise the
+    // rig and pull it toward centre so the window sits high above the text
+    // with only a slight crop at the top-right corner.
+    const portrait = aspect < 0.8;
+    camera.fov = portrait ? 55 : 50;
     camera.updateProjectionMatrix();
-    rig.position.x = aspect < 1.05 ? -(1.05 - aspect) * 2.6 : 0;
+    if (portrait) {
+      rig.position.x = -2.3;
+      rig.position.y = 1.4;
+    } else {
+      rig.position.x = aspect < 1.05 ? -(1.05 - aspect) * 2.6 : 0;
+      rig.position.y = 0;
+    }
     fishGroup.position.x = rig.position.x * 0.55; // corridor follows, half-strength
     renderer.shadowMap.needsUpdate = true;
   };
