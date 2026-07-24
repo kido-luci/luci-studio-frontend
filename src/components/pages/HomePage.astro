@@ -1088,10 +1088,21 @@ const homepageSchema = {
        band must already be dark while three.js idle-loads — the top nav and
        hero copy are light-ink over this band in BOTH themes. */
     background: #06121d;
-    -webkit-mask-image: linear-gradient(#000 82%, transparent 100%);
-    mask-image: linear-gradient(#000 82%, transparent 100%);
   }
   .bp-ocean canvas { width: 100%; height: 100%; display: block; }
+  /* Theme-INDEPENDENT floor (user call 2026-07-24): the scene sinks into the
+     fixed deep-water colour instead of mask-fading into the theme paper —
+     the old transparent mask exposed cream in light mode, a white fog eating
+     the bottom of the scene. The band now ends on its own dark edge against
+     the page, same convention as the other full-bleed dark sheets
+     (.bp-work-band / .bp-cta). */
+  .bp-ocean::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent 66%, #06121d 92%);
+  }
   :global(html.ocean-on) .bp-ocean { display: block; }
   /* The scene replaces both hero ornaments: the corner constellation and the
      right-column ring diagram (the sky window + shaft own that side now). The
