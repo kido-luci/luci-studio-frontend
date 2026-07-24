@@ -1,4 +1,5 @@
 import { invalidatePostStatsCache, refreshPostStats } from '../utils/postStats';
+import { whenReady } from './whenReady';
 
 export function initHomeReveals() {
   // EXPERIENCE timeline items — each animates as it scrolls into view
@@ -415,10 +416,7 @@ export function initHomeReveals() {
         onComplete: () => host.remove()
       });
     };
-    if (ready()) run();
-    else {
-      const id = setInterval(() => { if (ready()) { clearInterval(id); run(); } }, 30);
-    }
+    whenReady(ready, run);
   })();
 
   // ML6 "Beautiful Questions" — word-level mask reveal: each word rises from behind a clip
@@ -454,10 +452,7 @@ export function initHomeReveals() {
         delay: 1.5
       });
     };
-    if (ready()) run();
-    else {
-      const id = setInterval(() => { if (ready()) { clearInterval(id); run(); } }, 30);
-    }
+    whenReady(ready, run);
   })();
 
 
