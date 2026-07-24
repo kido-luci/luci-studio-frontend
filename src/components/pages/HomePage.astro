@@ -1099,6 +1099,20 @@ const homepageSchema = {
     min-height: calc(100dvh - 190px);
     align-content: center;
   }
+  /* The ocean band is THEME-INDEPENDENT (always the deep-water palette), so
+     the hero copy must stay light-on-dark in BOTH modes: re-point the local
+     blueprint tokens exactly like .bp-work-band does for its dark sheet.
+     --bp-bg only feeds the solid button's text/hover here. */
+  :global(html.ocean-on) .bp-hero {
+    --bp-ink: #eceae3;
+    --bp-muted: rgba(236, 234, 227, 0.72);
+    --bp-faint: rgba(236, 234, 227, 0.5);
+    --bp-bg: #0d1520;
+  }
+  :global(html.ocean-on body.light-mode) .bp-hero .bp-display { filter: none !important; }
+  /* Single-column hero: cap the text column so the dimension rule and
+     tagline stop short of the light shaft instead of slicing across it. */
+  :global(html.ocean-on) .bp-hero-left { max-width: 620px; }
   .bp-cst-lines {
     position: absolute;
     inset: 0;

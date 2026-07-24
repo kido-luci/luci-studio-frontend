@@ -18,8 +18,9 @@
 //     oceanHero="off"); this module DEMOTES it (removes the class) if real
 //     init fails or the GL context dies, which restores the CSS fallback
 //     (constellation corner + hero ring diagram).
-//   · Colour tracks --accent-rgb live; light/dark tracks body.light-mode
-//     (same MutationObserver contract the old bpGlow used).
+//   · The band is THEME-INDEPENDENT (user decision 2026-07-24): the fixed
+//     demo palette renders identically in light and dark mode, and the hero
+//     text keeps contrast via local --bp-* overrides in HomePage.astro.
 //   · Reduced motion: one static frame, doors already open, no loop.
 //   · Idle budget: ~30fps cap after the opening; paused when the tab is
 //     hidden or the band scrolls offscreen; the shadow map stops re-rendering
@@ -53,65 +54,25 @@ const WHALE_SCALE = 0.09;
 const FISH_URLS = ['/models/fish/fish2.glb', '/models/fish/clownfish.glb'];
 const WHALE_URL = '/models/fish/whale.glb';
 
-type RGB = [number, number, number];
-
-/** Live accent as 0..1 rgb; falls back to the blueprint blue. */
-function accentRgb(): RGB {
-  const raw = getComputedStyle(document.documentElement)
-    .getPropertyValue('--accent-rgb')
-    .trim();
-  const parts = (raw || '27 86 255').split(/[\s,]+/).map(Number);
-  if (parts.length < 3 || parts.some((n) => !isFinite(n))) return [27 / 255, 86 / 255, 1];
-  return [parts[0] / 255, parts[1] / 255, parts[2] / 255];
-}
-
-function mix(a: RGB, b: RGB, t: number): RGB {
-  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-}
-function col(rgb: RGB): THREE.Color {
-  return new THREE.Color(rgb[0], rgb[1], rgb[2]);
-}
-function hex(h: number): RGB {
-  return [((h >> 16) & 255) / 255, ((h >> 8) & 255) / 255, (h & 255) / 255];
-}
-
-/** Theme palette. Dark = the approved demo look; light stays a PALE sunlit
- *  wash so the hero's dark ink text keeps AA contrast on the band. */
-function palette(light: boolean, acc: RGB) {
-  return light
-    ? {
-        fog: hex(0xc9e2ee),
-        fogDensity: 0.045,
-        surface: hex(0xb9d7e6),
-        sky: hex(0xffffff),
-        panel: hex(0x9dc0d2),
-        hemiSky: hex(0xdfeef7),
-        hemiGround: hex(0x9fc2d4),
-        hemiIntensity: 1.6,
-        sunColor: mix(hex(0xfff6dd), acc, 0.15),
-        sunIntensity: 5.5,
-        rays: mix(hex(0xfff3cf), acc, 0.15),
-        maxDensity: 0.32,
-        snow: hex(0xa8c8d8),
-        fishEmissive: 0x0a141c,
-      }
-    : {
-        fog: hex(0x06121d),
-        fogDensity: 0.052,
-        surface: hex(0x0e2233),
-        sky: hex(0xdff2ff),
-        panel: hex(0x091019),
-        hemiSky: hex(0x2e5473),
-        hemiGround: hex(0x03080e),
-        hemiIntensity: 1.15,
-        sunColor: mix(hex(0xcfe8ff), acc, 0.25),
-        sunIntensity: 4.5,
-        rays: mix(hex(0xbfe3ff), acc, 0.25),
-        maxDensity: 0.55,
-        snow: hex(0x6f8ca3),
-        fishEmissive: 0x14242f,
-      };
-}
+// ── Fixed palette — the EXACT approved-demo constants. The band is theme-
+// INDEPENDENT by the user's decision (2026-07-24): same deep-ocean look in
+// light and dark mode, no accent tracking (accent-mixing the sun/rays was
+// what made the integrated colours drift from the demo). The hero text keeps
+// contrast via local --bp-* token overrides in HomePage.astro instead.
+const FOG = 0x06121d;
+const FOG_DENSITY = 0.052;
+const SURFACE_COLOR = 0x0e2233;
+const SKY_COLOR = 0xdff2ff;
+const PANEL_COLOR = 0x091019;
+const HEMI_SKY = 0x2e5473;
+const HEMI_GROUND = 0x03080e;
+const HEMI_INTENSITY = 1.15;
+const SUN_COLOR = 0xcfe8ff;
+const SUN_INTENSITY = 4.5;
+const RAYS_COLOR = 0xbfe3ff;
+const RAYS_MAX_DENSITY = 0.55;
+const SNOW_COLOR = 0x6f8ca3;
+const FISH_EMISSIVE = 0x14242f;
 
 export function initOceanHero(): void {
   const wrap = document.querySelector<HTMLElement>('.bp-ocean');
@@ -176,7 +137,7 @@ export function initOceanHero(): void {
   holePath.lineTo(hx - WIN_W / 2, hy + WIN_D / 2);
   holePath.closePath();
   shape.holes.push(holePath);
-  const surfaceMat = new THREE.MeshStandardMaterial({ roughness: 1, metalness: 0, side: THREE.DoubleSide });
+  const surfaceMat = new THREE.MeshStandardMaterial({ color: SURFACE_COLOR, roughness: 1, metalness: 0, side: THREE.DoubleSide });
   const surface = new THREE.Mesh(new THREE.ShapeGeometry(shape, 8), surfaceMat);
   surface.rotation.x = -Math.PI / 2;
   surface.position.y = SURFACE_Y;
@@ -185,14 +146,14 @@ export function initOceanHero(): void {
   rig.add(surface);
 
   // Bright sky seen through the hole.
-  const skyMat = new THREE.MeshBasicMaterial({ fog: false, side: THREE.DoubleSide });
+  const skyMat = new THREE.MeshBasicMaterial({ color: SKY_COLOR, fog: false, side: THREE.DoubleSide });
   const sky = new THREE.Mesh(new THREE.PlaneGeometry(36, 20), skyMat);
   sky.rotation.x = Math.PI / 2;
   sky.position.set(WIN_X, SURFACE_Y + 3, WIN_Z);
   rig.add(sky);
 
   // Hatch doors — real occluders: the shaft grows as they swing open.
-  const panelMat = new THREE.MeshStandardMaterial({ roughness: 1 });
+  const panelMat = new THREE.MeshStandardMaterial({ color: PANEL_COLOR, roughness: 1 });
   const mkPanel = (side: 1 | -1) => {
     const hinge = new THREE.Group();
     hinge.position.set(WIN_X + (side * WIN_W) / 2, SURFACE_Y - 0.05, WIN_Z);
@@ -207,7 +168,7 @@ export function initOceanHero(): void {
   const panelR = mkPanel(1);
 
   // Sun above the window, slanting the shaft down-left; hemisphere ambience.
-  const sun = new THREE.DirectionalLight(0xffffff, 4.5);
+  const sun = new THREE.DirectionalLight(SUN_COLOR, SUN_INTENSITY);
   sun.position.set(WIN_X + 3.2, SURFACE_Y + 8, WIN_Z + 0.3);
   sun.target.position.set(WIN_X - 4.4, SURFACE_Y - 10, WIN_Z);
   sun.castShadow = true;
@@ -220,7 +181,7 @@ export function initOceanHero(): void {
   sun.shadow.camera.bottom = -16;
   sun.shadow.bias = -0.0004;
   rig.add(sun, sun.target);
-  const hemi = new THREE.HemisphereLight(0xffffff, 0x000000, 1.15);
+  const hemi = new THREE.HemisphereLight(HEMI_SKY, HEMI_GROUND, HEMI_INTENSITY);
   scene.add(hemi);
 
   // ── Post: shadow-raymarched god rays (three-good-godrays).
@@ -228,24 +189,17 @@ export function initOceanHero(): void {
   const renderPass = new RenderPass(scene, camera);
   renderPass.renderToScreen = false;
   composer.addPass(renderPass);
-  let godraysPass: GodraysPass | null = null;
-  const buildGodrays = (raysColor: THREE.Color, maxDensity: number) => {
-    if (godraysPass) {
-      composer.removePass(godraysPass);
-      godraysPass.dispose();
-    }
-    godraysPass = new GodraysPass(sun, camera, {
-      density: 1 / 64,
-      maxDensity,
-      distanceAttenuation: 1.6,
-      color: raysColor,
-      raymarchSteps: coarse ? 40 : 60,
-      blur: true,
-      gammaCorrection: true,
-    });
-    godraysPass.renderToScreen = true;
-    composer.addPass(godraysPass);
-  };
+  const godraysPass = new GodraysPass(sun, camera, {
+    density: 1 / 64,
+    maxDensity: RAYS_MAX_DENSITY,
+    distanceAttenuation: 1.6,
+    color: new THREE.Color(RAYS_COLOR),
+    raymarchSteps: coarse ? 40 : 60,
+    blur: true,
+    gammaCorrection: true,
+  });
+  godraysPass.renderToScreen = true;
+  composer.addPass(godraysPass);
 
   // ── Marine snow.
   const SNOW = coarse ? 60 : 140;
@@ -260,6 +214,7 @@ export function initOceanHero(): void {
   const snowGeo = new THREE.BufferGeometry();
   snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
   const snowMat = new THREE.PointsMaterial({
+    color: SNOW_COLOR,
     size: 0.045,
     transparent: true,
     opacity: 0.5,
@@ -289,7 +244,6 @@ export function initOceanHero(): void {
     fphase.push(Math.random() * Math.PI * 2);
   }
 
-  let fishEmissive = 0x14242f;
   const prep = (src: THREE.Object3D, scl: number): Swimmer => {
     const inner = SkeletonUtils.clone(src);
     inner.scale.setScalar(scl); // MANUAL — see gotchas at the top
@@ -302,7 +256,7 @@ export function initOceanHero(): void {
         m.receiveShadow = true;
         m.castShadow = false;
         const cloned = (m.material as THREE.MeshStandardMaterial).clone();
-        cloned.emissive.setHex(fishEmissive);
+        cloned.emissive.setHex(FISH_EMISSIVE);
         m.material = cloned;
         mats.push(cloned);
       }
@@ -350,28 +304,9 @@ export function initOceanHero(): void {
     })
     .catch(() => {}); // whale is garnish — skip silently
 
-  // ── Theme (light/dark + accent scheme) — mirrors the old bpGlow contract.
-  let pal = palette(document.body.classList.contains('light-mode'), accentRgb());
-  const applyTheme = () => {
-    pal = palette(document.body.classList.contains('light-mode'), accentRgb());
-    scene.fog = new THREE.FogExp2(col(pal.fog).getHex(), pal.fogDensity);
-    renderer.setClearColor(col(pal.fog), 1);
-    surfaceMat.color = col(pal.surface);
-    skyMat.color = col(pal.sky);
-    panelMat.color = col(pal.panel);
-    snowMat.color = col(pal.snow);
-    hemi.color = col(pal.hemiSky);
-    hemi.groundColor = col(pal.hemiGround);
-    hemi.intensity = pal.hemiIntensity;
-    sun.color = col(pal.sunColor);
-    sun.intensity = pal.sunIntensity;
-    fishEmissive = pal.fishEmissive;
-    for (const f of fishes) for (const m of f.mats) m.emissive.setHex(fishEmissive);
-    if (whale) for (const m of whale.mats) m.emissive.setHex(fishEmissive);
-    buildGodrays(col(pal.rays), pal.maxDensity);
-    renderer.shadowMap.needsUpdate = true;
-    if (staticMode) renderStatic();
-  };
+  // ── Fixed atmosphere (theme-independent): fog + clear colour, set once.
+  scene.fog = new THREE.FogExp2(FOG, FOG_DENSITY);
+  renderer.setClearColor(new THREE.Color(FOG), 1);
 
   // ── Layout: on narrow viewports pull the rig (window+sun+doors) toward the
   // centre and widen the fov so the right-offset window stays in frame.
@@ -540,14 +475,8 @@ export function initOceanHero(): void {
     { passive: true },
   );
 
-  new MutationObserver(applyTheme).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-scheme', 'class'],
-  });
-  new MutationObserver(applyTheme).observe(document.body, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
+  // (No theme/accent observers: the band is deliberately theme-independent —
+  // the fixed demo palette renders identically in light and dark mode.)
 
   // Dev/verify handle (same convention as the old __bpGlow): enough to drive
   // and render frames headlessly — hidden tabs never tick rAF.
@@ -575,7 +504,6 @@ export function initOceanHero(): void {
   (window as any).__oceanHero = dbg;
 
   layout();
-  applyTheme();
   if (staticMode) {
     renderStatic();
   } else {
