@@ -46,8 +46,11 @@ const WIN_Z = -1.0;
 const OPEN_MS = 1900;
 const OPEN_DELAY_MS = 500;
 const IDLE_FRAME_MS = 30; // ~30fps ambient cap
-// Quaternius models face -Z; the boids orient noses along +X.
-const MODEL_YAW = -Math.PI / 2;
+// Model facing is PER-SPECIES in this pack (verified by posing + eyeballing,
+// 2026-07-24): the school fish (Fish2/ClownFish) face +Z, the whale faces
+// -Z. Each yaw turns that species' nose onto +X for the boids.
+const SCHOOL_YAW = Math.PI / 2; // +Z nose → +X
+const WHALE_YAW = -Math.PI / 2; // -Z nose → +X
 // MANUAL scales (demo-calibrated) — never Box3-normalise these armatures.
 const FISH_SCALE = 0.018;
 const WHALE_SCALE = 0.09;
@@ -244,10 +247,10 @@ export function initOceanHero(): void {
     fphase.push(Math.random() * Math.PI * 2);
   }
 
-  const prep = (src: THREE.Object3D, scl: number): Swimmer => {
+  const prep = (src: THREE.Object3D, scl: number, yaw: number): Swimmer => {
     const inner = SkeletonUtils.clone(src);
     inner.scale.setScalar(scl); // MANUAL — see gotchas at the top
-    inner.rotation.y = MODEL_YAW;
+    inner.rotation.y = yaw; // per-species (SCHOOL_YAW / WHALE_YAW)
     const mats: THREE.MeshStandardMaterial[] = [];
     inner.traverse((o) => {
       const m = o as THREE.Mesh;
@@ -271,7 +274,7 @@ export function initOceanHero(): void {
     .then((gltfs) => {
       for (let i = 0; i < FISH_COUNT; i++) {
         const g = gltfs[i % 3 === 2 ? 1 : 0]; // ~2/3 fish2, 1/3 clownfish
-        const f = prep(g.scene, FISH_SCALE * fscale[i]);
+        const f = prep(g.scene, FISH_SCALE * fscale[i], SCHOOL_YAW);
         if (g.animations.length) {
           f.mixer = new THREE.AnimationMixer(f.root);
           f.mixer.clipAction(g.animations[0]).play();
@@ -291,7 +294,7 @@ export function initOceanHero(): void {
   loader
     .loadAsync(WHALE_URL)
     .then((g) => {
-      whale = prep(g.scene, WHALE_SCALE);
+      whale = prep(g.scene, WHALE_SCALE, WHALE_YAW);
       whale.root.rotation.y = Math.PI; // prep leaves the nose on +X; drift is -X
       whale.root.position.set(whaleX, -0.9, -7.5);
       if (g.animations.length) {
@@ -325,9 +328,7 @@ export function initOceanHero(): void {
   };
 
   // ── Per-frame state (temps preallocated — zero-alloc loop).
-  const tmpQ = new THREE.Quaternion();
   const tmpV = new THREE.Vector3();
-  const X_AXIS = new THREE.Vector3(1, 0, 0);
   const attractor = new THREE.Vector3();
 
   const stepFish = (dt: number, t: number) => {
@@ -353,10 +354,16 @@ export function initOceanHero(): void {
       p.addScaledVector(v, dt);
 
       const f = fishes[i];
-      tmpV.copy(v).normalize();
-      tmpQ.setFromUnitVectors(X_AXIS, tmpV);
       f.root.position.copy(p);
-      f.root.quaternion.copy(tmpQ);
+      // Yaw/pitch only, NEVER shortest-arc quaternions: setFromUnitVectors
+      // picks an arbitrary rotation axis near the 180° case, which rolled
+      // fish belly-up whenever they swam toward -X. This keeps world-up up.
+      f.root.rotation.set(
+        0,
+        Math.atan2(-v.z, v.x),
+        Math.atan2(v.y, Math.hypot(v.x, v.z)),
+        'YZX',
+      );
       if (f.mixer) f.mixer.update(dt);
     }
     if (whale) {
