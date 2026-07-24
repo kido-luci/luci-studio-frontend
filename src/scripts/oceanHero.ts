@@ -41,7 +41,7 @@ import { GodraysPass } from 'three-good-godrays';
 const SURFACE_Y = 3.6;
 const WIN_W = 3.4; // window rect, world units (x)
 const WIN_D = 1.9; // window rect depth (z)
-const WIN_X = 3.1; // offset right
+const WIN_X = 3.7; // offset right
 const WIN_Z = -1.0;
 const OPEN_MS = 1900;
 const OPEN_DELAY_MS = 500;
@@ -66,7 +66,7 @@ const FOG = 0x06121d;
 const FOG_DENSITY = 0.052;
 const SURFACE_COLOR = 0x0e2233;
 const SKY_COLOR = 0xdff2ff;
-const PANEL_COLOR = 0x091019;
+const SKY_DIM = 0x21333f; // window before the light wells up (open progress 0)
 const HEMI_SKY = 0x2e5473;
 const HEMI_GROUND = 0x03080e;
 const HEMI_INTENSITY = 1.15;
@@ -105,6 +105,10 @@ export function initOceanHero(): void {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // The only caster (the holed surface) never moves and the shaft SHAPE is
+  // constant, so the shadow map is rendered on demand (init + resize) via
+  // needsUpdate, never per-frame.
+  renderer.shadowMap.autoUpdate = false;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 2, 0.1, 80);
@@ -155,20 +159,13 @@ export function initOceanHero(): void {
   sky.position.set(WIN_X, SURFACE_Y + 3, WIN_Z);
   rig.add(sky);
 
-  // Hatch doors — real occluders: the shaft grows as they swing open.
-  const panelMat = new THREE.MeshStandardMaterial({ color: PANEL_COLOR, roughness: 1 });
-  const mkPanel = (side: 1 | -1) => {
-    const hinge = new THREE.Group();
-    hinge.position.set(WIN_X + (side * WIN_W) / 2, SURFACE_Y - 0.05, WIN_Z);
-    const leaf = new THREE.Mesh(new THREE.BoxGeometry(WIN_W / 2 + 0.06, 0.06, WIN_D + 0.06), panelMat);
-    leaf.position.x = (-side * WIN_W) / 4;
-    leaf.castShadow = true;
-    hinge.add(leaf);
-    rig.add(hinge);
-    return hinge;
-  };
-  const panelL = mkPanel(-1);
-  const panelR = mkPanel(1);
+  // No mechanical lid. Every hinged flap, under this oblique upper-right sun,
+  // leans over its own aperture as it swings and shadows it for most of the
+  // motion — the light "popped" on at the end instead of opening. Instead the
+  // shaft EMERGES like sun breaking through: the surface hole is the only
+  // occluder (constant rectangular shaft shape); applyOpen ramps the shaft
+  // intensity, the sun, and the window brightness up together. Reads as light
+  // welling up through the sky window — which is the whole idea.
 
   // Sun above the window, slanting the shaft down-left; hemisphere ambience.
   const sun = new THREE.DirectionalLight(SUN_COLOR, SUN_INTENSITY);
@@ -192,35 +189,43 @@ export function initOceanHero(): void {
   const renderPass = new RenderPass(scene, camera);
   renderPass.renderToScreen = false;
   composer.addPass(renderPass);
-  const godraysPass = new GodraysPass(sun, camera, {
+  // Base params reused every applyOpen call — setParams spreads over DEFAULTS,
+  // so the full set must be re-sent each time (only maxDensity varies).
+  const GODRAYS_BASE = {
     density: 1 / 64,
-    maxDensity: RAYS_MAX_DENSITY,
     distanceAttenuation: 1.6,
     color: new THREE.Color(RAYS_COLOR),
     raymarchSteps: coarse ? 40 : 60,
     blur: true,
     gammaCorrection: true,
-  });
+  };
+  const godraysPass = new GodraysPass(sun, camera, { ...GODRAYS_BASE, maxDensity: RAYS_MAX_DENSITY });
   godraysPass.renderToScreen = true;
   composer.addPass(godraysPass);
 
-  // ── Marine snow.
-  const SNOW = coarse ? 60 : 140;
+  // ── Marine snow: faint organic detritus for depth. STRICTLY below the
+  // water surface (SNOW_TOP) so none appear "in the sky" above the window,
+  // drifting slowly with a gentle sideways sway (not straight-down rain).
+  const SNOW = coarse ? 50 : 90;
+  const SNOW_TOP = SURFACE_Y - 0.8; // 2.8 — never breaches the surface
+  const SNOW_BOTTOM = -6.2;
   const snowPos = new Float32Array(SNOW * 3);
   const snowSpeed = new Float32Array(SNOW);
+  const snowPhase = new Float32Array(SNOW);
   for (let i = 0; i < SNOW; i++) {
     snowPos[i * 3] = -8 + Math.random() * 16;
-    snowPos[i * 3 + 1] = -6 + Math.random() * 10;
+    snowPos[i * 3 + 1] = SNOW_BOTTOM + Math.random() * (SNOW_TOP - SNOW_BOTTOM);
     snowPos[i * 3 + 2] = -3 + Math.random() * 5;
-    snowSpeed[i] = 0.05 + Math.random() * 0.12;
+    snowSpeed[i] = 0.02 + Math.random() * 0.05; // slow sink
+    snowPhase[i] = Math.random() * Math.PI * 2;
   }
   const snowGeo = new THREE.BufferGeometry();
   snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
   const snowMat = new THREE.PointsMaterial({
     color: SNOW_COLOR,
-    size: 0.045,
+    size: 0.04,
     transparent: true,
-    opacity: 0.5,
+    opacity: 0.28,
     depthWrite: false,
     sizeAttenuation: true,
   });
@@ -375,21 +380,28 @@ export function initOceanHero(): void {
     }
   };
 
-  const stepSnow = (dt: number) => {
+  const stepSnow = (dt: number, t: number) => {
     for (let i = 0; i < SNOW; i++) {
       let y = snowPos[i * 3 + 1] - snowSpeed[i] * dt;
-      if (y < -6.2) y = 4;
+      if (y < SNOW_BOTTOM) y = SNOW_TOP; // respawn below the surface, never above
       snowPos[i * 3 + 1] = y;
+      snowPos[i * 3] += Math.sin(t * 0.3 + snowPhase[i]) * 0.06 * dt; // gentle sway
     }
     snowGeo.attributes.position.needsUpdate = true;
   };
 
-  /** Opening progress 0→1 (cubic in-out): the doors are shadow casters, so
-   *  the shaft grows physically as they swing — nothing else to fade. */
+  /** Opening progress 0→1: light WELLS UP through the sky window. smootherstep
+   *  (slow → bloom → settle) ramps the shaft intensity, the sun, and the
+   *  window brightness together — a soft dawn breaking through, not a hard
+   *  switch. The shaft SHAPE is constant (the surface hole is the occluder);
+   *  only its strength animates, so the shadow map never needs re-rendering. */
+  const skyDim = new THREE.Color(SKY_DIM);
+  const skyBright = new THREE.Color(SKY_COLOR);
   const applyOpen = (p: number) => {
-    const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-    panelL.rotation.z = e * 1.9;
-    panelR.rotation.z = -e * 1.9;
+    const e = p * p * (3 - 2 * p);
+    godraysPass.setParams({ ...GODRAYS_BASE, maxDensity: e * RAYS_MAX_DENSITY });
+    sun.intensity = e * SUN_INTENSITY;
+    skyMat.color.copy(skyDim).lerp(skyBright, e);
   };
 
   // ── Static path (reduced motion): open pose, fish scattered, one frame.
@@ -429,14 +441,10 @@ export function initOceanHero(): void {
     if (!opened) {
       const p = Math.min(1, Math.max(0, (now - t0 - OPEN_DELAY_MS) / OPEN_MS));
       applyOpen(p);
-      if (p >= 1) {
-        opened = true;
-        // Casters are static from here (fish don't cast) — freeze the map.
-        renderer.shadowMap.autoUpdate = false;
-      }
+      if (p >= 1) opened = true;
     }
     stepFish(dt, t);
-    stepSnow(dt);
+    stepSnow(dt, t);
     composer.render(dt);
     dbg.frames++;
   };
@@ -489,7 +497,7 @@ export function initOceanHero(): void {
   // and render frames headlessly — hidden tabs never tick rAF.
   const step = (dt: number, t: number) => {
     stepFish(dt, t);
-    stepSnow(dt);
+    stepSnow(dt, t);
   };
   const dbg = {
     fish: FISH_COUNT,
