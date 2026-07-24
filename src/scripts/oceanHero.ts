@@ -237,8 +237,6 @@ export function initOceanHero(): void {
     godraysPass = new GodraysPass(sun, camera, {
       density: 1 / 64,
       maxDensity,
-      edgeStrength: 2,
-      edgeRadius: 2,
       distanceAttenuation: 1.6,
       color: raysColor,
       raymarchSteps: coarse ? 40 : 60,
