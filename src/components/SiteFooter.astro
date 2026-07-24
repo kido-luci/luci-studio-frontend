@@ -51,6 +51,25 @@ const makeLinks = [
       <circle class="bp-g-hub-ping" cx="60" cy="60" r="4"></circle>
     </svg>
   </span>
+  <!-- Rotating blueprint ring — relocated here from the hero (the ocean scene
+       took its spot on the homepage). Shown only when html.ocean-on so the
+       non-ocean fallback keeps it in the hero; large + faint on the right,
+       mirroring where it opened the page. -->
+  <span class="bp-cta-ring" aria-hidden="true">
+    <svg viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor">
+      <circle cx="210" cy="210" r="200" stroke-opacity="0.10"></circle>
+      <circle cx="210" cy="210" r="150" stroke-opacity="0.14"></circle>
+      <circle cx="210" cy="210" r="96" class="cr-acc" stroke-width="2.5" stroke-opacity="0.7"></circle>
+      <line x1="8" y1="210" x2="412" y2="210" stroke-opacity="0.08"></line>
+      <line x1="210" y1="8" x2="210" y2="412" stroke-opacity="0.08"></line>
+      <circle cx="210" cy="210" r="200" class="cr-acc cr-spin" stroke-opacity="0.45" stroke-dasharray="2 9"></circle>
+      <rect x="280" y="256" width="12" height="12" stroke-opacity="0.2"></rect>
+      <circle cx="210" cy="210" r="6" class="cr-ping"></circle>
+      <circle cx="210" cy="210" r="5" class="cr-orange"></circle>
+      <g class="cr-orbit cr-orbit-a"><circle cx="306" cy="114" r="4" class="cr-acc-fill"></circle></g>
+      <g class="cr-orbit cr-orbit-b"><circle cx="138" cy="300" r="3" class="cr-orange"></circle></g>
+    </svg>
+  </span>
   <div class="bp-cta-inner bp-wrap">
     <div class="bp-cta-label" data-reveal>
       <span class="bp-coord-dot" aria-hidden="true"></span>
@@ -195,5 +214,49 @@ const makeLinks = [
   @media (max-width: 900px) { .bp-cta-graph { display: none; } }
   @media (prefers-reduced-motion: reduce) { .bp-g-pulse { display: none; } .bp-g-hub-ping { animation: none; } }
   :global(body.win-perf-mode) .bp-g-pulse { display: none; }
+
+  /* ── Relocated hero ring (html.ocean-on only) ────────────────────────────
+     On the homepage the ocean scene replaced the hero's rotating ring; it's
+     rehomed here as the closing sheet's decoration. Off by default so the
+     footer stays clean everywhere else; on ocean-on it takes over the corner
+     from the small node graph (which hides). */
+  :global(html.ocean-on) .bp-cta-graph { display: none; }
+  /* Default styled + visible; hidden only when the ocean scene is OFF (so it
+     shows on the homepage, where it was relocated from, and nowhere else).
+     Inverted on purpose: a standalone `.bp-cta-ring { display:none }` base
+     gets merged with other display:none rules and wins the cascade over the
+     show rule, so gate visibility with :not() instead. */
+  .bp-cta-ring {
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: -5%;
+    transform: translateY(-50%);
+    width: min(48vw, 480px);
+    aspect-ratio: 1;
+    color: #eceae3;
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 0;
+    -webkit-mask-image: radial-gradient(circle, #000 52%, transparent 80%);
+    mask-image: radial-gradient(circle, #000 52%, transparent 80%);
+  }
+  :global(html:not(.ocean-on)) .bp-cta-ring { display: none; }
+  .bp-cta-ring svg { display: block; width: 100%; height: 100%; }
+  .cr-acc { stroke: var(--bp-acc); }
+  .cr-acc-fill { fill: var(--bp-acc); }
+  .cr-orange { fill: #ff5b1a; }
+  .cr-spin { transform-box: fill-box; transform-origin: center; animation: crSpin 44s linear infinite; }
+  .cr-orbit { transform-box: view-box; transform-origin: center; }
+  .cr-orbit-a { animation: crSpin 30s linear infinite; }
+  .cr-orbit-b { animation: crSpin 24s linear infinite reverse; }
+  .cr-ping { fill: none; stroke: #ff5b1a; stroke-width: 1.4; opacity: 0; transform-box: view-box; transform-origin: center; animation: crPing 2.8s ease-out infinite; }
+  @keyframes crSpin { to { transform: rotate(360deg); } }
+  @keyframes crPing { 0% { transform: scale(1); opacity: 0.5; } 70% { opacity: 0; } 100% { transform: scale(3.4); opacity: 0; } }
+  @media (max-width: 640px) { :global(html.ocean-on) .bp-cta-ring { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .cr-spin, .cr-orbit, .cr-ping { animation: none !important; } }
+  :global(body.win-perf-mode) .cr-spin,
+  :global(body.win-perf-mode) .cr-orbit,
+  :global(body.win-perf-mode) .cr-ping { animation: none !important; }
   :global(body.win-perf-mode) .bp-g-hub-ping { animation: none; }
 </style>

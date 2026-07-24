@@ -217,6 +217,15 @@ const schemes = [
     background: var(--nav-bg-scroll);
     border-bottom-color: var(--bp-hair);
   }
+  /* Over the theme-INDEPENDENT ocean band (homepage only, html.ocean-on): at
+     the very top the glassless nav floats on deep water in BOTH themes, so
+     light mode's dark ink would sink — force light ink until .nav-scrolled
+     brings the theme-aware glass back. */
+  :global(html.ocean-on) .bp-nav:not(.nav-scrolled) {
+    --bp-ink: #eceae3;
+    --bp-muted: rgba(236, 234, 227, 0.72);
+    --bp-bg: #0d1520; /* CTA pill text/hover — keeps light-pill + dark text */
+  }
   /* Hide-on-scroll-down / reveal-on-scroll-up (toggled by navDimmer.ts).
      Never applied while the mobile dropdown is open — see navDimmer.ts. */
   .bp-nav.nav-hidden {
