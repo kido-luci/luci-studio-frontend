@@ -220,8 +220,9 @@ export function initOceanHero(): void {
   const bloom = new BloomEffect({
     luminanceThreshold: 0.72,
     luminanceSmoothing: 0.25,
-    intensity: 0.85,
+    intensity: 0.45, // tight bleed — the spill above the window stays a slim rim
     mipmapBlur: true,
+    radius: 0.55,
   });
   composer.addPass(new EffectPass(camera, bloom));
   const godraysPass = new GodraysPass(sun, camera, { ...GODRAYS_BASE, maxDensity: RAYS_MAX_DENSITY });
