@@ -35,7 +35,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
-import { EffectComposer, RenderPass } from 'postprocessing';
+import { BloomEffect, EffectComposer, EffectPass, RenderPass } from 'postprocessing';
 import { GodraysPass } from 'three-good-godrays';
 
 const SURFACE_Y = 3.6;
@@ -76,20 +76,6 @@ const RAYS_COLOR = 0xbfe3ff;
 const RAYS_MAX_DENSITY = 0.55;
 const SNOW_COLOR = 0x6f8ca3;
 const FISH_EMISSIVE = 0x14242f;
-
-/** Soft radial sprite texture (asset-free) for the window's light bleed. */
-function glowTexture(): THREE.CanvasTexture {
-  const cv = document.createElement('canvas');
-  cv.width = cv.height = 128;
-  const ctx = cv.getContext('2d')!;
-  const g = ctx.createRadialGradient(64, 64, 2, 64, 64, 64);
-  g.addColorStop(0, 'rgba(255,255,255,0.85)');
-  g.addColorStop(0.4, 'rgba(255,255,255,0.22)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 128, 128);
-  return new THREE.CanvasTexture(cv);
-}
 
 export function initOceanHero(): void {
   const wrap = document.querySelector<HTMLElement>('.bp-ocean');
@@ -173,23 +159,11 @@ export function initOceanHero(): void {
   sky.position.set(WIN_X, SURFACE_Y + 3, WIN_Z);
   rig.add(sky);
 
-  // Soft light bleed at the aperture — additive halo so the window reads as a
-  // glowing underwater light source, not a hard-edged white cut-out. Sits just
-  // under the surface, sized a touch past the hole; brightness follows the
-  // opening (applyOpen).
-  const glowMat = new THREE.SpriteMaterial({
-    map: glowTexture(),
-    color: SKY_COLOR,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    depthTest: false,
-    fog: false,
-    opacity: 0,
-  });
-  const glow = new THREE.Sprite(glowMat);
-  glow.position.set(WIN_X, SURFACE_Y - 0.2, WIN_Z);
-  glow.scale.set(WIN_W * 1.35, WIN_D * 1.7, 1); // hugs the window, no big cloud
-  rig.add(glow);
+  // (No sprite halo here: a billboard glow reads as a flat 2D disc pasted
+  // over the 3D scene the moment you look closely. The window's light bleed
+  // comes from a real post-process bloom instead — see the composer below —
+  // which derives from the rendered brightness, so it hugs the window's
+  // actual projected shape and scales with the opening automatically.)
 
   // No mechanical lid. Every hinged flap, under this oblique upper-right sun,
   // leans over its own aperture as it swings and shadows it for most of the
@@ -236,6 +210,20 @@ export function initOceanHero(): void {
     blur: true,
     gammaCorrection: true,
   };
+  // Real light bleed: threshold bloom on the scene BEFORE the godrays pass.
+  // Only near-white pixels (the sky window) pass the luminance gate, so the
+  // halo follows the window's projected parallelogram and breathes with the
+  // opening — a 3D-honest glow, not a billboard disc. Order matters: with
+  // bloom AFTER GodraysPass the EffectPass reads an empty buffer and outputs
+  // black (measured); bloom-then-godrays composites correctly and keeps the
+  // scene depth (from RenderPass) available to the raymarcher.
+  const bloom = new BloomEffect({
+    luminanceThreshold: 0.72,
+    luminanceSmoothing: 0.25,
+    intensity: 0.85,
+    mipmapBlur: true,
+  });
+  composer.addPass(new EffectPass(camera, bloom));
   const godraysPass = new GodraysPass(sun, camera, { ...GODRAYS_BASE, maxDensity: RAYS_MAX_DENSITY });
   godraysPass.renderToScreen = true;
   composer.addPass(godraysPass);
@@ -439,7 +427,7 @@ export function initOceanHero(): void {
     godraysPass.setParams({ ...GODRAYS_BASE, maxDensity: e * RAYS_MAX_DENSITY });
     sun.intensity = e * SUN_INTENSITY;
     skyMat.color.copy(skyDim).lerp(skyBright, e);
-    glowMat.opacity = e * 0.24;
+    // (bloom needs no ramp — it follows the window brightness, which ramps)
   };
 
   // ── Static path (reduced motion): open pose, fish scattered, one frame.
