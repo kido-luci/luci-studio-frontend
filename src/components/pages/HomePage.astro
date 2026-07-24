@@ -1084,6 +1084,10 @@ const homepageSchema = {
     z-index: 0;
     pointer-events: none;
     display: none;
+    /* Deep-water base from the FIRST paint (the scene's fog colour): the
+       band must already be dark while three.js idle-loads — the top nav and
+       hero copy are light-ink over this band in BOTH themes. */
+    background: #06121d;
     -webkit-mask-image: linear-gradient(#000 82%, transparent 100%);
     mask-image: linear-gradient(#000 82%, transparent 100%);
   }
