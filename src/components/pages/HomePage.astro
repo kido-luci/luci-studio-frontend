@@ -1114,6 +1114,16 @@ const homepageSchema = {
     min-height: calc(100dvh - 190px);
     align-content: center;
   }
+  /* Phones: a full 100dvh band leaves a big stretch of empty water under the
+     copy on tall viewports (user-spotted on device). End the band earlier so
+     the next section peeks in under the fold. */
+  @media (max-width: 700px) {
+    .bp-ocean { height: 88dvh; }
+    /* -50px (not -170): the hero must reach the band's bottom edge so the
+       DIRECTORY header starts on the theme paper below it, never on the dark
+       floor (its ink is theme-coloured). */
+    :global(html.ocean-on) .bp-hero { min-height: calc(88dvh - 50px); }
+  }
   /* The ocean band is THEME-INDEPENDENT (always the deep-water palette), so
      the hero copy must stay light-on-dark in BOTH modes: re-point the local
      blueprint tokens exactly like .bp-work-band does for its dark sheet.
