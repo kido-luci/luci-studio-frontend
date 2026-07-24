@@ -1,7 +1,5 @@
-import { BASE_URL } from '../lib/apiClient';
+import { cachedGetAll, fetchOne, FAIL_FAST } from '../lib/apiClient';
 import type { LocaleOverlay } from '../i18n';
-
-const failFast = import.meta.env.PROD && import.meta.env.ALLOW_EMPTY_POSTS !== '1';
 
 export interface GalleryItem {
     id: string;
@@ -16,29 +14,8 @@ export interface GalleryItem {
 
 export const galleryService = {
     // Active pieces only — deactivated artwork stays out of the public build.
-    async getAll(): Promise<GalleryItem[]> {
-        try {
-            const response = await fetch(`${BASE_URL}/gallery/public`);
-            if (!response.ok) throw new Error(`GET /gallery/public failed with ${response.status}`);
-            const data = await response.json();
-            return Array.isArray(data) ? data : (data || []);
-        } catch (error) {
-            console.error('Failed to fetch gallery:', error);
-            if (failFast) throw error;
-            return [];
-        }
-    },
+    getAll: cachedGetAll<GalleryItem>('/gallery/public', { failFast: FAIL_FAST }),
 
-    async getByID(id: string | number): Promise<GalleryItem | null> {
-        try {
-            const response = await fetch(`${BASE_URL}/gallery/${id}`);
-            if (response.status === 404) return null;
-            if (!response.ok) throw new Error(`GET /gallery/${id} failed with ${response.status}`);
-            return response.json();
-        } catch (error) {
-            console.error(`Failed to fetch gallery item ${id}:`, error);
-            if (failFast) throw error;
-            return null;
-        }
-    }
+    getByID: (id: string | number): Promise<GalleryItem | null> =>
+        fetchOne<GalleryItem>(`/gallery/${id}`, { failFast: FAIL_FAST }),
 };

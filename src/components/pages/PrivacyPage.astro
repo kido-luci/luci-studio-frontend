@@ -1,154 +1,65 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import TopNav from "../TopNav.astro";
-import SiteFooter from "../SiteFooter.astro";
-import { getLocaleFromUrl, useTranslations } from '../../i18n';
-const locale = getLocaleFromUrl(Astro.url);
-const t = useTranslations(locale);
-
-const SITE_URL = 'https://luci-studio.com';
-const lastUpdated = 'July 11, 2026';
+import LegalPage from "./LegalPage.astro";
 ---
 
-<Layout
+<LegalPage
   title="Privacy Policy | Luci Studio"
   description="Privacy Policy for Luci Studio, including local storage, comments, and Google login."
-  canonical={`${SITE_URL}/privacy/`}
+  path="privacy"
   keywords="Luci Studio privacy, privacy policy, local storage, Google login"
-  ogImage={`${SITE_URL}/images/og/privacy.png`}
   ogImageAlt="Luci Studio — privacy"
-  ogImageWidth={1200}
-  ogImageHeight={630}
+  titleKey="legal.privacyTitle"
+  lastUpdated="July 11, 2026"
 >
-  <TopNav />
+  <section>
+    <h2>Overview</h2>
+    <p>
+      Luci Studio is a creative engineering space. This policy explains how the site handles information from visitors, commenters, and Google sign-in users.
+    </p>
+    <p>
+      This policy is provided for general information and is not legal advice.
+    </p>
+  </section>
 
-  <main class="bp-legal">
-    <div class="bp-grid" aria-hidden="true"></div>
-    <article class="bp-legal-inner">
-      <div class="bp-sec-head">
-        <span class="bp-dot" aria-hidden="true"></span>
-        <span class="bp-mono bp-sec-label">{t('legal.eyebrow')}</span>
-        <span class="bp-rule" aria-hidden="true"></span>
-      </div>
-      <h1 class="bp-display bp-legal-title">{t('legal.privacyTitle')}<span class="bp-acc-dot">.</span></h1>
-      <p class="bp-mono bp-legal-updated">{t('legal.lastUpdated')} {lastUpdated}</p>
-      <!-- i18n: body copy is Phase 5 content -->
+  <section>
+    <h2>Information You Provide</h2>
+    <p>
+      If you comment, contact Luci Studio by email, or use Google login, the site may process the information needed to provide those features. This can include your comment text, display identity from Google, and email address if provided.
+    </p>
+  </section>
 
-      <div class="legal-copy">
-        <section>
-          <h2>Overview</h2>
-          <p>
-            Luci Studio is a creative engineering space. This policy explains how the site handles information from visitors, commenters, and Google sign-in users.
-          </p>
-          <p>
-            This policy is provided for general information and is not legal advice.
-          </p>
-        </section>
+  <section>
+    <h2>Local Storage and Required Features</h2>
+    <p>
+      The site uses browser local storage for required and user-requested features, including theme preference, liked and saved posts, viewed-post or session markers, and the Google OAuth user token.
+    </p>
+  </section>
 
-        <section>
-          <h2>Information You Provide</h2>
-          <p>
-            If you comment, contact Luci Studio by email, or use Google login, the site may process the information needed to provide those features. This can include your comment text, display identity from Google, and email address if provided.
-          </p>
-        </section>
+  <section>
+    <h2>Third-Party Services and Media</h2>
+    <p>
+      Pages may load content or services from third parties, including Google login, hosted images and media, fonts, and CDNs. These providers may receive technical information such as IP address, browser details, referrer, and requested URLs. The site also uses privacy-focused, cookieless analytics (Cloudflare Web Analytics) to measure aggregate traffic, and error monitoring (Sentry) that may receive technical details about your browser when an error occurs.
+    </p>
+  </section>
 
-        <section>
-          <h2>Local Storage and Required Features</h2>
-          <p>
-            The site uses browser local storage for required and user-requested features, including theme preference, liked and saved posts, viewed-post or session markers, and the Google OAuth user token.
-          </p>
-        </section>
+  <section>
+    <h2>Data Retention and Choices</h2>
+    <p>
+      Browser-stored preferences remain until you clear site data or change them in the interface. Comments, login-related records, and server logs may be retained as needed to operate, protect, debug, and improve the site.
+    </p>
+  </section>
 
-        <section>
-          <h2>Third-Party Services and Media</h2>
-          <p>
-            Pages may load content or services from third parties, including Google login, hosted images and media, fonts, and CDNs. These providers may receive technical information such as IP address, browser details, referrer, and requested URLs. The site also uses privacy-focused, cookieless analytics (Cloudflare Web Analytics) to measure aggregate traffic, and error monitoring (Sentry) that may receive technical details about your browser when an error occurs.
-          </p>
-        </section>
+  <section>
+    <h2>Affiliate Disclosure</h2>
+    <p>
+      Some posts in the blog and lab may contain affiliate links. If you click such a link and make a purchase, Luci Studio may earn a commission at no additional cost to you. These links are marked as sponsored, and any post containing them carries a disclosure. Recommendations reflect genuine use or research and are never determined by a commission.
+    </p>
+  </section>
 
-        <section>
-          <h2>Data Retention and Choices</h2>
-          <p>
-            Browser-stored preferences remain until you clear site data or change them in the interface. Comments, login-related records, and server logs may be retained as needed to operate, protect, debug, and improve the site.
-          </p>
-        </section>
-
-        <section>
-          <h2>Affiliate Disclosure</h2>
-          <p>
-            Some posts in the blog and lab may contain affiliate links. If you click such a link and make a purchase, Luci Studio may earn a commission at no additional cost to you. These links are marked as sponsored, and any post containing them carries a disclosure. Recommendations reflect genuine use or research and are never determined by a commission.
-          </p>
-        </section>
-
-        <section>
-          <h2>Contact</h2>
-          <p>
-            For privacy questions, contact <a href="mailto:kidoluci.work@gmail.com">kidoluci.work@gmail.com</a>.
-          </p>
-        </section>
-      </div>
-    </article>
-
-    <SiteFooter locale={locale} />
-  </main>
-</Layout>
-
-<style>
-  /* Legal pages — homepage "blueprint" drafting-sheet DNA (shared by
-     terms / privacy / license). Line grid header band + §-header + Space Grotesk
-     title + IBM Plex Mono labels; the legal copy stays a readable document. */
-  .bp-legal {
-    --bp-ink: var(--text-primary);
-    --bp-acc: var(--accent);
-    --bp-line: rgba(255, 255, 255, 0.05);
-    --bp-line2: rgba(255, 255, 255, 0.08);
-    --bp-fig: rgba(255, 255, 255, 0.05);
-    --bp-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
-    --bp-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
-
-    position: relative;
-    min-height: 100vh;
-    background: var(--bp-bg);
-    color: var(--bp-ink);
-    padding-top: clamp(120px, 15vh, 168px);
-    padding-bottom: clamp(80px, 14vw, 160px);
-    overflow-x: clip;
-    font-family: "Space Grotesk", system-ui, sans-serif;
-  }
-  :global(body.light-mode) .bp-legal {
-    --bp-line: rgba(22, 32, 43, 0.05);
-    --bp-line2: rgba(22, 32, 43, 0.08);
-    --bp-fig: #e8e6df;
-  }
-  .bp-legal .bp-grid {
-    position: absolute; top: 0; left: 0; right: 0; height: 560px; z-index: 0; pointer-events: none;
-    background-image:
-      linear-gradient(var(--bp-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
-      linear-gradient(var(--bp-line2) 1px, transparent 1px),
-      linear-gradient(90deg, var(--bp-line2) 1px, transparent 1px);
-    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);
-            mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);
-  }
-  .bp-legal-inner { position: relative; z-index: 1; max-width: 48rem; margin: 0 auto; padding-left: clamp(20px, 5vw, 40px); padding-right: clamp(20px, 5vw, 40px); }
-  .bp-acc-dot { color: var(--bp-acc); font-style: normal; }
-  .bp-sec-head { display: flex; align-items: center; gap: 14px; }
-  .bp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bp-acc); flex-shrink: 0; }
-  .bp-sec-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-acc); white-space: nowrap; }
-  .bp-rule { flex: 1; height: 1px; background: var(--bp-hair); }
-  .bp-sec-count { font-size: 11px; letter-spacing: 0.16em; color: var(--bp-muted); white-space: nowrap; }
-
-  .bp-legal-title { font-size: clamp(2.8rem, 8vw, 5.5rem); line-height: 0.98; margin: clamp(16px, 2.5vw, 24px) 0 0; }
-  .bp-legal-updated { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bp-muted); margin: 1.2rem 0 0; }
-
-  .legal-copy { display: grid; gap: 0; margin-top: clamp(40px, 6vw, 64px); }
-  .legal-copy section { padding: clamp(24px, 3.5vw, 34px) 0; border-top: 1px solid var(--bp-hair); }
-  .legal-copy section:first-child { border-top: none; padding-top: 0; }
-  .legal-copy h2 { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: -0.01em; text-transform: none; color: var(--bp-ink); margin: 0 0 0.9rem; }
-  .legal-copy p { color: var(--bp-muted); font-size: 0.98rem; line-height: 1.8; margin: 0.7rem 0 0; }
-  .legal-copy p:first-of-type { margin-top: 0; }
-  .legal-copy a { color: var(--bp-acc); font-weight: 600; text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--bp-acc) 40%, transparent); }
-  .legal-copy a:hover { border-bottom-color: var(--bp-acc); }
-  .legal-copy code { font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--bp-ink); font-size: 0.88em; padding: 0.1rem 0.35rem; border-radius: 5px; background: var(--bp-fig); border: 1px solid var(--bp-hair); }
-</style>
+  <section>
+    <h2>Contact</h2>
+    <p>
+      For privacy questions, contact <a href="mailto:kidoluci.work@gmail.com">kidoluci.work@gmail.com</a>.
+    </p>
+  </section>
+</LegalPage>

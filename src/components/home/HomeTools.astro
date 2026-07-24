@@ -1,0 +1,109 @@
+---
+import { TOOL_ENGINES, TOOLS_URL } from "../../data/tools";
+
+const toolCount: number = TOOL_ENGINES.reduce((n, e) => n + e.tools.length, 0);
+---
+
+<!-- ===================== ANNEX C — TOOLS INDEX (parts-list index of the
+     tools.luci-studio.com portfolio. Data: src/data/tools.ts, a hardcoded
+     mirror of the tools-home catalog). ================================= -->
+<section class="bp-wrap bp-section" id="tools">
+  <div class="bp-sec-head" data-reveal>
+    <span class="bp-dot" aria-hidden="true"></span>
+    <span class="bp-mono bp-sec-label">ANNEX C — TOOLS INDEX</span>
+    <span class="bp-rule" aria-hidden="true"></span>
+    <span class="bp-mono bp-sec-count">{String(toolCount).padStart(2, "0")} TOOLS · {String(TOOL_ENGINES.length).padStart(2, "0")} ENGINES</span>
+  </div>
+  <div class="bp-sec-title-row" data-reveal>
+    <h2 class="bp-display bp-h2" data-ml9>Use something.</h2>
+    <a href={`${TOOLS_URL}/`} target="_blank" rel="noopener noreferrer" class="bp-mono bp-more">ALL {toolCount} TOOLS →</a>
+  </div>
+  <div class="bp-tools-index">
+    {TOOL_ENGINES.map((eng, i) => (
+      <div class="bp-tools-block" data-reveal data-delay={String((i % 6) + 1)}>
+        <a href={`${TOOLS_URL}/${eng.prefix}/`} target="_blank" rel="noopener noreferrer" class="bp-tools-eng">
+          <span class="bp-mono bp-tools-eng-name">{eng.name}</span>
+          <span class="bp-mono bp-tools-eng-count">{String(eng.tools.length).padStart(2, "0")}</span>
+        </a>
+        <ul class="bp-tools-list">
+          {eng.tools.slice(0, 5).map((t) => (
+            <li>
+              <a href={`${TOOLS_URL}/${eng.prefix}/${t.slug}/`} target="_blank" rel="noopener noreferrer" class="bp-tools-row">
+                <span class="bp-mono bp-tools-chip">{t.chip ?? t.specimen}</span>
+                <span class="bp-tools-title">{t.title}</span>
+                <span class="bp-mono bp-tools-arrow" aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <a href={`${TOOLS_URL}/${eng.prefix}/`} target="_blank" rel="noopener noreferrer" class="bp-mono bp-tools-all">ALL {String(eng.tools.length).padStart(2, "0")} →</a>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  /* Crisp light-mode headings — cancel the site-wide heading drop-shadow for
+     this section's .bp-display elements (mirrors HomePage's own scoped rule). */
+  :global(body.light-mode) .bp-display { filter: none !important; }
+  /* ── ANNEX C — TOOLS INDEX (parts-list; blocks pack into CSS columns) ── */
+  .bp-tools-index {
+    columns: 3;
+    column-gap: 44px;
+    column-rule: 1px solid var(--bp-line2);
+  }
+  .bp-tools-block {
+    break-inside: avoid;
+    padding: 14px 0 20px;
+    border-top: 1px solid var(--bp-hair);
+  }
+  .bp-tools-eng {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--bp-ink);
+  }
+  .bp-tools-eng:hover .bp-tools-eng-name { color: var(--bp-acc); }
+  .bp-tools-eng-name { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; transition: color 0.2s ease; }
+  .bp-tools-eng-count { font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); }
+  .bp-tools-list { list-style: none; margin: 10px 0 0; padding: 0; }
+  .bp-tools-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    text-decoration: none;
+    color: var(--bp-ink);
+    transition: background 0.2s ease;
+  }
+  .bp-tools-row:hover { background: var(--bp-hover); }
+  .bp-tools-chip {
+    flex: 0 0 56px;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--bp-muted);
+    border: 1px solid var(--bp-line2);
+    border-radius: 4px;
+    text-align: center;
+    padding: 1px 4px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .bp-tools-title { font-size: 13.5px; line-height: 1.35; }
+  .bp-tools-row:hover .bp-tools-title { color: var(--bp-acc); }
+  .bp-tools-arrow { margin-left: auto; font-size: 11px; color: var(--bp-faint); opacity: 0; transition: opacity 0.15s ease; }
+  .bp-tools-row:hover .bp-tools-arrow { opacity: 1; }
+  .bp-tools-all { display: inline-block; margin-top: 8px; font-size: 11px; letter-spacing: 0.14em; color: var(--bp-acc); text-decoration: none; }
+  .bp-tools-all:hover { text-decoration: underline; }
+  @media (max-width: 900px) {
+    .bp-tools-index { columns: 2; column-gap: 32px; }
+  }
+  @media (max-width: 640px) {
+    .bp-tools-index { columns: 1; }
+    /* single column would run ~70 rows; cap each engine at its top 3 (the
+       per-engine ALL NN → footer keeps the full count reachable) */
+    .bp-tools-list li:nth-child(n + 4) { display: none; }
+  }
+</style>

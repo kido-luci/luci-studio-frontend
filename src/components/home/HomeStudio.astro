@@ -1,0 +1,85 @@
+---
+import { profileService } from "../../services/profile";
+
+const profile = await profileService.getProfile();
+const stats = profile?.portfolio_stats ?? [];
+---
+
+<!-- ===================== §05 STUDIO ===================== -->
+<section class="bp-wrap bp-section" id="studio">
+  <div class="bp-sec-head bp-sec-head--inst" data-reveal>
+    <span class="bp-dot" aria-hidden="true"></span>
+    <span class="bp-mono bp-sec-label">§05 — STUDIO</span>
+    <span class="bp-rule" aria-hidden="true"></span>
+    <span class="bp-compass" aria-hidden="true">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="16" class="bp-compass-guide"></circle>
+        <circle cx="24" cy="24" r="16" class="bp-compass-draw"></circle>
+        <g class="bp-compass-arm"><line x1="24" y1="24" x2="40" y2="24"></line><circle cx="40" cy="24" r="2.4" class="bp-compass-tip"></circle></g>
+        <circle cx="24" cy="24" r="1.8" class="bp-compass-pivot"></circle>
+      </svg>
+    </span>
+  </div>
+  <div class="bp-studio">
+    <p class="bp-display bp-studio-statement" data-reveal>
+      I treat engineering as a craft — measure twice, ship once, and write down what I learn along the way. Small scope, production-grade standards, no deferred debt.
+    </p>
+    {stats.length > 0 && (
+      <div class="bp-stats" data-reveal>
+        {stats.map((s) => (
+          <div class="bp-stat-row">
+            <span class="bp-display bp-stat-num">{s.number}<em>{s.suffix}</em></span>
+            <span class="bp-stat-meta">
+              <span class="bp-mono bp-stat-label">{s.label}</span>
+              {s.sub && <span class="bp-mono bp-stat-sub">{s.sub}</span>}
+            </span>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  /* Crisp light-mode headings — cancel the site-wide heading drop-shadow for
+     this section's .bp-display elements (mirrors HomePage's own scoped rule). */
+  :global(body.light-mode) .bp-display { filter: none !important; }
+  /* §05 header instrument: a small compass whose arm sweeps and traces its ring
+     (echoes the "measure twice" studio statement). Guarded like the hero SVG. */
+  .bp-sec-head--inst { position: relative; }
+  .bp-compass { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; pointer-events: none; }
+  .bp-compass svg { display: block; width: 100%; height: 100%; }
+  .bp-compass-guide { fill: none; stroke: var(--bp-hair); stroke-width: 1; }
+  .bp-compass-draw { fill: none; stroke: var(--bp-acc); stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 20 81; transform-box: view-box; transform-origin: center; animation: lu-spin 5s linear infinite; }
+  .bp-compass-arm { transform-box: view-box; transform-origin: center; animation: lu-spin 5s linear infinite; }
+  .bp-compass-arm line { stroke: var(--bp-ink); stroke-width: 1.2; stroke-opacity: 0.55; }
+  .bp-compass-tip { fill: var(--bp-orange); }
+  .bp-compass-pivot { fill: var(--bp-ink); fill-opacity: 0.6; }
+
+  /* ── §05 STUDIO ── */
+  .bp-studio { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(32px, 5vw, 60px); align-items: start; }
+  .bp-studio-statement { font-size: clamp(1.3rem, 2.6vw, 1.9rem); font-weight: 500; line-height: 1.35; letter-spacing: -0.01em !important; }
+  .bp-stats { display: flex; flex-direction: column; }
+  .bp-stat-row { display: flex; align-items: baseline; gap: 18px; padding: 16px 0; border-top: 1px solid var(--bp-hair); }
+  .bp-stat-num { font-size: clamp(2rem, 4vw, 3rem); min-width: 110px; letter-spacing: -0.02em !important; }
+  .bp-stat-num em { color: var(--bp-acc); font-style: normal; }
+  .bp-stat-meta { display: flex; flex-direction: column; gap: 3px; }
+  .bp-stat-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-muted); }
+  .bp-stat-sub { font-size: 11px; letter-spacing: 0.02em; color: var(--bp-muted); }
+
+  /* Duplicated from HomePage's own <style> (not imported/shared): the compass
+     arm/ring reuse the site's generic "spin" keyframe, which the hero SVG
+     (staying in HomePage.astro) also animates with. Astro scopes @keyframes
+     names per component, so each component needs its own copy of the keyframe
+     it references — see the HomePage.astro comment at the matching keyframe. */
+  @keyframes lu-spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 900px) {
+    .bp-studio { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bp-compass-arm, .bp-compass-draw { animation: none !important; }
+  }
+  :global(body.win-perf-mode) .bp-compass-arm,
+  :global(body.win-perf-mode) .bp-compass-draw { animation: none; }
+</style>

@@ -1,0 +1,291 @@
+---
+import { galleryService } from "../../services/gallery";
+import { formatDate } from "../../utils/blog";
+import { getLocaleFromUrl, localized } from "../../i18n";
+
+const locale = getLocaleFromUrl(Astro.url);
+const API_URL = import.meta.env.PUBLIC_API_URL || "";
+
+// §04 ART — live gallery (kept masonry + lightbox subsystem). Fallback keeps the
+// section populated if the gallery API is empty at build time.
+const galleryItems = await galleryService.getAll();
+const artItems: { img: string; label: string; year: string; date: string; topic: string; id?: string; likes?: number; views?: number }[] =
+  galleryItems.length > 0
+    ? galleryItems.map((rawG) => {
+        const g = localized(rawG, locale);
+        return {
+          img: g.cover_image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800",
+          label: g.title,
+          year: new Date(g.created_at).getFullYear().toString(),
+          date: formatDate(g.created_at, locale),
+          topic: "Art",
+          id: g.id,
+          likes: g.likes ?? 0,
+          views: g.views ?? 0,
+        };
+      })
+    : [
+        { img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200", label: "Neon Currents", year: "2024", date: "Jan 2024", topic: "Digital Art" },
+        { img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800", label: "Deep Space", year: "2024", date: "Mar 2024", topic: "Digital Art" },
+        { img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=800", label: "Bloom", year: "2024", date: "Jun 2024", topic: "Illustration" },
+      ];
+
+// Hand-curated mosaic arrangement — hardcoded order + native aspect ratio per
+// piece, rendered as justified rows (widths ∝ ratios per row → equal-height,
+// full-width, crop-free rows with no grid holes; see .art-mosaic CSS). Data
+// (URL/title/likes/views) still comes from the gallery API at build time: a
+// piece deleted from the DB drops out here, and a newly added piece stays off
+// the homepage mosaic until this map (and the .art-mosaic widths) is re-tuned.
+// Rows are grouped by native resolution, not just ratio: the first row holds
+// the tallest/highest-res scans (they can afford big tiles), the second the
+// low-res pieces — its larger ratio sum makes that row shorter, so no image is
+// ever displayed above its native size (the 600×501 Paint shot stays small
+// instead of becoming the widest, blurriest tile).
+const ART_ORDER: { id: string; ar: string }[] = [
+  { id: "53", ar: "600 / 1100" }, // Manga - a Student Girl
+  { id: "48", ar: "600 / 939" }, // Sagiri Izumi
+  { id: "64", ar: "600 / 840" }, // Portrait of a Girl - Blue Pen
+  { id: "57", ar: "600 / 773" }, // Deep feeling - Blue pen
+  { id: "54", ar: "600 / 592" }, // Portrait of a Girl 2 - Blue Pen
+  { id: "51", ar: "600 / 501" }, // Portrail of a Girl - Microsoft Paint
+];
+const artById = new Map(artItems.map((a) => [String(a.id), a]));
+const curated = ART_ORDER.flatMap((o) => {
+  const a = artById.get(o.id);
+  return a ? [{ ...a, ar: o.ar }] : [];
+});
+// Fallback (gallery API empty/changed at build): render whatever we have with a
+// neutral ratio — flex-grow closes any short row, so the grid still has no holes.
+const artPieces = curated.length > 0 ? curated : artItems.map((a) => ({ ...a, ar: "4 / 3" }));
+---
+
+<!-- ===================== §04 ART ===================== -->
+<section class="bp-section bp-art" id="art">
+  <div class="bp-art-bg-wrap" aria-hidden="true"><div id="art-bg" class="bp-art-bg"></div></div>
+  <div class="bp-wrap bp-art-inner">
+  <div class="bp-sec-head" data-reveal>
+    <span class="bp-dot is-orange" aria-hidden="true"></span>
+    <span class="bp-mono bp-sec-label is-orange">§04 — ART</span>
+    <span class="bp-rule" aria-hidden="true"></span>
+    <span class="bp-mono bp-sec-count">{String(artPieces.length).padStart(2, "0")} PIECES</span>
+  </div>
+  <div class="bp-sec-title-row" data-reveal>
+    <h2 class="bp-display bp-h2" data-ml9>Hand-drawn & digital.</h2>
+    <p class="bp-art-note">Off-clock studies — pen, pencil and pixels.</p>
+  </div>
+
+  <div class="art-mosaic">
+    {artPieces.map((a) => {
+      const infoBar = (
+        <div class="px-3 py-2 flex items-start justify-between gap-2 bp-art-bar">
+          <div class="flex-1 min-w-0">
+            <p class="bp-art-bar-title line-clamp-2">{a.label}</p>
+            <p class="bp-mono bp-art-bar-meta truncate">{a.topic} · {a.date}</p>
+          </div>
+          {a.id != null && (
+            <button
+              type="button"
+              class="art-like-area flex items-center gap-1 cursor-pointer flex-shrink-0 group/like mt-0.5 bg-transparent border-0 p-0"
+              data-id={String(a.id)}
+              data-likes={String(a.likes ?? 0)}
+              aria-label={`Like ${a.label}`}
+            >
+              <svg class="art-like-icon w-3.5 h-3.5 group-hover/like:text-rose-400 transition-colors duration-200" style="color:rgba(255,255,255,0.82)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              <span class="art-like-count bp-mono text-[10px] group-hover/like:text-rose-400 transition-colors duration-200" style="color:rgba(255,255,255,0.82)">{a.likes ?? 0}</span>
+            </button>
+          )}
+        </div>
+      );
+      const openable = a.id != null;
+      const frameClass = "art-img-frame relative block w-full overflow-hidden";
+      const frameInner = (
+        <Fragment>
+          <img src={a.img} alt={a.label} class="w-full h-full object-cover block transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+        </Fragment>
+      );
+      return (
+        <div class="art-mosaic-item group" style={`aspect-ratio: ${a.ar};`} data-art-card>
+          {openable ? (
+            <button
+              type="button"
+              class={`${frameClass} cursor-pointer p-0 bg-transparent text-left`}
+              data-art-open
+              data-img={a.img}
+              data-title={a.label}
+              data-date={a.date}
+              data-views={String(a.views ?? 0)}
+              data-likes={String(a.likes ?? 0)}
+              data-id={String(a.id)}
+              aria-label={`View ${a.label}`}
+            >
+              {frameInner}
+            </button>
+          ) : (
+            <div class={frameClass}>{frameInner}</div>
+          )}
+          {infoBar}
+        </div>
+      );
+    })}
+  </div>
+  </div>
+</section>
+
+<!-- ART LIGHTBOX (popup) -->
+<div id="art-lightbox" class="art-lightbox" data-api-url={API_URL} aria-hidden="true" role="dialog" aria-modal="true" aria-label="Artwork viewer">
+  <div class="art-lightbox-bg" data-art-bgimg></div>
+  <button type="button" class="art-lightbox-close" data-art-close aria-label="Close">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+  </button>
+  <figure class="art-lightbox-figure">
+    <img class="art-lightbox-img" data-art-img src="" alt="" />
+    <figcaption class="art-lightbox-caption">
+      <div class="flex items-center gap-3 mb-2 flex-wrap">
+        <span class="bp-mono text-[10px] text-gray-400" data-art-cap-date></span>
+        <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+        <span class="bp-mono text-xs text-gray-400 flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+          <span data-art-cap-views>—</span>
+        </span>
+        <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+        <span class="bp-mono text-xs text-gray-400 flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+          <span data-art-cap-likes>—</span>
+        </span>
+      </div>
+      <h3 class="bp-display text-xl md:text-3xl leading-tight" data-art-cap-title></h3>
+    </figcaption>
+  </figure>
+</div>
+
+<style>
+  /* Crisp light-mode headings — cancel the site-wide heading drop-shadow for
+     this section's .bp-display elements (mirrors HomePage's own scoped rule). */
+  :global(body.light-mode) .bp-display { filter: none !important; }
+
+  .bp-dot.is-orange { background: var(--bp-orange); }
+  .bp-sec-label.is-orange { color: var(--bp-orange); }
+
+  /* ── §04 ART (quilt grid + lightbox subsystem) ── */
+  /* Full-bleed sticky background with GSAP parallax — buildArtParallax() in
+     homeScrollAnimations.ts drifts #art-bg's background-position on scroll (same
+     mechanism as the old homepage). Section text flips light over the dark photo. */
+  /* No overflow:hidden here — it would create a scroll container and break the
+     child #art-bg's position:sticky. Clipping is handled by the wrapper's clip-path,
+     exactly like the old homepage. */
+  .bp-art { position: relative; }
+  .bp-art-bg-wrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; clip-path: inset(0); }
+  .bp-art-bg {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background-image: url("https://media.luci-studio.com/ChatGPT%20Image%20May%205%2C%202026%2C%2011_03_29%20AM.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .bp-art-bg::after { content: ""; position: absolute; inset: 0; background: rgba(6, 9, 14, 0.46); }
+  @media (max-width: 767px) {
+    .bp-art-bg { background-image: url("https://media.luci-studio.com/ef8036c5a8709482e3e4ecc1090cb8ae.jpg"); }
+  }
+  .bp-art-inner { position: relative; z-index: 1; }
+  .bp-art .bp-h2 { color: #fff; }
+  .bp-art .bp-sec-count,
+  .bp-art .bp-art-note { color: rgba(255, 255, 255, 0.62); }
+  .bp-art .bp-rule { background: rgba(255, 255, 255, 0.22); }
+  .bp-art-note { font-size: 13px; color: var(--bp-muted); max-width: 280px; }
+  /* Square-cell mosaic: uniform square base cells (row height = column width, set in
+     homeReveals.ts since 1fr columns are fluid), images object-cover to fill. Each
+     item spans whole cells by ratio — landscape → 2×1 (.is-wide), portrait → 1×2
+     (.is-tall), square → 1×1; the 2 most-viewed become 2×2 features (.is-big). Dense
+     flow packs them into a clean row/column-aligned grid. With JS off, cells fall
+     back to a fixed square-ish row height so the grid still renders. */
+  /* Justified-rows mosaic, hardcoded to the six curated pieces (see ART_ORDER):
+     per row, each tile's width is proportional to its image's native aspect
+     ratio, so rows are equal-height, full-width and crop-free — no holes by
+     construction. flex-basis percentages are floored slightly under a full row
+     (keeps wrapping deterministic against sub-pixel rounding) and flex-grow
+     (∝ ratio) absorbs the slack, which preserves uniform row height exactly.
+     Rows: (1,2)(3,4)(5,6) below 768px, (1,2,3)(4,5,6) from 768px up. */
+  .art-mosaic { display: flex; flex-wrap: wrap; gap: 1rem; }
+  .art-mosaic-item { position: relative; flex-shrink: 0; }
+  .art-mosaic-item:nth-child(1) { flex: 0.5455 0 calc((100% - 1rem) * 0.460); }
+  .art-mosaic-item:nth-child(2) { flex: 0.639 0 calc((100% - 1rem) * 0.539); }
+  .art-mosaic-item:nth-child(3) { flex: 0.7143 0 calc((100% - 1rem) * 0.479); }
+  .art-mosaic-item:nth-child(4) { flex: 0.7762 0 calc((100% - 1rem) * 0.520); }
+  .art-mosaic-item:nth-child(5) { flex: 1.0135 0 calc((100% - 1rem) * 0.458); }
+  .art-mosaic-item:nth-child(6) { flex: 1.1976 0 calc((100% - 1rem) * 0.541); }
+  @media (min-width: 768px) {
+    .art-mosaic-item:nth-child(1) { flex-basis: calc((100% - 2rem) * 0.287); }
+    .art-mosaic-item:nth-child(2) { flex-basis: calc((100% - 2rem) * 0.336); }
+    .art-mosaic-item:nth-child(3) { flex-basis: calc((100% - 2rem) * 0.376); }
+    .art-mosaic-item:nth-child(4) { flex-basis: calc((100% - 2rem) * 0.259); }
+    .art-mosaic-item:nth-child(5) { flex-basis: calc((100% - 2rem) * 0.339); }
+    .art-mosaic-item:nth-child(6) { flex-basis: calc((100% - 2rem) * 0.400); }
+  }
+  .art-img-frame {
+    height: 100%;
+    border: 1px solid color-mix(in srgb, var(--bp-acc) 35%, transparent);
+    border-radius: 10px;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  [data-art-card]:hover .art-img-frame { border-color: var(--bp-orange); box-shadow: 0 10px 30px color-mix(in srgb, var(--bp-ink) 14%, transparent); }
+  /* Caption overlaid inside the image — hidden until hover/keyboard focus so
+     the artwork stays clean while browsing (the lightbox carries the full
+     caption); touch devices (no hover state; a tap opens the lightbox) keep a
+     slim always-on scrim instead. The bar itself never takes pointer events —
+     a click opens the lightbox — and the like button re-enables its own clicks
+     only while the bar is shown, so the invisible button can't swallow a tap. */
+  .bp-art-bar {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: 0 0 10px 10px;
+    background: linear-gradient(to top, rgba(6, 9, 14, 0.72) 0%, rgba(6, 9, 14, 0.34) 55%, transparent 100%);
+    text-shadow: 0 1px 6px rgba(6, 9, 14, 0.85);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  [data-art-card]:hover .bp-art-bar,
+  [data-art-card]:focus-within .bp-art-bar { opacity: 1; transform: none; }
+  [data-art-card]:hover .art-like-area,
+  [data-art-card]:focus-within .art-like-area { pointer-events: auto; }
+  @media (hover: none) {
+    .bp-art-bar {
+      opacity: 1;
+      transform: none;
+      background: linear-gradient(to top, rgba(6, 9, 14, 0.62) 0%, transparent 78%);
+    }
+    .art-like-area { pointer-events: auto; }
+  }
+  .bp-art-bar-title { font-weight: 700; font-size: 13px; line-height: 1.3; color: #fff; }
+  .bp-art-bar-meta { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); margin-top: 3px; }
+
+  @keyframes artFadeIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  [data-art-card] { opacity: 0; }
+  [data-art-card].card-visible { animation: artFadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  .art-lightbox { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 4vh 4vw; background: rgba(6, 9, 14, 0.94); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s ease 0.3s; }
+  .art-lightbox.is-open { opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0s ease 0s; }
+  .art-lightbox-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: blur(80px) brightness(0.2) saturate(1.4); transform: scale(1.15); pointer-events: none; }
+  .art-lightbox-figure { position: relative; z-index: 10; margin: 0; display: flex; flex-direction: column; align-items: center; max-width: 100%; max-height: 92vh; transform: scale(0.96); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .art-lightbox.is-open .art-lightbox-figure { transform: scale(1); }
+  .art-lightbox-img { max-width: 100%; max-height: 78vh; width: auto; height: auto; object-fit: contain; border-radius: 0.5rem; box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8); }
+  .art-lightbox-caption { width: 100%; max-width: 64rem; padding: 1.25rem 0.25rem 0; text-align: left; }
+  .art-lightbox-caption h3 { color: #fff; }
+  .art-lightbox-close { position: absolute; top: 1.25rem; right: 1.25rem; z-index: 20; display: flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 9999px; color: #fff; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); transition: background 0.2s ease; }
+  .art-lightbox-close:hover { background: rgba(255, 255, 255, 0.22); }
+
+  /* [data-art-card] reduced-motion rules split out of HomePage's own
+     reduced-motion block (that block also silences hero SVG animations, which
+     stay in HomePage — the two halves now live with their respective markup). */
+  @media (prefers-reduced-motion: reduce) {
+    [data-art-card] { opacity: 1; }
+    [data-art-card].card-visible { animation: none; }
+  }
+</style>

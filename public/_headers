@@ -8,13 +8,15 @@
 # and frame-ancestors/base-uri/object-src close common pivots.
 #
 # The script/connect allowlist is kept tight: only jsDelivr + cdnjs (GSAP,
-# Prism, Twemoji, fontsource) plus Google Fonts and the API origin. Stale
-# entries — cdn.tailwindcss.com (now build-time PostCSS), the Google ad domains
-# (no ads), the origin-locked *.fly.dev, and the unused ad frame-src — were
-# removed: they served no live resource and only widened the attack surface.
+# Prism, Twemoji) plus Google Fonts and the API origin. connect-src also
+# allows the three read-only public feeds the homepage's ANNEX D live-telemetry
+# strip polls (ISS position, USGS quakes, Frankfurter FX). Stale entries —
+# cdn.tailwindcss.com (now build-time PostCSS), the Google ad domains (no ads),
+# the origin-locked *.fly.dev, and the unused ad frame-src — were removed: they
+# served no live resource and only widened the attack surface.
 
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://api.luci-studio.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://api.luci-studio.com https://api.wheretheiss.at https://earthquake.usgs.gov https://api.frankfurter.dev; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   X-Content-Type-Options: nosniff

@@ -1,3 +1,5 @@
+import { whenReady } from './whenReady';
+
 export function initHomeScrollAnimations() {
   // ════════════════════════════════════════════════════════════════════════
   // HOME SCROLL ANIMATIONS — "Develop & Dive"
@@ -5,7 +7,7 @@ export function initHomeScrollAnimations() {
   // reduced-motion / mobile / desktop paths live in one place. Every CSS hidden
   // initial-state is gated on html.home-anim; the load failsafe AND the reduce
   // branch both drop that class so content reveals when motion is unavailable or
-  // unwanted. Reuses the deferred-CDN poll pattern from Layout.astro.
+  // unwanted. Waits for the CDN globals via the shared whenReady helper.
   // ════════════════════════════════════════════════════════════════════════
   (function () {
     const w = window as any;
@@ -143,17 +145,10 @@ export function initHomeScrollAnimations() {
       });
     };
 
-    if (ready()) run();
-    else {
-      let waited = 0;
-      const id = setInterval(() => {
-        if (ready()) { clearInterval(id); run(); }
-        else if ((waited += 30) >= 2500) {
-          // GSAP CDN never arrived — reveal everything rather than leave it hidden.
-          clearInterval(id);
-          root.classList.remove('home-anim');
-        }
-      }, 30);
-    }
+    whenReady(ready, run, {
+      timeoutMs: 2500,
+      // GSAP CDN never arrived — reveal everything rather than leave it hidden.
+      onTimeout: () => root.classList.remove('home-anim'),
+    });
   })();
 }
