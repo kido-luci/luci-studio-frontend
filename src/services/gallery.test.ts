@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { galleryService, type GalleryItem } from './gallery';
+import type { GalleryItem, galleryService as GalleryService } from './gallery';
 
 const sampleItem: GalleryItem = {
     id: 'gal-1',
@@ -11,13 +11,20 @@ const sampleItem: GalleryItem = {
     updated_at: '2026-05-22T00:00:00Z',
 };
 
+// gallery.ts holds a module-scoped getAll cache (cachedGetAll). Reset modules
+// between tests so each one starts with a fresh, uncached service.
+let galleryService: typeof GalleryService;
+
 describe('galleryService', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.resetModules();
+        ({ galleryService } = await import('./gallery'));
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.unstubAllGlobals();
     });
 
     describe('getAll', () => {
