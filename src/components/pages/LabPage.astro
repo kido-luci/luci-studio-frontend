@@ -28,16 +28,6 @@ const hubs = [
     stats: [{ n: "60+", label: "tools" }],
     host: "tools.luci-studio.com",
   },
-  {
-    url: "https://live.luci-studio.com/",
-    name: "Live",
-    monogram: "L",
-    bar: "#3aa0ff",
-    desc: "Live-data widgets built on free public APIs — earthquakes, the ISS, currency, weather and crypto, each updating in real time.",
-    tags: ["Quakes", "ISS", "Currency", "Weather", "Crypto"],
-    stats: [{ n: "5", label: "widgets" }],
-    host: "live.luci-studio.com",
-  },
 ];
 ---
 
@@ -92,7 +82,7 @@ const hubs = [
         </section>
       )}
 
-      <!-- external hubs (tools + live) -->
+      <!-- external hubs (tools) -->
       <section id="hubs" class="bp-lab-sec" style="scroll-margin-top:96px;">
         <div class="bp-sec-head">
           <span class="bp-dot" aria-hidden="true"></span>
@@ -100,7 +90,7 @@ const hubs = [
           <span class="bp-rule" aria-hidden="true"></span>
           <span class="bp-mono bp-sec-count">{String(hubs.length).padStart(2, "0")} EXTERNAL</span>
         </div>
-        <h2 class="bp-display bp-lab-title bp-lab-title--sub">Tools &amp; Live<span class="bp-acc-dot">.</span></h2>
+        <h2 class="bp-display bp-lab-title bp-lab-title--sub">Tools<span class="bp-acc-dot">.</span></h2>
         <div class="bp-lab-grid">
           {hubs.map((h) => (
             <RepoCard {...h} variant="blueprint" />
