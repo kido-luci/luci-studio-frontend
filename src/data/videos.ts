@@ -107,4 +107,9 @@ export const VIDEOS = [
   },
 ] as const;
 
+// Both surfaces show newest first, so they share one reversal instead of each
+// calling .reverse() and drifting apart. Keep appending new entries at the END
+// of VIDEOS above (upload order) and render from this.
+export const VIDEOS_NEWEST_FIRST = [...VIDEOS].reverse();
+
 export type Video = (typeof VIDEOS)[number];
