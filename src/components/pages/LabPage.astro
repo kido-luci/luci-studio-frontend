@@ -174,7 +174,10 @@ const hubs = [
   .bp-lab-title { font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1.0; margin: clamp(16px, 2.5vw, 24px) 0 0; }
   .bp-lab-title--sub { font-size: clamp(2.1rem, 5vw, 3.75rem); }
   .bp-lab-sub { margin: 1.4rem 0 0; max-width: 34rem; font-size: 1.05rem; line-height: 1.6; color: var(--bp-muted); }
-  .bp-lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 26px; margin-top: clamp(36px, 5vw, 60px); }
+  /* auto-FILL, not auto-fit: auto-fit collapses empty tracks, so a section with a
+     single card (HUBS, since live was de-listed) stretched it across the whole row
+     instead of keeping the card rhythm of the sections above. */
+  .bp-lab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); gap: 26px; margin-top: clamp(36px, 5vw, 60px); }
   .bp-lab-empty { margin-top: clamp(36px, 5vw, 60px); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bp-muted); }
 
   /* Coordinate-plotter instrument in the hero's top-right: a crosshair steps
