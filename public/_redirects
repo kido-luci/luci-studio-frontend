@@ -42,6 +42,8 @@
 
 # /tools and /live hub pages removed on 2026-07-04 — the nav links straight to the
 # standalone deploys now. Redirect old indexed/bookmarked URLs (both slash variants).
+# Nothing on the blog has linked live.luci-studio.com since 2026-07-27, but the site
+# is still deployed — keep these two so URLs indexed back then don't 404.
 /tools/                                                                     https://tools.luci-studio.com/                                             301
 /tools                                                                      https://tools.luci-studio.com/                                             301
 /live/                                                                      https://live.luci-studio.com/                                              301

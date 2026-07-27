@@ -1,9 +1,11 @@
 ---
-import { VIDEOS, CHANNEL_URL } from "../../data/videos";
+import { VIDEOS_NEWEST_FIRST, CHANNEL_URL } from "../../data/videos";
 
-// Typed as number so the `=== 1` plural check type-checks (VIDEOS is `as const`,
-// so its .length is the literal 2, which TS would flag against `=== 1`).
-const videoCount: number = VIDEOS.length;
+// The band is a teaser, not the catalog — it shows the newest few and hands the
+// rest to /videos via ALL VIDEOS →. The count label still reports the real total.
+const HOME_VIDEO_LIMIT = 6;
+const featured = VIDEOS_NEWEST_FIRST.slice(0, HOME_VIDEO_LIMIT);
+const videoCount = VIDEOS_NEWEST_FIRST.length;
 ---
 
 <!-- ===================== ANNEX B — SCREENING ROOM (video band) =============
@@ -40,7 +42,7 @@ const videoCount: number = VIDEOS.length;
 
   <!-- static video grid -->
   <div class="bp-vid-grid">
-    {VIDEOS.map((v) => (
+    {featured.map((v) => (
       <a href={v.href} target="_blank" rel="noopener noreferrer" class="bp-vid-card" data-reveal>
         <div class="bp-vid-media">
           <img src={v.img} alt={v.title} loading="lazy" width="1280" height="720" />

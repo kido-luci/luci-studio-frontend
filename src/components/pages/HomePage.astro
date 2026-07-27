@@ -14,7 +14,6 @@ import HomeCapabilities from "../home/HomeCapabilities.astro";
 import HomeDirectory from "../home/HomeDirectory.astro";
 import HomeTools from "../home/HomeTools.astro";
 import HomeVideos from "../home/HomeVideos.astro";
-import HomeTelemetry from "../home/HomeTelemetry.astro";
 import HomeStudio from "../home/HomeStudio.astro";
 import HomeWork from "../home/HomeWork.astro";
 import HomeArt from "../home/HomeArt.astro";
@@ -221,8 +220,6 @@ const homepageSchema = {
     <HomeVideos />
 
     <HomeTools />
-
-    <HomeTelemetry />
 
     <HomeCapabilities />
 
@@ -529,7 +526,7 @@ const homepageSchema = {
   /* Reach-into-children form (:global(:where(.bp) .X)): these atoms are used
      both by markup that stays directly in this component (hero, §04 art) and by
      markup now living in child section components (HomeDirectory/HomeWork/
-     HomeVideos/HomeTools/HomeTelemetry/HomeCapabilities/HomeStudio/
+     HomeVideos/HomeTools/HomeCapabilities/HomeStudio/
      HomeGamesRail/HomeBlogRail). The zero-specificity :where(.bp) guard keeps
      each rule page-local while :global() lets it match elements stamped with a
      child's own Astro scope id. Deliberately (0,1,0): before the split these
