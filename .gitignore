@@ -40,3 +40,6 @@ playwright/.cache/
 
 # Local Claude Code agent state (worktrees, config)
 .claude/
+
+# Local codegraph index (machine-local SQLite db)
+.codegraph/

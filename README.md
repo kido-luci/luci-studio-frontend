@@ -11,8 +11,9 @@ Posts are fetched from a separate REST API **at build time** and baked into stat
 
 - **[Astro](https://astro.build)** (`output: 'static'`, `@astrojs/cloudflare` adapter)
 - Vanilla JS for all interactivity — no React/Vue
-- Tailwind via CDN (no PostCSS/build step for CSS)
-- CDN libs: Vanta.js + Three.js + p5.js (animated background), Anime.js, Prism.js (code highlighting)
+- Tailwind CSS v3, compiled at build time via PostCSS
+- CDN libs: GSAP + ScrollTrigger + SplitText (scroll reveals, text animations), Prism.js (code highlighting, post pages only)
+- three.js ocean scene on the homepage hero (`src/scripts/oceanHero.ts`, `three` pinned at 0.179.1)
 - **[Vitest](https://vitest.dev)** (unit) + **[Playwright](https://playwright.dev)** (e2e)
 
 ## Getting started
@@ -20,16 +21,21 @@ Posts are fetched from a separate REST API **at build time** and baked into stat
 ```bash
 npm install
 cp .env.example .env      # set PUBLIC_API_URL to your blog API
-npm run dev               # http://localhost:4321
+npm run build && npm run preview   # http://localhost:4321
 ```
+
+> `npm run dev` is currently broken (Sentry + Cloudflare Vite SSR can't resolve
+> `node:path`) — verify changes via `npm run build` + `npm run preview` instead.
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Dev server on `localhost:4321` |
+| `npm run dev` | Dev server — **currently broken**, see note above |
 | `npm run build` | Static build to `./dist/` |
-| `npm run preview` | Preview the production build |
+| `npm run preview` | Preview the production build on `localhost:4321` |
+| `npm run check` | Type-check `.astro` + `.ts` via `astro check` (the pre-commit gate) |
 | `npm run test:unit` | Run unit tests (Vitest) |
 | `npm run test:e2e` | Run end-to-end tests (Playwright) |
+| `npm run test:all` | Unit + e2e |
 
 > The production build fetches posts from `PUBLIC_API_URL` and **fails fast** if the API is unreachable. To build without a backend (e.g. CI), set `ALLOW_EMPTY_POSTS=1` to produce an empty-posts site.
 
