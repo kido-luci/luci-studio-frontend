@@ -25,6 +25,10 @@ process.on('uncaughtException', (err) => {
 export default defineConfig({
   site: 'https://luci-studio.com',
   output: 'static',
+  // Astro 7 changed the default to 'jsx', which strips whitespace between
+  // inline elements; keep the v6 lossless compression so rendered text spacing
+  // is unchanged.
+  compressHTML: true,
   adapter: cloudflare(),
   integrations: [
     // Errors-only client monitoring. Runtime init lives in sentry.client.config.js

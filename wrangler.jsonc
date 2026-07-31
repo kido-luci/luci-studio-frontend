@@ -2,7 +2,9 @@
   "name": "luci-dev",
   "compatibility_date": "2024-04-20",
   "assets": {
-    "directory": "./dist",
+    // Astro 7 / @astrojs/cloudflare 14 emit static output under dist/client
+    // (dist/server is an empty build leftover).
+    "directory": "./dist/client",
     "not_found_handling": "404-page"
   },
   "observability": {
