@@ -1,7 +1,7 @@
 # luci_dev
 
 [![CI](https://github.com/kido-luci/luci_dev/actions/workflows/ci.yml/badge.svg)](https://github.com/kido-luci/luci_dev/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 
 Personal blog and portfolio site, built with [Astro](https://astro.build) and deployed as a fully static site to Cloudflare Pages. Live at **[luci-studio.com](https://luci-studio.com)**.
 
@@ -59,4 +59,10 @@ Post slugs follow `{title-kebab-case}-{post-id}` and are parsed in `src/utils/bl
 
 ## License
 
-[MIT](./LICENSE) © Luci
+[AGPL-3.0-only](./LICENSE) © Luci Studio
+
+You are free to use, study, modify, and self-host this code. If you run a
+modified version as a network service, the AGPL requires you to offer its
+source to your users under the same license. Site content (articles, artwork,
+branding) is not covered by this license — see
+[luci-studio.com/license](https://luci-studio.com/license).
