@@ -31,13 +31,20 @@ so the ~10 pre-existing legacy hints (implicit-any in inline event handlers,
 - `dev` is the default/integration branch; `master` is the prod auto-deploy branch.
 - Flow: topic branch → PR into `dev` → merge → PR `dev → master` → merge → annotated tag
   `vX.Y.Z` on `master`. (See the workspace CLAUDE.md for the repo-wide PR-only convention.)
-- **Always merge with `gh pr merge <n> --merge --delete-branch=false`.** A back-merge PR
-  (`head=master`) merged without it once auto-deleted the prod `master` branch — never let
-  a merge delete a long-lived branch.
+- **`dev` and `master` are protected on GitHub** (set 2026-08-03 — this repo is public since
+  the AGPL source release, so protection is available on the free plan): branch deletion and
+  force-push are blocked, and changes must arrive through a PR (0 approvals required, admins
+  not enforced). That protection, not any merge flag, is what keeps the prod `master` branch
+  alive.
+- **The repo's "Automatically delete head branches" setting is ON**, and
+  `gh pr merge --delete-branch=false` does **not** override it — on 2026-08-03 two topic
+  branches were auto-deleted at merge despite the flag. Merged topic branches disappearing is
+  expected; `dev` and `master` are spared because they are protected.
 - **No `master→dev` back-merges.** The dev/master merge-commit "desync" is cosmetic
-  (identical content) — don't chase it. A back-merge PR has `head=master`, which the repo's
-  auto-delete-head setting uses to delete the prod `master` branch (it did, twice on
-  2026-06-22). See the workspace CLAUDE.md Git Workflow for the full rationale.
+  (identical content) — don't chase it. A back-merge PR has `head=master`, which the
+  auto-delete-head setting used to delete the prod `master` branch outright (it did, twice on
+  2026-06-22). Branch protection blocks that now, but the rule stands. See the workspace
+  CLAUDE.md Git Workflow for the full rationale.
 - **Build green before releasing**: with the local backend running, `npm run build` fetches
   real data and renders every page. (The build is network-gated against the prod API, so
   build against the local backend.)
