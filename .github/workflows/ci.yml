@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build & unit test
+    name: Type-check, build & unit test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -26,6 +26,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      # The cheap gate first: `astro check` catches .astro/.ts type errors that
+      # neither the unit tests nor the build surface (the build transpiles
+      # without type-checking). Tuned to fail on errors only, so the handful of
+      # pre-existing advisory hints don't block a PR.
+      - name: Type check
+        run: npm run check
 
       - name: Unit tests
         run: npm run test:unit
