@@ -14,7 +14,7 @@ Posts are fetched from a separate REST API **at build time** and baked into stat
 - Tailwind CSS v3, compiled at build time via PostCSS
 - CDN libs: GSAP + ScrollTrigger + SplitText (scroll reveals, text animations), Prism.js (code highlighting, post pages only)
 - three.js ocean scene on the homepage hero (`src/scripts/oceanHero.ts`, `three` pinned at 0.179.1)
-- **[Vitest](https://vitest.dev)** (unit) + **[Playwright](https://playwright.dev)** (e2e)
+- **[Vitest](https://vitest.dev)** (unit tests)
 
 ## Getting started
 
@@ -34,8 +34,6 @@ npm run build && npm run preview   # http://localhost:4321
 | `npm run preview` | Preview the production build on `localhost:4321` |
 | `npm run check` | Type-check `.astro` + `.ts` via `astro check` (the pre-commit gate) |
 | `npm run test:unit` | Run unit tests (Vitest) |
-| `npm run test:e2e` | Run end-to-end tests (Playwright) |
-| `npm run test:all` | Unit + e2e |
 
 > The production build fetches posts from `PUBLIC_API_URL` and **fails fast** if the API is unreachable. To build without a backend (e.g. CI), set `ALLOW_EMPTY_POSTS=1` to produce an empty-posts site.
 
