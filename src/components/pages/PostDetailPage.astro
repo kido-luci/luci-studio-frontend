@@ -4,6 +4,7 @@ import TopNav from "../TopNav.astro";
 import PostCard from "../PostCard.astro";
 import SiteFooter from "../SiteFooter.astro";
 import AdSlot from "../AdSlot.astro";
+import SupportDialog from "../post/SupportDialog.astro";
 import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown, needsVietnameseSerif } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, localized } from '../../i18n';
 import type { Post } from "../../services/posts";
@@ -266,73 +267,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
         </button>
       </div>
 
-      <!-- Support popup — the three payment methods (VietQR · PayPal · GitHub), opened
-           from the support card. Native <dialog>: top-layer, Esc-to-close, focus-managed. -->
-      <dialog id="sup-dialog" class="sup-dialog" aria-labelledby="sup-dialog-title">
-        <button type="button" class="sup-dialog-close" data-sup-close aria-label="Close">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
-        <h3 id="sup-dialog-title" class="sup-dialog-title">{t('post.supportWork')}<span class="bd-acc-dot">.</span></h3>
-        <p class="sup-dialog-sub">{t('post.supportBody')}</p>
-        <div class="sup-methods">
-          <!-- 01 · Vietnamese bank (VietQR) -->
-          <div class="sup-method">
-            <div class="sup-method-head">
-              <img src="/images/tpbank-logo.png" alt="" width="22" height="22" class="sup-method-logo" loading="lazy" />
-              <span class="sup-method-name">TP Bank</span>
-              <span class="sup-method-region">Vietnam</span>
-            </div>
-            <p class="sup-method-hint">{t('post.bankHint')}</p>
-            <div class="sup-account" data-copy="02332348201" data-copied={t('post.copied')} role="button" tabindex="0" aria-label="Copy bank account number">
-              <span class="sup-account-no">0233 2348 201</span>
-              <span class="sup-copy-btn">{t('post.copy')}</span>
-            </div>
-            <details class="sup-qr">
-              <summary><span class="sup-qr-show">{t('post.showQr')}</span><span class="sup-qr-hide">{t('post.hideQr')}</span></summary>
-              <div class="sup-qr-panel">
-                <img src="/images/vietqr.png" alt="Scan to support via Vietnamese bank (VietQR)" width="140" height="140" loading="lazy" />
-                <span class="sup-qr-cap">{t('post.scanToPay')}</span>
-              </div>
-            </details>
-          </div>
-
-          <!-- 02 · PayPal -->
-          <div class="sup-method">
-            <div class="sup-method-head">
-              <img src="/images/paypal-logo.svg" alt="" width="22" height="22" class="sup-method-logo" loading="lazy" />
-              <span class="sup-method-name">PayPal</span>
-              <span class="sup-method-region">Global</span>
-            </div>
-            <p class="sup-method-hint">{t('post.paypalHint')}</p>
-            <a href="https://paypal.me/TrungLapTieu?locale.x=en_US&country.x=VN" target="_blank" rel="noopener noreferrer" class="sup-action sup-action--solid">{t('post.supportCta')}</a>
-            <details class="sup-qr">
-              <summary><span class="sup-qr-show">{t('post.showQr')}</span><span class="sup-qr-hide">{t('post.hideQr')}</span></summary>
-              <div class="sup-qr-panel">
-                <img src="/images/paypal-qr.png" alt="Scan to support via PayPal" width="140" height="140" loading="lazy" />
-                <span class="sup-qr-cap">{t('post.scanToPay')}</span>
-              </div>
-            </details>
-          </div>
-
-          <!-- 03 · GitHub Sponsors -->
-          <div class="sup-method">
-            <div class="sup-method-head">
-              <img src="/images/github-logo.svg" alt="" width="22" height="22" class="sup-method-logo" loading="lazy" />
-              <span class="sup-method-name">GitHub</span>
-              <span class="sup-method-region">Global</span>
-            </div>
-            <p class="sup-method-hint">{t('post.sponsorHint')}</p>
-            <a href="https://github.com/sponsors/kido-luci" target="_blank" rel="noopener noreferrer" class="sup-action sup-action--outline">{t('post.sponsorCta')}</a>
-            <details class="sup-qr">
-              <summary><span class="sup-qr-show">{t('post.showQr')}</span><span class="sup-qr-hide">{t('post.hideQr')}</span></summary>
-              <div class="sup-qr-panel">
-                <img src="/images/sponsors-qr.png" alt="Scan to sponsor on GitHub" width="140" height="140" loading="lazy" />
-                <span class="sup-qr-cap">{t('post.scanToPay')}</span>
-              </div>
-            </details>
-          </div>
-        </div>
-      </dialog>
+      <SupportDialog />
 
       {relatedPosts.length > 0 && (
         <section class="more-posts mt-24">
@@ -520,44 +455,6 @@ const structuredData = [articleSchema, breadcrumbSchema];
 <script is:inline src="/scripts/post-engagement-comments.js" defer></script>
 <script is:inline src="/scripts/post-emoji-picker.js" defer></script>
 
-<script is:inline>
-  // Support popup — open/close the native <dialog>.
-  var supDialog = document.getElementById('sup-dialog');
-  if (supDialog) {
-    var supOpen = document.querySelector('[data-sup-open]');
-    if (supOpen) supOpen.addEventListener('click', function () {
-      if (typeof supDialog.showModal === 'function') supDialog.showModal();
-      else supDialog.setAttribute('open', '');
-    });
-    supDialog.querySelectorAll('[data-sup-close]').forEach(function (b) {
-      b.addEventListener('click', function () { supDialog.close(); });
-    });
-    // Click on the backdrop (outside the panel content) closes the dialog.
-    supDialog.addEventListener('click', function (e) {
-      if (e.target === supDialog) supDialog.close();
-    });
-  }
-
-  // Support card — copy the VietQR bank account number (whole row is the target).
-  document.querySelectorAll('.sup-account').forEach(function (row) {
-    var btn = row.querySelector('.sup-copy-btn');
-    var original = btn ? btn.textContent : '';
-    var copied = row.getAttribute('data-copied') || 'Copied';
-    function doCopy() {
-      var val = row.getAttribute('data-copy') || '';
-      if (!navigator.clipboard) return;
-      navigator.clipboard.writeText(val).then(function () {
-        if (!btn) return;
-        btn.textContent = copied;
-        setTimeout(function () { btn.textContent = original; }, 1500);
-      }).catch(function () {});
-    }
-    row.addEventListener('click', doCopy);
-    row.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doCopy(); }
-    });
-  });
-</script>
 
 <style is:global>
   .markdown-content h1,
@@ -686,53 +583,12 @@ const structuredData = [articleSchema, breadcrumbSchema];
   .support-card #like-count { color: var(--bp-ink); }
   .support-card .border-t { border-color: var(--bp-hair) !important; }
 
-  /* ── Support methods: three blueprint payment cards (VietQR · PayPal · GitHub) ── */
-  .sup-methods { width: 100%; max-width: 680px; margin-top: 1.75rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: left; }
-  @media (max-width: 640px) { .sup-methods { grid-template-columns: 1fr; max-width: 340px; } }
-  .sup-method { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid var(--bp-hair); border-radius: 12px; background: color-mix(in srgb, var(--bp-ink) 3.5%, transparent); }
-  .sup-method-head { display: flex; align-items: center; gap: 8px; }
-  .sup-method-logo { width: 22px; height: 22px; object-fit: contain; flex: 0 0 auto; background: #fff; border-radius: 5px; padding: 3px; }
-  .sup-method-name { font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: 14px; color: var(--bp-ink); }
-  .sup-method-region { margin-left: auto; font-family: var(--bp-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bp-muted); border: 1px solid var(--bp-hair); border-radius: 999px; padding: 2px 7px; }
-  .sup-method-hint { font-size: 12px; line-height: 1.4; color: var(--bp-muted); }
-  /* VietQR account row — the whole row copies the number on click */
-  .sup-account { display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 6px 0 12px; border: 1px solid var(--bp-hair); border-radius: 8px; background: transparent; cursor: pointer; transition: border-color 0.2s ease; }
-  .sup-account:hover, .sup-account:focus-visible { border-color: var(--bp-acc); outline: none; }
-  .sup-account-no { flex: 1; min-width: 0; font-family: var(--bp-mono); font-size: 14px; letter-spacing: 0.03em; color: var(--bp-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sup-copy-btn { flex: 0 0 auto; font-family: var(--bp-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bp-acc); border: 1px solid var(--bp-acc); border-radius: 6px; padding: 5px 9px; }
-  /* Action links — solid accent (PayPal) / hairline outline (GitHub) */
-  .sup-action { display: flex; align-items: center; justify-content: center; height: 42px; border-radius: 8px; font-family: var(--bp-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; transition: filter 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
-  .sup-action--solid { background: var(--bp-acc); color: #fff; }
-  .sup-action--solid:hover { filter: brightness(1.08); }
-  .sup-action--outline { background: transparent; color: var(--bp-ink); border: 1px solid var(--bp-hair); }
-  .sup-action--outline:hover { border-color: var(--bp-acc); color: var(--bp-acc); }
-  /* Collapsible QR (native <details>) */
-  .sup-qr summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 2px 0; font-family: var(--bp-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bp-acc); }
-  .sup-qr summary::-webkit-details-marker { display: none; }
-  .sup-qr summary::before { content: "+"; font-weight: 700; }
-  .sup-qr[open] summary::before { content: "\2212"; }
-  .sup-qr .sup-qr-hide { display: none; }
-  .sup-qr[open] .sup-qr-show { display: none; }
-  .sup-qr[open] .sup-qr-hide { display: inline; }
-  .sup-qr-panel { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--bp-hair); border-radius: 8px; }
-  .sup-qr-panel img { width: 140px; height: 140px; object-fit: contain; background: #fff; padding: 6px; border-radius: 6px; }
-  .sup-qr-cap { font-family: var(--bp-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--bp-muted); }
 
   /* Trigger button — opens the support popup */
   .sup-open-btn { margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 9px; padding: 12px 24px; border-radius: 999px; font-family: var(--bp-mono); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--bp-acc); border: none; cursor: pointer; transition: filter 0.2s ease, transform 0.2s ease; }
   .sup-open-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
   .sup-open-btn svg { flex: 0 0 auto; }
 
-  /* Support popup — native <dialog> (top layer, so it clears any transformed ancestor) */
-  .sup-dialog { width: min(720px, 92vw); max-width: 720px; max-height: 86vh; overflow: auto; padding: clamp(22px, 4vw, 38px); border: 1px solid var(--bp-hair); border-radius: 16px; background: var(--bp-panel); color: var(--bp-ink); box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6); }
-  .sup-dialog::backdrop { background: rgba(6, 9, 14, 0.6); backdrop-filter: blur(3px); }
-  .sup-dialog[open] { animation: sup-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
-  @keyframes sup-pop { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
-  .sup-dialog-close { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--bp-hair); background: transparent; color: var(--bp-muted); cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease; }
-  .sup-dialog-close:hover { color: var(--bp-ink); border-color: var(--bp-acc); }
-  .sup-dialog-title { padding-right: 44px; font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 700; font-size: clamp(1.4rem, 3vw, 1.9rem); color: var(--bp-ink); }
-  .sup-dialog-sub { margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--bp-muted); }
-  .sup-dialog .sup-methods { margin-top: 1.5rem; max-width: 100%; }
 
   /* ── In-header back link (mirrors series' .bp-series-back) ── */
   .bd-back {
