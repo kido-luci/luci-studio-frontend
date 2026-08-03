@@ -10,8 +10,6 @@ npm run build     # Build for production (static output)
 npm run preview   # Preview production build locally
 npm run check     # Type-check .astro + .ts via `astro check` (fails on errors; hints/warnings don't block)
 npm run test      # Unit tests (vitest)
-npm run test:e2e  # End-to-end smoke tests (playwright)
-npm run test:all  # Unit + e2e
 ```
 
 `npm run check` is the cheap pre-commit gate — it catches type errors the dev
