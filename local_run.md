@@ -72,67 +72,14 @@ npm run preview
 
 ## Running Tests
 
-Two suites live in this repo:
-
-- **Unit tests** — Vitest. Cover the service clients (`src/services/*.ts`), the blog utilities (`src/utils/blog.ts`), and the post-stats cache (`src/utils/postStats.ts`). They mock `fetch`/DOM and need no servers running.
-- **E2E tests** — Playwright. Drive a real Chromium against `npm run dev` and assert that the top-level pages render. Playwright auto-spawns the dev server before tests and reuses it if one is already running.
-
-### First-time setup
-
-```bash
-npm install
-npx playwright install chromium chromium-headless-shell
-```
-
-Browsers are downloaded once into `~/Library/Caches/ms-playwright` and reused across runs.
+One suite lives in this repo: **unit tests** on Vitest. They cover the service clients (`src/services/*.ts`), the blog utilities (`src/utils/blog.ts`), and the post-stats cache (`src/utils/postStats.ts`). They mock `fetch`/DOM and need no servers running.
 
 ### Common commands
 
 ```bash
 npm run test:unit          # vitest, ~0.5s
 npm run test:unit:watch    # vitest in watch mode
-npm run test:e2e           # playwright headless, ~15s
-npm run test:e2e:ui        # interactive Playwright UI (best for development)
-npm run test:all           # unit + e2e in sequence
 ```
-
-### Watching the browser drive the tests
-
-By default Playwright runs headless. To see the browser:
-
-```bash
-npm run test:e2e -- --headed --workers=1
-```
-
-`--workers=1` runs the tests one-at-a-time instead of opening five Chromium windows in parallel.
-
-To slow each browser action down enough to actually follow along, set `SLOW_MO` (milliseconds between actions):
-
-```bash
-SLOW_MO=500 npm run test:e2e -- --headed --workers=1
-```
-
-For step-by-step debugging with a Resume/Step-over UI:
-
-```bash
-npm run test:e2e -- --debug
-```
-
-To run a single test by name:
-
-```bash
-npm run test:e2e -- -g "homepage renders"
-```
-
-### After a failed E2E run
-
-Playwright writes a full HTML report — open it with:
-
-```bash
-npx playwright show-report
-```
-
-Traces are recorded on the first retry (`trace: 'on-first-retry'` in `playwright.config.ts`). Open a trace file with `npx playwright show-trace <path-to-trace.zip>` to step through the failed run frame-by-frame.
 
 ### Where the tests live
 
@@ -142,8 +89,6 @@ src/
   services/gallery.test.ts     — unit tests for the gallery API client
   utils/blog.test.ts           — unit tests for slugify / markdown / date utils
   utils/postStats.test.ts      — unit tests for the localStorage stats cache
-tests/
-  e2e/smoke.spec.ts            — Playwright smoke suite for /, /blog, /chat
 ```
 
 ## Common Issues

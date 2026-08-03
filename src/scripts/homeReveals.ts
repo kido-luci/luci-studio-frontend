@@ -1,4 +1,5 @@
-import { invalidatePostStatsCache, refreshPostStats } from '../utils/postStats';
+import { refreshPostStats } from '../utils/postStats';
+import { initPostLikes } from './postLikes';
 import { whenReady } from './whenReady';
 
 export function initHomeReveals() {
@@ -93,108 +94,9 @@ export function initHomeReveals() {
     items.forEach(i => obs.observe(i));
   })();
 
-  // Blog tile like buttons
-  (function() {
-    const API_URL = (document.querySelector('main[data-api-url]') as HTMLElement | null)?.dataset.apiUrl || '';
-
-    function burstHearts(anchor: HTMLElement) {
-      const count = 6;
-      const rect = anchor.getBoundingClientRect();
-      for (let i = 0; i < count; i++) {
-        const h = document.createElement('span');
-        h.textContent = '♥';
-        const angle = (i / count) * 360;
-        const dist = 28 + Math.random() * 20;
-        const dx = Math.cos((angle * Math.PI) / 180) * dist;
-        const dy = Math.sin((angle * Math.PI) / 180) * dist - 18;
-        h.style.cssText = `
-          position:fixed;
-          left:${rect.left + rect.width / 2}px;
-          top:${rect.top + rect.height / 2}px;
-          font-size:${9 + Math.random() * 7}px;
-          color:#f43f5e;
-          pointer-events:none;
-          z-index:9999;
-          transform:translate(-50%,-50%);
-          transition:transform 0.6s ease-out,opacity 0.6s ease-out;
-          will-change:transform,opacity;
-        `;
-        document.body.appendChild(h);
-        requestAnimationFrame(() => {
-          h.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0)`;
-          h.style.opacity = '0';
-        });
-        setTimeout(() => h.remove(), 650);
-      }
-    }
-
-    function pulseIcon(icon: HTMLElement) {
-      icon.style.transform = 'scale(1.6)';
-      icon.style.transition = 'transform 0.15s ease-out';
-      setTimeout(() => {
-        icon.style.transform = 'scale(1)';
-        icon.style.transition = 'transform 0.2s ease-in';
-      }, 150);
-    }
-
-    document.querySelectorAll('.tile-like-area').forEach(el => {
-      const btn = el as HTMLElement;
-      const postId = btn.dataset.id;
-      const icon = btn.querySelector('.tile-like-icon') as HTMLElement | null;
-      const countEl = btn.querySelector('.tile-like-count') as HTMLElement | null;
-      const likedKey = `liked_${postId}`;
-      let liked = localStorage.getItem(likedKey) === '1';
-      let pending = false;
-
-      function applyLikedState(state: boolean) {
-        liked = state;
-        if (state) {
-          icon?.setAttribute('fill', '#f43f5e');
-          icon?.setAttribute('stroke', '#f43f5e');
-          countEl?.classList.add('text-rose-400');
-          countEl?.classList.remove('text-gray-500');
-        } else {
-          icon?.setAttribute('fill', 'none');
-          icon?.setAttribute('stroke', 'currentColor');
-          countEl?.classList.remove('text-rose-400');
-          countEl?.classList.add('text-gray-500');
-        }
-      }
-
-      applyLikedState(liked);
-
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (pending) return;
-        btn.dataset.userInteracted = '1';
-        const nextLiked = !liked;
-        if (nextLiked) {
-          burstHearts(btn);
-          if (icon) pulseIcon(icon);
-        }
-        const endpoint = liked ? 'unlike' : 'like';
-        pending = true;
-        btn.setAttribute('aria-busy', 'true');
-        fetch(`${API_URL}/posts/${postId}/${endpoint}`, { method: 'POST' })
-          .then(r => r.ok ? r.json() : Promise.reject(new Error(`like ${r.status}`)))
-          .then(d => {
-            if (d.likes != null && countEl) countEl.textContent = d.likes;
-            applyLikedState(nextLiked);
-            localStorage.setItem(likedKey, nextLiked ? '1' : '0');
-            invalidatePostStatsCache();
-            refreshPostStats();
-          })
-          .catch(() => {})
-          .finally(() => {
-            pending = false;
-            btn.removeAttribute('aria-busy');
-          });
-      });
-    });
-
-    refreshPostStats();
-  })();
+  // Blog tile like buttons — shared with the /blog list (see postLikes.ts).
+  initPostLikes();
+  refreshPostStats();
 
   // Art tile like buttons
   (function() {
