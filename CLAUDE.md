@@ -12,10 +12,15 @@ npm run check     # Type-check .astro + .ts via `astro check` (fails on errors; 
 npm run test      # Unit tests (vitest)
 ```
 
-`npm run check` is the cheap pre-commit gate — it catches type errors the dev
-server's per-request compile doesn't surface. It's tuned to `--minimumFailingSeverity error`
-so the ~10 pre-existing legacy hints (implicit-any in inline event handlers,
-`is:inline` script notices) stay advisory; only real type errors fail it.
+`npm run check` is the cheap pre-commit gate — it catches type errors the build
+does not, because the build transpiles without type-checking. It's tuned to
+`--minimumFailingSeverity error` so the ~12 pre-existing legacy hints (implicit-any
+in inline event handlers, `is:inline` script notices) stay advisory; only real
+type errors fail it. CI runs it on every PR, ahead of the tests and the build.
+
+`npm run dev` works in this repo (verified 2026-08-03: `/` and `/blog` both serve
+200). The workspace CLAUDE.md still says both frontends' dev server is broken —
+that is stale for this one; only the admin app is affected.
 
 ## Development workflow
 
@@ -63,27 +68,52 @@ PUBLIC_API_URL=http://localhost:3000
 
 **Stack**: Astro (static site generation) → Cloudflare Pages. Zero JS framework — no React/Vue/Svelte. All interactivity is vanilla JS.
 
-**Routes** (`src/pages/`):
+**Routes** (`src/pages/`) — every route file is a **thin wrapper** (4–20 lines) that
+imports a body component from `src/components/pages/`. That indirection is what lets
+the English and Vietnamese routes render the same component, which reads its locale
+from the URL. Put page logic in the body component, never in the route file.
 - `/` — Portfolio homepage: hardcoded project/experience content + a dynamic blog feed fetched from the backend at build time
 - `/blog/` (index) and `/blog/[slug]` — post pages via `getStaticPaths()`; slug `{title-slug}-{id}` (e.g. `my-post-123`)
 - `/blog/series/` and `/blog/series/[slug]` — series index + per-series pages
-- `/portfolio`, `/lab`, `/privacy`, `/terms`, `404`, and `sitemap.xml.ts` (there is no `/art` route — art lives in the homepage §04 gallery mosaic + lightbox only)
+- `/vi/blog/…` — the Vietnamese mirror of the blog section, and the **only** localized
+  surface. `getStaticPaths` for both locales comes from one source (`src/utils/i18nPaths.ts`)
+- `/portfolio`, `/lab`, `/games`, `/videos`, `/privacy`, `/terms`, `/license`, `404`, and `sitemap.xml.ts` (there is no `/art` route — art lives in the homepage §04 gallery mosaic + lightbox only)
+
+**Source layout** (`src/`):
+
+| Directory | Holds |
+|-----------|-------|
+| `pages/` | Route wrappers only — see above |
+| `components/pages/` | One body component per route (`HomePage`, `BlogIndexPage`, `PostDetailPage`, …) |
+| `components/home/` | The homepage's own sections (`HomeArt`, `HomeWork`, `HomeBlogRail`, …) |
+| `components/post/` | Widgets belonging to the post page (`SupportDialog`) |
+| `components/` (root) | Cross-page components (`TopNav`, `PostCard`, `SeriesCard`, `SiteFooter`, …) |
+| `services/` | One module per backend resource; pages never `fetch()` directly |
+| `lib/apiClient.ts` | The shared fetch layer every service is built on |
+| `utils/` | Pure transforms (markdown, series aggregation, stats, path building) |
+| `scripts/` | Client-side behaviour, one module per feature; `scripts/layout/` is the site chrome |
+| `i18n/` | Locale detection, the English string catalog, and the translation overlay |
+| `data/` | Hardcoded content (games, tools, videos) that has no backend entity |
+| `config/` | Feature flags |
+| `styles/` | `global.css` (Tailwind directives + shared blueprint tokens) and `lab-cards.css` |
 
 **Data flow**:
-- `src/services/posts.ts` — REST client for the backend API (`getAll()` → `GET /posts`, `getByID(id)` → `GET /posts/{id}`)
+- `src/lib/apiClient.ts` — the shared fetch layer: strips the trailing slash off `PUBLIC_API_URL`, dedupes concurrent build-time callers into one round-trip, and decides via `FAIL_FAST` whether a broken backend fails the prod build or resolves empty (`ALLOW_EMPTY_POSTS=1` opts out locally)
+- `src/services/*.ts` — one module per resource, built on `cachedGetAll` / `fetchOne`. `posts.ts` also owns the `Post` type. Two services bypass the client on purpose: `games.ts` (hits each game's own Worker) and `github.ts` (pure URL parsing)
 - `src/utils/blog.ts` — Custom regex-based Markdown→HTML parser (not a library), plus `calculateReadTime`, `formatDate`, `slugify`
 - Blog post content is fetched at build time and rendered server-side; no client-side data fetching
 
 **Styling**:
 - Tailwind CSS is compiled at build time via PostCSS (`tailwind.config.cjs`, `postcss.config.cjs`); the `@tailwind` directives live in `src/styles/global.css`, imported once in `src/layouts/Layout.astro`. Custom animations/keyframes are defined in `tailwind.config.cjs`. (Previously loaded via the `cdn.tailwindcss.com` runtime JIT — replaced to remove the render-blocking script.)
-- All other global CSS lives in `Layout.astro` (`<style is:global>`) — over 600 lines of custom styles
+- Global CSS lives in three deliberate places, not one: `Layout.astro`'s `<style is:global>` (~390 lines — site chrome, theme tokens, accent schemes), `src/styles/global.css` (Tailwind directives + the shared `bp-` blueprint tokens and section-header atoms, already de-duplicated out of ~17 components), and `src/styles/lab-cards.css` (the RepoCard palette, imported by `/lab` and `/games`). Per-page tokens stay in the component that owns them — do not hoist them
+- Everything else is component-scoped `<style>`. Note that a few base rules use the `background` **shorthand**, which resets `background-image`; a shared global class cannot override them without `!important`, so small per-component duplicates (e.g. the 45° hatch fill) are left alone on purpose
 - Theme system (light default / dark toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
 
 **Background**: none. Each page draws its own "blueprint" drafting-grid background in its component CSS. A 2D `<canvas>` particle field used to run site-wide (the drifting `-`/`o` shapes) but was **retired** in v1.45.0 — `particles.ts` / `canvasBackground.ts` and the `#canvas-bg` / `#bg-dimmer` elements are gone; `navDimmer.ts` now only styles the nav on scroll (glass bg + hide-on-scroll). (Also removed earlier: Vanta/p5.js — only a stale `--vanta-bg` CSS var name remains.) One exception: the homepage hero band is a **three.js ocean scene** (`src/scripts/oceanHero.ts` — sky window offset right, shadow-raymarched god rays via `three-good-godrays`, Quaternius CC0 fish; three pinned at 0.179.1 for the postprocessing/godrays peer range; code-split dynamic import on `/` only; ~30fps idle cap, offscreen/hidden pause). Armed by a cheap head probe (`html.ocean-on`); skipped via `localStorage oceanHero="off"`; reduced-motion renders one static frame; no WebGL2 (or GL death) falls back to the CSS constellation corner + hero ring diagram. It replaced the earlier `bpGlow.ts` ambient glow + tsParticles constellation trial.
 
 **Third-party libraries** (via CDN):
 - GSAP + ScrollTrigger + SplitText (jsDelivr, in `Layout.astro`) — scroll reveals, hero/section text animations
-- Prism.js (cdnjs, in `blog/[slug].astro` only) — code syntax highlighting (Dart, Go, JS, TS)
+- Prism.js (cdnjs, in `components/pages/PostDetailPage.astro` only) — code syntax highlighting (Dart, Go, JS, TS). Its token CSS and the `.markdown-content` prose styles live in that component's `<style is:global>` and are used by nothing else
 
 **Windows performance mode** (`win-perf-mode`): runtime Windows detection disables backdrop-filter, 3D transforms, and heavy animations. A parallel `max-width: 768px` rule drops backdrop-filter on fixed elements (nav, mobile menu) to cut mobile scroll jank.
 
@@ -92,8 +122,13 @@ PUBLIC_API_URL=http://localhost:3000
 | File | Purpose |
 |------|---------|
 | `src/layouts/Layout.astro` | Root layout — all CDN scripts, global CSS, theme toggle, custom cursor, mobile menu |
-| `src/services/posts.ts` | API client — Post type definition lives here |
+| `src/lib/apiClient.ts` | Shared fetch layer — base URL, build-time dedupe, fail-fast policy |
+| `src/services/posts.ts` | Posts resource — the `Post` type definition lives here |
 | `src/utils/blog.ts` | Markdown parser and blog utilities |
+| `src/utils/i18nPaths.ts` | The one `getStaticPaths` source shared by the `en` and `vi` routes |
+| `src/i18n/index.ts` | Locale detection, `t()`, `localizedHref`, and the `translations` overlay |
+| `src/scripts/blogIndex.ts` | `/blog` behaviour — filtering, search, pagination, topic-chip clamp |
+| `src/scripts/postLikes.ts` | The one like-button implementation, shared by `/blog` and the home rail |
 | `astro.config.mjs` | Static output + Cloudflare adapter |
 | `tailwind.config.cjs` / `postcss.config.cjs` | Build-time Tailwind config (content globs, custom animations) + PostCSS pipeline |
 | `src/styles/global.css` | `@tailwind` directives, imported in `Layout.astro` |
