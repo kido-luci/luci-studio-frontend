@@ -69,11 +69,15 @@ export function showConfirm({ message, confirmText = 'Confirm', cancelText = 'Ca
 
     function onKeydown(e: KeyboardEvent) {
       if (e.key === 'Escape') { e.preventDefault(); close(false); return; }
-      // Enter confirms only when the action is reversible. A stray Enter must
-      // never carry out a destructive one (comment recall passes danger: true).
-      if (e.key === 'Enter' && !danger) { e.preventDefault(); close(true); return; }
-      // Keep Tab inside the dialog — with two buttons the trap is just a swap.
+      // Enter is deliberately NOT handled here. Both actions are <button>s, so
+      // the browser already activates whichever one has focus — Enter on Cancel
+      // cancels, Enter on Confirm confirms. Handling it at the document level
+      // instead would override the focused button: it used to resolve true even
+      // while Cancel held focus, and (before that) it confirmed destructive
+      // dialogs outright. Since focus opens on Cancel, confirming always takes a
+      // deliberate Tab or click.
       if (e.key === 'Tab' && okBtn && cancelBtn) {
+        // Keep Tab inside the dialog — with two buttons the trap is just a swap.
         e.preventDefault();
         (document.activeElement === cancelBtn ? okBtn : cancelBtn).focus();
       }
