@@ -472,8 +472,16 @@ const bpStars = Array.from({ length: 40 }, () => {
   // fetched on the homepage only, after the page settles (idle) — never on
   // the LCP path. The head probe already set html.ocean-on (or didn't — then
   // this never loads).
+  //
+  // The scene module drops ocean-on itself when GL init fails, but it can only
+  // do that once it runs: if the chunk never arrives (offline, blocked, a bad
+  // deploy) nothing would clear the class and the hero would sit on a hidden
+  // constellation and ring. Clearing it here covers that case.
   if (document.documentElement.classList.contains("ocean-on")) {
-    const boot = () => import("../../scripts/oceanHero").then((m) => m.initOceanHero());
+    const boot = () =>
+      import("../../scripts/oceanHero")
+        .then((m) => m.initOceanHero())
+        .catch(() => document.documentElement.classList.remove("ocean-on"));
     if ("requestIdleCallback" in window) {
       requestIdleCallback(() => boot(), { timeout: 2000 });
     } else {
