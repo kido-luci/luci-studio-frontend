@@ -14,6 +14,12 @@ export function showConfirm({ message, confirmText = 'Confirm', cancelText = 'Ca
     overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);opacity:0;transition:opacity 0.2s ease;';
 
     const box = document.createElement('div');
+    // Modal contract: alertdialog (not dialog) because this interrupts to ask a
+    // question, and aria-modal so assistive tech treats the rest of the page as
+    // inert while it is open.
+    box.setAttribute('role', 'alertdialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-label', message);
     box.style.cssText = 'background:var(--bp-panel);border:1px solid var(--bp-hair);border-radius:14px;padding:1.5rem;width:100%;max-width:22rem;box-shadow:0 24px 64px rgba(0,0,0,0.5);transform:scale(0.95) translateY(8px);transition:transform 0.2s ease,opacity 0.2s ease;opacity:0;';
 
     box.innerHTML = `
@@ -33,7 +39,14 @@ export function showConfirm({ message, confirmText = 'Confirm', cancelText = 'Ca
     `;
 
     overlay.appendChild(box);
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     document.body.appendChild(overlay);
+
+    const okBtn = box.querySelector<HTMLButtonElement>('#confirm-ok');
+    const cancelBtn = box.querySelector<HTMLButtonElement>('#confirm-cancel');
+    // Open on the non-destructive action, so a reflexive Enter or Space cancels
+    // rather than confirms.
+    cancelBtn?.focus();
 
     requestAnimationFrame(() => {
       overlay.style.opacity = '1';
@@ -42,19 +55,33 @@ export function showConfirm({ message, confirmText = 'Confirm', cancelText = 'Ca
     });
 
     function close(result: boolean) {
+      // Every close path runs through here, which is the only place the document
+      // listener is removed — closing by button or backdrop used to leave it
+      // attached, leaking one listener per dialog for the life of the page.
+      document.removeEventListener('keydown', onKeydown);
       overlay.style.opacity = '0';
       box.style.opacity = '0';
       box.style.transform = 'scale(0.95) translateY(8px)';
       setTimeout(() => overlay.remove(), 200);
+      previouslyFocused?.focus();
       resolve(result);
     }
 
-    box.querySelector('#confirm-ok')?.addEventListener('click', () => close(true));
-    box.querySelector('#confirm-cancel')?.addEventListener('click', () => close(false));
+    function onKeydown(e: KeyboardEvent) {
+      if (e.key === 'Escape') { e.preventDefault(); close(false); return; }
+      // Enter confirms only when the action is reversible. A stray Enter must
+      // never carry out a destructive one (comment recall passes danger: true).
+      if (e.key === 'Enter' && !danger) { e.preventDefault(); close(true); return; }
+      // Keep Tab inside the dialog — with two buttons the trap is just a swap.
+      if (e.key === 'Tab' && okBtn && cancelBtn) {
+        e.preventDefault();
+        (document.activeElement === cancelBtn ? okBtn : cancelBtn).focus();
+      }
+    }
+
+    okBtn?.addEventListener('click', () => close(true));
+    cancelBtn?.addEventListener('click', () => close(false));
     overlay.addEventListener('click', e => { if (e.target === overlay) close(false); });
-    document.addEventListener('keydown', function handler(e) {
-      if (e.key === 'Escape') { close(false); document.removeEventListener('keydown', handler); }
-      if (e.key === 'Enter') { close(true); document.removeEventListener('keydown', handler); }
-    });
+    document.addEventListener('keydown', onKeydown);
   });
 }
