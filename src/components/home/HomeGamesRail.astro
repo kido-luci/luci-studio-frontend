@@ -47,7 +47,7 @@ const plays = await getPlayCounts();
 
 <!-- ===================== ANNEX A — GAMES REGISTER (horizontal rail) =====================
      units.gr-inspired pinned horizontal rail: on desktop the section pins and
-     vertical scroll drags the card track sideways (homeGamesRail.ts adds
+     vertical scroll drags the card track sideways (homeRails.ts adds
      .is-pinned + the GSAP scrub). Default CSS is a native overflow-x swipe
      strip, which is also the mobile / reduced-motion / no-CDN fallback.
      Unnumbered on purpose — an drafting-sheet ANNEX, so §02–§05 keep their
@@ -153,7 +153,7 @@ const plays = await getPlayCounts();
      plates and tinted "spec sheet" text plates (RAIL_LAYOUT in the
      frontmatter picks each game's variant). Default = native overflow-x
      swipe strip (mobile / reduced-motion / no-CDN fallback);
-     homeGamesRail.ts adds .is-pinned on desktop and GSAP scrubs the track
+     homeRails.ts adds .is-pinned on desktop and GSAP scrubs the track
      sideways with page scroll. Full-bleed on purpose — the rail breaking
      out of the bp-wrap column is the layout-variance beat between two
      contained sections. The shared .bp-rail-sec pin/height base and the
@@ -356,6 +356,6 @@ const plays = await getPlayCounts();
 </style>
 
 <script>
-  import { initHomeGamesRail } from "../../scripts/homeGamesRail";
+  import { initHomeGamesRail } from "../../scripts/homeRails";
   initHomeGamesRail();
 </script>

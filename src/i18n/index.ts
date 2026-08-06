@@ -8,8 +8,8 @@ export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en';
 
 // getLocaleFromUrl derives the active locale from the first path segment.
-// `/vi/...` → 'vi'; everything else → 'en'. Today every page is at `/`, so this
-// always returns 'en' (identical output); Phase 3's `/vi/` routes flip it.
+// `/vi/...` → 'vi'; everything else → 'en'. Only the blog section is mirrored
+// under `/vi` (see isBilingualPath), so every other route resolves to 'en'.
 export function getLocaleFromUrl(url: URL): Locale {
   const seg = url.pathname.split('/').filter(Boolean)[0];
   return seg === 'vi' ? 'vi' : 'en';
@@ -19,7 +19,8 @@ export function getLocaleFromUrl(url: URL): Locale {
 // stays ENGLISH in every locale by design — only POST CONTENT is localized (via
 // `localized()` reading the backend translations overlay). So `t()` always reads
 // the English catalog and ignores the locale; the `locale` param is kept for call-
-// site compatibility. (vi.ts is consequently unused for UI and left as a stub.)
+// site compatibility. There is consequently no `vi.ts` catalog — `en.ts` is the
+// only one, and adding a second would not change any rendered UI on its own.
 export function useTranslations(_locale: Locale) {
   return (key: string): string => en[key] ?? key;
 }

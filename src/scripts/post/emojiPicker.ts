@@ -1,10 +1,17 @@
-(function() {
+// Twemoji-backed emoji picker for the comment composer: a fixed popover with
+// category tabs, opened from the composer's emoji button and inserted at the
+// saved caret position.
+//
+// Moved verbatim out of public/scripts/post-emoji-picker.js so it is
+// type-checked, bundled and content-hashed like the rest of src/scripts. The
+// body is unchanged apart from the type annotations strict mode requires.
+export function initEmojiPicker() {
   const CDN = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/';
 
   // Twemoji codepoint → SVG URL
-  function twUrl(emoji) {
+  function twUrl(emoji: string) {
     const cp = [...emoji]
-      .map(c => c.codePointAt(0).toString(16))
+      .map(c => (c.codePointAt(0) ?? 0).toString(16))
       .filter(c => c !== 'fe0f')
       .join('-');
     return CDN + cp + '.svg';
@@ -12,12 +19,24 @@
 
   // Read localized strings from the emoji-i18n block (injected by PostDetailPage.astro).
   // Falls back to the English literal if the block is absent or a key is missing.
-  function _ei18n(key, fallback) {
+  function _ei18n(key: string, fallback: string): string {
     try {
       const el = document.getElementById('emoji-i18n');
-      if (el) { const d = JSON.parse(el.textContent); if (d[key] != null) return d[key]; }
+      if (el) {
+        const d = JSON.parse(el.textContent ?? '{}') as Record<string, string | null>;
+        if (d[key] != null) return d[key];
+      }
     } catch (_) {}
     return fallback;
+  }
+
+  // Nearest contenteditable host of a node — the composer (or a reply composer)
+  // the caret currently sits in. Text nodes start from their parent element.
+  function editableHostOf(node: Node | null): HTMLElement | null {
+    let el: HTMLElement | null =
+      node instanceof HTMLElement ? node : (node?.parentElement ?? null);
+    while (el && el.contentEditable !== 'true') el = el.parentElement;
+    return el;
   }
 
   const CATS = [
@@ -82,7 +101,7 @@
     const grid = document.createElement('div');
     grid.style.cssText = 'display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:0.5rem;overflow-y:auto;height:240px;';
 
-    function renderGrid(emojis) {
+    function renderGrid(emojis: string[]) {
       grid.innerHTML = '';
       emojis.forEach(em => {
         const btn = document.createElement('button');
@@ -131,29 +150,27 @@
 
   // Save caret position before any emoji-picker-btn steals focus (event delegation
   // covers both the main toolbar and dynamically-created reply toolbars).
-  let savedRange = null;
+  let savedRange: Range | null = null;
   document.addEventListener('mousedown', e => {
-    const btn = e.target.closest('.emoji-picker-btn');
+    const btn = (e.target as Element | null)?.closest('.emoji-picker-btn');
     if (!btn) return;
     const sel = window.getSelection();
     if (sel && sel.rangeCount) {
       const range = sel.getRangeAt(0);
-      let container = range.commonAncestorContainer;
-      if (container.nodeType === 3) container = container.parentElement;
-      while (container && container.contentEditable !== 'true') container = container.parentElement;
-      if (container) savedRange = range.cloneRange();
+      if (editableHostOf(range.commonAncestorContainer)) savedRange = range.cloneRange();
     }
   });
 
-  function insertEmoji(em) {
+  function insertEmoji(em: string) {
     // Resolve target: walk up from saved range, or fall back to main input
-    let el = null;
-    if (savedRange) {
-      let c = savedRange.commonAncestorContainer;
-      if (c.nodeType === 3) c = c.parentElement;
-      while (c && c.contentEditable !== 'true') c = c.parentElement;
-      el = c;
-    }
+    let el: HTMLElement | null = savedRange
+      ? editableHostOf(savedRange.commonAncestorContainer)
+      : null;
+    // A saved range can outlive the composer it points into: reply forms are
+    // removed from the DOM on cancel and after submit, and savedRange is only
+    // cleared on a successful insert. Inserting into that detached subtree would
+    // silently swallow the emoji, so drop the stale range and use the main input.
+    if (el && !el.isConnected) { savedRange = null; el = null; }
     if (!el) el = document.getElementById('comment-input');
     if (!el) return;
 
@@ -166,15 +183,16 @@
     img.style.cssText = 'pointer-events:none;';
 
     el.focus();
-    const rangeToUse = savedRange || (window.getSelection()?.rangeCount ? window.getSelection().getRangeAt(0) : null);
+    const liveSel = window.getSelection();
+    const rangeToUse = savedRange || (liveSel?.rangeCount ? liveSel.getRangeAt(0) : null);
     if (rangeToUse) {
       rangeToUse.deleteContents();
       rangeToUse.insertNode(img);
       rangeToUse.setStartAfter(img);
       rangeToUse.setEndAfter(img);
       const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(rangeToUse);
+      sel?.removeAllRanges();
+      sel?.addRange(rangeToUse);
     } else {
       el.appendChild(img);
     }
@@ -183,7 +201,7 @@
     closePicker();
   }
 
-  function positionPicker(btn) {
+  function positionPicker(btn: Element) {
     const rect = btn.getBoundingClientRect();
     const pH = 340, pW = 320;
     let top = rect.top - pH - 8;
@@ -196,7 +214,7 @@
 
   let open = false;
 
-  function openPicker(btn) {
+  function openPicker(btn: Element) {
     buildPicker();
     positionPicker(btn);
     wrap.style.display = 'flex';
@@ -216,16 +234,17 @@
 
   // Delegated click handler for all emoji-picker-btn buttons (main + reply toolbars)
   document.addEventListener('click', e => {
-    const btn = e.target.closest('.emoji-picker-btn');
-    if (btn && !wrap.contains(e.target)) {
+    const target = e.target as Element | null;
+    const btn = target?.closest('.emoji-picker-btn');
+    if (btn && !wrap.contains(target)) {
       e.stopPropagation();
       open ? closePicker() : openPicker(btn);
       return;
     }
-    if (open && !wrap.contains(e.target)) closePicker();
+    if (open && !wrap.contains(target)) closePicker();
   });
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && open) closePicker();
   });
-})();
+}
