@@ -2,10 +2,11 @@
 // Newsletter subscribe form — one email input + submit, dropped into the
 // site footer so it renders on every page (incl. the end of a blog post,
 // since SiteFooter already sits there). Self-contained: reads its own
-// PUBLIC_API_URL (same idiom as BlogIndexPage/PostDetailPage/HomePage) and
-// carries its own scoped styles, so it can sit inside any `.bp-footer-cols`
+// API base from the shared client (same normalisation every service uses — a
+// trailing slash on PUBLIC_API_URL would otherwise produce `…//subscribers`)
+// and carries its own scoped styles, so it can sit inside any `.bp-footer-cols`
 // flex row without depending on the host component's classes.
-const API_URL = import.meta.env.PUBLIC_API_URL || '';
+import { BASE_URL } from '../lib/apiClient';
 ---
 
 <div class="subscribe">
@@ -13,7 +14,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
   <p class="subscribe-copy">
     Get an email when I publish a new post. Unsubscribe anytime. <a href="/privacy" class="subscribe-link">Privacy</a>
   </p>
-  <form id="subscribe-form" data-api-url={API_URL} novalidate>
+  <form id="subscribe-form" data-api-url={BASE_URL} novalidate>
     <label for="subscribe-email" class="subscribe-label">Email</label>
     <div class="subscribe-row">
       <input
@@ -143,7 +144,10 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
   .subscribe-status[data-state="error"] {
     color: #f43f5e;
   }
-  body.light-mode .subscribe-status[data-state="error"] {
+  /* :global() on the ancestor — Astro scopes BOTH sides of a descendant
+     selector, and <body> never carries this component's scope attribute, so the
+     unwrapped form silently never matched. Same shape as PostCard/SeriesCard. */
+  :global(body.light-mode) .subscribe-status[data-state="error"] {
     color: #be123c; /* rose-700 — clears WCAG AA (~6:1) on the cream --bp-bg */
   }
 </style>
@@ -184,10 +188,16 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
       form.setAttribute('aria-busy', 'true');
       setStatus('pending', 'Sending…');
 
+      // fetch never rejects on a stalled connection, so without this the form
+      // would sit on "Sending…" with both controls disabled forever.
+      const abort = new AbortController();
+      const timeout = setTimeout(() => abort.abort(), 10000);
+
       fetch(`${apiUrl}/subscribers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
+        signal: abort.signal,
       })
         .then((res) => {
           if (!res.ok) throw new Error(`subscribe ${res.status}`);
@@ -198,6 +208,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || '';
           setStatus('error', 'Something went wrong — please try again.');
         })
         .finally(() => {
+          clearTimeout(timeout);
           submitBtn.disabled = false;
           emailInput.disabled = false;
           form.removeAttribute('aria-busy');
