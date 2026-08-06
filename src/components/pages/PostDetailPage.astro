@@ -456,5 +456,13 @@ const structuredData = [articleSchema, breadcrumbSchema];
   });
 </script>
 
-<script is:inline src="/scripts/post-engagement-comments.js" defer></script>
-<script is:inline src="/scripts/post-emoji-picker.js" defer></script>
+<!-- Post behaviour. Bundled modules (not /public scripts), so they are
+     type-checked and content-hashed; both still run after parsing, and the
+     engagement module keeps running first because the picker binds to the
+     composer it renders. -->
+<script>
+  import { initPostEngagement } from "../../scripts/post/postEngagementComments";
+  import { initEmojiPicker } from "../../scripts/post/emojiPicker";
+  initPostEngagement();
+  initEmojiPicker();
+</script>
