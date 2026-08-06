@@ -28,15 +28,21 @@ export function parseJWT(token: string | null): JwtPayload | null {
 
 // Relative timestamp, falling back to an absolute date past 30 days. `t` is the
 // caller's string lookup (comments.ts reads the page's i18n block); it takes a
-// key and the English fallback, exactly like the catalog does.
-export function timeAgo(iso: string, t: (key: string, fallback: string) => string): string {
+// key and the English fallback, exactly like the catalog does. `locale` formats
+// that absolute fallback — without it the relative times localise on /vi/blog
+// while the dates past 30 days stay English.
+export function timeAgo(
+  iso: string,
+  t: (key: string, fallback: string) => string,
+  locale = 'en-US',
+): string {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
   function interp(tpl: string, n: number) { return tpl.replace('{n}', String(n)); }
   if (diff < 60) return t('timeJustNow', 'just now');
   if (diff < 3600) { const m = Math.floor(diff / 60); return interp(t(m !== 1 ? 'timeMinutes' : 'timeMinute', `${m} minute${m !== 1 ? 's' : ''} ago`), m); }
   if (diff < 86400) { const h = Math.floor(diff / 3600); return interp(t(h !== 1 ? 'timeHours' : 'timeHour', `${h} hour${h !== 1 ? 's' : ''} ago`), h); }
   if (diff < 2592000) { const d = Math.floor(diff / 86400); return interp(t(d !== 1 ? 'timeDays' : 'timeDay', `${d} day${d !== 1 ? 's' : ''} ago`), d); }
-  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  return new Date(iso).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 // Escape before any comment text reaches innerHTML. Comment bodies are

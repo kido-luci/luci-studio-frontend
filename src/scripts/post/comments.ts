@@ -354,7 +354,7 @@ export function initComments() {
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.3rem;">
             <span style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:${isReply ? '0.875rem' : '0.9rem'};font-weight:700;letter-spacing:-0.01em;color:var(--bp-ink);">${escapeHtml(c.user.name ?? '')}</span>
-            <span style="font-family:var(--bp-mono);font-size:0.68rem;letter-spacing:0.03em;color:var(--bp-faint);">${timeAgo(c.created_at, _ci18n)}</span>
+            <span style="font-family:var(--bp-mono);font-size:0.68rem;letter-spacing:0.03em;color:var(--bp-faint);">${timeAgo(c.created_at, _ci18n, document.documentElement.lang || 'en-US')}</span>
           </div>
           ${contentHTML}
           <div class="comment-actions" style="display:flex;align-items:center;gap:1rem;">

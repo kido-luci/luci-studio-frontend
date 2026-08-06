@@ -115,6 +115,23 @@ describe('timeAgo', () => {
         expect(at(ago(31 * 86400))).toBe('Jul 6, 2026');
     });
 
+    it('formats that absolute fallback in the given locale', () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(now);
+        const iso = ago(31 * 86400);
+        // The /vi/blog routes render <html lang="vi">, which is what the caller
+        // passes through — without it the date stayed English there.
+        expect(timeAgo(iso, en, 'vi')).not.toBe(timeAgo(iso, en, 'en-US'));
+        expect(timeAgo(iso, en, 'vi')).toMatch(/2026/);
+    });
+
+    it('defaults to en-US when no locale is given', () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(now);
+        const iso = ago(31 * 86400);
+        expect(timeAgo(iso, en)).toBe(timeAgo(iso, en, 'en-US'));
+    });
+
     it('interpolates {n} when the catalog uses a placeholder', () => {
         vi.useFakeTimers();
         vi.setSystemTime(now);
