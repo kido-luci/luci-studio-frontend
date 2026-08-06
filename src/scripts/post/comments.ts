@@ -5,6 +5,8 @@
 // article chrome and the engagement counters (now postChrome.ts and
 // postEngagement.ts).
 import { showConfirm } from './confirmDialog';
+import { escapeHtml, parseJWT, renderCommentText, timeAgo } from './commentFormat';
+import type { JwtPayload } from './commentFormat';
 
 // Twemoji is loaded from a CDN <script> in PostDetailPage.astro, so it may be
 // absent (blocked, offline, still loading) — every call site guards on it.
@@ -16,18 +18,6 @@ declare global {
     };
     clipboardData?: DataTransfer;
   }
-}
-
-// Claims of the commenter JWT the Google OAuth callback hands back, as read by
-// parseJWT. `role` and `exp` gate validity; the rest populate the composer's
-// avatar and the ownership check on each comment.
-interface JwtPayload {
-  sub?: string;
-  name?: string;
-  email?: string;
-  avatar?: string;
-  role?: string;
-  exp: number;
 }
 
 // A comment (or reply) as returned by the comments API and rendered here.
@@ -75,15 +65,6 @@ export function initComments() {
     function getToken() { return localStorage.getItem(TOKEN_KEY); }
     function setToken(t: string) { localStorage.setItem(TOKEN_KEY, t); }
     function clearToken() { localStorage.removeItem(TOKEN_KEY); }
-
-    function parseJWT(token: string | null): JwtPayload | null {
-      try {
-        const base64 = (token ?? '').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        // atob gives Latin-1 bytes; decode as UTF-8 to handle Vietnamese and other multi-byte chars
-        const bytes = atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('');
-        return JSON.parse(decodeURIComponent(bytes));
-      } catch { return null; }
-    }
 
     function isTokenValid(token: string | null) {
       if (!token) return false;
@@ -262,33 +243,7 @@ export function initComments() {
     });
 
     // --- Relative time ---
-    function timeAgo(iso: string) {
-      const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-      function interp(tpl: string, n: number) { return tpl.replace('{n}', String(n)); }
-      if (diff < 60) return _ci18n('timeJustNow', 'just now');
-      if (diff < 3600) { const m = Math.floor(diff / 60); return interp(_ci18n(m !== 1 ? 'timeMinutes' : 'timeMinute', `${m} minute${m !== 1 ? 's' : ''} ago`), m); }
-      if (diff < 86400) { const h = Math.floor(diff / 3600); return interp(_ci18n(h !== 1 ? 'timeHours' : 'timeHour', `${h} hour${h !== 1 ? 's' : ''} ago`), h); }
-      if (diff < 2592000) { const d = Math.floor(diff / 86400); return interp(_ci18n(d !== 1 ? 'timeDays' : 'timeDay', `${d} day${d !== 1 ? 's' : ''} ago`), d); }
-      return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    }
-
     // --- Render comment text with simple markdown ---
-    function escapeHtml(str: string) {
-      return String(str ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function renderCommentText(text: string) {
-      return escapeHtml(text)
-        .replace(/\*\*(.+?)\*\*/gs, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/gs, '<em>$1</em>')
-        .replace(/__(.+?)__/gs, '<u>$1</u>');
-    }
-
     // --- Apply Twemoji to a DOM element ---
     function applyTwemoji(el: HTMLElement) {
       if (!window.twemoji) return;
@@ -399,7 +354,7 @@ export function initComments() {
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.3rem;">
             <span style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:${isReply ? '0.875rem' : '0.9rem'};font-weight:700;letter-spacing:-0.01em;color:var(--bp-ink);">${escapeHtml(c.user.name ?? '')}</span>
-            <span style="font-family:var(--bp-mono);font-size:0.68rem;letter-spacing:0.03em;color:var(--bp-faint);">${timeAgo(c.created_at)}</span>
+            <span style="font-family:var(--bp-mono);font-size:0.68rem;letter-spacing:0.03em;color:var(--bp-faint);">${timeAgo(c.created_at, _ci18n)}</span>
           </div>
           ${contentHTML}
           <div class="comment-actions" style="display:flex;align-items:center;gap:1rem;">
