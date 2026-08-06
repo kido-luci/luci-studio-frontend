@@ -456,13 +456,16 @@ const structuredData = [articleSchema, breadcrumbSchema];
   });
 </script>
 
-<!-- Post behaviour. Bundled modules (not /public scripts), so they are
-     type-checked and content-hashed; both still run after parsing, and the
-     engagement module keeps running first because the picker binds to the
-     composer it renders. -->
+<!-- Post behaviour, one module per feature (src/scripts/post/). Bundled, so they
+     are type-checked and content-hashed. Order matters at the end: the emoji
+     picker binds to the composer the comment module renders. -->
 <script>
-  import { initPostEngagement } from "../../scripts/post/postEngagementComments";
+  import { initPostChrome } from "../../scripts/post/postChrome";
+  import { initPostEngagement } from "../../scripts/post/postEngagement";
+  import { initComments } from "../../scripts/post/comments";
   import { initEmojiPicker } from "../../scripts/post/emojiPicker";
+  initPostChrome();
   initPostEngagement();
+  initComments();
   initEmojiPicker();
 </script>
