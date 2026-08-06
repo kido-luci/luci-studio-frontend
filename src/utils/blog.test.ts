@@ -7,7 +7,6 @@ import {
     shortId,
     buildPostSlug,
     formatMarkdown,
-    isAffiliateUrl
 } from './blog';
 
 describe('Blog Utils', () => {
@@ -147,45 +146,11 @@ describe('Blog Utils', () => {
             expect(formatMarkdown(input)).toBe('<p>Check this: &lt;script&gt;alert(&quot;hack&quot;)&lt;/script&gt;</p>');
         });
 
-        it('renders the AFFILIATE disclosure callout', () => {
-            const html = formatMarkdown('> [!AFFILIATE]\n> Sponsored links.');
-            expect(html).toContain('border-left:4px solid #0ea5e9');
-            expect(html).toContain('background:rgba(14,165,233,0.08)');
-            expect(html).toContain('Sponsored links.');
-        });
-
-        it('keeps non-affiliate links as rel="noopener noreferrer" by default', () => {
-            // AFFILIATE_DOMAINS is empty by default → no link is sponsored yet.
-            expect(formatMarkdown('[buy](https://example.com)')).toContain('rel="noopener noreferrer"');
-            expect(formatMarkdown('[buy](https://example.com)')).not.toContain('sponsored');
-        });
-
-        it('marks tracked affiliate redirect links as sponsored', () => {
-            const html = formatMarkdown('[buy](https://api.luci-studio.com/affiliate-links/abc123/go)');
-            expect(html).toContain('rel="sponsored nofollow noopener noreferrer"');
+        it('gives every outbound link the safety rel pair', () => {
+            const html = formatMarkdown('[buy](https://example.com)');
+            expect(html).toContain('rel="noopener noreferrer"');
+            expect(html).not.toContain('sponsored');
         });
     });
 
-    describe('isAffiliateUrl', () => {
-        it('matches an exact affiliate host', () => {
-            expect(isAffiliateUrl('https://amzn.to/abc', ['amzn.to'])).toBe(true);
-        });
-
-        it('matches subdomains of an affiliate host', () => {
-            expect(isAffiliateUrl('https://www.amazon.com/dp/x', ['amazon.com'])).toBe(true);
-        });
-
-        it('does not match unrelated hosts', () => {
-            expect(isAffiliateUrl('https://luci-studio.com/blog', ['amzn.to'])).toBe(false);
-        });
-
-        it('returns false for an empty domain list', () => {
-            expect(isAffiliateUrl('https://amzn.to/abc', [])).toBe(false);
-        });
-
-        it('returns false for relative/anchor hrefs', () => {
-            expect(isAffiliateUrl('/blog/post', ['amzn.to'])).toBe(false);
-            expect(isAffiliateUrl('#section', ['amzn.to'])).toBe(false);
-        });
-    });
 });
