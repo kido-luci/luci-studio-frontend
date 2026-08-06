@@ -46,17 +46,21 @@ export function initPostEngagement() {
     // Increment view once per session
     const sessionKey = `viewed_${postId}`;
     if (!sessionStorage.getItem(sessionKey)) {
+      // Guard BEFORE posting so a reload while the request is in flight can't
+      // fire a second view POST and over-count one reader; release the guard if
+      // the POST actually fails. Same order (and reason) as the gallery view
+      // POST in scripts/homeReveals.ts.
+      sessionStorage.setItem(sessionKey, '1');
       fetch(`${apiUrl}/posts/${postId}/view`, { method: 'POST', cache: 'no-store' })
         .then(r => r.ok ? r.json() : Promise.reject(new Error(`view ${r.status}`)))
         .then((d: EngagementCounts) => {
           if (d && d.views != null) {
             document.querySelectorAll('#view-count').forEach(el => { el.textContent = String(d.views); });
           }
-          sessionStorage.setItem(sessionKey, '1');
           try { localStorage.removeItem('postStatsCache.v1'); } catch {}
           refreshEngagementCounts();
         })
-        .catch(() => { refreshEngagementCounts(); });
+        .catch(() => { sessionStorage.removeItem(sessionKey); refreshEngagementCounts(); });
     } else {
       refreshEngagementCounts();
     }
