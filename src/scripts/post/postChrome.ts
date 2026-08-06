@@ -83,7 +83,15 @@ export function initPostChrome() {
     const id = main instanceof HTMLElement ? main.dataset.postId : undefined;
     if (!btn || !id) return;
     const KEY = 'luci_saved_posts';
-    const read = (): string[] => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+    // The try/catch only covers parsing — a stored value of the wrong shape
+    // (an older build, another script, a hand-edited entry) would parse fine and
+    // then throw on .includes(), taking the whole bookmark button down.
+    const read = (): string[] => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(KEY) || '[]');
+        return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
+      } catch { return []; }
+    };
     const sync = () => btn.classList.toggle('is-saved', read().includes(id));
     sync();
     btn.addEventListener('click', () => {
