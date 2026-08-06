@@ -166,6 +166,11 @@ export function initEmojiPicker() {
     let el: HTMLElement | null = savedRange
       ? editableHostOf(savedRange.commonAncestorContainer)
       : null;
+    // A saved range can outlive the composer it points into: reply forms are
+    // removed from the DOM on cancel and after submit, and savedRange is only
+    // cleared on a successful insert. Inserting into that detached subtree would
+    // silently swallow the emoji, so drop the stale range and use the main input.
+    if (el && !el.isConnected) { savedRange = null; el = null; }
     if (!el) el = document.getElementById('comment-input');
     if (!el) return;
 
