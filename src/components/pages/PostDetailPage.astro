@@ -3,7 +3,6 @@ import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import PostCard from "../PostCard.astro";
 import SiteFooter from "../SiteFooter.astro";
-import AdSlot from "../AdSlot.astro";
 import SupportDialog from "../post/SupportDialog.astro";
 import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown, needsVietnameseSerif } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, localized } from '../../i18n';
@@ -232,15 +231,11 @@ const structuredData = [articleSchema, breadcrumbSchema];
         <div class="bd-rule"></div>
       </header>
 
-      <AdSlot placement="post-top" />
-
       <!-- Content -->
       <article class="prose-custom markdown-content" set:html={htmlContent}>
       </article>
 
       </div><!-- /.bd-sheet -->
-
-      <AdSlot placement="post-bottom" />
 
       <!-- Like + Support card -->
       <div class="support-card mt-24 rounded-3xl border border-white/10 bg-white/[0.02] px-6 py-12 md:px-12 flex flex-col items-center text-center gap-4">

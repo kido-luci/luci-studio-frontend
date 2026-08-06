@@ -8,7 +8,6 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SiteFooter from "../SiteFooter.astro";
-import AdSlot from "../AdSlot.astro";
 import { getLocaleFromUrl } from "../../i18n";
 import HomeCapabilities from "../home/HomeCapabilities.astro";
 import HomeDirectory from "../home/HomeDirectory.astro";
@@ -100,10 +99,6 @@ const homepageSchema = {
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
     <HomeStudio />
-
-    <div class="bp-wrap">
-      <AdSlot placement="home" />
-    </div>
 
     <SiteFooter locale={locale} />
   </main>
