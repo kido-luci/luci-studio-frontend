@@ -61,12 +61,17 @@ export function initPostChrome() {
   // Handle share functionality
   function setupShare() {
     const doShare = () => {
+      // navigator.share rejects with AbortError when the sheet is dismissed —
+      // an ordinary outcome, not an error worth surfacing.
       if (navigator.share) {
-        navigator.share({ title: document.title, url: window.location.href });
-      } else {
-        navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+        navigator.share({ title: document.title, url: window.location.href }).catch(() => {});
+        return;
       }
+      // navigator.clipboard is undefined outside a secure context (plain HTTP,
+      // older WebViews), so only claim the copy worked once it actually has.
+      navigator.clipboard?.writeText(window.location.href)
+        .then(() => alert('Link copied to clipboard!'))
+        .catch(() => {});
     };
     document.querySelectorAll('[data-share-trigger]').forEach(btn => btn.addEventListener('click', doShare));
   }
