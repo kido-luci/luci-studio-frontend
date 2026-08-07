@@ -8,21 +8,31 @@
 # and frame-ancestors/base-uri/object-src close common pivots.
 #
 # The script/connect allowlist is kept tight: only jsDelivr + cdnjs (GSAP,
-# Prism, Twemoji) plus Google Fonts, the API origin, and the Sentry ingest
-# endpoint. The Sentry entry is the project's exact ingest origin rather than
-# a *.ingest.us.sentry.io wildcard, so a compromised script cannot exfiltrate
-# to an unrelated Sentry tenant. It is required because sentry.client.config.js
-# initialises with PUBLIC_SENTRY_DSN in prod; without it every error envelope
-# POST is refused by CSP and client-side monitoring silently reports nothing.
-# Stale entries —
-# cdn.tailwindcss.com (now build-time PostCSS), the Google ad domains (no ads),
-# the origin-locked *.fly.dev, the unused ad frame-src, and the three public
-# feeds the retired ANNEX D live-telemetry strip polled (ISS position, USGS
-# quakes, Frankfurter FX) — were removed: they served no live resource and only
-# widened the attack surface.
+# Prism, Twemoji), Google Fonts, the API origin, and the two telemetry
+# integrations below. Stale entries — cdn.tailwindcss.com (now build-time
+# PostCSS), the Google ad domains (no ads), the origin-locked *.fly.dev, the
+# unused ad frame-src, and the three public feeds the retired ANNEX D
+# live-telemetry strip polled (ISS position, USGS quakes, Frankfurter FX) —
+# were removed: they served no live resource and only widened the attack
+# surface.
+#
+# Sentry (connect-src): sentry.client.config.js initialises with
+# PUBLIC_SENTRY_DSN in prod, so error envelopes POST to the ingest endpoint.
+# Without this entry every send is refused and client-side monitoring silently
+# reports nothing. Pinned to the project's exact ingest origin rather than a
+# *.ingest.us.sentry.io wildcard, so a compromised script cannot exfiltrate to
+# an unrelated Sentry tenant.
+#
+# Cloudflare Web Analytics (script-src + connect-src): the beacon is injected
+# at the edge by Web Analytics "automatic setup" — there is no reference to it
+# anywhere in this repo, so grep will not explain these two entries. It needs
+# BOTH: the script loads from static.cloudflareinsights.com, then POSTs its
+# measurements to a DIFFERENT host, cloudflareinsights.com/cdn-cgi/rum. The
+# privacy policy discloses this analytics; if the edge setting is ever turned
+# off, drop these entries and that disclosure together.
 
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://api.luci-studio.com https://o4509530171113472.ingest.us.sentry.io; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://api.luci-studio.com https://o4509530171113472.ingest.us.sentry.io https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   X-Content-Type-Options: nosniff
