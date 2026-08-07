@@ -1,6 +1,7 @@
 ---
-// Thin route wrapper — shared body lives in PrivacyPage so /privacy (en) and
-// /vi/privacy render the same component, which reads the locale from the URL.
+// Thin route wrapper — the body lives in PrivacyPage so page logic stays out of
+// the route file. English-only: only /blog is mirrored under /vi (see
+// isBilingualPath in src/i18n).
 import PrivacyPage from "../components/pages/PrivacyPage.astro";
 ---
 <PrivacyPage />

@@ -6,6 +6,7 @@
 // (--bp-acc/--bp-ink/--bp-muted/--bp-faint/--bp-hair/--bp-line2, --accent-ink)
 // already being in scope — every page in the blueprint rollout defines them.
 import FooterLinks from "./FooterLinks.astro";
+import SubscribeForm from "./SubscribeForm.astro";
 import { profileService } from "../services/profile";
 import { localizedHref, type Locale } from "../i18n";
 
@@ -109,6 +110,7 @@ const makeLinks = [
         <a href={l.url} target="_blank" rel="noopener" class="bp-footer-link">{l.label}</a>
       ))}
     </div>
+    <SubscribeForm />
   </div>
   <div class="bp-wrap bp-footer-base">
     <span class="bp-mono bp-footer-copy">{profile?.copyright ?? "© 2026 LUCI STUDIO — ALL RIGHTS RESERVED"}</span>

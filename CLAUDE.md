@@ -85,17 +85,17 @@ from the URL. Put page logic in the body component, never in the route file.
 |-----------|-------|
 | `pages/` | Route wrappers only — see above |
 | `components/pages/` | One body component per route (`HomePage`, `BlogIndexPage`, `PostDetailPage`, …) |
-| `components/home/` | The homepage's own sections (`HomeArt`, `HomeWork`, `HomeBlogRail`, …) |
+| `components/home/` | The homepage's own sections (`HomeHero`, `HomeArt`, `HomeWork`, `HomeBlogRail`, …) — `HomePage.astro` is a shell that composes them |
 | `components/post/` | Widgets belonging to the post page (`SupportDialog`) |
 | `components/` (root) | Cross-page components (`TopNav`, `PostCard`, `SeriesCard`, `SiteFooter`, …) |
 | `services/` | One module per backend resource; pages never `fetch()` directly |
 | `lib/apiClient.ts` | The shared fetch layer every service is built on |
 | `utils/` | Pure transforms (markdown, series aggregation, stats, path building) |
-| `scripts/` | Client-side behaviour, one module per feature; `scripts/layout/` is the site chrome |
+| `scripts/` | Client-side behaviour, one module per feature; `scripts/layout/` is the site chrome and `scripts/post/` is the post page. **All client JS lives here** — nothing ships from `public/` |
 | `i18n/` | Locale detection, the English string catalog, and the translation overlay |
 | `data/` | Hardcoded content (games, tools, videos) that has no backend entity |
 | `config/` | Feature flags |
-| `styles/` | `global.css` (Tailwind directives + shared blueprint tokens) and `lab-cards.css` |
+| `styles/` | `global.css` (Tailwind directives + shared blueprint tokens), `lab-cards.css`, and `post-content.css` |
 
 **Data flow**:
 - `src/lib/apiClient.ts` — the shared fetch layer: strips the trailing slash off `PUBLIC_API_URL`, dedupes concurrent build-time callers into one round-trip, and decides via `FAIL_FAST` whether a broken backend fails the prod build or resolves empty (`ALLOW_EMPTY_POSTS=1` opts out locally)
@@ -105,15 +105,16 @@ from the URL. Put page logic in the body component, never in the route file.
 
 **Styling**:
 - Tailwind CSS is compiled at build time via PostCSS (`tailwind.config.cjs`, `postcss.config.cjs`); the `@tailwind` directives live in `src/styles/global.css`, imported once in `src/layouts/Layout.astro`. Custom animations/keyframes are defined in `tailwind.config.cjs`. (Previously loaded via the `cdn.tailwindcss.com` runtime JIT — replaced to remove the render-blocking script.)
-- Global CSS lives in three deliberate places, not one: `Layout.astro`'s `<style is:global>` (~390 lines — site chrome, theme tokens, accent schemes), `src/styles/global.css` (Tailwind directives + the shared `bp-` blueprint tokens and section-header atoms, already de-duplicated out of ~17 components), and `src/styles/lab-cards.css` (the RepoCard palette, imported by `/lab` and `/games`). Per-page tokens stay in the component that owns them — do not hoist them
+- Global CSS lives in four deliberate places, not one: `Layout.astro`'s `<style is:global>` (~390 lines — site chrome, theme tokens, accent schemes), `src/styles/global.css` (Tailwind directives + the shared `bp-` blueprint tokens and section-header atoms, already de-duplicated out of ~17 components), `src/styles/lab-cards.css` (the RepoCard palette, imported by `/lab` and `/games`), and `src/styles/post-content.css` (the post page's prose, Prism tokens, engagement bar and comment thread, imported by `PostDetailPage.astro` alone). Per-page tokens stay in the component that owns them — do not hoist them
 - Everything else is component-scoped `<style>`. Note that a few base rules use the `background` **shorthand**, which resets `background-image`; a shared global class cannot override them without `!important`, so small per-component duplicates (e.g. the 45° hatch fill) are left alone on purpose
 - Theme system (light default / dark toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
 
-**Background**: none. Each page draws its own "blueprint" drafting-grid background in its component CSS. A 2D `<canvas>` particle field used to run site-wide (the drifting `-`/`o` shapes) but was **retired** in v1.45.0 — `particles.ts` / `canvasBackground.ts` and the `#canvas-bg` / `#bg-dimmer` elements are gone; `navDimmer.ts` now only styles the nav on scroll (glass bg + hide-on-scroll). (Also removed earlier: Vanta/p5.js — only a stale `--vanta-bg` CSS var name remains.) One exception: the homepage hero band is a **three.js ocean scene** (`src/scripts/oceanHero.ts` — sky window offset right, shadow-raymarched god rays via `three-good-godrays`, Quaternius CC0 fish; three pinned at 0.179.1 for the postprocessing/godrays peer range; code-split dynamic import on `/` only; ~30fps idle cap, offscreen/hidden pause). Armed by a cheap head probe (`html.ocean-on`); skipped via `localStorage oceanHero="off"`; reduced-motion renders one static frame; no WebGL2 (or GL death) falls back to the CSS constellation corner + hero ring diagram. It replaced the earlier `bpGlow.ts` ambient glow + tsParticles constellation trial.
+**Background**: none. Each page draws its own "blueprint" drafting-grid background in its component CSS. A 2D `<canvas>` particle field used to run site-wide (the drifting `-`/`o` shapes) but was **retired** in v1.45.0 — `particles.ts` / `canvasBackground.ts` and the `#canvas-bg` / `#bg-dimmer` elements are gone; `navDimmer.ts` now only styles the nav on scroll (glass bg + hide-on-scroll). (Also removed earlier: Vanta/p5.js — only a stale `--vanta-bg` CSS var name remains.) One exception: the homepage hero band is a **three.js ocean scene** (`src/scripts/oceanHero.ts` — sky window offset right, shadow-raymarched god rays via `three-good-godrays`, Quaternius CC0 fish; three pinned at 0.179.1 for the postprocessing/godrays peer range; code-split dynamic import on `/` only, loaded from `components/home/HomeHero.astro`, which owns the whole hero band; ~30fps idle cap, offscreen/hidden pause). Armed by a cheap head probe (`html.ocean-on`); skipped via `localStorage oceanHero="off"`; reduced-motion renders one static frame; no WebGL2 (or GL death) falls back to the CSS constellation corner + hero ring diagram. It replaced the earlier `bpGlow.ts` ambient glow + tsParticles constellation trial.
 
 **Third-party libraries** (via CDN):
 - GSAP + ScrollTrigger + SplitText (jsDelivr, in `Layout.astro`) — scroll reveals, hero/section text animations
-- Prism.js (cdnjs, in `components/pages/PostDetailPage.astro` only) — code syntax highlighting (Dart, Go, JS, TS). Its token CSS and the `.markdown-content` prose styles live in that component's `<style is:global>` and are used by nothing else
+- Prism.js (cdnjs, in `components/pages/PostDetailPage.astro` only) — code syntax highlighting (Dart, Go, JS, TS). Its token CSS and the `.markdown-content` prose styles live in `src/styles/post-content.css` and are used by nothing else
+- Twemoji (jsDelivr, in `components/pages/PostDetailPage.astro` only) — emoji in comments. Loaded from the body while the post modules are hoisted into `<head>`, so `window.twemoji` may be undefined at module-init time; every use is inside an event handler or runs after the comments fetch, and each one guards on it
 
 **Windows performance mode** (`win-perf-mode`): runtime Windows detection disables backdrop-filter, 3D transforms, and heavy animations. A parallel `max-width: 768px` rule drops backdrop-filter on fixed elements (nav, mobile menu) to cut mobile scroll jank.
 
@@ -129,6 +130,8 @@ from the URL. Put page logic in the body component, never in the route file.
 | `src/i18n/index.ts` | Locale detection, `t()`, `localizedHref`, and the `translations` overlay |
 | `src/scripts/blogIndex.ts` | `/blog` behaviour — filtering, search, pagination, topic-chip clamp |
 | `src/scripts/postLikes.ts` | The one like-button implementation, shared by `/blog` and the home rail |
+| `src/scripts/post/` | The post page, one module per feature: `postChrome` (copy/share/bookmark/theme icon), `postEngagement` (views + likes), `comments` (thread, Google auth, reactions, replies), `commentFormat` (its pure, tested helpers), `confirmDialog`, `emojiPicker` |
+| `src/components/home/HomeHero.astro` | Homepage hero band — ocean scene, constellation and hero header, with the CSS for all three |
 | `astro.config.mjs` | Static output + Cloudflare adapter |
 | `tailwind.config.cjs` / `postcss.config.cjs` | Build-time Tailwind config (content globs, custom animations) + PostCSS pipeline |
 | `src/styles/global.css` | `@tailwind` directives, imported in `Layout.astro` |

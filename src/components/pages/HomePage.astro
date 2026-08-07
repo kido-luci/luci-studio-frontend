@@ -8,7 +8,6 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SiteFooter from "../SiteFooter.astro";
-import AdSlot from "../AdSlot.astro";
 import { getLocaleFromUrl } from "../../i18n";
 import HomeCapabilities from "../home/HomeCapabilities.astro";
 import HomeDirectory from "../home/HomeDirectory.astro";
@@ -19,40 +18,10 @@ import HomeWork from "../home/HomeWork.astro";
 import HomeArt from "../home/HomeArt.astro";
 import HomeGamesRail from "../home/HomeGamesRail.astro";
 import HomeBlogRail from "../home/HomeBlogRail.astro";
+import HomeHero from "../home/HomeHero.astro";
 
 const locale = getLocaleFromUrl(Astro.url);
 const API_URL = import.meta.env.PUBLIC_API_URL || "";
-
-// Blueprint constellation: a field of twinkling points biased toward the
-// top-right corner (under the lamp glow). Positions are generated at BUILD time
-// with a fixed-seed PRNG so the layout is deterministic across rebuilds (no
-// per-build drift, no runtime JS). The linked "nodes" are curated in the template
-// SVG; these are the loose surrounding stars.
-const bpRand = (() => {
-  let s = 1337 >>> 0;
-  return () => {
-    s = (s + 0x6d2b79f5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-})();
-const bpStars = Array.from({ length: 40 }, () => {
-  const rx = Math.pow(bpRand(), 0.6); // 0 = hugging the right edge
-  const ry = Math.pow(bpRand(), 0.6); // 0 = hugging the top edge
-  const da = bpRand() * 6.283, dd = 6 + bpRand() * 10; // drift heading + 6–16px radius
-  return {
-    right: +(rx * 97).toFixed(1),
-    top: +(ry * 95).toFixed(1),
-    size: +(1 + bpRand() * 1.8).toFixed(1),
-    dur: +(2.6 + bpRand() * 2.8).toFixed(2),
-    dl: +(-bpRand() * 5).toFixed(2),
-    dx: +(Math.cos(da) * dd).toFixed(1), // drift vector (px), used by bp-star-drift
-    dy: +(Math.sin(da) * dd).toFixed(1),
-    ddur: +(9 + bpRand() * 8).toFixed(2), // 9–17s slow float, independent of the twinkle
-    ddl: +(-bpRand() * 17).toFixed(2), // negative offset desyncs each star's drift
-  };
-});
 
 const SITE_URL = "https://luci-studio.com";
 const homepageSchema = {
@@ -94,116 +63,7 @@ const homepageSchema = {
   <main class="bp" data-api-url={API_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
 
-    <!-- Ocean hero band (html.ocean-on only): the three.js underwater scene —
-         sky window offset right, shadowed god rays, fish school. Sits AFTER
-         .bp-grid at the same z-index so the water paints over the grid within
-         the band; a CSS mask dissolves its bottom edge back into the drafting
-         sheet. Scene module: src/scripts/oceanHero.ts (loader at file end). -->
-    <div class="bp-ocean" aria-hidden="true"><canvas></canvas></div>
-
-    <!-- Blueprint constellation: a twinkling point-field in the top-right corner
-         with a few larger nodes linked by hairlines — a schematic star chart, on
-         theme for the drafting sheet. Anchored at top:0/right:0 so it sits behind
-         the translucent fixed nav; a radial mask fades it out toward centre so it
-         never crowds the hero copy. Points are baked at build time (fixed-seed PRNG
-         in the frontmatter); twinkle is pure CSS (staggered delays, no JS/rAF).
-         Gated for reduced-motion, win-perf-mode and mobile (see CSS). -->
-    <div class="bp-constellation" aria-hidden="true">
-      <svg class="bp-cst-lines" viewBox="0 0 440 300" preserveAspectRatio="none" fill="none">
-        <g class="bp-cst-edges">
-          <line x1="424" y1="24" x2="360" y2="60" />
-          <line x1="424" y1="24" x2="300" y2="40" />
-          <line x1="360" y1="60" x2="410" y2="108" />
-          <line x1="360" y1="60" x2="330" y2="128" />
-          <line x1="300" y1="40" x2="250" y2="90" />
-          <line x1="410" y1="108" x2="382" y2="172" />
-          <line x1="330" y1="128" x2="250" y2="90" />
-          <line x1="330" y1="128" x2="382" y2="172" />
-          <line x1="250" y1="90" x2="210" y2="150" />
-          <line x1="382" y1="172" x2="296" y2="210" />
-          <line x1="330" y1="128" x2="296" y2="210" />
-        </g>
-        <g class="bp-cst-nodes">
-          <circle cx="424" cy="24" r="2.8" style="--dur:3.8s;--dl:-0.2s" />
-          <circle cx="360" cy="60" r="3" style="--dur:4.4s;--dl:-1.4s" />
-          <circle cx="410" cy="108" r="2.4" style="--dur:4s;--dl:-2.6s" />
-          <circle cx="300" cy="40" r="2.6" style="--dur:3.4s;--dl:-0.9s" />
-          <circle cx="330" cy="128" r="2.6" style="--dur:4.6s;--dl:-3.1s" />
-          <circle cx="250" cy="90" r="2.2" style="--dur:3.6s;--dl:-1.9s" />
-          <circle cx="382" cy="172" r="2.4" style="--dur:4.2s;--dl:-2.2s" />
-          <circle cx="210" cy="150" r="2" style="--dur:5s;--dl:-0.5s" />
-          <circle cx="296" cy="210" r="2.2" style="--dur:4s;--dl:-3.6s" />
-        </g>
-      </svg>
-      {
-        bpStars.map((s) => (
-          <span
-            class="bp-star"
-            style={`right:${s.right}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;--dur:${s.dur}s;--dl:${s.dl}s;--dx:${s.dx}px;--dy:${s.dy}px;--ddur:${s.ddur}s;--ddl:${s.ddl}s`}
-          />
-        ))
-      }
-    </div>
-
-    <!-- ===================== HERO ===================== -->
-    <header class="bp-wrap bp-hero">
-      <div class="bp-hero-left">
-        <div class="bp-coord" data-reveal>
-          <span class="bp-coord-dot" aria-hidden="true"></span>
-          <span class="bp-mono">N 10°49′ · CREATIVE ENGINEERING STUDIO</span>
-        </div>
-
-        <h1 class="bp-display bp-hero-title" data-word-reveal>
-          <span class="reveal-word"><span>LUCI</span></span>
-          <span class="reveal-word"><span>STUDIO<em class="bp-acc-dot">.</em></span></span>
-        </h1>
-
-        <div class="bp-hero-note bp-mono" data-reveal aria-hidden="true">
-          <span class="bp-dim-tick"></span>
-          <span class="bp-dim-txt">Δ 1440 × 8-COL BASELINE GRID · REV 1.0</span>
-          <span class="bp-dim-rule"></span>
-          <span class="bp-dim-tick"></span>
-        </div>
-
-        <p class="bp-tagline" data-reveal>
-          A creative engineering studio — we craft <span class="bp-u">cross-platform apps</span>, <span class="bp-u">browser tools &amp; games</span>, <span class="bp-u">technical writing</span>, and <span class="bp-u bp-u--o">digital art</span>, turning hard problems into shipped products.
-        </p>
-
-        <div class="bp-hero-cta" data-reveal>
-          <a href="#work" class="bp-btn bp-btn--solid">View work</a>
-          <a href="#art" class="bp-btn bp-btn--ghost">See art →</a>
-        </div>
-      </div>
-
-      <div class="bp-hero-right" data-reveal="scale" aria-hidden="true">
-        <div class="bp-diagram">
-          <svg class="bp-hero-svg" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg">
-            <g fill="none" stroke="currentColor">
-              <circle cx="210" cy="210" r="200" stroke-opacity="0.10"></circle>
-              <circle cx="210" cy="210" r="150" stroke-opacity="0.16"></circle>
-              <circle cx="210" cy="210" r="96" class="bp-svg-acc" stroke-width="2.5" stroke-opacity="0.8"></circle>
-              <line x1="8" y1="210" x2="412" y2="210" stroke-opacity="0.10"></line>
-              <line x1="210" y1="8" x2="210" y2="412" stroke-opacity="0.10"></line>
-              <line x1="68" y1="68" x2="352" y2="352" stroke-opacity="0.06"></line>
-              <line x1="352" y1="68" x2="68" y2="352" stroke-opacity="0.06"></line>
-              <circle cx="210" cy="210" r="200" class="bp-svg-acc bp-svg-spin" stroke-opacity="0.5" stroke-dasharray="2 9"></circle>
-              <rect x="280" y="256" width="12" height="12" stroke-opacity="0.22"></rect>
-            </g>
-            <circle cx="210" cy="210" r="6" class="bp-svg-ping"></circle>
-            <circle cx="210" cy="210" r="5" class="bp-svg-orange-fill"></circle>
-            <g class="bp-orbit bp-orbit--a"><circle cx="306" cy="114" r="4" class="bp-svg-acc-fill"></circle></g>
-            <g class="bp-orbit bp-orbit--b"><circle cx="138" cy="300" r="3" class="bp-svg-orange-fill"></circle></g>
-          </svg>
-          <span class="bp-mono bp-diagram-ann bp-diagram-ann--tr">R = 96px<br />◦ node.02</span>
-          <span class="bp-mono bp-diagram-ann bp-diagram-ann--bl">Ø 400<br />tol ±0.5</span>
-        </div>
-      </div>
-
-      <a href="#directory" class="bp-scroll bp-mono" aria-label="Scroll down">
-        <span>SCROLL</span>
-        <svg class="bp-scroll-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-      </a>
-    </header>
+    <HomeHero />
 
     <HomeDirectory />
 
@@ -239,10 +99,6 @@ const homepageSchema = {
     <div class="bp-conn-wrap"><span data-connector class="bp-conn"></span></div>
 
     <HomeStudio />
-
-    <div class="bp-wrap">
-      <AdSlot placement="home" />
-    </div>
 
     <SiteFooter locale={locale} />
   </main>
@@ -341,187 +197,12 @@ const homepageSchema = {
     background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px, auto;
   }
 
-  /* Blueprint constellation — a build-time twinkling point-field that shares the
-     hero's corner accent with the desk-lamp glow, sitting opposite the rotating
-     ring. Point + line coordinates and the star `right:%` offsets are all
-     authored for a top-RIGHT cluster. Base (desktop ≥900px, ring on the right):
-     `transform: scaleX(-1)` mirrors the whole field — mask included — to the
-     top-LEFT (only the anchor flips to `left: 0`; every coordinate below stays
-     as-is). At ≤900px the hero stacks and the ring moves up, so the field drops
-     the flip and returns to its authored top-RIGHT corner (see media query
-     below). z-index below the fixed nav (100) so it runs behind the translucent
-     glass; a radial mask fades it toward the centre so it never crowds the hero
-     copy. Colour tracks the active accent (--bp-acc). CSS-only twinkle (staggered
-     per-element delays, no JS/rAF). */
-  .bp-constellation {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform: scaleX(-1);
-    width: min(460px, 60vw);
-    height: 340px;
-    z-index: 2;
-    pointer-events: none;
-    -webkit-mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
-    mask-image: radial-gradient(ellipse 130% 120% at 100% 0%, #000 32%, transparent 82%);
-  }
-  /* ── Ocean hero band (html.ocean-on) ─────────────────────────────────────
-     The three.js water fills the first viewport behind the hero copy: same
-     z-index as .bp-grid but LATER in the DOM, so the water paints over the
-     grid inside the band while .bp-wrap content (z-index:1) stays on top. A
-     bottom mask dissolves the water back into the drafting sheet, and the
-     whole band is display:none when the scene is off — the constellation +
-     hero ring below are the untouched fallback look. */
-  .bp-ocean {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100dvh;
-    z-index: 0;
-    pointer-events: none;
-    display: none;
-    /* Deep-water base from the FIRST paint (the scene's fog colour): the
-       band must already be dark while three.js idle-loads — the top nav and
-       hero copy are light-ink over this band in BOTH themes. */
-    background: #06121d;
-  }
-  .bp-ocean canvas { width: 100%; height: 100%; display: block; }
-  /* Theme-INDEPENDENT floor (user call 2026-07-24): the scene sinks into the
-     fixed deep-water colour instead of mask-fading into the theme paper —
-     the old transparent mask exposed cream in light mode, a white fog eating
-     the bottom of the scene. The band now ends on its own dark edge against
-     the page, same convention as the other full-bleed dark sheets
-     (.bp-work-band / .bp-cta). */
-  .bp-ocean::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(to bottom, transparent 66%, #06121d 92%);
-  }
-  :global(html.ocean-on) .bp-ocean { display: block; }
-  /* The scene replaces both hero ornaments: the corner constellation and the
-     right-column ring diagram (the sky window + shaft own that side now). The
-     text column takes the full width and the band gets viewport presence. */
-  :global(html.ocean-on) .bp-constellation { display: none; }
-  :global(html.ocean-on) .bp-hero-right { display: none; }
-  :global(html.ocean-on) .bp-hero {
-    grid-template-columns: 1fr;
-    min-height: calc(100dvh - 190px);
-    align-content: center;
-  }
-  /* Phones (user-spotted on device): a 100dvh band left a dead stretch of
-     water UNDER the copy on tall viewports. Fixed composition instead of
-     centring: window at the top, copy anchored to the BOTTOM of a shorter
-     band, and the slack collects in the middle where the shaft + fish live —
-     scene depth instead of trailing void. The next section peeks in under
-     the fold on the theme paper. */
-  @media (max-width: 700px) {
-    .bp-ocean { height: 88dvh; }
-    :global(html.ocean-on) .bp-hero {
-      min-height: calc(88dvh - 150px);
-      align-content: end;
-    }
-  }
-  /* The ocean band is THEME-INDEPENDENT (always the deep-water palette), so
-     the hero copy must stay light-on-dark in BOTH modes: re-point the local
-     blueprint tokens exactly like .bp-work-band does for its dark sheet.
-     --bp-bg only feeds the solid button's text/hover here. */
-  :global(html.ocean-on) .bp-hero {
-    --bp-ink: #eceae3;
-    --bp-muted: rgba(236, 234, 227, 0.72);
-    --bp-faint: rgba(236, 234, 227, 0.5);
-    --bp-bg: #0d1520;
-  }
-  :global(html.ocean-on body.light-mode) .bp-hero .bp-display { filter: none !important; }
-  /* Single-column hero: cap the text column so the dimension rule and
-     tagline stop short of the light shaft instead of slicing across it. */
-  :global(html.ocean-on) .bp-hero-left { max-width: 620px; }
-  .bp-cst-lines {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-  .bp-cst-edges line {
-    stroke: var(--bp-acc);
-    stroke-width: 0.75;
-    opacity: 0.16;
-    animation: bp-line-pulse 6s ease-in-out infinite;
-  }
-  /* Shared twinkle: fade + scale, staggered per element via --dur/--dl. */
-  .bp-cst-nodes circle,
-  .bp-star {
-    fill: var(--bp-acc);
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: bp-twinkle var(--dur, 4s) ease-in-out infinite;
-    animation-delay: var(--dl, 0s);
-    will-change: opacity, transform;
-  }
-  .bp-star {
-    position: absolute;
-    display: block;
-    border-radius: 50%;
-    background: var(--bp-acc);
-    /* Loose "dust" stars (no connecting lines) drift on a slow, independent
-       timeline (individual `translate`) while they twinkle (individual `scale`
-       + opacity) — two separate animations on distinct properties, so they
-       compose AND desync for an organic float. The 9 linked SVG nodes keep the
-       plain in-place twinkle (shared rule above) so their connectors stay put. */
-    animation:
-      bp-star-twinkle var(--dur, 4s) ease-in-out infinite var(--dl, 0s),
-      bp-star-drift var(--ddur, 12s) ease-in-out infinite var(--ddl, 0s);
-    will-change: translate, scale, opacity;
-  }
-  /* Light mode has no corner glow (see --bp-lamp above), so the stars stay the
-     default blueprint blue — blue-on-cream reads fine; no white flip needed. */
-  @keyframes bp-twinkle {
-    0%, 100% { opacity: 0.12; transform: scale(0.6); }
-    50% { opacity: 0.9; transform: scale(1); }
-  }
-  /* Loose-star twinkle via the individual `scale` property (not `transform`), so
-     it composes with the independent `translate` drift below instead of the two
-     fighting over a single `transform`. */
-  @keyframes bp-star-twinkle {
-    0%, 100% { opacity: 0.12; scale: 0.6; }
-    50% { opacity: 0.9; scale: 1; }
-  }
-  /* Slow wander: eased through a few fractions of the per-star drift vector
-     (--dx/--dy) and back, on its own long duration so it never syncs with the
-     twinkle. Individual `translate` composes with the `scale` above. */
-  @keyframes bp-star-drift {
-    0% { translate: 0 0; }
-    25% { translate: var(--dx, 8px) var(--dy, -6px); }
-    50% { translate: calc(var(--dx, 8px) * -0.35) calc(var(--dy, -6px) * 0.8); }
-    75% { translate: calc(var(--dx, 8px) * 0.65) calc(var(--dy, -6px) * -0.45); }
-    100% { translate: 0 0; }
-  }
-  /* Connector lines breathe faintly so the fixed node structure feels alive
-     alongside the drifting dust. */
-  @keyframes bp-line-pulse {
-    0%, 100% { opacity: 0.08; }
-    50% { opacity: 0.22; }
-  }
-  /* Gates: honour reduced-motion and freeze under win-perf-mode (Windows) like
-     the other homepage anims — a static, faint field in each case. */
-  @media (prefers-reduced-motion: reduce) {
-    .bp-cst-nodes circle,
-    .bp-star { animation: none; opacity: 0.5; }
-    .bp-cst-edges line { animation: none; }
-  }
   /* ≤900px the hero stacks and the ring moves up, freeing the top-right corner:
-     shift BOTH accents there — the glow via --bp-lamp-x, and the constellation by
-     dropping its scaleX flip back to the authored top-RIGHT anchor. Constellation
-     now shows on mobile too (was display:none ≤768px). */
+     the desk-lamp glow shifts there via --bp-lamp-x. (The constellation's half
+     of this move lives in HomeHero.astro, which owns that markup.) */
   @media (max-width: 900px) {
     .bp-grid { --bp-lamp-x: 100%; }
-    .bp-constellation { left: auto; right: 0; transform: none; }
   }
-  :global(body.win-perf-mode) .bp-cst-nodes circle,
-  :global(body.win-perf-mode) .bp-star { animation: none; opacity: 0.5; }
-  :global(body.win-perf-mode) .bp-cst-edges line { animation: none; }
 
   /* Reach-into-children form (:global(:where(.bp) .X)): these atoms are used
      both by markup that stays directly in this component (hero, §04 art) and by
@@ -635,106 +316,6 @@ const homepageSchema = {
     white-space: nowrap;
   }
 
-  /* ── underlined tagline phrases ── */
-  .bp-u { border-bottom: 2px solid var(--bp-acc); font-weight: 600; color: var(--bp-ink); }
-  .bp-u--o { border-bottom-color: var(--bp-orange); }
-
-  /* ── HERO ── */
-  .bp-hero {
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 40px;
-    align-items: center;
-    padding-top: clamp(40px, 6vw, 76px);
-    padding-bottom: clamp(40px, 6vw, 64px);
-    position: relative;
-  }
-  .bp-coord { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; font-size: 12px; letter-spacing: 0.14em; color: var(--bp-acc); }
-  .bp-coord-dot { width: 7px; height: 7px; background: var(--bp-orange); flex-shrink: 0; }
-  .bp-hero-title {
-    font-size: clamp(3.2rem, 11vw, 7.5rem);
-    line-height: 0.9;
-    letter-spacing: -0.03em !important;
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 0.28em;
-  }
-  .bp-hero-title .reveal-word { vertical-align: bottom; }
-  .bp-hero-note {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 18px;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    color: var(--bp-faint);
-  }
-  .bp-dim-txt { white-space: nowrap; }
-  .bp-dim-tick { width: 1px; height: 9px; background: var(--bp-faint); flex-shrink: 0; }
-  .bp-dim-rule { flex: 1; height: 1px; background: var(--bp-faint); min-width: 24px; }
-  .bp-tagline {
-    font-family: "Space Grotesk", system-ui, sans-serif;
-    font-size: clamp(1rem, 1.6vw, 1.2rem);
-    line-height: 1.55;
-    color: var(--bp-muted);
-    max-width: 560px;
-    margin: 22px 0 30px;
-  }
-  .bp-hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
-
-  .bp-btn {
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    padding: 13px 24px;
-    border-radius: 8px;
-    text-decoration: none;
-    border: 1.5px solid transparent;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    white-space: nowrap;
-  }
-  .bp-btn--solid { background: var(--bp-ink); color: var(--bp-bg); }
-  .bp-btn--solid:hover { background: var(--bp-acc); color: #fff; }
-  .bp-btn--ghost { border-color: var(--bp-ink); color: var(--bp-ink); }
-  .bp-btn--ghost:hover { background: var(--bp-ink); color: var(--bp-bg); }
-
-  .bp-hero-right { display: flex; justify-content: center; }
-  .bp-diagram { position: relative; width: min(100%, 460px); aspect-ratio: 1; }
-  .bp-hero-svg { width: 100%; height: 100%; color: var(--bp-ink); display: block; }
-  .bp-svg-acc { stroke: var(--bp-acc); }
-  .bp-svg-acc-fill { fill: var(--bp-acc); }
-  .bp-svg-orange-fill { fill: var(--bp-orange); }
-  .bp-svg-spin { transform-box: fill-box; transform-origin: center; animation: lu-spin 44s linear infinite; }
-  /* Orbiting nodes + center ping — rotate/scale about the SVG centre (view-box
-     origin), so they trace the guide rings instead of spinning in place. When
-     motion is off (reduce / win-perf) they rest at their authored coords = the
-     prior static diagram. */
-  .bp-orbit { transform-box: view-box; transform-origin: center; }
-  .bp-orbit--a { animation: lu-spin 30s linear infinite; }
-  .bp-orbit--b { animation: lu-spin 24s linear infinite reverse; }
-  .bp-svg-ping { fill: none; stroke: var(--bp-orange); stroke-width: 1.4; opacity: 0; transform-box: view-box; transform-origin: center; animation: lu-ping 2.8s ease-out infinite; }
-  .bp-diagram-ann { position: absolute; font-size: 10px; line-height: 1.35; letter-spacing: 0.04em; color: var(--bp-faint); }
-  .bp-diagram-ann--tr { top: 12%; right: -2%; text-align: left; }
-  .bp-diagram-ann--bl { bottom: 12%; left: -2%; text-align: right; }
-
-  .bp-scroll {
-    position: absolute;
-    left: 50%;
-    bottom: -6px;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    font-size: 10px;
-    letter-spacing: 0.24em;
-    text-indent: 0.24em;
-    color: var(--bp-faint);
-    text-decoration: none;
-  }
-  .bp-scroll-arrow { width: 16px; height: 16px; animation: lu-bob 1.8s ease-in-out infinite; }
 
   /* ── ANNEX A / §03 rails — shared pin machinery ──
      :global(:where(.bp) …) reach-into-children form (see the comment block
@@ -746,7 +327,7 @@ const homepageSchema = {
      styling (marquee + bento plates / .bp-write-cards bento) now lives with
      its component. units.gr-style bento inside a horizontal rail: the track is
      a 2-row column-flow grid; default = native overflow-x swipe strip (mobile
-     / reduced-motion / no-CDN fallback); homeGamesRail.ts adds .is-pinned on
+     / reduced-motion / no-CDN fallback); homeRails.ts adds .is-pinned on
      desktop and GSAP scrubs the track sideways with page scroll. Full-bleed on
      purpose — the rail breaking out of the bp-wrap column is the
      layout-variance beat between two contained sections. */
@@ -774,32 +355,6 @@ const homepageSchema = {
   .bp-conn::before { content: ""; position: absolute; top: 0; left: 50%; width: 10px; height: 1px; margin-left: -5px; background: color-mix(in srgb, var(--bp-acc) 50%, transparent); }
   .bp-conn::after { content: ""; position: absolute; bottom: -1.5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--bp-acc); }
 
-  /* ── keyframes ──
-     lu-spin is also duplicated verbatim in HomeStudio.astro's own <style> —
-     Astro scopes @keyframes names per component, so the compass ring/arm
-     there (a separate component now) needs its own copy of this keyframe
-     rather than referencing this one. */
-  @keyframes lu-spin { to { transform: rotate(360deg); } }
-  @keyframes lu-ping { 0% { transform: scale(1); opacity: 0.55; } 70% { opacity: 0; } 100% { transform: scale(3.4); opacity: 0; } }
-  @keyframes lu-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
-
-  /* ── responsive ── */
-  @media (max-width: 900px) {
-    .bp-hero { grid-template-columns: 1fr; gap: 24px; }
-    .bp-hero-right { order: -1; max-width: 300px; }
-    .bp-scroll { display: none; }
-  }
-  /* .bp-compass-arm/.bp-compass-draw split out to HomeStudio.astro's own
-     reduced-motion / win-perf-mode rules (that markup now lives there); the
-     [data-art-card] rules that used to sit alongside this block split out to
-     HomeArt.astro's own reduced-motion query the same way (its markup moved
-     there too — the hero SVG rule below stays, since the hero markup stays). */
-  @media (prefers-reduced-motion: reduce) {
-    .bp-svg-spin, .bp-orbit, .bp-svg-ping, .bp-scroll-arrow { animation: none !important; }
-  }
-  :global(body.win-perf-mode) .bp-svg-spin,
-  :global(body.win-perf-mode) .bp-orbit,
-  :global(body.win-perf-mode) .bp-svg-ping { animation: none; }
 </style>
 
 <!-- Home scroll-animation hidden initial-states — gated on html.home-anim so JS-off /
@@ -822,20 +377,6 @@ const homepageSchema = {
 <script>
   import { initHomeScrollAnimations } from "../../scripts/homeScrollAnimations";
   initHomeScrollAnimations();
-</script>
-<script>
-  // Ocean hero: dynamic import so the three.js stack is a code-split chunk
-  // fetched on the homepage only, after the page settles (idle) — never on
-  // the LCP path. The head probe already set html.ocean-on (or didn't — then
-  // this never loads).
-  if (document.documentElement.classList.contains("ocean-on")) {
-    const boot = () => import("../../scripts/oceanHero").then((m) => m.initOceanHero());
-    if ("requestIdleCallback" in window) {
-      requestIdleCallback(() => boot(), { timeout: 2000 });
-    } else {
-      setTimeout(boot, 300);
-    }
-  }
 </script>
 
 <!-- PROTOTYPE (units.gr-inspired): scramble-in for the mono section labels — the
@@ -865,6 +406,3 @@ const homepageSchema = {
     })();
   })();
 </script>
-
-
-

@@ -1,6 +1,7 @@
 ---
-// Thin route wrapper — shared body lives in TermsPage so /terms (en) and
-// /vi/terms render the same component, which reads the locale from the URL.
+// Thin route wrapper — the body lives in TermsPage so page logic stays out of
+// the route file. English-only: only /blog is mirrored under /vi (see
+// isBilingualPath in src/i18n).
 import TermsPage from "../components/pages/TermsPage.astro";
 ---
 <TermsPage />

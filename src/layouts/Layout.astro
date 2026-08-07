@@ -2,13 +2,8 @@
 import '../styles/global.css';
 import { COOKIE_BANNER_ENABLED } from '../config/features';
 import { getLocaleFromUrl, useTranslations, isBilingualPath } from '../i18n';
-import { adsService } from '../services/ads';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
-
-// AdSense config (admin-managed, build-time). Gates the loader script below —
-// zero ad bytes on every page while ads are dormant.
-const adsConfig = await adsService.getConfig();
 
 const SITE_URL = 'https://luci-studio.com';
 const SITE_NAME = 'Luci Studio';
@@ -146,15 +141,6 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" integrity="sha384-xb96EMJeax+NLXMC88ZBa1xAeAW+kn+horHh/zFlbMLG2UPWhMJJSlv7fi57hS+Q" crossorigin="anonymous"></script>
 		<!-- PROTOTYPE: Lenis smooth scroll (units.gr-inspired) — init in scripts/layout/smoothScroll.ts -->
 		<script defer is:inline src="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.min.js" integrity="sha384-ClD7pCgIUz5M81HT8aZmMxCsWmfsycmBiwL5gy1pUbdWHvICIbea22N9sTtAFotA" crossorigin="anonymous"></script>
-		<!-- Google AdSense loader — emitted only when ads are enabled in /admin/ads (AdSlot components render the units) -->
-		{adsConfig.enabled && (
-			<script
-				async
-				is:inline
-				src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsConfig.publisher_id}`}
-				crossorigin="anonymous"></script>
-		)}
-
 		<script is:inline>
 			// Initialize theme + color scheme immediately to prevent flash
 			(function() {
