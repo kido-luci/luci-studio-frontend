@@ -369,8 +369,12 @@ const structuredData = [articleSchema, breadcrumbSchema];
           <!-- Logged in state -->
           <div id="logged-in-area" class="hidden">
             <div style="display:flex;align-items:center;gap:0.625rem;padding:0.875rem 1.25rem 0;">
-              <img id="user-avatar" src="" alt="" style="width:2rem;height:2rem;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none';document.getElementById('user-avatar-fallback').style.display='flex';" />
-              <div id="user-avatar-fallback" style="display:none;width:2rem;height:2rem;border-radius:50%;background:rgb(var(--accent-rgb) / 0.2);align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;font-weight:900;color:var(--accent);" id="user-avatar-fallback"></div>
+              <!-- No src attribute: an empty one resolves against the page URL and
+                   fires a real request that 404s on every load. renderAuthUI sets
+                   the src only when the signed-in user actually has an avatar, and
+                   shows the initial-letter fallback otherwise. Hidden until then. -->
+              <img id="user-avatar" alt="" style="display:none;width:2rem;height:2rem;border-radius:50%;object-fit:cover;flex-shrink:0;" />
+              <div id="user-avatar-fallback" style="display:none;width:2rem;height:2rem;border-radius:50%;background:rgb(var(--accent-rgb) / 0.2);align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;font-weight:900;color:var(--accent);"></div>
               <span id="user-name" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:0.85rem;font-weight:700;color:var(--bp-ink);"></span>
             </div>
             <form id="comment-form">
