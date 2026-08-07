@@ -127,22 +127,30 @@ export function initComments() {
       if (isTokenValid(token) && payload) {
         signInPrompt?.classList.add('hidden');
         loggedInArea?.classList.remove('hidden');
-        // Same lookup as before, just typed: #user-avatar is the <img> in the
-        // composer's signed-in header (PostDetailPage.astro).
+        // #user-avatar is the <img> in the composer's signed-in header
+        // (PostDetailPage.astro). It ships with no src, so nothing is requested
+        // until there is a real URL to load.
         const avatarEl = document.getElementById('user-avatar') as HTMLImageElement | null;
         const nameEl = document.getElementById('user-name');
         const avatarFallback = document.getElementById('user-avatar-fallback');
         const initial = (payload.name || '?')[0].toUpperCase();
-        if (avatarEl) {
-          avatarEl.style.display = '';
-          avatarEl.src = payload.avatar || '';
+        if (avatarFallback) avatarFallback.textContent = initial;
+        // Only touch the <img> when the token actually carries an avatar.
+        // Assigning an empty src would resolve against the page URL, fire a real
+        // request, 404, and only then fall through to onerror.
+        if (avatarEl && payload.avatar) {
+          avatarEl.src = payload.avatar;
           avatarEl.alt = payload.name || '';
+          avatarEl.style.display = '';
+          if (avatarFallback) avatarFallback.style.display = 'none';
           avatarEl.onerror = () => {
             avatarEl.style.display = 'none';
-            if (avatarFallback) { avatarFallback.textContent = initial; avatarFallback.style.display = 'flex'; }
+            if (avatarFallback) avatarFallback.style.display = 'flex';
           };
+        } else {
+          if (avatarEl) avatarEl.style.display = 'none';
+          if (avatarFallback) avatarFallback.style.display = 'flex';
         }
-        if (avatarFallback) { avatarFallback.textContent = initial; avatarFallback.style.display = 'none'; }
         if (nameEl) nameEl.textContent = payload.name || '';
       } else {
         clearToken();
