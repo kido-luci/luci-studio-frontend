@@ -2,13 +2,16 @@
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SiteFooter from "../SiteFooter.astro";
-import { CHANNEL_URL, VIDEOS_NEWEST_FIRST } from "../../data/videos";
+import { CHANNEL_URL, VIDEOS_NEWEST_FIRST, SHORTS_NEWEST_FIRST } from "../../data/videos";
 
 // Off-site content directory (same link-out model as GamesPage): everything
 // here is hosted on a third-party platform and linked out. YouTube-only for
 // now. Data lives in src/data/videos.ts (shared with the homepage SCREENING
-// ROOM band) — add entries there and both surfaces pick them up.
+// ROOM band) — add entries there and both surfaces pick them up. The Shorts
+// rail below the grid is the one exception to pure link-out: cards are
+// click-to-play facades (thumbnail at load, iframe on click — shortsEmbed.ts).
 const totalVideos = VIDEOS_NEWEST_FIRST.length;
+const totalShorts = SHORTS_NEWEST_FIRST.length;
 ---
 
 <Layout
@@ -51,6 +54,33 @@ const totalVideos = VIDEOS_NEWEST_FIRST.length;
         <span class="bp-mono vid-channel-cta">View channel ↗</span>
       </a>
 
+      <!-- shorts rail — click-to-play facades (iframe injected by shortsEmbed.ts) -->
+      <section class="bp-shorts" aria-label="YouTube Shorts">
+        <div class="bp-sec-head bp-shorts-head" data-reveal>
+          <span class="bp-dot" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-label">SHORTS</span>
+          <span class="bp-rule" aria-hidden="true"></span>
+          <span class="bp-mono bp-sec-count">{String(totalShorts).padStart(2, "0")} {totalShorts === 1 ? "SHORT" : "SHORTS"}</span>
+        </div>
+        <p class="bp-shorts-sub">Sixty-second cuts of the walkthroughs — tap a card to play it right here.</p>
+        <div class="shorts-rail" data-reveal>
+          {SHORTS_NEWEST_FIRST.map((s) => (
+            <div class="short-card" data-short-embed={s.id} data-short-title={s.title}>
+              <div class="short-card-media" data-short-media>
+                <img src={`https://i.ytimg.com/vi/${s.id}/oar2.jpg`} alt="" loading="lazy" width="1080" height="1920" />
+                <button type="button" class="short-card-play" aria-label={`Play Short: ${s.title}`}>
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
+                    <path d="M8 5.5v13l11-6.5-11-6.5Z"/>
+                  </svg>
+                </button>
+                <span class="bp-mono short-card-platform">Shorts</span>
+              </div>
+              <span class="short-card-title">{s.title}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <!-- video grid -->
       <div class="bp-videos-grid">
         {VIDEOS_NEWEST_FIRST.map((v) => (
@@ -76,6 +106,11 @@ const totalVideos = VIDEOS_NEWEST_FIRST.length;
     <SiteFooter locale="en" />
   </main>
 </Layout>
+
+<script>
+  import { initShortsEmbed } from "../../scripts/shortsEmbed";
+  initShortsEmbed();
+</script>
 
 <style>
   /* /videos — blueprint drafting-sheet DNA (same atom set as /games): line
@@ -166,7 +201,8 @@ const totalVideos = VIDEOS_NEWEST_FIRST.length;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
     gap: 22px;
-    margin-top: clamp(28px, 4vw, 40px);
+    /* section-scale gap — the grid follows the whole Shorts section now */
+    margin-top: clamp(48px, 7vw, 80px);
   }
   .vid-card {
     display: flex; flex-direction: column;
@@ -209,6 +245,62 @@ const totalVideos = VIDEOS_NEWEST_FIRST.length;
   .vid-card-host { display: flex; align-items: center; gap: 8px; }
   .vid-card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--bp-acc); }
   .vid-card-arrow { font-size: 14px; }
+
+  /* ── Shorts rail — vertical 9:16 click-to-play cards ── */
+  .bp-shorts { margin-top: clamp(48px, 7vw, 80px); }
+  .bp-shorts-sub { margin: 1rem 0 0; max-width: 34rem; font-size: 0.98rem; line-height: 1.6; color: var(--bp-muted); }
+  .shorts-rail {
+    display: flex; gap: 18px;
+    margin-top: clamp(20px, 3vw, 28px);
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 14px; /* room for the scrollbar so it doesn't overlap cards */
+    scrollbar-width: thin;
+  }
+  /* The card wrapper is deliberately NOT interactive — the play overlay is the
+     one <button>, and the injected iframe lands beside it in the media region,
+     so interactive content is never nested inside a button (a11y). */
+  .short-card {
+    flex: none; width: clamp(200px, 22vw, 250px);
+    scroll-snap-align: start;
+    display: flex; flex-direction: column; gap: 10px;
+    color: inherit;
+  }
+  .short-card-media {
+    position: relative; display: block;
+    aspect-ratio: 9 / 16; overflow: hidden;
+    border: 1px solid var(--bp-hair); border-radius: 12px;
+    background: var(--bp-screen);
+    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
+  }
+  .short-card:hover .short-card-media,
+  .short-card:focus-within .short-card-media {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 44px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
+  }
+  .short-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .short-card-play {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0; border: 0; cursor: pointer;
+    color: #fff;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent 45%);
+  }
+  .short-card-play svg {
+    width: 44px; height: 44px;
+    padding: 10px; box-sizing: content-box;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+  }
+  .short-card-platform {
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 5px;
+    color: #fff; background: #dd0000; /* same AA-checked red as .vid-card-platform */
+  }
+  .short-card-title { font-size: 0.92rem; line-height: 1.4; color: var(--bp-ink); }
 
   @media (max-width: 640px) {
     .vid-channel { flex-wrap: wrap; }
