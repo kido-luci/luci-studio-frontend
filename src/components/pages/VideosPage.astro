@@ -54,26 +54,6 @@ const totalShorts = SHORTS_NEWEST_FIRST.length;
         <span class="bp-mono vid-channel-cta">View channel ↗</span>
       </a>
 
-      <!-- video grid -->
-      <div class="bp-videos-grid">
-        {VIDEOS_NEWEST_FIRST.map((v) => (
-          <a href={v.href} target="_blank" rel="noopener noreferrer" class="vid-card" data-reveal>
-            <div class="vid-card-media">
-              <img src={v.img} alt={v.title} loading="lazy" width="1280" height="720" />
-              <span class="bp-mono vid-card-platform">{v.platform}</span>
-            </div>
-            <div class="vid-card-body">
-              <span class="bp-mono vid-card-tag">{v.tag}</span>
-              <div class="bp-display vid-card-title">{v.title}</div>
-            </div>
-            <div class="bp-mono vid-card-footer">
-              <span class="vid-card-host"><span class="vid-card-dot"></span>{v.host}</span>
-              <span class="vid-card-arrow">↗</span>
-            </div>
-          </a>
-        ))}
-      </div>
-
       <!-- shorts rail — click-to-play facades (iframe injected by shortsEmbed.ts) -->
       <section class="bp-shorts" aria-label="YouTube Shorts">
         <div class="bp-sec-head bp-shorts-head" data-reveal>
@@ -106,6 +86,26 @@ const totalShorts = SHORTS_NEWEST_FIRST.length;
           ))}
         </div>
       </section>
+
+      <!-- video grid -->
+      <div class="bp-videos-grid">
+        {VIDEOS_NEWEST_FIRST.map((v) => (
+          <a href={v.href} target="_blank" rel="noopener noreferrer" class="vid-card" data-reveal>
+            <div class="vid-card-media">
+              <img src={v.img} alt={v.title} loading="lazy" width="1280" height="720" />
+              <span class="bp-mono vid-card-platform">{v.platform}</span>
+            </div>
+            <div class="vid-card-body">
+              <span class="bp-mono vid-card-tag">{v.tag}</span>
+              <div class="bp-display vid-card-title">{v.title}</div>
+            </div>
+            <div class="bp-mono vid-card-footer">
+              <span class="vid-card-host"><span class="vid-card-dot"></span>{v.host}</span>
+              <span class="vid-card-arrow">↗</span>
+            </div>
+          </a>
+        ))}
+      </div>
 
     </div>
 
@@ -207,7 +207,8 @@ const totalShorts = SHORTS_NEWEST_FIRST.length;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
     gap: 22px;
-    margin-top: clamp(28px, 4vw, 40px);
+    /* section-scale gap — the grid follows the whole Shorts section now */
+    margin-top: clamp(48px, 7vw, 80px);
   }
   .vid-card {
     display: flex; flex-direction: column;
