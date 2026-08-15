@@ -266,18 +266,26 @@ const totalShorts = SHORTS_NEWEST_FIRST.length;
     display: flex; flex-direction: column; gap: 10px;
     color: inherit;
   }
+  /* The hairline is an outset ring, not a border. This box is clipped
+     (overflow + radius) and lifted on hover (transform), which puts it on its
+     own compositing layer — a real border sits right on that clip seam, where
+     the re-rasterised rounded mask eats into it unevenly and the top edge
+     reads as broken. A 1px spread shadow paints outside the clip, so the line
+     stays continuous, and it lands in the same place a border did. */
   .short-card-media {
     position: relative; display: block;
     aspect-ratio: 9 / 16; overflow: hidden;
-    border: 1px solid var(--bp-hair); border-radius: 12px;
+    border-radius: 12px;
     background: var(--bp-screen);
-    transition: transform 0.25s ease, box-shadow 0.25s, border-color 0.25s;
+    box-shadow: 0 0 0 1px var(--bp-hair);
+    transition: transform 0.25s ease, box-shadow 0.25s;
   }
   .short-card:hover .short-card-media,
   .short-card:focus-within .short-card-media {
     transform: translateY(-4px);
-    box-shadow: 0 20px 44px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
-    border-color: color-mix(in srgb, var(--bp-acc) 45%, transparent);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--bp-acc) 45%, transparent),
+      0 20px 44px -26px color-mix(in srgb, var(--bp-acc) 45%, transparent);
   }
   .short-card-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .short-card-play {
