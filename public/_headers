@@ -16,6 +16,14 @@
 # were removed: they served no live resource and only widened the attack
 # surface.
 #
+# frame-src (YouTube): the /videos Shorts rail injects a youtube-nocookie
+# embed when a card is played — the site's only iframe. Without this entry
+# frames fall back to default-src 'self' and Chrome blocks the player outright
+# ("This content is blocked"), which is exactly what happened when the rail
+# shipped. www.youtube.com is listed alongside because some Shorts playback
+# flows hand off to that origin. Note this cannot be caught by `npm run dev`:
+# public/_headers is applied by Cloudflare Pages, so no CSP exists locally.
+#
 # Sentry (connect-src): sentry.client.config.js initialises with
 # PUBLIC_SENTRY_DSN in prod, so error envelopes POST to the ingest endpoint.
 # Without this entry every send is refused and client-side monitoring silently
@@ -32,7 +40,7 @@
 # off, drop these entries and that disclosure together.
 
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://api.luci-studio.com https://o4509530171113472.ingest.us.sentry.io https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://api.luci-studio.com https://o4509530171113472.ingest.us.sentry.io https://cloudflareinsights.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   X-Content-Type-Options: nosniff
