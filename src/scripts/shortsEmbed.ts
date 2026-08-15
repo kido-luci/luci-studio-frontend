@@ -12,21 +12,6 @@ export function initShortsEmbed(): void {
     const play = card.querySelector<HTMLButtonElement>(".short-card-play");
     const media = card.querySelector<HTMLElement>("[data-short-media]");
     if (!play || !media) return;
-    // The oar2.jpg vertical thumb can be missing/CORP-blocked on some YouTube
-    // CDN edges for freshly uploaded Shorts. Fall back to frame0.jpg (always
-    // generated, vertical, lower-res). The img may have already failed before
-    // this module ran, so check complete+naturalWidth too, not just onerror.
-    const img = media.querySelector<HTMLImageElement>("img");
-    const imgId = card.dataset.shortEmbed;
-    if (img && imgId) {
-      const fallback = () => {
-        if (img.dataset.fallback) return;
-        img.dataset.fallback = "1";
-        img.src = `https://i.ytimg.com/vi/${imgId}/frame0.jpg`;
-      };
-      img.addEventListener("error", fallback);
-      if (img.complete && img.naturalWidth === 0) fallback();
-    }
     play.addEventListener("click", () => {
       if (card.dataset.playing) return;
       const id = card.dataset.shortEmbed;
