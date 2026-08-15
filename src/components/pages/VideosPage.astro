@@ -251,9 +251,15 @@ const totalShorts = SHORTS_NEWEST_FIRST.length;
   .bp-shorts-sub { margin: 1rem 0 0; max-width: 34rem; font-size: 0.98rem; line-height: 1.6; color: var(--bp-muted); }
   .shorts-rail {
     display: flex; gap: 18px;
-    margin-top: clamp(20px, 3vw, 28px);
     overflow-x: auto;
     scroll-snap-type: x proximity;
+    /* overflow-x:auto forces overflow-y to auto as well, so this scroll box
+       clips vertically too. Cards sit flush against that clip edge, so the
+       4px hover lift pushed the top edge — border included — straight out of
+       view. Pad the box by more than the lift and take the same amount back
+       off the margin, so the section spacing is unchanged. */
+    padding-top: 6px;
+    margin-top: calc(clamp(20px, 3vw, 28px) - 6px);
     padding-bottom: 14px; /* room for the scrollbar so it doesn't overlap cards */
     scrollbar-width: thin;
   }
