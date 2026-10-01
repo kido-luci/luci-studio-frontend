@@ -1,9 +1,9 @@
-# luci_dev
+# luci-studio-frontend
 
-[![CI](https://github.com/kido-luci/luci_dev/actions/workflows/ci.yml/badge.svg)](https://github.com/kido-luci/luci_dev/actions/workflows/ci.yml)
+[![CI](https://github.com/kido-luci/luci-studio-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/kido-luci/luci-studio-frontend/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 
-Personal blog and portfolio site, built with [Astro](https://astro.build) and deployed as a fully static site to Cloudflare Pages. Live at **[luci-studio.com](https://luci-studio.com)**.
+Personal blog and portfolio site, built with [Astro](https://astro.build) as a fully static site and served by a Cloudflare Worker with static assets (Worker `luci-dev`), auto-built and deployed from `master` by Cloudflare Workers Builds. Live at **[luci-studio.com](https://luci-studio.com)**.
 
 Posts are fetched from a separate REST API **at build time** and baked into static HTML — there are no client-side API calls for post content.
 
@@ -21,15 +21,12 @@ Posts are fetched from a separate REST API **at build time** and baked into stat
 ```bash
 npm install
 cp .env.example .env      # set PUBLIC_API_URL to your blog API
-npm run build && npm run preview   # http://localhost:4321
+npm run dev               # http://localhost:4321
 ```
-
-> `npm run dev` is currently broken (Sentry + Cloudflare Vite SSR can't resolve
-> `node:path`) — verify changes via `npm run build` + `npm run preview` instead.
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Dev server — **currently broken**, see note above |
+| `npm run dev` | Dev server on `localhost:4321` |
 | `npm run build` | Static build to `./dist/` |
 | `npm run preview` | Preview the production build on `localhost:4321` |
 | `npm run check` | Type-check `.astro` + `.ts` via `astro check` (the pre-commit gate) |
@@ -47,11 +44,11 @@ src/
 │   └── sitemap.xml.ts         # Dynamic sitemap, generated at build
 ├── services/posts.ts          # Build-time API client
 ├── utils/blog.ts              # Markdown→HTML parser, slug + read-time helpers
-├── components/                # ProjectCard, TimelineItem, ...
+├── components/                # PostCard, TimelineItem, ...
 └── layouts/Layout.astro       # Shared shell, theme variables, scroll reveals
 ```
 
-Post slugs follow `{title-kebab-case}-{post-id}` and are parsed in `src/utils/blog.ts`.
+Post slugs follow `{title-kebab-case}-{short-id}` (the first 8 characters of the post id, dashes removed) and are built by `buildPostSlug` in `src/utils/blog.ts`.
 
 ## Environment variables
 
@@ -60,6 +57,9 @@ Post slugs follow `{title-kebab-case}-{post-id}` and are parsed in `src/utils/bl
 | `PUBLIC_API_URL` | yes | Base URL of the blog backend API |
 | `PUBLIC_GSC_VERIFICATION` | no | Google Search Console verification token |
 | `ALLOW_EMPTY_POSTS` | no | Set to `1` to allow builds when the API is unreachable |
+| `PUBLIC_SENTRY_DSN` | no | Sentry DSN for errors-only client monitoring; without it the SDK is disabled |
+| `PUBLIC_SENTRY_ENVIRONMENT` | no | Sentry environment name (defaults to `production`) |
+| `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` | no | Build-time source-map upload to Sentry; skipped when `SENTRY_AUTH_TOKEN` is unset |
 
 ## License
 

@@ -15,7 +15,7 @@ is maintained.
 
 **Please do not open a public issue for security problems.**
 
-Report privately via GitHub's [Private vulnerability reporting](https://github.com/kido-luci/luci_dev/security/advisories/new)
+Report privately via GitHub's [Private vulnerability reporting](https://github.com/kido-luci/luci-studio-frontend/security/advisories/new)
 (Security tab → "Report a vulnerability"). If that's unavailable, you may email
 the maintainer instead.
 

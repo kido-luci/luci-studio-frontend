@@ -4,7 +4,7 @@ import sentry from '@sentry/astro';
 import { loadEnv } from 'vite';
 
 // Build-time Sentry source-map upload credentials (non-public). Loaded via Vite so
-// they work from both local `.env` and the Cloudflare Pages build environment.
+// they work from both local `.env` and the Cloudflare Workers Builds environment.
 const { SENTRY_AUTH_TOKEN, SENTRY_ORG, SENTRY_PROJECT } = loadEnv(
   process.env.NODE_ENV ?? 'production',
   process.cwd(),
