@@ -1,6 +1,6 @@
 // Maps the backend `projects` entity into RepoCard props for the editorial
-// cards used on both /lab and the homepage LAB section. Keeping the mapping in
-// one place ensures the two surfaces stay in sync.
+// cards on /lab (LabPage.astro is the only caller; the homepage has no LAB
+// section any more).
 import { parseGitHub } from '../services/github';
 import type { Project } from '../services/projects';
 

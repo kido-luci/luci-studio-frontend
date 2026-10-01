@@ -110,9 +110,10 @@ export function initHomeScrollAnimations() {
       // a slow scrubbed parallax so the gallery slides OVER it (depth). Driven by
       // background-position, NOT a transform: #art-bg is a sticky child inside a
       // clip-path:inset(0) wrapper that would crop/fight a transform. cover means
-      // the position shift never exposes a seam. The ONLY continuous trigger on
-      // the page — desktop-only (this is the called-out mobile jank source) and
-      // skipped under win-perf-mode.
+      // the position shift never exposes a seam. The only continuous trigger in
+      // this module (homeRails.ts adds two more: the pinned, scrubbed games and
+      // blog rails) — desktop-only (this is the called-out mobile jank source)
+      // and skipped under win-perf-mode.
       const buildArtParallax = () => {
         if (document.body.classList.contains('win-perf-mode')) return;
         const bg = document.querySelector('#art-bg');
