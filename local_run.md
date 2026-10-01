@@ -5,7 +5,7 @@ This app is the public Astro blog/portfolio frontend. It fetches posts from the 
 ## Prerequisites
 
 - Node.js and npm installed.
-- The backend API running locally, usually from `../luci_web_blog-backend` on `http://localhost:3000`.
+- The backend API running locally, usually from `../luci-studio_backend` on `http://localhost:3000`.
 
 ## Environment Setup
 
@@ -33,7 +33,6 @@ Astro will print the local URL, normally `http://localhost:4321`. Open it in a b
 
 - `/` renders the portfolio and latest posts.
 - `/blog` lists blog posts.
-- `/chat` loads the chat page.
 - `/blog/{slug}` renders generated post pages when backend data is available.
 
 To make the dev server reachable from another device on the same network, bind Astro to all interfaces:
@@ -72,7 +71,7 @@ npm run preview
 
 ## Running Tests
 
-One suite lives in this repo: **unit tests** on Vitest. They cover the service clients (`src/services/*.ts`), the blog utilities (`src/utils/blog.ts`), and the post-stats cache (`src/utils/postStats.ts`). They mock `fetch`/DOM and need no servers running.
+One suite lives in this repo: **unit tests** on Vitest. They cover the shared API client (`src/lib/apiClient.ts`), the posts, gallery and GitHub services (`src/services/`), the `src/utils/` helpers (blog, series, i18n paths, lab cards, post-stats cache), the i18n helpers (`src/i18n/`), and the comment formatting helpers (`src/scripts/post/commentFormat.ts`). They mock `fetch`/DOM and need no servers running.
 
 ### Common commands
 
@@ -85,14 +84,21 @@ npm run test:unit:watch    # vitest in watch mode
 
 ```
 src/
+  i18n/i18n.test.ts            — unit tests for locale detection, localized paths and the translation overlay
+  lib/apiClient.test.ts        — unit tests for the shared fetch layer (fail-fast, 404, dedupe)
+  scripts/post/commentFormat.test.ts — unit tests for the comment formatting helpers
   services/posts.test.ts       — unit tests for the posts API client
   services/gallery.test.ts     — unit tests for the gallery API client
+  services/github.test.ts      — unit tests for the GitHub repo-URL parser
   utils/blog.test.ts           — unit tests for slugify / markdown / date utils
+  utils/i18nPaths.test.ts      — unit tests for the shared getStaticPaths builders
+  utils/labCards.test.ts       — unit tests for the /lab project-card mapping
   utils/postStats.test.ts      — unit tests for the localStorage stats cache
+  utils/series.test.ts         — unit tests for the series aggregation
 ```
 
 ## Common Issues
 
-- `Failed to fetch posts`: start the backend or set `PUBLIC_API_URL` to the correct API host.
-- `GET /posts/{id} failed with 404`: the post appears in `/posts` but the detail endpoint cannot load it; refresh backend data before deploying.
+- `Failed to fetch /posts`: start the backend or set `PUBLIC_API_URL` to the correct API host.
+- A post listed by `/posts` gets no page: its `GET /posts/{id}` returned 404, which the build treats as missing and skips without an error; refresh backend data before deploying.
 - Cloudflare/Astro build tries to bind an inspector port such as `9229`; if blocked by your environment, rerun the build with permission to bind local ports.
