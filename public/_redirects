@@ -1,7 +1,7 @@
 # Art posts moved from /blog/<slug>/ to /art/<slug>/ on 2026-05-22. On 2026-06-29
 # (a1a39d8) the /art/<slug>/ pages were removed too: art now opens in a lightbox
 # inside the homepage's art section, so no per-artwork page is left to point at.
-# Every old art URL — the /blog/<slug> sources below and any indexed /art URL —
+# Every old art URL — the /blog/<slug> sources below and any indexed /art or /vi/art URL —
 # therefore goes straight to the homepage in a single 301.
 # Both trailing-slash AND no-slash sources are listed: Workers static assets match
 # _redirects sources exactly, with no trailing-slash normalisation, so the no-slash
@@ -41,6 +41,8 @@
 /blog/nanatsu-no-taizai-47                                                  /                                                                          301
 /art                                                                        /                                                                          301
 /art/*                                                                      /                                                                          301
+/vi/art                                                                     /                                                                          301
+/vi/art/*                                                                   /                                                                          301
 
 # "Playlists" feature renamed to "Series" on 2026-06-18. Path prefix changed; slugs unchanged.
 /blog/playlists                                                             /blog/series                                                              301
