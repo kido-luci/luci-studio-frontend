@@ -1,6 +1,6 @@
-# luci_dev
+# luci-studio-frontend
 
-[![CI](https://github.com/kido-luci/luci_dev/actions/workflows/ci.yml/badge.svg)](https://github.com/kido-luci/luci_dev/actions/workflows/ci.yml)
+[![CI](https://github.com/kido-luci/luci-studio-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/kido-luci/luci-studio-frontend/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 
 Personal blog and portfolio site, built with [Astro](https://astro.build) and deployed as a fully static site to Cloudflare Pages. Live at **[luci-studio.com](https://luci-studio.com)**.
