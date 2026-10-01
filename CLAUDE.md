@@ -19,8 +19,8 @@ in inline event handlers, `is:inline` script notices) stay advisory; only real
 type errors fail it. CI runs it on every PR, ahead of the tests and the build.
 
 `npm run dev` works in this repo (verified 2026-08-03: `/` and `/blog` both serve
-200). The workspace CLAUDE.md still says both frontends' dev server is broken —
-that is stale for this one; only the admin app is affected.
+200). Only the admin app's dev server is broken, as the workspace CLAUDE.md also
+says.
 
 ## Development workflow
 
@@ -62,7 +62,7 @@ Requires a `.env` file (not committed):
 PUBLIC_API_URL=http://localhost:3000
 ```
 
-`PUBLIC_` prefix is required for Astro to expose variables to client-side code. Trailing slashes are stripped in `src/services/posts.ts` before constructing endpoint URLs.
+`PUBLIC_` prefix is required for Astro to expose variables to client-side code. Trailing slashes are stripped in `src/lib/apiClient.ts` before constructing endpoint URLs.
 
 ## Architecture
 
@@ -72,8 +72,8 @@ PUBLIC_API_URL=http://localhost:3000
 imports a body component from `src/components/pages/`. That indirection is what lets
 the English and Vietnamese routes render the same component, which reads its locale
 from the URL. Put page logic in the body component, never in the route file.
-- `/` — Portfolio homepage: hardcoded project/experience content + a dynamic blog feed fetched from the backend at build time
-- `/blog/` (index) and `/blog/[slug]` — post pages via `getStaticPaths()`; slug `{title-slug}-{id}` (e.g. `my-post-123`)
+- `/` — Portfolio homepage: hardcoded selected-work content, the `src/data/` catalogs (games, tools, videos), and a blog rail, art gallery and profile stats fetched from the backend at build time
+- `/blog/` (index) and `/blog/[slug]` — post pages via `getStaticPaths()`; slug `{title-slug}-{shortId}`, where `shortId` is the first 8 chars of the post id with dashes stripped (e.g. `modern-go-rest-api-a6b6a3da`; built by `buildPostSlug` in `src/utils/blog.ts`)
 - `/blog/series/` and `/blog/series/[slug]` — series index + per-series pages
 - `/vi/blog/…` — the Vietnamese mirror of the blog section, and the **only** localized
   surface. `getStaticPaths` for both locales comes from one source (`src/utils/i18nPaths.ts`)
@@ -99,7 +99,7 @@ from the URL. Put page logic in the body component, never in the route file.
 
 **Data flow**:
 - `src/lib/apiClient.ts` — the shared fetch layer: strips the trailing slash off `PUBLIC_API_URL`, dedupes concurrent build-time callers into one round-trip, and decides via `FAIL_FAST` whether a broken backend fails the prod build or resolves empty (`ALLOW_EMPTY_POSTS=1` opts out locally)
-- `src/services/*.ts` — one module per resource, built on `cachedGetAll` / `fetchOne`. `posts.ts` also owns the `Post` type. Two services bypass the client on purpose: `games.ts` (hits each game's own Worker) and `github.ts` (pure URL parsing)
+- `src/services/*.ts` — one module per resource, built on `cachedGetAll` / `fetchOne` (`profile.ts` instead keeps its own single-object cache on the client's `BASE_URL` and resolves `null` on errors — it never fails fast). `posts.ts` also owns the `Post` type. Two services bypass the client on purpose: `games.ts` (hits each game's own Worker) and `github.ts` (pure URL parsing)
 - `src/utils/blog.ts` — Custom regex-based Markdown→HTML parser (not a library), plus `calculateReadTime`, `formatDate`, `slugify`
 - Blog post content is fetched at build time and rendered server-side; no client-side data fetching
 
@@ -107,12 +107,14 @@ from the URL. Put page logic in the body component, never in the route file.
 - Tailwind CSS is compiled at build time via PostCSS (`tailwind.config.cjs`, `postcss.config.cjs`); the `@tailwind` directives live in `src/styles/global.css`, imported once in `src/layouts/Layout.astro`. Custom animations/keyframes are defined in `tailwind.config.cjs`. (Previously loaded via the `cdn.tailwindcss.com` runtime JIT — replaced to remove the render-blocking script.)
 - Global CSS lives in four deliberate places, not one: `Layout.astro`'s `<style is:global>` (~390 lines — site chrome, theme tokens, accent schemes), `src/styles/global.css` (Tailwind directives + the shared `bp-` blueprint tokens and section-header atoms, already de-duplicated out of ~17 components), `src/styles/lab-cards.css` (the RepoCard palette, imported by `/lab` and `/games`), and `src/styles/post-content.css` (the post page's prose, Prism tokens, engagement bar and comment thread, imported by `PostDetailPage.astro` alone). Per-page tokens stay in the component that owns them — do not hoist them
 - Everything else is component-scoped `<style>`. Note that a few base rules use the `background` **shorthand**, which resets `background-image`; a shared global class cannot override them without `!important`, so small per-component duplicates (e.g. the 45° hatch fill) are left alone on purpose
-- Theme system (light default / dark toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
+- Theme system (follows the OS `prefers-color-scheme`, dark when it can't be read; light/dark toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
 
-**Background**: none. Each page draws its own "blueprint" drafting-grid background in its component CSS. A 2D `<canvas>` particle field used to run site-wide (the drifting `-`/`o` shapes) but was **retired** in v1.45.0 — `particles.ts` / `canvasBackground.ts` and the `#canvas-bg` / `#bg-dimmer` elements are gone; `navDimmer.ts` now only styles the nav on scroll (glass bg + hide-on-scroll). (Also removed earlier: Vanta/p5.js — only a stale `--vanta-bg` CSS var name remains.) One exception: the homepage hero band is a **three.js ocean scene** (`src/scripts/oceanHero.ts` — sky window offset right, shadow-raymarched god rays via `three-good-godrays`, Quaternius CC0 fish; three pinned at 0.179.1 for the postprocessing/godrays peer range; code-split dynamic import on `/` only, loaded from `components/home/HomeHero.astro`, which owns the whole hero band; ~30fps idle cap, offscreen/hidden pause). Armed by a cheap head probe (`html.ocean-on`); skipped via `localStorage oceanHero="off"`; reduced-motion renders one static frame; no WebGL2 (or GL death) falls back to the CSS constellation corner + hero ring diagram. It replaced the earlier `bpGlow.ts` ambient glow + tsParticles constellation trial.
+**Background**: none. Each page draws its own "blueprint" drafting-grid background in its component CSS. A 2D `<canvas>` particle field used to run site-wide (the drifting `-`/`o` shapes) but was **retired** in v1.45.0 — `particles.ts` / `canvasBackground.ts` and the `#canvas-bg` / `#bg-dimmer` elements are gone; `navDimmer.ts` now only styles the nav on scroll (glass bg + hide-on-scroll). (Also removed earlier: Vanta/p5.js.) One exception: the homepage hero band is a **three.js ocean scene** (`src/scripts/oceanHero.ts` — sky window offset right, shadow-raymarched god rays via `three-good-godrays`, Quaternius CC0 fish; three pinned at 0.179.1 for the postprocessing/godrays peer range; code-split dynamic import on `/` only, loaded from `components/home/HomeHero.astro`, which owns the whole hero band; ~30fps idle cap, offscreen/hidden pause). Armed by a cheap head probe (`html.ocean-on`); skipped via `localStorage oceanHero="off"`; reduced-motion renders one static frame; no WebGL2 (or GL death) falls back to the CSS constellation corner + hero ring diagram. It replaced the earlier `bpGlow.ts` ambient glow + tsParticles constellation trial.
 
 **Third-party libraries** (via CDN):
 - GSAP + ScrollTrigger + SplitText (jsDelivr, in `Layout.astro`) — scroll reveals, hero/section text animations
+- GSAP ScrambleTextPlugin (jsDelivr, in `components/pages/HomePage.astro` only) — scramble-in for the homepage's mono section labels
+- Lenis (jsDelivr, in `Layout.astro`) — site-wide smooth scroll, booted by `scripts/layout/smoothScroll.ts`; skipped under reduced motion
 - Prism.js (cdnjs, in `components/pages/PostDetailPage.astro` only) — code syntax highlighting (Dart, Go, JS, TS). Its token CSS and the `.markdown-content` prose styles live in `src/styles/post-content.css` and are used by nothing else
 - Twemoji (jsDelivr, in `components/pages/PostDetailPage.astro` only) — emoji in comments. Loaded from the body while the post modules are hoisted into `<head>`, so `window.twemoji` may be undefined at module-init time; every use is inside an event handler or runs after the comments fetch, and each one guards on it
 
@@ -122,7 +124,7 @@ from the URL. Put page logic in the body component, never in the route file.
 
 | File | Purpose |
 |------|---------|
-| `src/layouts/Layout.astro` | Root layout — all CDN scripts, global CSS, theme toggle, custom cursor, mobile menu |
+| `src/layouts/Layout.astro` | Root layout — site-wide CDN scripts, global CSS, theme toggle, custom cursor (the nav and mobile menu live in `components/TopNav.astro`) |
 | `src/lib/apiClient.ts` | Shared fetch layer — base URL, build-time dedupe, fail-fast policy |
 | `src/services/posts.ts` | Posts resource — the `Post` type definition lives here |
 | `src/utils/blog.ts` | Markdown parser and blog utilities |
