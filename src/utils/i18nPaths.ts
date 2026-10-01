@@ -8,14 +8,16 @@ import { playlistService } from "../services/playlists";
 import { buildPostSlug } from "./blog";
 
 // postPaths: one path per post, props { post, related } — mirrors the original
-// blog/[slug] getStaticPaths, including the cold-start retry.
+// blog/[slug] getStaticPaths, including the fetch retry.
 export async function postPaths() {
   const posts = await postService.getAll();
 
-  // Retry per-post fetch — backend cold-starts (Fly.io min_machines_running=0)
-  // can drop the first call in a burst. Without retry, a transient failure
-  // silently excludes the post from the build but still lists it in the sitemap,
-  // producing 404s that fall through to 404.astro's redirect-to-home.
+  // Retry per-post fetch — the build fires every detail call at once, and one
+  // transient error (a dropped connection, a 5xx) should not cost the post.
+  // getByID only throws in FAIL_FAST (prod) builds; there, once all 3 attempts
+  // fail, the error propagates and fails the build on purpose: a post missing
+  // from the build but still listed in the sitemap would be a 404 that falls
+  // through to 404.astro's redirect-to-home.
   async function fetchPostWithRetry(id: string) {
     let lastErr: unknown;
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -48,7 +50,7 @@ export async function postPaths() {
 }
 
 // seriesPaths: one path per playlist, props { playlist } — mirrors the original
-// blog/series/[slug] getStaticPaths, including the cold-start retry and concurrency cap.
+// blog/series/[slug] getStaticPaths, including the fetch retry and concurrency cap.
 export async function seriesPaths() {
   const playlists = await playlistService.getAll();
 

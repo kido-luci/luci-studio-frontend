@@ -1,8 +1,8 @@
 /* Editorial /lab card palette + keyframes — the single source of truth for the
    RepoCard look. Colors are exposed as --lab-* variables scoped to .lab-palette
    and follow the site theme toggle: light by default, dark when <html> has no
-   .light-mode class. Shared by the /lab page and the homepage LAB section so
-   both render identical cards from one place. */
+   .light-mode class. Imported by the /lab page (its RepoCards) and the /games
+   page, which also sits inside .lab-palette. */
 .lab-palette {
   --lab-bg: radial-gradient(120% 80% at 80% -10%, #f9f7f3 0%, #fbfaf7 60%);
   --lab-text: #13151d;

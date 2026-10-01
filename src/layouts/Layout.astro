@@ -424,12 +424,14 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 
 			/* === MOBILE GPU RELIEF: drop backdrop-filter on fixed elements === */
 			/* backdrop-filter on a fixed/sticky element re-rasterizes its blur on every
-			   scroll frame — the top scroll-jank source on low-end mobile GPUs. The fixed
-			   nav (blur 16→32px on scroll) is the worst offender. Cards (ProjectCard /
-			   TimelineItem) scroll away and only blur once per paint, so they keep theirs.
-			   Backgrounds here are already opaque enough to stay legible without the blur
-			   (--nav-bg-scroll, mobile menu bg-black/95).
-			   !important beats both the inline style and the JS-set nav.style.backdropFilter. */
+			   scroll frame — the top scroll-jank source on low-end mobile GPUs. The post
+			   page's fixed #floating-like-btn (backdrop-blur-2xl) is the one that still
+			   blurs; the nav has no blur of its own any more (TopNav sets backdrop-filter:
+			   none) and stays listed as a guard. In-flow blurs (small overlays on cards,
+			   e.g. PostCard's badge) scroll away and only blur once per paint, so they
+			   keep theirs. The nav background (--nav-bg-scroll) is opaque enough to stay
+			   legible without a blur.
+			   !important beats the utility classes and any inline style. */
 			@media (max-width: 768px) {
 				nav,
 				#floating-like-btn {

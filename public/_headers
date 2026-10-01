@@ -1,4 +1,4 @@
-# Cloudflare Pages headers. Format: https://developers.cloudflare.com/pages/configuration/headers/
+# Workers static assets headers. Format: https://developers.cloudflare.com/workers/static-assets/headers/
 #
 # CSP keeps 'unsafe-inline' because the site has many inline <script> and
 # inline style attributes (per-letter animations, IntersectionObserver setup,
@@ -22,7 +22,7 @@
 # ("This content is blocked"), which is exactly what happened when the rail
 # shipped. www.youtube.com is listed alongside because some Shorts playback
 # flows hand off to that origin. Note this cannot be caught by `npm run dev`:
-# public/_headers is applied by Cloudflare Pages, so no CSP exists locally.
+# public/_headers is applied by Workers static assets, so no CSP exists locally.
 #
 # Sentry (connect-src): sentry.client.config.js initialises with
 # PUBLIC_SENTRY_DSN in prod, so error envelopes POST to the ingest endpoint.

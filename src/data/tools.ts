@@ -1,6 +1,6 @@
 // Shared tools catalog — a hardcoded MIRROR of the cross-engine catalog in
 // luci-tools/tools-home/src/consts.ts (ENGINES). The blog builds standalone on
-// Cloudflare Pages and can't import across repos, so this is a deliberate
+// Cloudflare Workers Builds and can't import across repos, so this is a deliberate
 // one-line-per-tool mirror (same pattern as games.ts / videos.ts) — when a tool
 // or engine ships or is renamed over there, update it here. Rendered by the
 // homepage ANNEX C — TOOLS INDEX section. Per-engine accent colors and icons

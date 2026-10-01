@@ -2,9 +2,11 @@
 // LUCI STUDIO — "Blueprint" homepage.
 // A technical drafting-sheet redesign, adapted to the site's existing design
 // tokens so it keeps dark/light mode, the 6 accent color-schemes, the shared
-// TopNav and the GSAP reveal system. Every content slot is wired to the live API
-// (projects / posts / gallery / profile); the blueprint's placeholder copy was
-// mapped onto real work. The homepage is English-only (there is no /vi/ route).
+// TopNav and the GSAP reveal system. Only some slots come from the API, at build
+// time: the blog rail (posts / series), the art gallery and the studio stats
+// (profile). Games, videos and tools come from the src/data/ catalogs, and the
+// selected-work section is a hand-picked list hardcoded in HomeWork.astro. The
+// homepage is English-only (there is no /vi/ route).
 import Layout from "../../layouts/Layout.astro";
 import TopNav from "../TopNav.astro";
 import SiteFooter from "../SiteFooter.astro";
@@ -49,7 +51,8 @@ const homepageSchema = {
   <Fragment slot="head">
     <!-- Mark the homepage: (1) home-anim gates the scroll-reveal hidden states so
          JS-off / GSAP-fail / reduced-motion all fall back to visible content; (2)
-         bp-home suppresses the shared particle canvas (the blueprint grid is the bg);
+         bp-home hangs the blueprint design tokens on <html> so the shared TopNav (a
+         sibling of <main>, not a child) inherits them too;
          (3) ocean-on arms the 3D ocean hero band (cheap probe: WebGL2 API present +
          no oceanHero="off" kill switch) so the hero lays out single-column from the
          first paint — no post-load swap/CLS. The scene script demotes the class if
