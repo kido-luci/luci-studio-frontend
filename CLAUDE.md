@@ -19,8 +19,8 @@ in inline event handlers, `is:inline` script notices) stay advisory; only real
 type errors fail it. CI runs it on every PR, ahead of the tests and the build.
 
 `npm run dev` works in this repo (verified 2026-08-03: `/` and `/blog` both serve
-200). Only the admin app's dev server is broken, as the workspace CLAUDE.md also
-says.
+200). The admin app's dev server works too since 2026-08-07 (admin `ab1912a` added
+the missing `nodejs_compat` flag).
 
 ## Development workflow
 
