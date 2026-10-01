@@ -32,7 +32,7 @@ says.
    the preview, not screenshots (`/blog` and `/lab` screenshot fine).
 4. **Commit** one change per commit on a topic branch (keeps rollback points).
 
-**Release** (this app auto-deploys to Cloudflare Pages from `master`):
+**Release** (this app auto-deploys from `master`: Cloudflare Workers Builds builds it and deploys it to the `luci-dev` Worker, which serves it as static assets):
 - `dev` is the default/integration branch; `master` is the prod auto-deploy branch.
 - Flow: topic branch → PR into `dev` → merge → PR `dev → master` → merge → annotated tag
   `vX.Y.Z` on `master`. (See the workspace CLAUDE.md for the repo-wide PR-only convention.)
@@ -66,7 +66,7 @@ PUBLIC_API_URL=http://localhost:3000
 
 ## Architecture
 
-**Stack**: Astro (static site generation) → Cloudflare Pages. Zero JS framework — no React/Vue/Svelte. All interactivity is vanilla JS.
+**Stack**: Astro (static site generation) → a Cloudflare Worker with static assets (Worker `luci-dev`, auto-built and deployed from `master` by Cloudflare Workers Builds). Zero JS framework — no React/Vue/Svelte. All interactivity is vanilla JS.
 
 **Routes** (`src/pages/`) — every route file is a **thin wrapper** (4–20 lines) that
 imports a body component from `src/components/pages/`. That indirection is what lets
@@ -137,4 +137,4 @@ from the URL. Put page logic in the body component, never in the route file.
 | `astro.config.mjs` | Static output + Cloudflare adapter |
 | `tailwind.config.cjs` / `postcss.config.cjs` | Build-time Tailwind config (content globs, custom animations) + PostCSS pipeline |
 | `src/styles/global.css` | `@tailwind` directives, imported in `Layout.astro` |
-| `wrangler.jsonc` | Cloudflare Pages deployment config |
+| `wrangler.jsonc` | Cloudflare Worker deployment config — Worker `luci-dev`, static assets from `./dist/client`, `404-page` not-found handling |

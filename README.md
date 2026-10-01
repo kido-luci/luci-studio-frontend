@@ -3,7 +3,7 @@
 [![CI](https://github.com/kido-luci/luci-studio-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/kido-luci/luci-studio-frontend/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 
-Personal blog and portfolio site, built with [Astro](https://astro.build) and deployed as a fully static site to Cloudflare Pages. Live at **[luci-studio.com](https://luci-studio.com)**.
+Personal blog and portfolio site, built with [Astro](https://astro.build) as a fully static site and served by a Cloudflare Worker with static assets (Worker `luci-dev`), auto-built and deployed from `master` by Cloudflare Workers Builds. Live at **[luci-studio.com](https://luci-studio.com)**.
 
 Posts are fetched from a separate REST API **at build time** and baked into static HTML — there are no client-side API calls for post content.
 
