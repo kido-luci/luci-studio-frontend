@@ -114,6 +114,11 @@ function applyEmphasis(text: string): string {
         .replace(/\*(.*?)\*/gim, '<em>$1</em>');
 }
 
+// A markdown link, parked; its label arrives already rendered.
+function parkLink(store: string[], label: string, url: string): string {
+    return park(store, `<a href="${safeUrl(attrValue(store, url))}" target="_blank" rel="${OUTBOUND_REL}">${label}</a>`);
+}
+
 // Runs on escaped text whose code spans are already parked. Images and links are
 // parked as soon as they are built, so no later rule rewrites inside their
 // attributes or pairs an emphasis marker across them.
@@ -121,8 +126,18 @@ function applyInlineMarkdown(text: string, store: string[]): string {
     return applyEmphasis(text
         .replace(/!\[(.*?)\]\((.*?)\)/gim, (_, alt, url) => park(store,
             `<img src="${safeUrl(attrValue(store, url))}" alt="${attrValue(store, alt)}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`))
-        .replace(/\[(.*?)\]\((.*?)\)/gim, (_, label, url) => park(store,
-            `<a href="${safeUrl(attrValue(store, url))}" target="_blank" rel="${OUTBOUND_REL}">${applyEmphasis(label)}</a>`)));
+        .replace(/\[(.*?)\]\((.*?)\)/gim, (_, label, url) => parkLink(store, applyEmphasis(label), url)));
+}
+
+// Posts rely on bold and links inside backticks (`**go_router**`, a tile-server URL
+// written as a link), so a code span keeps exactly those two rules: a plain `**`
+// pair and `[text](url)`. No italics, no `***`, no images.
+const CODE_SPAN_BOLD = /(?<!\*)\*\*(?!\*)(.+?)(?<!\*)\*\*(?!\*)/g;
+
+function applyCodeSpanMarkdown(text: string, store: string[]): string {
+    const bold = (s: string) => s.replace(CODE_SPAN_BOLD, '<strong>$1</strong>');
+    return bold(text.replace(/(!?)\[(.*?)\]\((.*?)\)/g, (match, bang, label, url) =>
+        (bang ? match : parkLink(store, bold(label), url))));
 }
 
 function parseTableRow(line: string): string[] {
@@ -159,7 +174,8 @@ export function formatMarkdown(text: string) {
     });
 
     //    Then park inline code spans, so no later rule reads inside them.
-    processedText = processedText.replace(/`(.*?)`/g, (_, code) => park(inline, `<code>${escapeHtml(code)}</code>`));
+    processedText = processedText.replace(/`(.*?)`/g, (_, code) =>
+        park(inline, `<code>${applyCodeSpanMarkdown(escapeHtml(code), inline)}</code>`));
 
     // 2. Extract blockquotes/callouts BEFORE HTML escaping so `>` is still raw.
     //    Matches one or more consecutive `> ...` lines (including blank `>` lines).

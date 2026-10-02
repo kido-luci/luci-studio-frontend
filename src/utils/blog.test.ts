@@ -172,8 +172,6 @@ describe('Blog Utils', () => {
                 '<p><strong>bold <em>and italic</em> text</strong></p>'],
             ['emphasis markers inside code spans', 'Use `a*b` and `c*d` here.',
                 '<p>Use <code>a*b</code> and <code>c*d</code> here.</p>'],
-            ['link syntax inside a code span', 'Write `[a](b)` for a link.',
-                '<p>Write <code>[a](b)</code> for a link.</p>'],
             ['bold link label next to another bold run', '[**squadron**](https://pub.dev/packages/squadron) handles **worker pools**',
                 `<p>${link('https://pub.dev/packages/squadron', '<strong>squadron</strong>')} handles <strong>worker pools</strong></p>`],
             ['a star bullet with bold and italic', '*   **Parallelism** is about *doing* things at once',
@@ -181,6 +179,23 @@ describe('Blog Utils', () => {
             ['bold, italic and code in a quote', '> **Go** and *Dart* and `x*y`',
                 '<blockquote><strong>Go</strong> and <em>Dart</em> and <code>x*y</code></blockquote>'],
         ])('renders emphasis and code without interleaving: %s', (_, input, expected) => {
+            expect(formatMarkdown(input)).toBe(expected);
+        });
+
+        // Live posts put bold and links inside backticks; nothing else applies there.
+        it.each([
+            ['bold', 'Enter `**go_router**` now.',
+                '<p>Enter <code><strong>go_router</strong></code> now.</p>'],
+            ['bold code between two bold runs', '**Pre-load the** `**ui.Image**`**:** first.',
+                '<p><strong>Pre-load the</strong> <code><strong>ui.Image</strong></code><strong>:</strong> first.</p>'],
+            ['a link', 'Tiles: `[https://t.dev/{z}/{x}/{y}.png](https://t.dev/{z}/{x}/{y}.png)`',
+                `<p>Tiles: <code>${link('https://t.dev/{z}/{x}/{y}.png', 'https://t.dev/{z}/{x}/{y}.png')}</code></p>`],
+            ['an unsafe link', '`[x](javascript:alert(1))`',
+                `<p><code>${link('#', 'x')})</code></p>`],
+            ['single-star italics stay literal', '`a*b*c`', '<p><code>a*b*c</code></p>'],
+            ['a *** run stays literal', '`***x***`', '<p><code>***x***</code></p>'],
+            ['image syntax stays literal', '`![a](https://x.dev/i.png)`', '<p><code>![a](https://x.dev/i.png)</code></p>'],
+        ])('applies only bold and links inside a code span: %s', (_, input, expected) => {
             expect(formatMarkdown(input)).toBe(expected);
         });
 
