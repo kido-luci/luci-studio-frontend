@@ -11,6 +11,10 @@
 //
 // fetchOne: single-resource GET — 404 is a known empty state (null, no log);
 // other failures log, then throw (failFast) or resolve null.
+//
+// cachedFetchOne: fetchOne deduped by path across build-time callers (the en
+// and vi routes both read every post and series). A null or failed result is
+// dropped from the cache, so a retry fetches again.
 
 const rawBaseUrl = import.meta.env.PUBLIC_API_URL || '';
 export const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
@@ -49,10 +53,29 @@ export async function fetchOne<T>(path: string, opts: { failFast?: boolean } = {
         const response = await fetch(`${BASE_URL}${path}`);
         if (response.status === 404) return null;
         if (!response.ok) throw new Error(`GET ${path} failed with ${response.status}`);
-        return response.json();
+        return await response.json();
     } catch (error) {
         console.error(`Failed to fetch ${path}:`, error);
         if (opts.failFast) throw error;
         return null;
     }
+}
+
+const fetchOneCache = new Map<string, Promise<unknown>>();
+
+export function cachedFetchOne<T>(path: string, opts: { failFast?: boolean } = {}): Promise<T | null> {
+    const cached = fetchOneCache.get(path);
+    if (cached) return cached as Promise<T | null>;
+    const promise = fetchOne<T>(path, opts).then(
+        (data) => {
+            if (data === null) fetchOneCache.delete(path);
+            return data;
+        },
+        (error) => {
+            fetchOneCache.delete(path);
+            throw error;
+        },
+    );
+    fetchOneCache.set(path, promise);
+    return promise;
 }

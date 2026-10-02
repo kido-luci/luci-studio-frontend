@@ -7,6 +7,7 @@
 import { showConfirm } from './confirmDialog';
 import { escapeHtml, parseJWT, renderCommentText, timeAgo } from './commentFormat';
 import type { JwtPayload } from './commentFormat';
+import { localStore } from '../../utils/storage';
 
 // Twemoji is loaded from a CDN <script> in PostDetailPage.astro, so it may be
 // absent (blocked, offline, still loading) — every call site guards on it.
@@ -22,24 +23,22 @@ declare global {
 
 // A comment (or reply) as returned by the comments API and rendered here.
 interface CommentUser {
-  id?: string;
+  id?: number;
   name?: string;
   email?: string;
   avatar?: string;
 }
 interface CommentNode {
-  id: string;
+  id: number;
   content: string;
   created_at: string;
-  user_id?: string;
+  user_id?: number;
   user: CommentUser;
-  parent_id?: string | null;
-  is_recalled?: boolean;
+  parent_id?: number | null;
+  recalled?: boolean;
   likes?: number;
   dislikes?: number;
-  user_reaction?: string | null;
-  replies?: CommentNode[];
-  [key: string]: unknown;
+  user_reaction?: string;
 }
 
 export function initComments() {
@@ -62,9 +61,9 @@ export function initComments() {
     const TOKEN_KEY = 'user_token';
 
     // --- Token helpers ---
-    function getToken() { return localStorage.getItem(TOKEN_KEY); }
-    function setToken(t: string) { localStorage.setItem(TOKEN_KEY, t); }
-    function clearToken() { localStorage.removeItem(TOKEN_KEY); }
+    function getToken() { return localStore.get(TOKEN_KEY); }
+    function setToken(t: string) { localStore.set(TOKEN_KEY, t); }
+    function clearToken() { localStore.remove(TOKEN_KEY); }
 
     function isTokenValid(token: string | null) {
       if (!token) return false;
@@ -282,7 +281,7 @@ export function initComments() {
     // --- Render a single comment node ---
     function buildCommentEl(c: CommentNode, isReply = false, hasReplies = false) {
       const wrap = document.createElement('div');
-      wrap.dataset.commentId = c.id;
+      wrap.dataset.commentId = String(c.id);
 
       if (isReply) {
         // position:relative so the arm can be absolutely placed
@@ -391,14 +390,20 @@ export function initComments() {
         if (!ok) return;
         const t = getToken();
         if (!isTokenValid(t)) return;
-        const res = await fetch(`${API_URL}/posts/${postID}/comments/${c.id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${t}` },
-        });
-        if (res.ok || res.status === 204) {
-          const p = wrap.querySelector('p');
-          if (p) { p.textContent = _ci18n('messageRecalled', 'Message recalled'); p.style.fontStyle = 'italic'; p.style.color = 'var(--bp-faint)'; p.style.fontSize = '0.875rem'; }
-          wrap.querySelector('.recall-btn')?.remove();
+        try {
+          const res = await fetch(`${API_URL}/posts/${postID}/comments/${c.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${t}` },
+          });
+          if (res.ok || res.status === 204) {
+            const p = wrap.querySelector('p');
+            if (p) { p.textContent = _ci18n('messageRecalled', 'Message recalled'); p.style.fontStyle = 'italic'; p.style.color = 'var(--bp-faint)'; p.style.fontSize = '0.875rem'; }
+            wrap.querySelector('.recall-btn')?.remove();
+          } else {
+            alert('Failed to recall comment');
+          }
+        } catch {
+          alert('Failed to recall comment');
         }
       });
 
@@ -407,7 +412,7 @@ export function initComments() {
           // Replies can't nest — post to the same parent thread.
           // The root comment wrap is the sibling before our replies-wrap container.
           const rootWrap = wrap.parentElement?.previousElementSibling;
-          if (rootWrap instanceof HTMLElement) toggleReplyForm(rootWrap, c.parent_id ?? '', c.user.name ?? '');
+          if (rootWrap instanceof HTMLElement && c.parent_id != null) toggleReplyForm(rootWrap, c.parent_id, c.user.name ?? '');
         } else {
           toggleReplyForm(wrap, c.id, c.user.name ?? '');
         }
@@ -488,7 +493,7 @@ export function initComments() {
     }
 
     // --- Inline reply form ---
-    function toggleReplyForm(parentWrap: HTMLElement, parentCommentId: string, parentUserName: string) {
+    function toggleReplyForm(parentWrap: HTMLElement, parentCommentId: number, parentUserName: string) {
       const existing = parentWrap.querySelector('.reply-form-wrap');
       if (existing) { existing.remove(); return; }
 
@@ -585,11 +590,19 @@ export function initComments() {
         submitBtn.textContent = _ci18n('posting', 'Posting…');
 
         try {
-          const res = await fetch(`${API_URL}/posts/${postID}/comments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
-            body: JSON.stringify({ content, parent_id: parentCommentId }),
-          });
+          // Only a failed request is a failed reply: once the server answers
+          // 2xx the reply is saved, so a later error must not invite a resend.
+          let res: Response;
+          try {
+            res = await fetch(`${API_URL}/posts/${postID}/comments`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
+              body: JSON.stringify({ content, parent_id: parentCommentId }),
+            });
+          } catch {
+            alert('Failed to post reply');
+            return;
+          }
 
           if (res.status === 401 || res.status === 403) { clearToken(); renderAuthUI(); return; }
           if (!res.ok) { const txt = await res.text(); alert(txt || 'Failed to post reply'); return; }
@@ -786,11 +799,19 @@ export function initComments() {
       submitBtn.textContent = _ci18n('posting', 'Posting…');
 
       try {
-        const res = await fetch(`${API_URL}/posts/${postID}/comments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ content }),
-        });
+        // Only a failed request is a failed post: once the server answers 2xx
+        // the comment is saved, so a later error must not invite a resend.
+        let res: Response;
+        try {
+          res = await fetch(`${API_URL}/posts/${postID}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ content }),
+          });
+        } catch {
+          alert('Failed to post comment');
+          return;
+        }
 
         if (res.status === 401 || res.status === 403) { clearToken(); renderAuthUI(); return; }
         if (!res.ok) { const t = await res.text(); alert(t || 'Failed to post comment'); return; }

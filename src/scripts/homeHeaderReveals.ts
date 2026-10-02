@@ -5,7 +5,7 @@ export function initHomeHeaderReveals() {
   // settling with an expo decel. Triggered once per header on scroll into view.
   (function () {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const w = window as any;
+    const w = window;
     const ready = () => w.gsap && w.ScrollTrigger && w.SplitText;
     const run = () => {
       const { gsap, ScrollTrigger, SplitText } = w;

@@ -1,4 +1,4 @@
-import { BASE_URL } from '../lib/apiClient';
+import { fetchOne, FAIL_FAST } from '../lib/apiClient';
 import type { LocaleOverlay } from '../i18n';
 
 export interface ProfileFact { label: string; value: string; }
@@ -25,19 +25,21 @@ export interface Profile {
 let getProfilePromise: Promise<Profile | null> | null = null;
 
 export const profileService = {
+    // Build-time cached, and fails the prod build on fetch errors like the other
+    // content services. A 404 (no profile yet) resolves null; a null result or a
+    // failure is not cached, so a later caller fetches again.
     async getProfile(): Promise<Profile | null> {
         if (getProfilePromise) return getProfilePromise;
-        getProfilePromise = (async () => {
-            try {
-                const response = await fetch(`${BASE_URL}/profile`);
-                if (!response.ok) throw new Error(`GET /profile failed with ${response.status}`);
-                return await response.json();
-            } catch (error) {
-                console.error('Failed to fetch profile:', error);
+        getProfilePromise = fetchOne<Profile>('/profile', { failFast: FAIL_FAST }).then(
+            (profile) => {
+                if (!profile) getProfilePromise = null;
+                return profile;
+            },
+            (error) => {
                 getProfilePromise = null;
-                return null;
-            }
-        })();
+                throw error;
+            },
+        );
         return getProfilePromise;
     },
 };

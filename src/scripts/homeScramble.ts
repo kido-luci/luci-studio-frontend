@@ -7,7 +7,7 @@ import { whenReady } from './whenReady';
 // HomePage.astro; without it (or GSAP) after 8 s the labels simply stay put.
 export function initHomeScramble() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const w = window as any;
+  const w = window;
   const ready = () => w.gsap && w.ScrollTrigger && w.ScrambleTextPlugin;
   const run = () => {
     const { gsap, ScrollTrigger, ScrambleTextPlugin } = w;

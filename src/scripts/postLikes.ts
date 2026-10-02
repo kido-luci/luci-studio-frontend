@@ -1,4 +1,5 @@
 import { invalidatePostStatsCache, refreshPostStats } from '../utils/postStats';
+import { localStore } from '../utils/storage';
 
 // Post like buttons — the single implementation behind every `.tile-like-area`
 // (PostCard renders the markup; the home blog rail and the /blog list both wire
@@ -41,11 +42,11 @@ export function burstHearts(
 // The liked flag is client-only (`liked_<id>` in localStorage) — the backend
 // counts likes but doesn't know who pressed them.
 export function isLiked(postId: string | undefined): boolean {
-    return localStorage.getItem(`liked_${postId}`) === '1';
+    return localStore.get(`liked_${postId}`) === '1';
 }
 
 export function storeLiked(postId: string | undefined, liked: boolean) {
-    localStorage.setItem(`liked_${postId}`, liked ? '1' : '0');
+    localStore.set(`liked_${postId}`, liked ? '1' : '0');
 }
 
 // POSTs a like or an unlike and resolves with the backend's counts. On success

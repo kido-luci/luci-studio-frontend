@@ -1,9 +1,10 @@
 import { isWindows, dot, ring } from './env';
+import { localStore } from '../../utils/storage';
 
 // ── Theme Management ────────────────────────────────────────────────────
 // Initialize theme from localStorage or system preference
 const initTheme = () => {
-	const savedTheme = localStorage.getItem('theme');
+	const savedTheme = localStore.get('theme');
 	// Priority: explicit user choice → OS preference → dark when the OS theme
 	// can't be read (matches the pre-paint script in Layout.astro).
 	const theme =
@@ -23,7 +24,7 @@ const initTheme = () => {
 const toggleTheme = () => {
 	const isLight = document.body.classList.toggle('light-mode');
 	document.documentElement.classList.toggle('light-mode', isLight);
-	localStorage.setItem('theme', isLight ? 'light' : 'dark');
+	localStore.set('theme', isLight ? 'light' : 'dark');
 
 	// Update cursor colors for non-Windows
 	if (!isWindows && dot && ring) {
@@ -56,7 +57,7 @@ const syncSchemeUI = (scheme: string) => {
 };
 
 const initScheme = (): Scheme => {
-	const saved = localStorage.getItem('scheme');
+	const saved = localStore.get('scheme');
 	const scheme = isScheme(saved) ? saved : DEFAULT_SCHEME;
 	document.documentElement.dataset.scheme = scheme;
 	return scheme;
@@ -65,7 +66,7 @@ const initScheme = (): Scheme => {
 const setScheme = (name: string) => {
 	if (!isScheme(name)) return;
 	document.documentElement.dataset.scheme = name;
-	localStorage.setItem('scheme', name);
+	localStore.set('scheme', name);
 	syncSchemeUI(name);
 };
 
@@ -75,11 +76,11 @@ export function initThemeManagement() {
 	const currentScheme = initScheme();
 
 	// Expose toggle function globally for button click
-	(window as any).toggleTheme = () => {
+	window.toggleTheme = () => {
 		toggleTheme();
 		// Re-trigger scroll logic to update nav background immediately
 		window.dispatchEvent(new Event('scroll'));
 	};
-	(window as any).setScheme = setScheme;
+	window.setScheme = setScheme;
 	syncSchemeUI(currentScheme);
 }

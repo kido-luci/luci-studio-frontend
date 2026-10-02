@@ -1,9 +1,10 @@
 // Smoke check for the CI build, run after `npm run build` against
 // tools/ci/fixture-api.mjs. Checks that each fixture post and its /vi/ copy
 // and the fixture series page were rendered with the fixture titles, that the
-// sitemap lists the posts, and that no built page carries an inline on*= event
-// handler attribute (public/_headers sets script-src-attr 'none', so one would
-// silently stop working in production).
+// sitemap lists the posts, the series (en and vi) and the static pages, and
+// that no built page carries an inline on*= event handler attribute
+// (public/_headers sets script-src-attr 'none', so one would silently stop
+// working in production).
 //
 // Usage: node tools/ci/smoke.mjs [distDir]   (default dist/client)
 import fs from 'node:fs';
@@ -51,8 +52,18 @@ for (const post of POSTS) {
 
 for (const series of SERIES) {
     const slug = findPage('blog/series', series.title);
-    if (!slug) fail(`no /blog/series/<slug>/ page has the title "${series.title}"`);
-    else if (!read(`vi/blog/series/${slug}/index.html`)) fail(`/vi/blog/series/${slug}/ is missing`);
+    if (!slug) {
+        fail(`no /blog/series/<slug>/ page has the title "${series.title}"`);
+        continue;
+    }
+    if (!read(`vi/blog/series/${slug}/index.html`)) fail(`/vi/blog/series/${slug}/ is missing`);
+    for (const loc of [`/blog/series/${slug}/`, `/vi/blog/series/${slug}/`]) {
+        if (!sitemap.includes(`<loc>${SITE}${loc}</loc>`)) fail(`the sitemap does not list ${loc}`);
+    }
+}
+
+for (const loc of ['/portfolio/', '/lab/', '/games/', '/license/', '/blog/series/', '/vi/blog/series/']) {
+    if (!sitemap.includes(`<loc>${SITE}${loc}</loc>`)) fail(`the sitemap does not list ${loc}`);
 }
 
 // Inline event handlers: scan the attributes of every tag in every page.

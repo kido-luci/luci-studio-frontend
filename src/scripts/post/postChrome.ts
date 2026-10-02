@@ -4,6 +4,8 @@
 //
 // Split out of the old postEngagementComments module — none of this touches the
 // engagement counters or the comment thread.
+import { localStore } from '../../utils/storage';
+
 export function initPostChrome() {
   // Back to Blog: use history.back() if we came from /blog (preserves scroll)
   document.querySelectorAll('a[href="/blog"]').forEach(function(link) {
@@ -97,7 +99,7 @@ export function initPostChrome() {
     btn.addEventListener('click', () => {
       const list = read();
       const next = list.includes(id) ? list.filter(x => x !== id) : [...list, id];
-      localStorage.setItem(KEY, JSON.stringify(next));
+      localStore.set(KEY, JSON.stringify(next));
       sync();
     });
   }

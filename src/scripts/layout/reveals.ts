@@ -8,7 +8,7 @@ import { whenReady } from '../whenReady';
 export function initReveals() {
 	// Reduced motion: skip every reveal; CSS resolves the hidden states to visible.
 	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-	const w = window as any;
+	const w = window;
 	const root = document.documentElement;
 	// GSAP was late and the head script already showed the content: leave it
 	// visible rather than hide it again for an entrance animation.

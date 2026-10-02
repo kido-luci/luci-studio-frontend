@@ -1,4 +1,4 @@
-import { cachedGetAll, fetchOne, FAIL_FAST } from '../lib/apiClient';
+import { cachedGetAll, cachedFetchOne, FAIL_FAST } from '../lib/apiClient';
 import type { LocaleOverlay } from '../i18n';
 
 export interface Post {
@@ -22,5 +22,5 @@ export const postService = {
     getAll: cachedGetAll<Post>('/posts', { failFast: FAIL_FAST }),
 
     getByID: (id: string | number): Promise<Post | null> =>
-        fetchOne<Post>(`/posts/${id}`, { failFast: FAIL_FAST }),
+        cachedFetchOne<Post>(`/posts/${id}`, { failFast: FAIL_FAST }),
 };

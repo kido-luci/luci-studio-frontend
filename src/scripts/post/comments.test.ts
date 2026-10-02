@@ -1,6 +1,10 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initComments } from './comments';
+import { blockStorage } from '../../test/blockedStorage';
+
+// Recall asks through the themed confirm dialog; answer yes.
+vi.mock('./confirmDialog', () => ({ showConfirm: vi.fn(async () => true) }));
 
 // The post page's comment thread. The commenter JWT is the security-relevant
 // part (where it may come from, when it is dropped) and comment text is the XSS
@@ -13,8 +17,8 @@ const b64url = (s: string) => btoa(s).replace(/\+/g, '-').replace(/\//g, '_').re
 const makeJwt = (claims: Record<string, unknown>) =>
     `${b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))}.${b64url(JSON.stringify(claims))}.sig`;
 const nowSec = () => Math.floor(Date.now() / 1000);
-const validToken = (sub = 'u1') => makeJwt({ sub, name: 'Alice', role: 'user', exp: nowSec() + 3600 });
-const expiredToken = () => makeJwt({ sub: 'u1', name: 'Alice', role: 'user', exp: nowSec() - 60 });
+const validToken = (sub = '1') => makeJwt({ sub, name: 'Alice', role: 'user', exp: nowSec() + 3600 });
+const expiredToken = () => makeJwt({ sub: '1', name: 'Alice', role: 'user', exp: nowSec() - 60 });
 
 function mountPage() {
     document.body.innerHTML = `
@@ -51,11 +55,11 @@ function res(body: unknown, status = 200, headers: Record<string, string> = {}) 
 
 function comment(over: Record<string, unknown> = {}) {
     return {
-        id: 'c1',
+        id: 1,
         content: 'hello',
         created_at: new Date().toISOString(),
-        user_id: 'u2',
-        user: { id: over.user_id ?? 'u2', name: 'Bob' },
+        user_id: 2,
+        user: { id: over.user_id ?? 2, name: 'Bob' },
         likes: 2,
         dislikes: 0,
         ...over,
@@ -141,6 +145,25 @@ describe('initComments', () => {
         });
     });
 
+    // Blocked site data makes the token read throw; the thread must still load
+    // (signed out) instead of sticking on "Loading…".
+    it('still loads the thread, signed out, when storage is blocked', async () => {
+        const fetchMock = stubApi([comment()]);
+        mountPage();
+        const restore = blockStorage();
+        try {
+            expect(() => initComments()).not.toThrow();
+            await flush();
+        } finally {
+            restore();
+        }
+
+        expect(fetchMock).toHaveBeenCalled();
+        expect(document.querySelector('[data-comment-id="1"]')).not.toBeNull();
+        expect(document.getElementById('comments-loading')).toBeNull();
+        expect(isHidden('sign-in-prompt')).toBe(false);
+    });
+
     it('renders a hostile name and comment body as text', async () => {
         stubApi([comment({
             user: { name: '<img src=x onerror=alert(1)>' },
@@ -190,23 +213,164 @@ describe('initComments', () => {
     });
 
     it("shows the recall button only on the signed-in user's own comments", async () => {
-        localStorage.setItem('user_token', validToken('u1'));
-        stubApi([comment({ id: 'c1', user_id: 'u1' }), comment({ id: 'c2', user_id: 'u2' })]);
+        localStorage.setItem('user_token', validToken('1'));
+        stubApi([comment({ id: 1, user_id: 1 }), comment({ id: 2, user_id: 2 })]);
         mountPage();
         initComments();
         await flush();
 
-        expect(document.querySelector('[data-comment-id="c1"] .recall-btn')).not.toBeNull();
-        expect(document.querySelector('[data-comment-id="c2"] .recall-btn')).toBeNull();
+        expect(document.querySelector('[data-comment-id="1"] .recall-btn')).not.toBeNull();
+        expect(document.querySelector('[data-comment-id="2"] .recall-btn')).toBeNull();
     });
 
     it('shows no recall button when signed out', async () => {
-        stubApi([comment({ id: 'c1', user_id: 'u1' })]);
+        stubApi([comment({ id: 1, user_id: 1 })]);
         mountPage();
         initComments();
         await flush();
 
         expect(document.querySelector('.recall-btn')).toBeNull();
+    });
+
+    // A dropped connection on a write must tell the user it failed, not end in
+    // an unhandled rejection with nothing on screen.
+    describe('write failures', () => {
+        const networkDown = () => Promise.reject(new TypeError('Failed to fetch'));
+
+        // The list loads as usual; every write (POST, DELETE) answers with `write`.
+        function stubWrites(list: unknown[], write: () => unknown) {
+            const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+                if (url.startsWith(`${API}/posts/p1/comments?`)) {
+                    return res(list, 200, { 'X-Total-Count': String(list.length), 'X-Has-More': 'false' });
+                }
+                if (init?.method === 'POST' || init?.method === 'DELETE') return write();
+                throw new Error(`unexpected fetch ${url}`);
+            });
+            vi.stubGlobal('fetch', fetchMock);
+            return fetchMock;
+        }
+
+        beforeEach(() => {
+            localStorage.setItem('user_token', validToken('1'));
+            vi.stubGlobal('alert', vi.fn());
+        });
+
+        it('alerts when posting a comment fails, keeping the text', async () => {
+            stubWrites([], networkDown);
+            mountPage();
+            initComments();
+            await flush();
+
+            const input = document.getElementById('comment-input')!;
+            input.textContent = 'hello';
+            document.getElementById('comment-form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+            await flush();
+
+            expect(alert).toHaveBeenCalledWith('Failed to post comment');
+            expect(input.textContent).toBe('hello');
+            const submit = document.querySelector<HTMLButtonElement>('#comment-form button[type="submit"]')!;
+            expect(submit.disabled).toBe(false);
+        });
+
+        it('alerts when posting a reply fails, keeping the form and its text', async () => {
+            stubWrites([comment()], networkDown);
+            mountPage();
+            initComments();
+            await flush();
+
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .reply-btn')!.click();
+            const replyInput = document.querySelector<HTMLElement>('.reply-input')!;
+            replyInput.textContent = 'a reply';
+            document.querySelector<HTMLButtonElement>('.reply-submit')!.click();
+            await flush();
+
+            expect(alert).toHaveBeenCalledWith('Failed to post reply');
+            expect(document.querySelector('.reply-input')).toBe(replyInput);
+            expect(replyInput.textContent).toBe('a reply');
+            expect(document.querySelector<HTMLButtonElement>('.reply-submit')!.disabled).toBe(false);
+        });
+
+        it('alerts when a recall fails on the network, leaving the comment as it was', async () => {
+            stubWrites([comment({ id: 1, user_id: 1 })], networkDown);
+            mountPage();
+            initComments();
+            await flush();
+
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .recall-btn')!.click();
+            await flush();
+
+            expect(alert).toHaveBeenCalledWith('Failed to recall comment');
+            expect(document.querySelector('[data-comment-id="1"] .recall-btn')).not.toBeNull();
+        });
+
+        // Once the server has answered 2xx the comment is saved: a later failure
+        // (an unreadable body, a twemoji throw) must not tell the reader it
+        // failed, or a second Submit posts a duplicate. That failure escapes the
+        // click handler, whose promise nobody awaits, so Node reports it as an
+        // unhandled rejection; collect it here instead of failing the run.
+        async function collectUnhandled(run: () => Promise<void>) {
+            const caught: unknown[] = [];
+            const saved = process.listeners('unhandledRejection');
+            const collect = (reason: unknown) => { caught.push(reason); };
+            process.removeAllListeners('unhandledRejection');
+            process.on('unhandledRejection', collect);
+            try {
+                await run();
+                await flush();
+            } finally {
+                process.off('unhandledRejection', collect);
+                for (const listener of saved) process.on('unhandledRejection', listener);
+            }
+            return caught;
+        }
+
+        it('does not report a saved comment as failed when its response body is unreadable', async () => {
+            stubWrites([], () => ({ ...res({}, 201), json: () => Promise.reject(new SyntaxError('Unexpected end of JSON input')) }));
+            mountPage();
+            initComments();
+            await flush();
+
+            const caught = await collectUnhandled(async () => {
+                document.getElementById('comment-input')!.textContent = 'hello';
+                document.getElementById('comment-form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+                await flush();
+            });
+
+            expect(alert).not.toHaveBeenCalled();
+            expect(caught).toEqual([expect.objectContaining({ message: 'Unexpected end of JSON input' })]);
+            expect(document.querySelector<HTMLButtonElement>('#comment-form button[type="submit"]')!.disabled).toBe(false);
+        });
+
+        it('does not report a saved reply as failed when rendering it throws', async () => {
+            stubWrites([comment()], () => res(comment({ id: 3, parent_id: 1 }), 201));
+            mountPage();
+            initComments();
+            await flush();
+
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .reply-btn')!.click();
+            document.querySelector<HTMLElement>('.reply-input')!.textContent = 'a reply';
+            vi.stubGlobal('twemoji', { parse: () => { throw new Error('twemoji failed'); } });
+            const caught = await collectUnhandled(async () => {
+                document.querySelector<HTMLButtonElement>('.reply-submit')!.click();
+                await flush();
+            });
+
+            expect(alert).not.toHaveBeenCalled();
+            expect(caught).toEqual([expect.objectContaining({ message: 'twemoji failed' })]);
+        });
+
+        it('alerts when the server refuses a recall', async () => {
+            stubWrites([comment({ id: 1, user_id: 1 })], () => res({}, 500));
+            mountPage();
+            initComments();
+            await flush();
+
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .recall-btn')!.click();
+            await flush();
+
+            expect(alert).toHaveBeenCalledWith('Failed to recall comment');
+            expect(document.querySelector('[data-comment-id="1"] .recall-btn')).not.toBeNull();
+        });
     });
 
     describe('the composers', () => {
@@ -255,7 +419,7 @@ describe('initComments', () => {
             initComments();
             await flush();
 
-            document.querySelector<HTMLButtonElement>('[data-comment-id="c1"] .reply-btn')!.click();
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .reply-btn')!.click();
             exerciseComposer(
                 document.querySelector<HTMLElement>('.reply-input')!,
                 document.querySelector<HTMLElement>('.reply-char-count')!,
