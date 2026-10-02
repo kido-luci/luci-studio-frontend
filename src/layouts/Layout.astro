@@ -161,6 +161,8 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'];
 				const savedScheme = localStorage.getItem('scheme');
 				document.documentElement.dataset.scheme = SCHEMES.indexOf(savedScheme) >= 0 ? savedScheme : 'ocean';
+				// Arms the reveal hidden states; reveals.ts drops it if GSAP never loads.
+				document.documentElement.classList.add('reveal-anim');
 			})();
 		</script>
 	</head>
@@ -358,6 +360,9 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			body.light-mode ::-webkit-scrollbar-thumb:hover { background: #bbb; }
 
 			/* === CLIP-PATH REVEAL === */
+			/* The hidden start states here and under FADE SLIDE are gated on
+			   html.reveal-anim (added by the head script; reveals.ts removes it if
+			   the GSAP CDN never loads), so content is never left invisible. */
 			.reveal-word {
 				display: inline-block;
 				overflow: hidden;
@@ -365,9 +370,11 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			}
 			.reveal-word span {
 				display: inline-block;
+				transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease-out;
+			}
+			html.reveal-anim .reveal-word span {
 				transform: translateY(-60px);
 				opacity: 0;
-				transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease-out;
 			}
 			.reveal-word.revealed span {
 				transform: translateY(0);
@@ -381,14 +388,16 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 
 			/* === FADE SLIDE === */
 			[data-reveal] {
-				opacity: 0;
-				transform: translateY(40px);
 				transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 				will-change: opacity, transform;
 			}
-			[data-reveal="left"] { transform: translateX(-40px); opacity: 0; }
-			[data-reveal="right"] { transform: translateX(40px); opacity: 0; }
-			[data-reveal="scale"] { transform: scale(0.92); opacity: 0; }
+			html.reveal-anim [data-reveal] {
+				opacity: 0;
+				transform: translateY(40px);
+			}
+			html.reveal-anim [data-reveal="left"] { transform: translateX(-40px); opacity: 0; }
+			html.reveal-anim [data-reveal="right"] { transform: translateX(40px); opacity: 0; }
+			html.reveal-anim [data-reveal="scale"] { transform: scale(0.92); opacity: 0; }
 			[data-reveal].is-visible {
 				opacity: 1 !important;
 				transform: translateY(0) translateX(0) scale(1) !important;
