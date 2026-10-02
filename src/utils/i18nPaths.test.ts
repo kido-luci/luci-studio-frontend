@@ -133,14 +133,15 @@ describe('seriesPaths', () => {
         expect(paths[0].props.playlist.id).toBe('9');
     });
 
-    // Unlike postPaths, a failing playlist is skipped rather than failing the build.
-    it('skips a playlist that fails all 3 attempts, keeping the others', async () => {
+    // Like postPaths: a series missing from the build would still be linked from
+    // the series index and the blog rails, so a lasting failure fails the build.
+    it('rejects when a playlist still fails after 3 attempts', async () => {
         getAllPlaylists.mockResolvedValue([playlist('1'), playlist('2')]);
         getPlaylistByID.mockImplementation((id: string) =>
             id === '1' ? Promise.reject(new Error('nope')) : Promise.resolve(playlist(id)));
 
-        const paths = await settle(seriesPaths());
-        expect(paths.map(p => p.props.playlist.id)).toEqual(['2']);
+        await expect(settle(seriesPaths())).rejects.toThrow('nope');
+        expect(getPlaylistByID.mock.calls.filter(([id]) => id === '1')).toHaveLength(3);
     });
 
     it('drops a playlist whose fetch resolves null', async () => {

@@ -54,6 +54,9 @@ export async function postPaths() {
 export async function seriesPaths() {
   const playlists = await playlistService.getAll();
 
+  // Same policy as posts: getByID only throws in FAIL_FAST (prod) builds, and
+  // there a series that fails all 3 attempts fails the build, because the
+  // series index and blog rails would still link to the missing page.
   async function fetchPlaylistWithRetry(id: string) {
     let lastErr: unknown;
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -65,8 +68,7 @@ export async function seriesPaths() {
         if (attempt < 2) await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
       }
     }
-    console.error(`[getStaticPaths] playlist ${id} gave up after 3 attempts; skipping:`, lastErr);
-    return null;
+    throw lastErr;
   }
 
   async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
