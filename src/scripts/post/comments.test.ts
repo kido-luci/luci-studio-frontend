@@ -3,6 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initComments } from './comments';
 import { blockStorage } from '../../test/blockedStorage';
 
+// Recall asks through the themed confirm dialog; answer yes.
+vi.mock('./confirmDialog', () => ({ showConfirm: vi.fn(async () => true) }));
+
 // The post page's comment thread. The commenter JWT is the security-relevant
 // part (where it may come from, when it is dropped) and comment text is the XSS
 // boundary, so both are pinned here alongside the composer behaviour. Tokens
@@ -227,6 +230,91 @@ describe('initComments', () => {
         await flush();
 
         expect(document.querySelector('.recall-btn')).toBeNull();
+    });
+
+    // A dropped connection on a write must tell the user it failed, not end in
+    // an unhandled rejection with nothing on screen.
+    describe('write failures', () => {
+        const networkDown = () => Promise.reject(new TypeError('Failed to fetch'));
+
+        // The list loads as usual; every write (POST, DELETE) answers with `write`.
+        function stubWrites(list: unknown[], write: () => unknown) {
+            const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+                if (url.startsWith(`${API}/posts/p1/comments?`)) {
+                    return res(list, 200, { 'X-Total-Count': String(list.length), 'X-Has-More': 'false' });
+                }
+                if (init?.method === 'POST' || init?.method === 'DELETE') return write();
+                throw new Error(`unexpected fetch ${url}`);
+            });
+            vi.stubGlobal('fetch', fetchMock);
+            return fetchMock;
+        }
+
+        beforeEach(() => {
+            localStorage.setItem('user_token', validToken('u1'));
+            vi.stubGlobal('alert', vi.fn());
+        });
+
+        it('alerts when posting a comment fails, keeping the text', async () => {
+            stubWrites([], networkDown);
+            mountPage();
+            initComments();
+            await flush();
+
+            const input = document.getElementById('comment-input')!;
+            input.textContent = 'hello';
+            document.getElementById('comment-form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+            await flush();
+
+            expect(alert).toHaveBeenCalledWith('Failed to post comment');
+            expect(input.textContent).toBe('hello');
+            const submit = document.querySelector<HTMLButtonElement>('#comment-form button[type="submit"]')!;
+            expect(submit.disabled).toBe(false);
+        });
+
+        it('alerts when posting a reply fails, keeping the form and its text', async () => {
+            stubWrites([comment()], networkDown);
+            mountPage();
+            initComments();
+            await flush();
+
+            document.querySelector<HTMLButtonElement>('[data-comment-id="c1"] .reply-btn')!.click();
+            const replyInput = document.querySelector<HTMLElement>('.reply-input')!;
+            replyInput.textContent = 'a reply';
+            document.querySelector<HTMLButtonElement>('.reply-submit')!.click();
+            await flush();
+
+            expect(alert).toHaveBeenCalledWith('Failed to post reply');
+            expect(document.querySelector('.reply-input')).toBe(replyInput);
+            expect(replyInput.textContent).toBe('a reply');
+            expect(document.querySelector<HTMLButtonElement>('.reply-submit')!.disabled).toBe(false);
+        });
+
+        it('alerts when a recall fails on the network, leaving the comment as it was', async () => {
+            stubWrites([comment({ id: 'c1', user_id: 'u1' })], networkDown);
+            mountPage();
+            initComments();
+            await flush();
+
+            document.querySelector<HTMLButtonElement>('[data-comment-id="c1"] .recall-btn')!.click();
+            await flush();
+
+            expect(alert).toHaveBeenCalledWith('Failed to recall comment');
+            expect(document.querySelector('[data-comment-id="c1"] .recall-btn')).not.toBeNull();
+        });
+
+        it('alerts when the server refuses a recall', async () => {
+            stubWrites([comment({ id: 'c1', user_id: 'u1' })], () => res({}, 500));
+            mountPage();
+            initComments();
+            await flush();
+
+            document.querySelector<HTMLButtonElement>('[data-comment-id="c1"] .recall-btn')!.click();
+            await flush();
+
+            expect(alert).toHaveBeenCalledWith('Failed to recall comment');
+            expect(document.querySelector('[data-comment-id="c1"] .recall-btn')).not.toBeNull();
+        });
     });
 
     describe('the composers', () => {

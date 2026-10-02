@@ -392,14 +392,20 @@ export function initComments() {
         if (!ok) return;
         const t = getToken();
         if (!isTokenValid(t)) return;
-        const res = await fetch(`${API_URL}/posts/${postID}/comments/${c.id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${t}` },
-        });
-        if (res.ok || res.status === 204) {
-          const p = wrap.querySelector('p');
-          if (p) { p.textContent = _ci18n('messageRecalled', 'Message recalled'); p.style.fontStyle = 'italic'; p.style.color = 'var(--bp-faint)'; p.style.fontSize = '0.875rem'; }
-          wrap.querySelector('.recall-btn')?.remove();
+        try {
+          const res = await fetch(`${API_URL}/posts/${postID}/comments/${c.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${t}` },
+          });
+          if (res.ok || res.status === 204) {
+            const p = wrap.querySelector('p');
+            if (p) { p.textContent = _ci18n('messageRecalled', 'Message recalled'); p.style.fontStyle = 'italic'; p.style.color = 'var(--bp-faint)'; p.style.fontSize = '0.875rem'; }
+            wrap.querySelector('.recall-btn')?.remove();
+          } else {
+            alert('Failed to recall comment');
+          }
+        } catch {
+          alert('Failed to recall comment');
         }
       });
 
@@ -622,6 +628,8 @@ export function initComments() {
 
           const current = parseInt(countBadge?.textContent ?? '') || 0;
           updateCountBadge(current + 1);
+        } catch {
+          alert('Failed to post reply');
         } finally {
           submitBtn.disabled = false;
           submitBtn.textContent = _ci18n('replySubmit', 'Reply');
@@ -810,6 +818,8 @@ export function initComments() {
         if (charCount) charCount.textContent = '0/500';
         const current = parseInt(countBadge?.textContent ?? '') || 0;
         updateCountBadge(current + 1);
+      } catch {
+        alert('Failed to post comment');
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = _ci18n('submitBtn', 'Submit');
