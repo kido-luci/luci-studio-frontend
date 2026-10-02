@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { Window } from 'happy-dom';
 import {
     calculateReadTime,
     calculateReadTimeFromWordCount,
@@ -7,7 +8,15 @@ import {
     shortId,
     buildPostSlug,
     formatMarkdown,
+    demoteH1Headings,
 } from './blog';
+
+const IMG_STYLE = 'max-width:100%; border-radius:0.75rem; margin:1.5rem 0;';
+const link = (href: string, label: string) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+const codeBlock = (lang: string, code: string) =>
+    `<div class="code-block-container"><pre><code class="language-${lang}">${code}</code></pre></div>`;
+const TABLE = '<div class="table-container"><table><thead><tr><th>a</th><th>b</th></tr></thead>' +
+    '<tbody><tr><td>1</td><td>2</td></tr></tbody></table></div>';
 
 describe('Blog Utils', () => {
     describe('calculateReadTime', () => {
@@ -150,6 +159,125 @@ describe('Blog Utils', () => {
             const html = formatMarkdown('[buy](https://example.com)');
             expect(html).toContain('rel="noopener noreferrer"');
             expect(html).not.toContain('sponsored');
+        });
+
+        it.each([
+            ['two bold runs on one line', 'Use **Go** and **Dart** together.',
+                '<p>Use <strong>Go</strong> and <strong>Dart</strong> together.</p>'],
+            ['two italic runs on one line', 'Keep it *visible* to tests and *invisible* to others.',
+                '<p>Keep it <em>visible</em> to tests and <em>invisible</em> to others.</p>'],
+            ['bold, italic and code on one line', '**Bold**, *italic* and `a*b` on one line.',
+                '<p><strong>Bold</strong>, <em>italic</em> and <code>a*b</code> on one line.</p>'],
+            ['italic inside bold', '**bold *and italic* text**',
+                '<p><strong>bold <em>and italic</em> text</strong></p>'],
+            ['emphasis markers inside code spans', 'Use `a*b` and `c*d` here.',
+                '<p>Use <code>a*b</code> and <code>c*d</code> here.</p>'],
+            ['link syntax inside a code span', 'Write `[a](b)` for a link.',
+                '<p>Write <code>[a](b)</code> for a link.</p>'],
+            ['bold link label next to another bold run', '[**squadron**](https://pub.dev/packages/squadron) handles **worker pools**',
+                `<p>${link('https://pub.dev/packages/squadron', '<strong>squadron</strong>')} handles <strong>worker pools</strong></p>`],
+            ['a star bullet with bold and italic', '*   **Parallelism** is about *doing* things at once',
+                '<li>  <strong>Parallelism</strong> is about <em>doing</em> things at once</li>'],
+            ['bold, italic and code in a quote', '> **Go** and *Dart* and `x*y`',
+                '<blockquote><strong>Go</strong> and <em>Dart</em> and <code>x*y</code></blockquote>'],
+        ])('renders emphasis and code without interleaving: %s', (_, input, expected) => {
+            expect(formatMarkdown(input)).toBe(expected);
+        });
+
+        it.each([
+            ['text right after a fence', '```go\nfmt.Println(1)\n```\nThis sentence follows the fence.',
+                `${codeBlock('go', 'fmt.Println(1)\n')}\n<p>This sentence follows the fence.</p>`],
+            ['text right after a fence (CRLF)', '```go\r\nx\r\n```\r\nAfter.',
+                `${codeBlock('go', 'x\r\n')}\n<p>After.</p>`],
+            ['text right before a fence', 'Intro line\n```js\nlet x = 1;\n```',
+                `<p>Intro line</p>\n${codeBlock('js', 'let x = 1;\n')}`],
+            ['a fence opened on the line that closes the previous one', '```\na\n``````\nb\n```',
+                `${codeBlock('', 'a\n')}\n${codeBlock('', 'b\n')}`],
+            ['a fence between two list items', '- one\n```sh\nls\n```\n- two',
+                `<li>one</li>\n${codeBlock('sh', 'ls\n')}\n<li>two</li>`],
+            ['text right after a quote', '> quoted line\nThis sentence follows the quote.',
+                '<blockquote>quoted line</blockquote>\n<p>This sentence follows the quote.</p>'],
+            ['text right before a quote', 'Intro line\n> quoted',
+                '<p>Intro line</p>\n<blockquote>quoted</blockquote>'],
+            ['text right after a table', '| a | b |\n|---|---|\n| 1 | 2 |\nThis sentence follows the table.',
+                `${TABLE}\n<p>This sentence follows the table.</p>`],
+            ['text right before a table', 'Intro line\n| a | b |\n|---|---|\n| 1 | 2 |',
+                `<p>Intro line</p>\n${TABLE}`],
+        ])('ends a block at its own boundary: %s', (_, input, expected) => {
+            expect(formatMarkdown(input)).toBe(expected);
+        });
+
+        it.each([
+            ['javascript:', '[x](javascript:alert(1))'],
+            ['mixed-case javascript:', '[x](JaVaScRiPt:alert(1))'],
+            ['javascript: with a tab in the scheme', '[x](java\tscript:alert(1))'],
+            ['javascript: after leading spaces', '[x](  javascript:alert(1))'],
+            ['vbscript:', '[x](vbscript:msgbox(1))'],
+            ['data:', '[x](data:text/html,hi)'],
+            ['a scheme smuggled through a code span', '[x](`javascript`:alert(1))'],
+        ])('replaces an unsafe link URL with #: %s', (_, input) => {
+            expect(formatMarkdown(input)).toContain(`<a href="#" target="_blank"`);
+        });
+
+        it.each([
+            ['https', 'https://luci-studio.com/blog/'],
+            ['mailto', 'mailto:hi@luci-studio.com'],
+            ['an anchor', '#setup'],
+            ['an absolute path', '/blog/series/'],
+            ['a relative path', './guide'],
+        ])('keeps a safe link URL: %s', (_, url) => {
+            expect(formatMarkdown(`[x](${url})`)).toBe(`<p>${link(url, 'x')}</p>`);
+        });
+
+        it.each([
+            ['javascript:', '![x](javascript:alert(1))', `<p><img src="#" alt="x" style="${IMG_STYLE}" />)</p>`],
+            ['data:', '![x](data:image/svg+xml,hi)', `<p><img src="#" alt="x" style="${IMG_STYLE}" /></p>`],
+        ])('replaces an unsafe image URL with #: %s', (_, input, expected) => {
+            expect(formatMarkdown(input)).toBe(expected);
+        });
+
+        it.each([
+            ['nested brackets in an image URL',
+                '![a](x[y](/ onerror=window.onerror=alert;throw[1]//) t)',
+                `<p><img src="x[y](/ onerror=window.onerror=alert;throw[1]//" alt="a" style="${IMG_STYLE}" /> t)</p>`],
+            ['a quote in a link URL', '[x](https://a.com/"onmouseover="alert(1))',
+                `<p>${link('https://a.com/&quot;onmouseover=&quot;alert(1', 'x')})</p>`],
+            ['a quote in image alt text', '![a" onerror="alert(1)](https://x.dev/i.png)',
+                `<p><img src="https://x.dev/i.png" alt="a&quot; onerror=&quot;alert(1)" style="${IMG_STYLE}" /></p>`],
+            ['a code span in image alt text', '![a `b` c](https://x.dev/i.png)',
+                `<p><img src="https://x.dev/i.png" alt="a b c" style="${IMG_STYLE}" /></p>`],
+        ])('keeps attribute values inside their attribute: %s', (_, input, expected) => {
+            const html = formatMarkdown(input);
+            expect(html).toBe(expected);
+            // What a browser builds from it: no element may gain an event-handler attribute.
+            const { document } = new Window();
+            document.body.innerHTML = html;
+            const handlers = [...document.body.querySelectorAll('*')]
+                .flatMap(el => el.getAttributeNames().filter(name => name.startsWith('on')));
+            expect(handlers).toEqual([]);
+        });
+
+        it('still nests images, code and bold inside link labels', () => {
+            expect(formatMarkdown('[![alt](https://x.dev/i.png)](https://x.dev)')).toBe(
+                `<p>${link('https://x.dev', `<img src="https://x.dev/i.png" alt="alt" style="${IMG_STYLE}" />`)}</p>`);
+            expect(formatMarkdown('[**bold** `code`](https://x.dev)')).toBe(
+                `<p>${link('https://x.dev', '<strong>bold</strong> <code>code</code>')}</p>`);
+        });
+    });
+
+    describe('demoteH1Headings', () => {
+        it.each([
+            ['a body h1', '# Setup\ntext', '## Setup\ntext'],
+            ['a # comment inside a fence', '```bash\n# comment\necho hi\n```', '```bash\n# comment\necho hi\n```'],
+            ['h1s around a fence, not inside it', '# Setup\n```yaml\n# pubspec.yaml\n```\n# Next',
+                '## Setup\n```yaml\n# pubspec.yaml\n```\n## Next'],
+        ])('demotes %s', (_, input, expected) => {
+            expect(demoteH1Headings(input)).toBe(expected);
+        });
+
+        it('leaves the fenced comment intact through the renderer', () => {
+            expect(formatMarkdown(demoteH1Headings('# Setup\n```bash\n# comment\n```'))).toBe(
+                `<h2>Setup</h2>\n${codeBlock('bash', '# comment\n')}`);
         });
     });
 

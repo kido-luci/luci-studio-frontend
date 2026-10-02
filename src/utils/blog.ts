@@ -64,16 +64,16 @@ function escapeHtml(text: string): string {
         .replace(/'/g, '&#039;');
 }
 
-const UNSAFE_URL = /^(javascript|data|vbscript|file):/i;
+// An href/src may be http(s) or mailto, or carry no scheme at all (a relative path,
+// `//host`, `?query`, `#anchor`); anything else becomes '#'. Browsers skip control
+// characters and spaces when reading a scheme (`java\tscript:`), so drop them first.
+const SAFE_SCHEME = /^(https?|mailto):/i;
+const ANY_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 const SAFE_LANGUAGE = /[^A-Za-z0-9_+-]/g;
 
-function safeImgSrc(url: string): string {
-    return UNSAFE_URL.test(url) ? '#' : url;
-}
-
-function safeLinkHref(url: string): string {
-    if (UNSAFE_URL.test(url)) return '#';
-    return (url.startsWith('http') || url.startsWith('/') || url.startsWith('#')) ? url : '#';
+function safeUrl(url: string): string {
+    const probe = url.replace(/[\u0000-\u0020\u007f]/g, '');
+    return ANY_SCHEME.test(probe) && !SAFE_SCHEME.test(probe) ? '#' : url;
 }
 
 // rel for every outbound markdown link. The site runs no affiliate or sponsored
@@ -81,18 +81,48 @@ function safeLinkHref(url: string): string {
 // that keeps target="_blank" from leaking the opener and the referrer.
 const OUTBOUND_REL = 'noopener noreferrer';
 
-function applyInlineMarkdown(text: string): string {
+// Inline HTML that later rules must not read into (code spans, images, links) is
+// parked behind a token — its index between two private-use characters, which no
+// rule matches and escapeHtml leaves alone — and put back once every rule has run.
+const TOKEN = /\uE000(\d+)\uE001/g;
+
+function park(store: string[], html: string): string {
+    return `\uE000${store.push(html) - 1}\uE001`;
+}
+
+// Recursive: a link's label can itself hold a parked code span or image.
+function unpark(store: string[], text: string): string {
+    return text.replace(TOKEN, (_, i) => unpark(store, store[Number(i)]));
+}
+
+// An attribute value: parked HTML flattened to its text, then quotes and angle
+// brackets escaped. The text has been through escapeHtml already, so `&` is left alone.
+function attrValue(store: string[], text: string): string {
+    return unpark(store, text)
+        .replace(/<[^>]*>/g, '')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+// Lazy, so `**Go** and **Dart**` stays two bold runs instead of one with a stray
+// italic inside it.
+function applyEmphasis(text: string): string {
     return text
         .replace(/\*\*\*(.*?)\*\*\*/gim, '<strong><em>$1</em></strong>')
         .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-        .replace(/`(.*?)`/gim, '<code>$1</code>')
-        .replace(/!\[(.*?)\]\((.*?)\)/gim, (_, alt, url) => {
-            return `<img src="${safeImgSrc(url)}" alt="${alt}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`;
-        })
-        .replace(/\[(.*?)\]\((.*?)\)/gim, (_, label, url) => {
-            return `<a href="${safeLinkHref(url)}" target="_blank" rel="${OUTBOUND_REL}">${label}</a>`;
-        });
+        .replace(/\*(.*?)\*/gim, '<em>$1</em>');
+}
+
+// Runs on escaped text whose code spans are already parked. Images and links are
+// parked as soon as they are built, so no later rule rewrites inside their
+// attributes or pairs an emphasis marker across them.
+function applyInlineMarkdown(text: string, store: string[]): string {
+    return applyEmphasis(text
+        .replace(/!\[(.*?)\]\((.*?)\)/gim, (_, alt, url) => park(store,
+            `<img src="${safeUrl(attrValue(store, url))}" alt="${attrValue(store, alt)}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`))
+        .replace(/\[(.*?)\]\((.*?)\)/gim, (_, label, url) => park(store,
+            `<a href="${safeUrl(attrValue(store, url))}" target="_blank" rel="${OUTBOUND_REL}">${applyEmphasis(label)}</a>`)));
 }
 
 function parseTableRow(line: string): string[] {
@@ -104,21 +134,32 @@ function parseTableRow(line: string): string[] {
         .map(c => c.trim());
 }
 
+// A fenced code block: ``` and an info string, then everything up to the next ```.
+// Shared with demoteH1Headings so both agree on where each fence starts and ends.
+const FENCE = /```(.*?)\r?\n([\s\S]*?)```/gim;
+
 export function formatMarkdown(text: string) {
     const codeBlocks: string[] = [];
     const blockquotes: string[] = [];
     const tables: string[] = [];
-    let processedText = text;
+    const inline: string[] = [];
+    // The token delimiters must never come from the post itself.
+    let processedText = text.replace(/[\uE000\uE001]/g, '');
 
-    // 1. Extract fenced code blocks → placeholders (escape content inside)
-    processedText = processedText.replace(/```(.*?)\r?\n([\s\S]*?)```/gim, (_, lang, code) => {
+    // 1. Extract fenced code blocks → placeholders (escape content inside). Each
+    //    placeholder is a paragraph of its own, so a line right before or after the
+    //    fence still starts a block of its own.
+    processedText = processedText.replace(FENCE, (_, lang, code) => {
         const index = codeBlocks.length;
         const safeLang = escapeHtml(lang.trim().replace(SAFE_LANGUAGE, ''));
         codeBlocks.push(
             `<div class="code-block-container"><pre><code class="language-${safeLang}">${escapeHtml(code)}</code></pre></div>`
         );
-        return `__CODE_BLOCK_${index}__`;
+        return `\n\n__CODE_BLOCK_${index}__\n\n`;
     });
+
+    //    Then park inline code spans, so no later rule reads inside them.
+    processedText = processedText.replace(/`(.*?)`/g, (_, code) => park(inline, `<code>${escapeHtml(code)}</code>`));
 
     // 2. Extract blockquotes/callouts BEFORE HTML escaping so `>` is still raw.
     //    Matches one or more consecutive `> ...` lines (including blank `>` lines).
@@ -135,18 +176,18 @@ export function formatMarkdown(text: string) {
             const inlineRest = firstLineMatch?.[2]?.trim() ?? '';
             const remainingLines = contents.slice(1).join('\n').trim();
             const rawBody = [inlineRest, remainingLines].filter(Boolean).join('\n');
-            const body = applyInlineMarkdown(escapeHtml(rawBody));
+            const body = applyInlineMarkdown(escapeHtml(rawBody), inline);
             blockquotes.push(
                 `<div style="border-left:4px solid ${color};background:${bg};padding:0.875rem 1.25rem;border-radius:0 0.5rem 0.5rem 0;margin:1.5rem 0;">` +
                 `<div style="font-size:0.95rem;">${body}</div>` +
                 `</div>`
             );
         } else {
-            const body = applyInlineMarkdown(escapeHtml(contents.join('\n').trim()));
+            const body = applyInlineMarkdown(escapeHtml(contents.join('\n').trim()), inline);
             blockquotes.push(`<blockquote>${body}</blockquote>`);
         }
 
-        return `__BLOCKQUOTE_${index}__\n`;
+        return `\n\n__BLOCKQUOTE_${index}__\n\n`;
     });
 
     // 3. Extract GFM tables → placeholders. Header row, separator row (dashes /
@@ -164,7 +205,7 @@ export function formatMarkdown(text: string) {
                 if (left) return 'left';
                 return '';
             });
-            const cell = (c: string) => applyInlineMarkdown(escapeHtml(c));
+            const cell = (c: string) => applyInlineMarkdown(escapeHtml(c), inline);
             const attr = (i: number) => (aligns[i] ? ` style="text-align:${aligns[i]}"` : '');
 
             const thead = '<thead><tr>' +
@@ -178,33 +219,24 @@ export function formatMarkdown(text: string) {
 
             const index = tables.length;
             tables.push(`<div class="table-container"><table>${thead}${tbody}</table></div>`);
-            return `\n__TABLE_${index}__\n`;
+            return `\n\n__TABLE_${index}__\n\n`;
         }
     );
 
     // 4. Escape HTML in the remaining text
     processedText = escapeHtml(processedText);
 
-    // 5. Apply block + inline markdown
-    processedText = processedText
+    // 5. Apply block + inline markdown. List markers go before emphasis, so a
+    //    `* ` bullet is never read as an emphasis delimiter.
+    processedText = applyInlineMarkdown(processedText
         .replace(/^# (.*$)/gim, '<h1>$1</h1>')
         .replace(/^## (.*$)/gim, '<h2>$1</h2>')
         .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/\*\*\*(.*)\*\*\*/gim, '<strong><em>$1</em></strong>')
-        .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-        .replace(/\*(.*)\*/gim, '<em>$1</em>')
-        .replace(/!\[(.*?)\]\((.*?)\)/gim, (_, alt, url) => {
-            return `<img src="${safeImgSrc(url)}" alt="${alt}" style="max-width:100%; border-radius:0.75rem; margin:1.5rem 0;" />`;
-        })
-        .replace(/\[(.*?)\]\((.*?)\)/gim, (_, label, url) => {
-            return `<a href="${safeLinkHref(url)}" target="_blank" rel="${OUTBOUND_REL}">${label}</a>`;
-        })
         .replace(/^\* (.*$)/gim, '<li>$1</li>')
-        .replace(/^- (.*$)/gim, '<li>$1</li>')
-        .replace(/`(.*?)`/gim, '<code>$1</code>');
+        .replace(/^- (.*$)/gim, '<li>$1</li>'), inline);
 
-    // 6. Wrap paragraphs and re-insert extracted blocks
-    return processedText
+    // 6. Wrap paragraphs, re-insert extracted blocks, then the parked inline HTML
+    return unpark(inline, processedText
         .split(/\r?\n\s*\r?\n/g)
         .map(p => p.trim())
         .filter(p => p.length > 0)
@@ -221,7 +253,13 @@ export function formatMarkdown(text: string) {
             if (p.startsWith('<h') || p.startsWith('<li')) return p;
             return `<p>${p.replace(/\n/g, '<br />')}</p>`;
         })
-        .join('\n');
+        .join('\n'));
+}
+
+// The post page shows the title as its own h1, so a body `# Heading` is demoted to
+// `## `. Fenced code is skipped, so a shell or YAML `# comment` keeps its single `#`.
+export function demoteH1Headings(markdown: string): string {
+    return markdown.replace(new RegExp(`${FENCE.source}|^#\\s`, 'gm'), m => (m.startsWith('```') ? m : '## '));
 }
 
 export function slugify(text: string): string {
