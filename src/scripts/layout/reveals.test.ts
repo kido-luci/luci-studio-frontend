@@ -7,6 +7,7 @@ import { inlineScript } from '../../test/inlineScript';
 // html.reveal-anim, added by Layout's head script. That script also starts the
 // fail-open timer: module scripts (reveals.ts among them) only run once the CDN
 // scripts settle, so a timer started there would start late when the CDN hangs.
+// At 2.5 s the gate goes unless initReveals has taken over (html.reveal-init).
 describe('reveals', () => {
     const root = document.documentElement;
     const runHeadScript = () => new Function(inlineScript('layouts/Layout.astro', "classList.add('reveal-anim')"))();
@@ -30,7 +31,7 @@ describe('reveals', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.unstubAllGlobals();
-        root.classList.remove('reveal-anim');
+        root.classList.remove('reveal-anim', 'reveal-init');
     });
 
     describe("Layout's head script", () => {
@@ -45,11 +46,22 @@ describe('reveals', () => {
             expect(root.classList.contains('reveal-anim')).toBe(false);
         });
 
-        it('keeps the gate when GSAP is there by then', () => {
+        it('drops the gate when GSAP is there but initReveals has not taken over by then', () => {
             runHeadScript();
-            loadGsap();
+            loadGsap(); // e.g. SplitText or Lenis still hanging, so the module hasn't run
+            vi.advanceTimersByTime(2600);
+
+            expect(root.classList.contains('reveal-anim')).toBe(false);
+        });
+
+        it('keeps the gate once initReveals has taken over', () => {
+            runHeadScript();
+            const { gsap } = loadGsap();
+            initReveals();
             vi.advanceTimersByTime(5000);
 
+            expect(gsap.set).toHaveBeenCalled();
+            expect(root.classList.contains('reveal-init')).toBe(true);
             expect(root.classList.contains('reveal-anim')).toBe(true);
         });
     });

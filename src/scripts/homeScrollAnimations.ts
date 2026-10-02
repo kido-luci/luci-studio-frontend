@@ -18,6 +18,9 @@ export function initHomeScrollAnimations() {
     const ready = () => w.gsap && w.ScrollTrigger;
 
     const run = () => {
+      // Re-checked here: the head script may have dropped the gate meanwhile.
+      if (!root.classList.contains('home-anim')) return;
+      root.classList.add('home-anim-init'); // taken over: the head timer keeps the gate
       const { gsap, ScrollTrigger } = w;
       gsap.registerPlugin(ScrollTrigger);
 
