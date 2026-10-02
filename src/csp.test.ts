@@ -83,7 +83,7 @@ describe('Content-Security-Policy (public/_headers)', () => {
 
     it('matches no inline event handler attribute left in src', () => {
         const handlers = sourceFiles.flatMap(file =>
-            [...readFileSync(file, 'utf8').matchAll(/\son[a-z]+\s*=\s*["'{`$]/g)]
+            [...readFileSync(file, 'utf8').matchAll(/\son[a-z]+\s*=(?!=)/g)]
                 .map(m => `${relative(ROOT, file)}: ${m[0].trim()}`));
         expect(handlers).toEqual([]);
     });
