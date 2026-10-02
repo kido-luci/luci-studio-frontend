@@ -7,6 +7,7 @@
 import { showConfirm } from './confirmDialog';
 import { escapeHtml, parseJWT, renderCommentText, timeAgo } from './commentFormat';
 import type { JwtPayload } from './commentFormat';
+import { localStore } from '../../utils/storage';
 
 // Twemoji is loaded from a CDN <script> in PostDetailPage.astro, so it may be
 // absent (blocked, offline, still loading) — every call site guards on it.
@@ -62,9 +63,9 @@ export function initComments() {
     const TOKEN_KEY = 'user_token';
 
     // --- Token helpers ---
-    function getToken() { return localStorage.getItem(TOKEN_KEY); }
-    function setToken(t: string) { localStorage.setItem(TOKEN_KEY, t); }
-    function clearToken() { localStorage.removeItem(TOKEN_KEY); }
+    function getToken() { return localStore.get(TOKEN_KEY); }
+    function setToken(t: string) { localStore.set(TOKEN_KEY, t); }
+    function clearToken() { localStore.remove(TOKEN_KEY); }
 
     function isTokenValid(token: string | null) {
       if (!token) return false;

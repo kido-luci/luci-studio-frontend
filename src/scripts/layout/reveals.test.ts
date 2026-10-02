@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initReveals } from './reveals';
 import { inlineScript } from '../../test/inlineScript';
+import { blockStorage } from '../../test/blockedStorage';
 
 // The hidden start states of [data-reveal] and .reveal-word are gated on
 // html.reveal-anim, added by Layout's head script. That script also starts the
@@ -35,6 +36,19 @@ describe('reveals', () => {
     });
 
     describe("Layout's head script", () => {
+        // The same script reads the saved theme and scheme first; blocked site
+        // data makes that read throw, which must not stop the rest of it.
+        it('still applies the default scheme and arms the gate when storage is blocked', () => {
+            const restore = blockStorage();
+            try {
+                expect(() => runHeadScript()).not.toThrow();
+            } finally {
+                restore();
+            }
+            expect(root.dataset.scheme).toBe('ocean');
+            expect(root.classList.contains('reveal-anim')).toBe(true);
+        });
+
         it('drops the gate 2.5 s after the page starts when GSAP has not arrived', () => {
             runHeadScript();
             expect(root.classList.contains('reveal-anim')).toBe(true);

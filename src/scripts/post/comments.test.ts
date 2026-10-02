@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initComments } from './comments';
+import { blockStorage } from '../../test/blockedStorage';
 
 // The post page's comment thread. The commenter JWT is the security-relevant
 // part (where it may come from, when it is dropped) and comment text is the XSS
@@ -139,6 +140,25 @@ describe('initComments', () => {
             expect(location.hash).toBe('');
             expect(isHidden('logged-in-area')).toBe(true);
         });
+    });
+
+    // Blocked site data makes the token read throw; the thread must still load
+    // (signed out) instead of sticking on "Loading…".
+    it('still loads the thread, signed out, when storage is blocked', async () => {
+        const fetchMock = stubApi([comment()]);
+        mountPage();
+        const restore = blockStorage();
+        try {
+            expect(() => initComments()).not.toThrow();
+            await flush();
+        } finally {
+            restore();
+        }
+
+        expect(fetchMock).toHaveBeenCalled();
+        expect(document.querySelector('[data-comment-id="c1"]')).not.toBeNull();
+        expect(document.getElementById('comments-loading')).toBeNull();
+        expect(isHidden('sign-in-prompt')).toBe(false);
     });
 
     it('renders a hostile name and comment body as text', async () => {

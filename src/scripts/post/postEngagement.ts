@@ -6,6 +6,7 @@
 // Split out of the old postEngagementComments module.
 import { burstHearts, isLiked, sendPostLike, storeLiked } from '../postLikes';
 import { invalidatePostStatsCache } from '../../utils/postStats';
+import { sessionStore } from '../../utils/storage';
 
 // The engagement counters the backend returns from GET /posts/stats and from the
 // view / like / unlike endpoints. Only the fields this page renders.
@@ -48,12 +49,12 @@ export function initPostEngagement() {
 
     // Increment view once per session
     const sessionKey = `viewed_${postId}`;
-    if (!sessionStorage.getItem(sessionKey)) {
+    if (!sessionStore.get(sessionKey)) {
       // Guard BEFORE posting so a reload while the request is in flight can't
       // fire a second view POST and over-count one reader; release the guard if
       // the POST actually fails. Same order (and reason) as the gallery view
       // POST in scripts/homeReveals.ts.
-      sessionStorage.setItem(sessionKey, '1');
+      sessionStore.set(sessionKey, '1');
       fetch(`${apiUrl}/posts/${postId}/view`, { method: 'POST', cache: 'no-store' })
         .then(r => r.ok ? r.json() : Promise.reject(new Error(`view ${r.status}`)))
         .then((d: EngagementCounts) => {
@@ -63,7 +64,7 @@ export function initPostEngagement() {
           invalidatePostStatsCache();
           refreshEngagementCounts();
         })
-        .catch(() => { sessionStorage.removeItem(sessionKey); refreshEngagementCounts(); });
+        .catch(() => { sessionStore.remove(sessionKey); refreshEngagementCounts(); });
     } else {
       refreshEngagementCounts();
     }
