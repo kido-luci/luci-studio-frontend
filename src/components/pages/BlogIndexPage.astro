@@ -9,6 +9,7 @@ import { playlistService } from "../../services/playlists";
 import { buildSeriesViews } from "../../utils/series";
 import { buildPostSlug, readTimeFor, formatDate, coverGradient } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
+import { BASE_URL } from '../../lib/apiClient';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -48,7 +49,6 @@ const allPosts = rawPosts
 const featured = allPosts[0];
 const gridPosts = allPosts;
 
-const API_URL = import.meta.env.PUBLIC_API_URL || '';
 const SITE_URL = 'https://luci-studio.com';
 
 // Topics ordered by how many posts carry them (most-used first); ties broken alphabetically.
@@ -72,7 +72,7 @@ const allTopics = [...topicCounts.keys()].sort(
 
   <TopNav active="blog" />
 
-  <main class="bp-blog" data-api-url={API_URL}>
+  <main class="bp-blog" data-api-url={BASE_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
     <div class="bp-wrap">
 

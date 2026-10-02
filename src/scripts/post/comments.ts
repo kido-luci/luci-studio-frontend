@@ -111,15 +111,18 @@ export function initComments() {
       return text.replace(/\n$/, '');
     }
 
-    // Char counter + placeholder visibility
-    if (charCount) charCount.textContent = '0/500';
-    document.getElementById('comment-input')?.addEventListener('input', function() {
-      const len = getCommentText(this).length;
-      this.dataset.empty = len === 0 ? 'true' : 'false';
-      if (!charCount) return;
-      charCount.textContent = `${len}/500`;
-      charCount.style.color = len >= 500 ? '#f87171' : len > 460 ? '#fb923c' : 'var(--bp-faint)';
-    });
+    // Char counter + placeholder visibility, for the main and reply composers
+    function bindCharCount(input: HTMLElement | null, counter: HTMLElement | null) {
+      if (counter) counter.textContent = '0/500';
+      input?.addEventListener('input', function(this: HTMLElement) {
+        const len = getCommentText(this).length;
+        this.dataset.empty = len === 0 ? 'true' : 'false';
+        if (!counter) return;
+        counter.textContent = `${len}/500`;
+        counter.style.color = len >= 500 ? '#f87171' : len > 460 ? '#fb923c' : 'var(--bp-faint)';
+      });
+    }
+    bindCharCount(document.getElementById('comment-input'), charCount);
 
     function renderAuthUI() {
       const token = getToken();
@@ -199,8 +202,17 @@ export function initComments() {
     document.getElementById('fmt-italic')?.addEventListener('click', () => applyFormat(document.getElementById('comment-input'), '*'));
     document.getElementById('fmt-underline')?.addEventListener('click', () => applyFormat(document.getElementById('comment-input'), '__'));
 
+    // Twemoji options for every parse on this page (pasted text and rendered comments).
+    const TWEMOJI_OPTIONS = {
+      folder: 'svg',
+      ext: '.svg',
+      base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/',
+      className: 'twemoji-inline',
+    };
+
     // --- Contenteditable: paste as plain text + convert emojis to Twemoji ---
-    document.getElementById('comment-input')?.addEventListener('paste', function(this: HTMLElement, e: ClipboardEvent) {
+    // Bound to the main and reply composers.
+    function onPlainPaste(this: HTMLElement, e: ClipboardEvent) {
       e.preventDefault();
       const text = (e.clipboardData || window.clipboardData)?.getData('text/plain') ?? '';
       const sel = window.getSelection();
@@ -210,7 +222,7 @@ export function initComments() {
       if (window.twemoji) {
         const tmp = document.createElement('div');
         tmp.textContent = text;
-        window.twemoji.parse(tmp, { folder: 'svg', ext: '.svg', base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/', className: 'twemoji-inline' });
+        window.twemoji.parse(tmp, TWEMOJI_OPTIONS);
         tmp.querySelectorAll<HTMLImageElement>('img.twemoji-inline').forEach(img => { img.dataset.emoji = img.alt; img.style.pointerEvents = 'none'; });
         const frag = document.createDocumentFragment();
         while (tmp.firstChild) frag.appendChild(tmp.firstChild);
@@ -222,10 +234,12 @@ export function initComments() {
       sel.removeAllRanges();
       sel.addRange(range);
       this.dispatchEvent(new Event('input'));
-    });
+    }
+    document.getElementById('comment-input')?.addEventListener('paste', onPlainPaste);
 
     // --- Contenteditable: normalize Enter to <br> for consistent serialization ---
-    document.getElementById('comment-input')?.addEventListener('keydown', function(e) {
+    // Bound to the main and reply composers.
+    function onEnterAsBr(this: HTMLElement, e: KeyboardEvent) {
       if (e.key === 'Enter') {
         e.preventDefault();
         const sel = window.getSelection();
@@ -240,7 +254,8 @@ export function initComments() {
         sel.addRange(range);
         this.dispatchEvent(new Event('input'));
       }
-    });
+    }
+    document.getElementById('comment-input')?.addEventListener('keydown', onEnterAsBr);
 
     // --- Sign out ---
     document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
@@ -255,12 +270,7 @@ export function initComments() {
     // --- Apply Twemoji to a DOM element ---
     function applyTwemoji(el: HTMLElement) {
       if (!window.twemoji) return;
-      window.twemoji.parse(el, {
-        folder: 'svg',
-        ext: '.svg',
-        base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/',
-        className: 'twemoji-inline',
-      });
+      window.twemoji.parse(el, TWEMOJI_OPTIONS);
     }
 
     // Thread line color shared by the ╰ arm and parent connector
@@ -553,63 +563,16 @@ export function initComments() {
       const replyCharCount = formWrap.querySelector<HTMLElement>('.reply-char-count');
       if (!replyInput || !replyCharCount) return;
       replyInput.focus();
-      replyCharCount.textContent = '0/500';
-
-      // Char counter + placeholder toggle
-      replyInput.addEventListener('input', function(this: HTMLElement) {
-        const len = getCommentText(this).length;
-        this.dataset.empty = len === 0 ? 'true' : 'false';
-        replyCharCount.textContent = `${len}/500`;
-        replyCharCount.style.color = len >= 500 ? '#f87171' : len > 460 ? '#fb923c' : 'var(--bp-faint)';
-      });
+      bindCharCount(replyInput, replyCharCount);
 
       // Format buttons
       formWrap.querySelector('.reply-fmt-bold')?.addEventListener('click', () => applyFormat(replyInput, '**'));
       formWrap.querySelector('.reply-fmt-italic')?.addEventListener('click', () => applyFormat(replyInput, '*'));
       formWrap.querySelector('.reply-fmt-underline')?.addEventListener('click', () => applyFormat(replyInput, '__'));
 
-      // Paste: strip HTML, convert emojis to Twemoji
-      replyInput.addEventListener('paste', function(this: HTMLElement, e: ClipboardEvent) {
-        e.preventDefault();
-        const text = (e.clipboardData || window.clipboardData)?.getData('text/plain') ?? '';
-        const sel = window.getSelection();
-        if (!sel || !sel.rangeCount) return;
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        if (window.twemoji) {
-          const tmp = document.createElement('div');
-          tmp.textContent = text;
-          window.twemoji.parse(tmp, { folder: 'svg', ext: '.svg', base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/', className: 'twemoji-inline' });
-          tmp.querySelectorAll<HTMLImageElement>('img.twemoji-inline').forEach(img => { img.dataset.emoji = img.alt; img.style.pointerEvents = 'none'; });
-          const frag = document.createDocumentFragment();
-          while (tmp.firstChild) frag.appendChild(tmp.firstChild);
-          range.insertNode(frag);
-        } else {
-          range.insertNode(document.createTextNode(text));
-        }
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
-        this.dispatchEvent(new Event('input'));
-      });
-
-      // Enter → <br>
-      replyInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const sel = window.getSelection();
-          if (!sel || !sel.rangeCount) return;
-          const range = sel.getRangeAt(0);
-          range.deleteContents();
-          const br = document.createElement('br');
-          range.insertNode(br);
-          range.setStartAfter(br);
-          range.setEndAfter(br);
-          sel.removeAllRanges();
-          sel.addRange(range);
-          this.dispatchEvent(new Event('input'));
-        }
-      });
+      // Paste as plain text, Enter → <br> (the main composer's handlers)
+      replyInput.addEventListener('paste', onPlainPaste);
+      replyInput.addEventListener('keydown', onEnterAsBr);
 
       formWrap.querySelector('.reply-cancel')?.addEventListener('click', () => formWrap.remove());
 

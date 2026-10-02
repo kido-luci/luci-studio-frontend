@@ -7,6 +7,7 @@ import SupportDialog from "../post/SupportDialog.astro";
 import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown, demoteH1Headings, needsVietnameseSerif } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, localized } from '../../i18n';
 import type { Post } from "../../services/posts";
+import { BASE_URL } from "../../lib/apiClient";
 // Post-page global CSS (prose, Prism tokens, engagement bar, comment thread).
 // Global because the post body and the comment thread are built as raw HTML at
 // runtime, so they never carry Astro's scoped-style attribute.
@@ -23,8 +24,6 @@ interface Props {
 }
 const { post: rawPost, related, slug } = Astro.props;
 const post = localized(rawPost, locale);
-
-const API_URL = import.meta.env.PUBLIC_API_URL || '';
 
 const SITE_URL = 'https://luci-studio.com';
 
@@ -167,7 +166,7 @@ const structuredData = [articleSchema, breadcrumbSchema];
     </button>
   </div>
 
-  <main class="bp-post pt-32 pb-24 px-6 min-h-screen" data-post-id={post.id} data-api-url={API_URL}>
+  <main class="bp-post pt-32 pb-24 px-6 min-h-screen" data-post-id={post.id} data-api-url={BASE_URL}>
     <div class="bp-grid" aria-hidden="true"></div>
 
     <div class="max-w-4xl mx-auto bp-post-inner">

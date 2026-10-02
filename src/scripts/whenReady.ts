@@ -2,7 +2,6 @@
 // module scripts poll for the globals before wiring animations. `run` fires
 // immediately when `ready()` is already truthy. Callers that must fail open if
 // the CDN never arrives pass `timeoutMs` + `onTimeout` (e.g. un-hide content).
-// (Layout.astro's is:inline scripts keep their own copy — they can't import.)
 export function whenReady(
     ready: () => unknown,
     run: () => void,
