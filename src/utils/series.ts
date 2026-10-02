@@ -1,7 +1,11 @@
 import type { Post } from '../services/posts';
 import type { Playlist } from '../services/playlists';
+import { buildPostSlug } from './blog';
+import { localized, type Locale } from '../i18n';
 
 export interface SeriesView extends Playlist {
+  /** Page slug, from the canonical (English) title so it matches the path seriesPaths() emits. */
+  slug: string;
   /** Sum of views across every post in the series. */
   totalViews: number;
   /** Sum of likes across every post in the series. */
@@ -17,8 +21,10 @@ export interface SeriesView extends Playlist {
  * page strip, and the /blog list strip. Aggregates per-series stats + topics
  * from the already-fetched post list (zero extra network cost) and sorts
  * newest-first. Callers can `.slice()` the result for a limited strip.
+ * Displayed fields are localized to `locale`; the slug always uses the raw title,
+ * since a Vietnamese title would build a slug no page exists for.
  */
-export function buildSeriesViews(playlists: Playlist[], posts: Post[]): SeriesView[] {
+export function buildSeriesViews(playlists: Playlist[], posts: Post[], locale: Locale = 'en'): SeriesView[] {
   const byId = new Map(posts.map((p) => [p.id, p]));
   return [...playlists]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -39,6 +45,10 @@ export function buildSeriesViews(playlists: Playlist[], posts: Post[]): SeriesVi
         .sort((a, b) => b[1] - a[1])
         .slice(0, 4)
         .map(([t]) => t);
-      return { ...p, totalViews, totalLikes, topics, year: new Date(p.created_at).getFullYear() };
+      return {
+        ...localized(p, locale),
+        slug: buildPostSlug(p.title, p.id),
+        totalViews, totalLikes, topics, year: new Date(p.created_at).getFullYear(),
+      };
     });
 }

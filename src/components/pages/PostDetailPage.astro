@@ -4,7 +4,7 @@ import TopNav from "../TopNav.astro";
 import PostCard from "../PostCard.astro";
 import SiteFooter from "../SiteFooter.astro";
 import SupportDialog from "../post/SupportDialog.astro";
-import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown, needsVietnameseSerif } from "../../utils/blog";
+import { buildPostSlug, calculateReadTime, readTimeFor, formatDate, formatMarkdown, demoteH1Headings, needsVietnameseSerif } from "../../utils/blog";
 import { getLocaleFromUrl, useTranslations, localizedHref, localized } from '../../i18n';
 import type { Post } from "../../services/posts";
 // Post-page global CSS (prose, Prism tokens, engagement bar, comment thread).
@@ -30,7 +30,7 @@ const SITE_URL = 'https://luci-studio.com';
 
 const readTime = post ? calculateReadTime(post.content, locale) : '';
 const formattedDate = post ? formatDate(post.created_at, locale) : '';
-const contentWithoutTitle = post ? post.content.replace(/^#\s+.*(\r?\n|$)/, '').replace(/^#\s/gm, '## ').trimStart() : '';
+const contentWithoutTitle = post ? demoteH1Headings(post.content.replace(/^#\s+.*(\r?\n|$)/, '')).trimStart() : '';
 const htmlContent = contentWithoutTitle ? formatMarkdown(contentWithoutTitle) : '';
 
 const tags = (post && post.topics && post.topics.length > 0) ? post.topics : ['Engineering'];

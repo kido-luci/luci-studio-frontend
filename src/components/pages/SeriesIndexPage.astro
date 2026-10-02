@@ -6,7 +6,7 @@ import SiteFooter from "../SiteFooter.astro";
 import { postService } from "../../services/posts";
 import { playlistService } from "../../services/playlists";
 import { buildSeriesViews } from "../../utils/series";
-import { getLocaleFromUrl, useTranslations, localizedHref, format, localized } from '../../i18n';
+import { getLocaleFromUrl, useTranslations, localizedHref, format } from '../../i18n';
 const locale = getLocaleFromUrl(Astro.url);
 const t = useTranslations(locale);
 
@@ -15,8 +15,7 @@ const [rawPosts, rawPlaylists] = await Promise.all([
   playlistService.getAll(),
 ]);
 
-const localizedPlaylists = rawPlaylists.map(pl => localized(pl, locale));
-const sorted = buildSeriesViews(localizedPlaylists, rawPosts);
+const sorted = buildSeriesViews(rawPlaylists, rawPosts, locale);
 
 const SITE_URL = 'https://luci-studio.com';
 ---

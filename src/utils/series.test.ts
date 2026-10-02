@@ -123,4 +123,24 @@ describe('buildSeriesViews', () => {
         expect(view.description).toBe('A tour');
         expect(view.cover_image_url).toBe('/c.jpg');
     });
+
+    // seriesPaths() emits /blog/series/deep-dives-9/ (and its /vi mirror) from the raw
+    // title, so a card built from the Vietnamese title would link to a page that
+    // does not exist.
+    it('localizes what is shown but builds the slug from the raw title', () => {
+        const pl = playlist('9', {
+            title: 'Deep Dives',
+            description: 'A tour',
+            translations: { vi: { title: 'Lặn sâu', description: 'Một chuyến đi' } },
+        });
+
+        const [vi] = buildSeriesViews([pl], [], 'vi');
+        expect(vi.title).toBe('Lặn sâu');
+        expect(vi.description).toBe('Một chuyến đi');
+        expect(vi.slug).toBe('deep-dives-9');
+
+        const [en] = buildSeriesViews([pl], []);
+        expect(en.title).toBe('Deep Dives');
+        expect(en.slug).toBe('deep-dives-9');
+    });
 });
