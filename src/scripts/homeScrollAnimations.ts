@@ -10,7 +10,7 @@ export function initHomeScrollAnimations() {
   // unwanted. Waits for the CDN globals via the shared whenReady helper.
   // ════════════════════════════════════════════════════════════════════════
   (function () {
-    const w = window as any;
+    const w = window;
     const root = document.documentElement;
     // GSAP was late and the head script already dropped the gate: leave the
     // content as it is.

@@ -76,11 +76,11 @@ export function initThemeManagement() {
 	const currentScheme = initScheme();
 
 	// Expose toggle function globally for button click
-	(window as any).toggleTheme = () => {
+	window.toggleTheme = () => {
 		toggleTheme();
 		// Re-trigger scroll logic to update nav background immediately
 		window.dispatchEvent(new Event('scroll'));
 	};
-	(window as any).setScheme = setScheme;
+	window.setScheme = setScheme;
 	syncSchemeUI(currentScheme);
 }

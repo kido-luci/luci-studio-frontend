@@ -10,13 +10,13 @@ import { whenReady } from '../whenReady';
 export function initSmoothScroll() {
 	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 	const boot = () => {
-		const Lenis = (window as any).Lenis;
+		const Lenis = window.Lenis;
 		const lenis = new Lenis({ autoRaf: true });
 		(window as any).__lenis = lenis; // dev/verify handle
 		// Nudge ScrollTrigger on lenis scroll (recommended pairing; cheap even
 		// though native scroll events already reach it).
-		const ST = () => (window as any).ScrollTrigger;
+		const ST = () => window.ScrollTrigger;
 		whenReady(ST, () => lenis.on('scroll', ST().update), { timeoutMs: 6000 });
 	};
-	whenReady(() => (window as any).Lenis, boot, { timeoutMs: 6000 });
+	whenReady(() => window.Lenis, boot, { timeoutMs: 6000 });
 }

@@ -28,9 +28,9 @@ describe('initThemeManagement with storage blocked', () => {
         initThemeManagement();
         const wasLight = document.body.classList.contains('light-mode');
 
-        expect(() => (window as any).toggleTheme()).not.toThrow();
+        expect(() => window.toggleTheme!()).not.toThrow();
         expect(document.body.classList.contains('light-mode')).toBe(!wasLight);
-        expect(() => (window as any).setScheme('ember')).not.toThrow();
+        expect(() => window.setScheme!('ember')).not.toThrow();
         expect(document.documentElement.dataset.scheme).toBe('ember');
     });
 });
