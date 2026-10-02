@@ -23,24 +23,22 @@ declare global {
 
 // A comment (or reply) as returned by the comments API and rendered here.
 interface CommentUser {
-  id?: string;
+  id?: number;
   name?: string;
   email?: string;
   avatar?: string;
 }
 interface CommentNode {
-  id: string;
+  id: number;
   content: string;
   created_at: string;
-  user_id?: string;
+  user_id?: number;
   user: CommentUser;
-  parent_id?: string | null;
-  is_recalled?: boolean;
+  parent_id?: number | null;
+  recalled?: boolean;
   likes?: number;
   dislikes?: number;
-  user_reaction?: string | null;
-  replies?: CommentNode[];
-  [key: string]: unknown;
+  user_reaction?: string;
 }
 
 export function initComments() {
@@ -283,7 +281,7 @@ export function initComments() {
     // --- Render a single comment node ---
     function buildCommentEl(c: CommentNode, isReply = false, hasReplies = false) {
       const wrap = document.createElement('div');
-      wrap.dataset.commentId = c.id;
+      wrap.dataset.commentId = String(c.id);
 
       if (isReply) {
         // position:relative so the arm can be absolutely placed
@@ -414,7 +412,7 @@ export function initComments() {
           // Replies can't nest — post to the same parent thread.
           // The root comment wrap is the sibling before our replies-wrap container.
           const rootWrap = wrap.parentElement?.previousElementSibling;
-          if (rootWrap instanceof HTMLElement) toggleReplyForm(rootWrap, c.parent_id ?? '', c.user.name ?? '');
+          if (rootWrap instanceof HTMLElement && c.parent_id != null) toggleReplyForm(rootWrap, c.parent_id, c.user.name ?? '');
         } else {
           toggleReplyForm(wrap, c.id, c.user.name ?? '');
         }
@@ -495,7 +493,7 @@ export function initComments() {
     }
 
     // --- Inline reply form ---
-    function toggleReplyForm(parentWrap: HTMLElement, parentCommentId: string, parentUserName: string) {
+    function toggleReplyForm(parentWrap: HTMLElement, parentCommentId: number, parentUserName: string) {
       const existing = parentWrap.querySelector('.reply-form-wrap');
       if (existing) { existing.remove(); return; }
 

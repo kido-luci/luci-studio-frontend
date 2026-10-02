@@ -17,8 +17,8 @@ const b64url = (s: string) => btoa(s).replace(/\+/g, '-').replace(/\//g, '_').re
 const makeJwt = (claims: Record<string, unknown>) =>
     `${b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))}.${b64url(JSON.stringify(claims))}.sig`;
 const nowSec = () => Math.floor(Date.now() / 1000);
-const validToken = (sub = 'u1') => makeJwt({ sub, name: 'Alice', role: 'user', exp: nowSec() + 3600 });
-const expiredToken = () => makeJwt({ sub: 'u1', name: 'Alice', role: 'user', exp: nowSec() - 60 });
+const validToken = (sub = '1') => makeJwt({ sub, name: 'Alice', role: 'user', exp: nowSec() + 3600 });
+const expiredToken = () => makeJwt({ sub: '1', name: 'Alice', role: 'user', exp: nowSec() - 60 });
 
 function mountPage() {
     document.body.innerHTML = `
@@ -55,11 +55,11 @@ function res(body: unknown, status = 200, headers: Record<string, string> = {}) 
 
 function comment(over: Record<string, unknown> = {}) {
     return {
-        id: 'c1',
+        id: 1,
         content: 'hello',
         created_at: new Date().toISOString(),
-        user_id: 'u2',
-        user: { id: over.user_id ?? 'u2', name: 'Bob' },
+        user_id: 2,
+        user: { id: over.user_id ?? 2, name: 'Bob' },
         likes: 2,
         dislikes: 0,
         ...over,
@@ -159,7 +159,7 @@ describe('initComments', () => {
         }
 
         expect(fetchMock).toHaveBeenCalled();
-        expect(document.querySelector('[data-comment-id="c1"]')).not.toBeNull();
+        expect(document.querySelector('[data-comment-id="1"]')).not.toBeNull();
         expect(document.getElementById('comments-loading')).toBeNull();
         expect(isHidden('sign-in-prompt')).toBe(false);
     });
@@ -213,18 +213,18 @@ describe('initComments', () => {
     });
 
     it("shows the recall button only on the signed-in user's own comments", async () => {
-        localStorage.setItem('user_token', validToken('u1'));
-        stubApi([comment({ id: 'c1', user_id: 'u1' }), comment({ id: 'c2', user_id: 'u2' })]);
+        localStorage.setItem('user_token', validToken('1'));
+        stubApi([comment({ id: 1, user_id: 1 }), comment({ id: 2, user_id: 2 })]);
         mountPage();
         initComments();
         await flush();
 
-        expect(document.querySelector('[data-comment-id="c1"] .recall-btn')).not.toBeNull();
-        expect(document.querySelector('[data-comment-id="c2"] .recall-btn')).toBeNull();
+        expect(document.querySelector('[data-comment-id="1"] .recall-btn')).not.toBeNull();
+        expect(document.querySelector('[data-comment-id="2"] .recall-btn')).toBeNull();
     });
 
     it('shows no recall button when signed out', async () => {
-        stubApi([comment({ id: 'c1', user_id: 'u1' })]);
+        stubApi([comment({ id: 1, user_id: 1 })]);
         mountPage();
         initComments();
         await flush();
@@ -251,7 +251,7 @@ describe('initComments', () => {
         }
 
         beforeEach(() => {
-            localStorage.setItem('user_token', validToken('u1'));
+            localStorage.setItem('user_token', validToken('1'));
             vi.stubGlobal('alert', vi.fn());
         });
 
@@ -278,7 +278,7 @@ describe('initComments', () => {
             initComments();
             await flush();
 
-            document.querySelector<HTMLButtonElement>('[data-comment-id="c1"] .reply-btn')!.click();
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .reply-btn')!.click();
             const replyInput = document.querySelector<HTMLElement>('.reply-input')!;
             replyInput.textContent = 'a reply';
             document.querySelector<HTMLButtonElement>('.reply-submit')!.click();
@@ -291,29 +291,29 @@ describe('initComments', () => {
         });
 
         it('alerts when a recall fails on the network, leaving the comment as it was', async () => {
-            stubWrites([comment({ id: 'c1', user_id: 'u1' })], networkDown);
+            stubWrites([comment({ id: 1, user_id: 1 })], networkDown);
             mountPage();
             initComments();
             await flush();
 
-            document.querySelector<HTMLButtonElement>('[data-comment-id="c1"] .recall-btn')!.click();
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .recall-btn')!.click();
             await flush();
 
             expect(alert).toHaveBeenCalledWith('Failed to recall comment');
-            expect(document.querySelector('[data-comment-id="c1"] .recall-btn')).not.toBeNull();
+            expect(document.querySelector('[data-comment-id="1"] .recall-btn')).not.toBeNull();
         });
 
         it('alerts when the server refuses a recall', async () => {
-            stubWrites([comment({ id: 'c1', user_id: 'u1' })], () => res({}, 500));
+            stubWrites([comment({ id: 1, user_id: 1 })], () => res({}, 500));
             mountPage();
             initComments();
             await flush();
 
-            document.querySelector<HTMLButtonElement>('[data-comment-id="c1"] .recall-btn')!.click();
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .recall-btn')!.click();
             await flush();
 
             expect(alert).toHaveBeenCalledWith('Failed to recall comment');
-            expect(document.querySelector('[data-comment-id="c1"] .recall-btn')).not.toBeNull();
+            expect(document.querySelector('[data-comment-id="1"] .recall-btn')).not.toBeNull();
         });
     });
 
@@ -363,7 +363,7 @@ describe('initComments', () => {
             initComments();
             await flush();
 
-            document.querySelector<HTMLButtonElement>('[data-comment-id="c1"] .reply-btn')!.click();
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .reply-btn')!.click();
             exerciseComposer(
                 document.querySelector<HTMLElement>('.reply-input')!,
                 document.querySelector<HTMLElement>('.reply-char-count')!,
