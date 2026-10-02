@@ -1,5 +1,5 @@
 ---
-import { buildPostSlug, needsVietnameseSerif } from "../utils/blog";
+import { needsVietnameseSerif } from "../utils/blog";
 import { getLocaleFromUrl, localizedHref } from "../i18n";
 import type { SeriesView } from "../utils/series";
 
@@ -14,7 +14,7 @@ interface Props {
 
 const { series: p, variant = "editorial", index } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url);
-const href = localizedHref(locale, `/blog/series/${buildPostSlug(p.title, p.id)}/`);
+const href = localizedHref(locale, `/blog/series/${p.slug}/`);
 const count = p.post_ids?.length ?? 0;
 const cover = p.cover_image_url;
 const isVi = needsVietnameseSerif(p.title);

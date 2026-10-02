@@ -32,7 +32,8 @@ const posts = (playlist.posts ?? []).map(rawP => {
 }; });
 
 const coverImage = playlist.cover_image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1600';
-const canonicalURL = `${SITE_URL}/blog/series/${buildPostSlug(playlist.title, playlist.id)}/`;
+// Slug from the canonical (English) title, so it matches the page seriesPaths() emits.
+const canonicalURL = `${SITE_URL}/blog/series/${buildPostSlug(rawPlaylist.title, rawPlaylist.id)}/`;
 const seoDescription = playlist.description
   ? playlist.description.slice(0, 160)
   : `A curated series of ${posts.length} posts from Luci Studio.`;
