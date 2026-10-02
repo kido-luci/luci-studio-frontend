@@ -127,5 +127,16 @@ describe('postService', () => {
             expect(await postService.getByID('abc-123')).toEqual(samplePost);
             expect(fetchMock).toHaveBeenCalledTimes(2);
         });
+
+        it('does not cache a 404, so a later call fetches again', async () => {
+            const fetchMock = vi.fn()
+                .mockResolvedValueOnce({ ok: false, status: 404, json: async () => ({}) })
+                .mockResolvedValue({ ok: true, status: 200, json: async () => samplePost });
+            vi.stubGlobal('fetch', fetchMock);
+
+            expect(await postService.getByID('abc-123')).toBeNull();
+            expect(await postService.getByID('abc-123')).toEqual(samplePost);
+            expect(fetchMock).toHaveBeenCalledTimes(2);
+        });
     });
 });
