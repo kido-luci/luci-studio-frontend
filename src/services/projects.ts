@@ -1,4 +1,4 @@
-import { cachedGetAll } from '../lib/apiClient';
+import { cachedGetAll, FAIL_FAST } from '../lib/apiClient';
 import type { LocaleOverlay } from '../i18n';
 
 export interface ProjectLink {
@@ -23,7 +23,7 @@ export interface Project {
     translations?: LocaleOverlay | null;
 }
 
-const _getAll = cachedGetAll<Project>('/projects');
+const _getAll = cachedGetAll<Project>('/projects', { failFast: FAIL_FAST });
 
 export const projectService = {
     getAll: _getAll,

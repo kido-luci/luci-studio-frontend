@@ -106,5 +106,16 @@ describe('apiClient', () => {
 
             await expect(fetchOne('/posts/a', { failFast: true })).rejects.toThrow('500');
         });
+
+        it("resolves null when the body isn't JSON (failFast off)", async () => {
+            vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+                ok: true,
+                status: 200,
+                json: async () => { throw new SyntaxError('Unexpected token <'); },
+            }));
+
+            await expect(fetchOne('/posts/a')).resolves.toBeNull();
+            expect(console.error).toHaveBeenCalled();
+        });
     });
 });

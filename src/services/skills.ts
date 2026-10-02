@@ -1,4 +1,4 @@
-import { cachedGetAll } from '../lib/apiClient';
+import { cachedGetAll, FAIL_FAST } from '../lib/apiClient';
 import type { LocaleOverlay } from '../i18n';
 
 export interface SkillCategory {
@@ -14,7 +14,7 @@ export interface SkillCategory {
     translations?: LocaleOverlay | null;
 }
 
-const _getAll = cachedGetAll<SkillCategory>('/skills');
+const _getAll = cachedGetAll<SkillCategory>('/skills', { failFast: FAIL_FAST });
 
 export const skillsService = {
     getAll: _getAll,

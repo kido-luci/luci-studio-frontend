@@ -146,7 +146,7 @@ const schemes = [
   syncTheme();
   // window.toggleTheme is set by the Layout theme script.
   document.getElementById('theme-toggle')?.addEventListener('click', () => {
-    (window as any).toggleTheme?.();
+    window.toggleTheme?.();
     requestAnimationFrame(syncTheme);
   });
 
@@ -177,7 +177,7 @@ const schemes = [
     schemePopover.querySelectorAll('.scheme-dot').forEach((d) => {
       d.addEventListener('click', () => {
         const name = (d as HTMLElement).dataset.scheme;
-        const setScheme = (window as any).setScheme;
+        const setScheme = window.setScheme;
         if (name && typeof setScheme === 'function') setScheme(name);
         closeSchemePopover();
       });

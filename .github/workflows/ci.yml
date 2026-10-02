@@ -57,7 +57,8 @@ jobs:
           PUBLIC_API_URL: http://127.0.0.1:3000
 
       # The fixture pages rendered with their titles, the sitemap lists the
-      # posts, and no page carries an inline on*= handler (the CSP's
-      # script-src-attr 'none' would block it in production).
+      # posts, the series and the static pages, and no page carries an inline
+      # on*= handler (the CSP's script-src-attr 'none' would block it in
+      # production).
       - name: Smoke check
         run: node tools/ci/smoke.mjs

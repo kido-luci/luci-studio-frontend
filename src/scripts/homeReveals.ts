@@ -1,5 +1,6 @@
 import { refreshPostStats } from '../utils/postStats';
 import { initPostLikes } from './postLikes';
+import { localStore, sessionStore } from '../utils/storage';
 
 export function initHomeReveals() {
   // Art item scroll-triggered stagger reveal
@@ -36,7 +37,7 @@ export function initHomeReveals() {
       const icon = btn.querySelector('.art-like-icon') as HTMLElement | null;
       const countEl = btn.querySelector('.art-like-count') as HTMLElement | null;
       const likedKey = `liked_gallery_${postId}`;
-      let liked = localStorage.getItem(likedKey) === '1';
+      let liked = localStore.get(likedKey) === '1';
       let pending = false;
 
       function apply(state: boolean) {
@@ -71,7 +72,7 @@ export function initHomeReveals() {
           .then(d => {
             if (d.likes != null && countEl) countEl.textContent = d.likes;
             apply(nextLiked);
-            localStorage.setItem(likedKey, nextLiked ? '1' : '0');
+            localStore.set(likedKey, nextLiked ? '1' : '0');
           })
           .catch(() => {})
           .finally(() => {
@@ -120,7 +121,7 @@ export function initHomeReveals() {
 
       if (!id || !API_URL) return;
       const sessionKey = `viewed_gallery_${id}`;
-      const alreadyViewed = !!sessionStorage.getItem(sessionKey);
+      const alreadyViewed = !!sessionStore.get(sessionKey);
 
       // Likes always come from the GET; views come from the GET only when no
       // /view POST will run, so the POST's incremented count is never clobbered
@@ -137,14 +138,14 @@ export function initHomeReveals() {
       if (!alreadyViewed) {
         // Guard BEFORE posting so a rapid re-open in the same session can't
         // fire a second view POST; release the guard if the POST actually fails.
-        sessionStorage.setItem(sessionKey, '1');
+        sessionStore.set(sessionKey, '1');
         fetch(`${API_URL}/gallery/${id}/view`, { method: 'POST' })
           .then(r => r.ok ? r.json() : Promise.reject(new Error(`gallery view ${r.status}`)))
           .then(d => {
             if (token !== openToken) return; // stale response, ignore
             if (viewsEl && d.views != null) viewsEl.textContent = d.views;
           })
-          .catch(() => { sessionStorage.removeItem(sessionKey); });
+          .catch(() => { sessionStore.remove(sessionKey); });
       }
     }
 

@@ -19,8 +19,8 @@ function initRail(opts: RailOpts) {
 	if (!section) return;
 
 	const boot = () => {
-		const gsap = (window as any).gsap;
-		const ScrollTrigger = (window as any).ScrollTrigger;
+		const gsap = window.gsap;
+		const ScrollTrigger = window.ScrollTrigger;
 		const track = section.querySelector(opts.trackSel) as HTMLElement | null;
 		const viewport = section.querySelector(opts.viewportSel) as HTMLElement | null;
 		if (!track || !viewport) return;
@@ -85,7 +85,7 @@ function initRail(opts: RailOpts) {
 		});
 	};
 	// Give up after 8 s without the CDN; the swipe strip stays.
-	whenReady(() => (window as any).gsap && (window as any).ScrollTrigger, boot, { timeoutMs: 8000 });
+	whenReady(() => window.gsap && window.ScrollTrigger, boot, { timeoutMs: 8000 });
 }
 
 export function initHomeGamesRail() {

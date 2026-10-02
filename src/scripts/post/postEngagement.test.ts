@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initPostEngagement } from './postEngagement';
 import { initPostLikes } from '../postLikes';
+import { blockStorage } from '../../test/blockedStorage';
 
 // The post page's view counter and its two like buttons (footer + floating
 // pill). Views are counted once per session; likes share `liked_<id>` with the
@@ -77,6 +78,27 @@ describe('initPostEngagement', () => {
         initPostEngagement();
         await flush();
         expect(calls(fetchMock, '/posts/p1/view')).toHaveLength(1);
+    });
+
+    // Blocked site data makes storage access throw; the view and the like
+    // buttons must still work, and the comments that init after this module
+    // must still get their turn.
+    it('still counts the view and wires the like buttons when storage is blocked', async () => {
+        const fetchMock = stubApi();
+        const { likeBtn, likeIcon } = mountPost();
+        const restore = blockStorage();
+        try {
+            expect(() => initPostEngagement()).not.toThrow();
+            await flush();
+            expect(calls(fetchMock, '/posts/p1/view')).toHaveLength(1);
+
+            likeBtn.click();
+            await flush();
+            expect(calls(fetchMock, '/posts/p1/like')).toHaveLength(1);
+            expect(likeIcon.getAttribute('fill')).toBe('#f43f5e');
+        } finally {
+            restore();
+        }
     });
 
     it('releases the session guard when the view request fails', async () => {

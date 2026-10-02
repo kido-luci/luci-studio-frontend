@@ -142,7 +142,10 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		<script is:inline>
 			// Initialize theme + color scheme immediately to prevent flash
 			(function() {
-				const savedTheme = localStorage.getItem('theme');
+				// Storage throws when the browser blocks site data; fall back to
+				// the defaults so the rest of this script still runs.
+				const read = (key) => { try { return localStorage.getItem(key); } catch (e) { return null; } };
+				const savedTheme = read('theme');
 				// Priority: explicit user choice → OS preference → dark when the OS
 				// theme can't be read.
 				const theme = (savedTheme === 'light' || savedTheme === 'dark')
@@ -157,7 +160,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				}
 				// Apply the saved accent scheme before paint (default = violet/brand).
 				const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'];
-				const savedScheme = localStorage.getItem('scheme');
+				const savedScheme = read('scheme');
 				document.documentElement.dataset.scheme = SCHEMES.indexOf(savedScheme) >= 0 ? savedScheme : 'ocean';
 				// Arms the reveal hidden states, and drops them again unless reveals.ts
 				// has taken over (html.reveal-init) 2.5 s from now, whichever CDN script
