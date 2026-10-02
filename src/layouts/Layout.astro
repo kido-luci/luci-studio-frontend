@@ -159,8 +159,14 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'];
 				const savedScheme = localStorage.getItem('scheme');
 				document.documentElement.dataset.scheme = SCHEMES.indexOf(savedScheme) >= 0 ? savedScheme : 'ocean';
-				// Arms the reveal hidden states; reveals.ts drops it if GSAP never loads.
+				// Arms the reveal hidden states, and drops them again if GSAP isn't in
+				// 2.5 s from now (CDN slow, failed or hanging) so the content shows;
+				// reveals.ts then leaves it alone. The timer starts here because module
+				// scripts only run once the CDN scripts above have settled.
 				document.documentElement.classList.add('reveal-anim');
+				setTimeout(() => {
+					if (!window.gsap || !window.ScrollTrigger) document.documentElement.classList.remove('reveal-anim');
+				}, 2500);
 			})();
 		</script>
 		<script is:inline>

@@ -50,7 +50,8 @@ const homepageSchema = {
 >
   <Fragment slot="head">
     <!-- Mark the homepage: (1) home-anim gates the scroll-reveal hidden states so
-         JS-off / GSAP-fail / reduced-motion all fall back to visible content; (2)
+         JS-off / GSAP-fail / reduced-motion all fall back to visible content (the
+         timer at the end drops it if GSAP isn't in after 2.5 s); (2)
          bp-home hangs the blueprint design tokens on <html> so the shared TopNav (a
          sibling of <main>, not a child) inherits them too;
          (3) ocean-on arms the 3D ocean hero band (cheap probe: WebGL2 API present +
@@ -58,7 +59,7 @@ const homepageSchema = {
          first paint — no post-load swap/CLS. The scene script demotes the class if
          real GL init later fails, restoring the constellation + ring fallback.
          Inline + in <head> so all land before first paint. -->
-    <script is:inline>document.documentElement.classList.add('home-anim');document.documentElement.classList.add('bp-home');(function(){try{if(localStorage.getItem('oceanHero')==='off')return;}catch(e){}if('WebGL2RenderingContext' in window)document.documentElement.classList.add('ocean-on');})();</script>
+    <script is:inline>document.documentElement.classList.add('home-anim');document.documentElement.classList.add('bp-home');(function(){try{if(localStorage.getItem('oceanHero')==='off')return;}catch(e){}if('WebGL2RenderingContext' in window)document.documentElement.classList.add('ocean-on');})();setTimeout(function(){if(!window.gsap||!window.ScrollTrigger)document.documentElement.classList.remove('home-anim');},2500);</script>
   </Fragment>
 
   <TopNav active="home" ctaHref="#contact" />

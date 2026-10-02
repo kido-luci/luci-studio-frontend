@@ -2,13 +2,16 @@ import { whenReady } from '../whenReady';
 
 // ── GSAP Reveals — ScrollTrigger drives both [data-reveal] and [data-word-reveal] ──
 // CSS keeps the initial hidden state (no FOUC); GSAP overrides the CSS transition and
-// runs the in-motion itself. The hidden states are gated on html.reveal-anim (set by
-// Layout's head script), which is dropped if the GSAP CDN never arrives.
+// runs the in-motion itself. The hidden states are gated on html.reveal-anim, which
+// Layout's head script adds and drops again if GSAP isn't in after 2.5 s.
 export function initReveals() {
 	// Reduced motion: skip every reveal; CSS resolves the hidden states to visible.
 	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 	const w = window as any;
 	const root = document.documentElement;
+	// GSAP was late and the head script already showed the content: leave it
+	// visible rather than hide it again for an entrance animation.
+	if (!root.classList.contains('reveal-anim')) return;
 	const ready = () => w.gsap && w.ScrollTrigger;
 	const run = () => {
 		const { gsap, ScrollTrigger } = w;

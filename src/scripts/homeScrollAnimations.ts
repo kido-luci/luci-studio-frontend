@@ -12,6 +12,9 @@ export function initHomeScrollAnimations() {
   (function () {
     const w = window as any;
     const root = document.documentElement;
+    // GSAP was late and the head script already dropped the gate: leave the
+    // content as it is.
+    if (!root.classList.contains('home-anim')) return;
     const ready = () => w.gsap && w.ScrollTrigger;
 
     const run = () => {
