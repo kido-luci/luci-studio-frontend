@@ -99,7 +99,7 @@ from the URL. Put page logic in the body component, never in the route file.
 
 **Data flow**:
 - `src/lib/apiClient.ts` — the shared fetch layer: strips the trailing slash off `PUBLIC_API_URL`, dedupes concurrent build-time callers into one round-trip, and decides via `FAIL_FAST` whether a broken backend fails the prod build or resolves empty (`ALLOW_EMPTY_POSTS=1` opts out locally)
-- `src/services/*.ts` — one module per resource, built on `cachedGetAll` / `fetchOne` (`profile.ts` instead keeps its own single-object cache on the client's `BASE_URL` and resolves `null` on errors — it never fails fast). `posts.ts` also owns the `Post` type. Two services bypass the client on purpose: `games.ts` (hits each game's own Worker) and `github.ts` (pure URL parsing)
+- `src/services/*.ts` — one module per resource, built on `cachedGetAll` / `fetchOne`, and every content fetch passes `{ failFast: FAIL_FAST }` (`profile.ts` wraps `fetchOne` in its own single-object memo, which keeps no null or failed result; a 404 resolves `null`). `posts.ts` also owns the `Post` type. Two services bypass the client on purpose: `games.ts` (hits each game's own Worker) and `github.ts` (pure URL parsing)
 - `src/utils/blog.ts` — Custom regex-based Markdown→HTML parser (not a library), plus `calculateReadTime`, `formatDate`, `slugify`
 - Blog post content is fetched at build time and rendered server-side; no client-side data fetching
 
