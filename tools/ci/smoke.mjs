@@ -66,6 +66,13 @@ for (const loc of ['/portfolio/', '/lab/', '/games/', '/license/', '/blog/series
     if (!sitemap.includes(`<loc>${SITE}${loc}</loc>`)) fail(`the sitemap does not list ${loc}`);
 }
 
+// Pages that leave out `canonical` inherit the homepage's, which tells search
+// engines they are duplicates of `/`.
+for (const page of ['portfolio', 'lab', 'games', 'videos']) {
+    const canonical = read(`${page}/index.html`)?.match(/<link rel="canonical" href="([^"]*)"/)?.[1];
+    if (canonical !== `${SITE}/${page}/`) fail(`/${page}/ has canonical ${canonical ?? '(none)'}, not ${SITE}/${page}/`);
+}
+
 // Inline event handlers: scan the attributes of every tag in every page.
 // Script and style bodies and comments are dropped first, so code or text that
 // merely mentions "onclick=" cannot trip the check.
