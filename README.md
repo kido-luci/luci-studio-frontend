@@ -32,7 +32,7 @@ npm run dev               # http://localhost:4321
 | `npm run check` | Type-check `.astro` + `.ts` via `astro check` (the pre-commit gate) |
 | `npm run test:unit` | Run unit tests (Vitest) |
 
-> The production build fetches posts from `PUBLIC_API_URL` and **fails fast** if the API is unreachable. To build without a backend (e.g. CI), set `ALLOW_EMPTY_POSTS=1` to produce an empty-posts site.
+> The production build fetches posts from `PUBLIC_API_URL` and **fails fast** if the API is unreachable. To build without a backend, set `ALLOW_EMPTY_POSTS=1` to produce an empty-posts site.
 
 ## Project structure
 

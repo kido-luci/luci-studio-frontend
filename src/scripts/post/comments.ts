@@ -111,15 +111,18 @@ export function initComments() {
       return text.replace(/\n$/, '');
     }
 
-    // Char counter + placeholder visibility
-    if (charCount) charCount.textContent = '0/500';
-    document.getElementById('comment-input')?.addEventListener('input', function() {
-      const len = getCommentText(this).length;
-      this.dataset.empty = len === 0 ? 'true' : 'false';
-      if (!charCount) return;
-      charCount.textContent = `${len}/500`;
-      charCount.style.color = len >= 500 ? '#f87171' : len > 460 ? '#fb923c' : 'var(--bp-faint)';
-    });
+    // Char counter + placeholder visibility, for the main and reply composers
+    function bindCharCount(input: HTMLElement | null, counter: HTMLElement | null) {
+      if (counter) counter.textContent = '0/500';
+      input?.addEventListener('input', function(this: HTMLElement) {
+        const len = getCommentText(this).length;
+        this.dataset.empty = len === 0 ? 'true' : 'false';
+        if (!counter) return;
+        counter.textContent = `${len}/500`;
+        counter.style.color = len >= 500 ? '#f87171' : len > 460 ? '#fb923c' : 'var(--bp-faint)';
+      });
+    }
+    bindCharCount(document.getElementById('comment-input'), charCount);
 
     function renderAuthUI() {
       const token = getToken();
@@ -199,8 +202,17 @@ export function initComments() {
     document.getElementById('fmt-italic')?.addEventListener('click', () => applyFormat(document.getElementById('comment-input'), '*'));
     document.getElementById('fmt-underline')?.addEventListener('click', () => applyFormat(document.getElementById('comment-input'), '__'));
 
+    // Twemoji options for every parse on this page (pasted text and rendered comments).
+    const TWEMOJI_OPTIONS = {
+      folder: 'svg',
+      ext: '.svg',
+      base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/',
+      className: 'twemoji-inline',
+    };
+
     // --- Contenteditable: paste as plain text + convert emojis to Twemoji ---
-    document.getElementById('comment-input')?.addEventListener('paste', function(this: HTMLElement, e: ClipboardEvent) {
+    // Bound to the main and reply composers.
+    function onPlainPaste(this: HTMLElement, e: ClipboardEvent) {
       e.preventDefault();
       const text = (e.clipboardData || window.clipboardData)?.getData('text/plain') ?? '';
       const sel = window.getSelection();
@@ -210,7 +222,7 @@ export function initComments() {
       if (window.twemoji) {
         const tmp = document.createElement('div');
         tmp.textContent = text;
-        window.twemoji.parse(tmp, { folder: 'svg', ext: '.svg', base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/', className: 'twemoji-inline' });
+        window.twemoji.parse(tmp, TWEMOJI_OPTIONS);
         tmp.querySelectorAll<HTMLImageElement>('img.twemoji-inline').forEach(img => { img.dataset.emoji = img.alt; img.style.pointerEvents = 'none'; });
         const frag = document.createDocumentFragment();
         while (tmp.firstChild) frag.appendChild(tmp.firstChild);
@@ -222,10 +234,12 @@ export function initComments() {
       sel.removeAllRanges();
       sel.addRange(range);
       this.dispatchEvent(new Event('input'));
-    });
+    }
+    document.getElementById('comment-input')?.addEventListener('paste', onPlainPaste);
 
     // --- Contenteditable: normalize Enter to <br> for consistent serialization ---
-    document.getElementById('comment-input')?.addEventListener('keydown', function(e) {
+    // Bound to the main and reply composers.
+    function onEnterAsBr(this: HTMLElement, e: KeyboardEvent) {
       if (e.key === 'Enter') {
         e.preventDefault();
         const sel = window.getSelection();
@@ -240,7 +254,8 @@ export function initComments() {
         sel.addRange(range);
         this.dispatchEvent(new Event('input'));
       }
-    });
+    }
+    document.getElementById('comment-input')?.addEventListener('keydown', onEnterAsBr);
 
     // --- Sign out ---
     document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
@@ -255,12 +270,7 @@ export function initComments() {
     // --- Apply Twemoji to a DOM element ---
     function applyTwemoji(el: HTMLElement) {
       if (!window.twemoji) return;
-      window.twemoji.parse(el, {
-        folder: 'svg',
-        ext: '.svg',
-        base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/',
-        className: 'twemoji-inline',
-      });
+      window.twemoji.parse(el, TWEMOJI_OPTIONS);
     }
 
     // Thread line color shared by the ╰ arm and parent connector
@@ -331,13 +341,13 @@ export function initComments() {
         : `<p style="font-size:${isReply ? '0.875rem' : '0.9rem'};color:var(--bp-muted);line-height:1.65;white-space:pre-wrap;word-break:break-word;margin:0 0 0.625rem 0;">${renderCommentText(c.content)}</p>`;
 
       const recallBtn = isOwner && !c.recalled
-        ? `<button class="recall-btn" type="button" data-id="${c.id}" style="display:flex;align-items:center;gap:0.3rem;font-family:var(--bp-mono);font-size:0.7rem;letter-spacing:0.04em;color:var(--bp-faint);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--bp-faint)'">
+        ? `<button class="recall-btn cm-hover-danger" type="button" data-id="${c.id}" style="display:flex;align-items:center;gap:0.3rem;font-family:var(--bp-mono);font-size:0.7rem;letter-spacing:0.04em;color:var(--bp-faint);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
               ${_ci18n('recall', 'Recall')}
             </button>`
         : '';
 
-      const replyBtnHTML = `<button class="reply-btn" type="button" style="display:flex;align-items:center;gap:0.3rem;font-family:var(--bp-mono);font-size:0.7rem;letter-spacing:0.04em;color:var(--bp-faint);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;" onmouseover="this.style.color='var(--bp-muted)'" onmouseout="this.style.color='var(--bp-faint)'">
+      const replyBtnHTML = `<button class="reply-btn cm-hover-muted" type="button" style="display:flex;align-items:center;gap:0.3rem;font-family:var(--bp-mono);font-size:0.7rem;letter-spacing:0.04em;color:var(--bp-faint);background:transparent;border:none;cursor:pointer;padding:0;transition:color 0.15s;">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               ${_ci18n('reply', 'Reply')}
             </button>`;
@@ -525,23 +535,20 @@ export function initComments() {
         <div class="reply-form-inner" style="display:flex;gap:0.5rem;align-items:flex-start;">
           <div style="flex:1;min-width:0;">
             <div style="font-family:var(--bp-mono);font-size:0.68rem;letter-spacing:0.03em;color:var(--bp-faint);margin-bottom:0.375rem;">${_ci18n('replyingTo', 'Replying to')} <span style="color:var(--bp-acc);font-weight:700;">@${escapeHtml(parentUserName)}</span></div>
-            <div class="reply-input" contenteditable="true" role="textbox" aria-multiline="true" data-empty="true"
-              style="width:100%;padding:0.5rem 0.75rem;font-size:0.875rem;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.08));border-radius:0.5rem;outline:none;color:var(--bp-ink);box-sizing:border-box;transition:border-color 0.15s;min-height:2.8rem;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;line-height:1.6;cursor:text;"
-              onfocus="this.style.borderColor='rgb(var(--accent-rgb) / 0.4)'" onblur="this.style.borderColor='var(--comment-divider,rgba(255,255,255,0.08))'"></div>
+            <div class="reply-input cm-focus-acc" contenteditable="true" role="textbox" aria-multiline="true" data-empty="true"
+              style="width:100%;padding:0.5rem 0.75rem;font-size:0.875rem;background:transparent;border:1px solid var(--comment-divider,rgba(255,255,255,0.08));border-radius:0.5rem;outline:none;color:var(--bp-ink);box-sizing:border-box;transition:border-color 0.15s;min-height:2.8rem;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;line-height:1.6;cursor:text;"></div>
             <div style="border-top:1px solid var(--comment-divider,rgba(255,255,255,0.06));display:flex;align-items:center;gap:0.375rem;padding:0.375rem 0.25rem 0;margin-top:0.375rem;">
-              <button type="button" class="reply-fmt-bold fmt-btn" title="Bold" style="padding:0.2rem 0.35rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;background:transparent;border:none;cursor:pointer;color:var(--bp-muted);transition:background 0.15s;" onmouseover="this.style.background='rgb(var(--accent-rgb) / 0.1)'" onmouseout="this.style.background='transparent'"><b>B</b></button>
-              <button type="button" class="reply-fmt-italic fmt-btn" title="Italic" style="padding:0.2rem 0.35rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;font-style:italic;background:transparent;border:none;cursor:pointer;color:var(--bp-muted);transition:background 0.15s;" onmouseover="this.style.background='rgb(var(--accent-rgb) / 0.1)'" onmouseout="this.style.background='transparent'">I</button>
-              <button type="button" class="reply-fmt-underline fmt-btn" title="Underline" style="padding:0.2rem 0.35rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;text-decoration:underline;background:transparent;border:none;cursor:pointer;color:var(--bp-muted);transition:background 0.15s;" onmouseover="this.style.background='rgb(var(--accent-rgb) / 0.1)'" onmouseout="this.style.background='transparent'">U</button>
+              <button type="button" class="reply-fmt-bold fmt-btn cm-hover-tint" title="Bold" style="padding:0.2rem 0.35rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;background:transparent;border:none;cursor:pointer;color:var(--bp-muted);transition:background 0.15s;"><b>B</b></button>
+              <button type="button" class="reply-fmt-italic fmt-btn cm-hover-tint" title="Italic" style="padding:0.2rem 0.35rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;font-style:italic;background:transparent;border:none;cursor:pointer;color:var(--bp-muted);transition:background 0.15s;">I</button>
+              <button type="button" class="reply-fmt-underline fmt-btn cm-hover-tint" title="Underline" style="padding:0.2rem 0.35rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;text-decoration:underline;background:transparent;border:none;cursor:pointer;color:var(--bp-muted);transition:background 0.15s;">U</button>
               <div style="width:1px;height:0.875rem;background:var(--comment-divider,rgba(255,255,255,0.1));margin:0 0.25rem;"></div>
-              <button type="button" class="emoji-picker-btn" title="Emoji" style="padding:0.2rem 0.3rem;border-radius:0.3rem;background:transparent;border:none;cursor:pointer;transition:background 0.15s;display:flex;align-items:center;" onmouseover="this.style.background='rgb(var(--accent-rgb) / 0.1)'" onmouseout="this.style.background='transparent'"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/svg/1f60a.svg" width="16" height="16" alt="😊" style="pointer-events:none;"></button>
+              <button type="button" class="emoji-picker-btn cm-hover-tint" title="Emoji" style="padding:0.2rem 0.3rem;border-radius:0.3rem;background:transparent;border:none;cursor:pointer;transition:background 0.15s;display:flex;align-items:center;"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/svg/1f60a.svg" width="16" height="16" alt="😊" style="pointer-events:none;"></button>
               <div style="flex:1;"></div>
               <span class="reply-char-count" style="font-family:var(--bp-mono);font-size:0.65rem;color:var(--bp-faint);"></span>
-              <button class="reply-cancel" type="button"
-                style="padding:0.375rem 0.875rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.66rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--bp-hair);color:var(--bp-muted);cursor:pointer;transition:background 0.15s,color 0.15s;"
-                onmouseover="this.style.background='color-mix(in srgb, var(--bp-ink) 6%, transparent)'" onmouseout="this.style.background='transparent'">${_ci18n('cancel', 'Cancel')}</button>
-              <button class="reply-submit" type="button"
-                style="padding:0.375rem 0.875rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.66rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:var(--bp-acc);color:var(--accent-ink);border:none;cursor:pointer;transition:filter 0.2s;"
-                onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter='none'">${_ci18n('replySubmit', 'Reply')}</button>
+              <button class="reply-cancel cm-hover-wash" type="button"
+                style="padding:0.375rem 0.875rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.66rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--bp-hair);color:var(--bp-muted);cursor:pointer;transition:background 0.15s,color 0.15s;">${_ci18n('cancel', 'Cancel')}</button>
+              <button class="reply-submit cm-hover-brighten" type="button"
+                style="padding:0.375rem 0.875rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.66rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:var(--bp-acc);color:var(--accent-ink);border:none;cursor:pointer;transition:filter 0.2s;">${_ci18n('replySubmit', 'Reply')}</button>
             </div>
           </div>
         </div>
@@ -553,63 +560,16 @@ export function initComments() {
       const replyCharCount = formWrap.querySelector<HTMLElement>('.reply-char-count');
       if (!replyInput || !replyCharCount) return;
       replyInput.focus();
-      replyCharCount.textContent = '0/500';
-
-      // Char counter + placeholder toggle
-      replyInput.addEventListener('input', function(this: HTMLElement) {
-        const len = getCommentText(this).length;
-        this.dataset.empty = len === 0 ? 'true' : 'false';
-        replyCharCount.textContent = `${len}/500`;
-        replyCharCount.style.color = len >= 500 ? '#f87171' : len > 460 ? '#fb923c' : 'var(--bp-faint)';
-      });
+      bindCharCount(replyInput, replyCharCount);
 
       // Format buttons
       formWrap.querySelector('.reply-fmt-bold')?.addEventListener('click', () => applyFormat(replyInput, '**'));
       formWrap.querySelector('.reply-fmt-italic')?.addEventListener('click', () => applyFormat(replyInput, '*'));
       formWrap.querySelector('.reply-fmt-underline')?.addEventListener('click', () => applyFormat(replyInput, '__'));
 
-      // Paste: strip HTML, convert emojis to Twemoji
-      replyInput.addEventListener('paste', function(this: HTMLElement, e: ClipboardEvent) {
-        e.preventDefault();
-        const text = (e.clipboardData || window.clipboardData)?.getData('text/plain') ?? '';
-        const sel = window.getSelection();
-        if (!sel || !sel.rangeCount) return;
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        if (window.twemoji) {
-          const tmp = document.createElement('div');
-          tmp.textContent = text;
-          window.twemoji.parse(tmp, { folder: 'svg', ext: '.svg', base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@v14.0.2/assets/', className: 'twemoji-inline' });
-          tmp.querySelectorAll<HTMLImageElement>('img.twemoji-inline').forEach(img => { img.dataset.emoji = img.alt; img.style.pointerEvents = 'none'; });
-          const frag = document.createDocumentFragment();
-          while (tmp.firstChild) frag.appendChild(tmp.firstChild);
-          range.insertNode(frag);
-        } else {
-          range.insertNode(document.createTextNode(text));
-        }
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
-        this.dispatchEvent(new Event('input'));
-      });
-
-      // Enter → <br>
-      replyInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const sel = window.getSelection();
-          if (!sel || !sel.rangeCount) return;
-          const range = sel.getRangeAt(0);
-          range.deleteContents();
-          const br = document.createElement('br');
-          range.insertNode(br);
-          range.setStartAfter(br);
-          range.setEndAfter(br);
-          sel.removeAllRanges();
-          sel.addRange(range);
-          this.dispatchEvent(new Event('input'));
-        }
-      });
+      // Paste as plain text, Enter → <br> (the main composer's handlers)
+      replyInput.addEventListener('paste', onPlainPaste);
+      replyInput.addEventListener('keydown', onEnterAsBr);
 
       formWrap.querySelector('.reply-cancel')?.addEventListener('click', () => formWrap.remove());
 

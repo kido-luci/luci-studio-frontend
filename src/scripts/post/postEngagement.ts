@@ -1,8 +1,11 @@
 // View and like tracking for the post page: bumps the view count once per
 // session, and drives the footer + floating like buttons (optimistic count,
-// heart burst, liked state in localStorage).
+// heart burst, liked state in localStorage). The burst, the liked flag and the
+// like request are shared with the /blog tiles (scripts/postLikes.ts).
 //
 // Split out of the old postEngagementComments module.
+import { burstHearts, isLiked, sendPostLike, storeLiked } from '../postLikes';
+import { invalidatePostStatsCache } from '../../utils/postStats';
 
 // The engagement counters the backend returns from GET /posts/stats and from the
 // view / like / unlike endpoints. Only the fields this page renders.
@@ -57,7 +60,7 @@ export function initPostEngagement() {
           if (d && d.views != null) {
             document.querySelectorAll('#view-count').forEach(el => { el.textContent = String(d.views); });
           }
-          try { localStorage.removeItem('postStatsCache.v1'); } catch {}
+          invalidatePostStatsCache();
           refreshEngagementCounts();
         })
         .catch(() => { sessionStorage.removeItem(sessionKey); refreshEngagementCounts(); });
@@ -75,8 +78,7 @@ export function initPostEngagement() {
     const floatingEl = document.getElementById('floating-like');
     if (!likeBtn) return;
 
-    const likedKey = `liked_${postId}`;
-    let liked = localStorage.getItem(likedKey) === '1';
+    let liked = isLiked(postId);
     let likePending = false;
 
     // Show/hide floating button based on scroll position
@@ -102,37 +104,6 @@ export function initPostEngagement() {
       if (headerCount) headerCount.textContent = String(n);
     }
 
-    function burstHearts(anchor: Element) {
-      const count = 6;
-      const rect = anchor.getBoundingClientRect();
-      for (let i = 0; i < count; i++) {
-        const h = document.createElement('span');
-        h.textContent = '♥';
-        const angle = (i / count) * 360;
-        const dist = 30 + Math.random() * 25;
-        const dx = Math.cos((angle * Math.PI) / 180) * dist;
-        const dy = Math.sin((angle * Math.PI) / 180) * dist - 20;
-        h.style.cssText = `
-          position:fixed;
-          left:${rect.left + rect.width / 2}px;
-          top:${rect.top + rect.height / 2}px;
-          font-size:${10 + Math.random() * 8}px;
-          color:#f43f5e;
-          pointer-events:none;
-          z-index:9999;
-          transform:translate(-50%,-50%);
-          transition:transform 0.6s ease-out,opacity 0.6s ease-out;
-          will-change:transform,opacity;
-        `;
-        document.body.appendChild(h);
-        requestAnimationFrame(() => {
-          h.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0)`;
-          h.style.opacity = '0';
-        });
-        setTimeout(() => h.remove(), 650);
-      }
-    }
-
     function pulseIcon(icon: HTMLElement) {
       icon.classList.remove('liked-pulse');
       void icon.offsetWidth; // reflow to restart animation
@@ -142,7 +113,7 @@ export function initPostEngagement() {
 
     function setLiked(state: boolean) {
       liked = state;
-      localStorage.setItem(likedKey, state ? '1' : '0');
+      storeLiked(postId, state);
       const fill = state ? '#f43f5e' : 'none';
       const stroke = state ? '#f43f5e' : 'currentColor';
       for (const icon of [likeIcon, floatingIcon]) {
@@ -174,19 +145,17 @@ export function initPostEngagement() {
       const nextLiked = !liked;
       const isLiking = nextLiked;
       if (isLiking) {
-        burstHearts(btn);
+        // The post page's burst is a touch bigger than the tiles' default.
+        burstHearts(btn, { spread: [30, 25], rise: 20, size: [10, 8] });
         if (icon) pulseIcon(icon);
       }
-      const endpoint = liked ? 'unlike' : 'like';
       likePending = true;
       likeBtn?.setAttribute('aria-busy', 'true');
       floatingBtn?.setAttribute('aria-busy', 'true');
-      fetch(`${apiUrl}/posts/${postId}/${endpoint}`, { method: 'POST', cache: 'no-store' })
-        .then(r => r.ok ? r.json() : Promise.reject(new Error(`like ${r.status}`)))
+      sendPostLike(apiUrl, postId, nextLiked)
         .then(d => {
           if (d.likes != null) updateAllCounts(d.likes);
           setLiked(nextLiked);
-          try { localStorage.removeItem('postStatsCache.v1'); } catch {}
         })
         .catch(() => {})
         .finally(() => {

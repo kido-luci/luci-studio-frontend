@@ -14,8 +14,8 @@ npm run test      # Unit tests (vitest)
 
 `npm run check` is the cheap pre-commit gate — it catches type errors the build
 does not, because the build transpiles without type-checking. It's tuned to
-`--minimumFailingSeverity error` so the ~12 pre-existing legacy hints (implicit-any
-in inline event handlers, `is:inline` script notices) stay advisory; only real
+`--minimumFailingSeverity error` so the ~10 pre-existing hints (`is:inline` script
+notices, unused declarations, async-function suggestions) stay advisory; only real
 type errors fail it. CI runs it on every PR, ahead of the tests and the build.
 
 `npm run dev` works in this repo (verified 2026-08-03: `/` and `/blog` both serve
@@ -105,7 +105,7 @@ from the URL. Put page logic in the body component, never in the route file.
 
 **Styling**:
 - Tailwind CSS is compiled at build time via PostCSS (`tailwind.config.cjs`, `postcss.config.cjs`); the `@tailwind` directives live in `src/styles/global.css`, imported once in `src/layouts/Layout.astro`. Custom animations/keyframes are defined in `tailwind.config.cjs`. (Previously loaded via the `cdn.tailwindcss.com` runtime JIT — replaced to remove the render-blocking script.)
-- Global CSS lives in four deliberate places, not one: `Layout.astro`'s `<style is:global>` (~390 lines — site chrome, theme tokens, accent schemes), `src/styles/global.css` (Tailwind directives + the shared `bp-` blueprint tokens and section-header atoms, already de-duplicated out of ~17 components), `src/styles/lab-cards.css` (the RepoCard palette, imported by `/lab` and `/games`), and `src/styles/post-content.css` (the post page's prose, Prism tokens, engagement bar and comment thread, imported by `PostDetailPage.astro` alone). Per-page tokens stay in the component that owns them — do not hoist them
+- Global CSS lives in four deliberate places, not one: `Layout.astro`'s `<style is:global>` (~270 lines — site chrome, theme tokens, accent schemes), `src/styles/global.css` (Tailwind directives + the shared `bp-` blueprint tokens and section-header atoms, already de-duplicated out of ~17 components), `src/styles/lab-cards.css` (the RepoCard palette, imported by `/lab` and `/games`), and `src/styles/post-content.css` (the post page's prose, Prism tokens, engagement bar and comment thread, imported by `PostDetailPage.astro` alone). Per-page tokens stay in the component that owns them — do not hoist them
 - Everything else is component-scoped `<style>`. Note that a few base rules use the `background` **shorthand**, which resets `background-image`; a shared global class cannot override them without `!important`, so small per-component duplicates (e.g. the 45° hatch fill) are left alone on purpose
 - Theme system (follows the OS `prefers-color-scheme`, dark when it can't be read; light/dark toggle) uses CSS variables (`--bg-primary`, `--text-primary`, etc.) persisted in `localStorage`
 
@@ -118,7 +118,7 @@ from the URL. Put page logic in the body component, never in the route file.
 - Prism.js (cdnjs, in `components/pages/PostDetailPage.astro` only) — code syntax highlighting (Dart, Go, JS, TS). Its token CSS and the `.markdown-content` prose styles live in `src/styles/post-content.css` and are used by nothing else
 - Twemoji (jsDelivr, in `components/pages/PostDetailPage.astro` only) — emoji in comments. Loaded from the body while the post modules are hoisted into `<head>`, so `window.twemoji` may be undefined at module-init time; every use is inside an event handler or runs after the comments fetch, and each one guards on it
 
-**Windows performance mode** (`win-perf-mode`): runtime Windows detection disables backdrop-filter, 3D transforms, and heavy animations. A parallel `max-width: 768px` rule drops backdrop-filter on fixed elements (nav, mobile menu) to cut mobile scroll jank.
+**Windows performance mode** (`win-perf-mode`): runtime Windows detection disables backdrop-filter, the cursor's blend mode, and heavy animations. A parallel `max-width: 768px` rule drops backdrop-filter on fixed elements (nav, mobile menu) to cut mobile scroll jank.
 
 ## Key Files
 
@@ -131,7 +131,7 @@ from the URL. Put page logic in the body component, never in the route file.
 | `src/utils/i18nPaths.ts` | The one `getStaticPaths` source shared by the `en` and `vi` routes |
 | `src/i18n/index.ts` | Locale detection, `t()`, `localizedHref`, and the `translations` overlay |
 | `src/scripts/blogIndex.ts` | `/blog` behaviour — filtering, search, pagination, topic-chip clamp |
-| `src/scripts/postLikes.ts` | The one like-button implementation, shared by `/blog` and the home rail |
+| `src/scripts/postLikes.ts` | The tile like buttons on `/blog` and the home rail, plus the heart burst, `liked_<id>` flag and like request the post page reuses |
 | `src/scripts/post/` | The post page, one module per feature: `postChrome` (copy/share/bookmark/theme icon), `postEngagement` (views + likes), `comments` (thread, Google auth, reactions, replies), `commentFormat` (its pure, tested helpers), `confirmDialog`, `emojiPicker` |
 | `src/components/home/HomeHero.astro` | Homepage hero band — ocean scene, constellation and hero header, with the CSS for all three |
 | `astro.config.mjs` | Static output + Cloudflare adapter |

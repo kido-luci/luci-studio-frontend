@@ -5,6 +5,8 @@
 // animations poll for). Below 901px, under reduced motion, or with no CDN the
 // section keeps its default CSS overflow-x swipe strip — this module only ever
 // *adds* behaviour.
+import { whenReady } from './whenReady';
+
 interface RailOpts {
 	sectionId: string;
 	trackSel: string;
@@ -16,14 +18,9 @@ function initRail(opts: RailOpts) {
 	const section = document.getElementById(opts.sectionId);
 	if (!section) return;
 
-	let tries = 0;
 	const boot = () => {
 		const gsap = (window as any).gsap;
 		const ScrollTrigger = (window as any).ScrollTrigger;
-		if (!gsap || !ScrollTrigger) {
-			if (tries++ < 100) setTimeout(boot, 80);
-			return;
-		}
 		const track = section.querySelector(opts.trackSel) as HTMLElement | null;
 		const viewport = section.querySelector(opts.viewportSel) as HTMLElement | null;
 		if (!track || !viewport) return;
@@ -87,7 +84,8 @@ function initRail(opts: RailOpts) {
 			};
 		});
 	};
-	boot();
+	// Give up after 8 s without the CDN; the swipe strip stays.
+	whenReady(() => (window as any).gsap && (window as any).ScrollTrigger, boot, { timeoutMs: 8000 });
 }
 
 export function initHomeGamesRail() {
