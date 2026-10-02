@@ -79,7 +79,7 @@ const schemes = [
         </div>
       )}
 
-      <button type="button" id="theme-toggle" class="bp-nav-icon" aria-label={t('nav.toggleTheme')} onclick="window.toggleTheme && window.toggleTheme()">
+      <button type="button" id="theme-toggle" class="bp-nav-icon" aria-label={t('nav.toggleTheme')}>
         <svg class="bp-nav-svg dark-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         <svg class="bp-nav-svg light-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
       </button>
@@ -97,7 +97,7 @@ const schemes = [
 
       <a href={ctaHref} class="bp-nav-cta bp-nav-mono">{ctaLabel}</a>
 
-      <button type="button" class="bp-nav-burger" aria-label="Menu" aria-expanded="false" onclick="var n=document.querySelector('[data-bp-nav]');var o=n.classList.toggle('menu-open');this.setAttribute('aria-expanded',String(o))">
+      <button type="button" class="bp-nav-burger" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -131,7 +131,20 @@ const schemes = [
     document.querySelectorAll('.light-icon').forEach(el => el.classList.toggle('hidden', !light));
   };
   syncTheme();
-  document.getElementById('theme-toggle')?.addEventListener('click', () => requestAnimationFrame(syncTheme));
+  // window.toggleTheme is set by the Layout theme script.
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    (window as any).toggleTheme?.();
+    requestAnimationFrame(syncTheme);
+  });
+
+  // Mobile menu: the burger opens and closes the nav's link sheet.
+  const nav = document.querySelector('[data-bp-nav]');
+  const burger = document.querySelector('.bp-nav-burger');
+  if (nav && burger) {
+    burger.addEventListener('click', () => {
+      burger.setAttribute('aria-expanded', String(nav.classList.toggle('menu-open')));
+    });
+  }
 
   // Color-scheme picker popover. window.setScheme + the swatch aria-checked sync
   // are provided globally by the Layout theme script; this only handles

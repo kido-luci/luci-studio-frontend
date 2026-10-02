@@ -42,7 +42,7 @@ const statId = interactive && id != null ? String(id) : undefined;
   <article class:list={["tb-card", { "tb-card--compact": compact, "tb-card--bp": isBp }]}>
     <div class="tb-card-cover" style={!img ? `background:${cover}` : undefined}>
       {img
-        ? <img src={img} alt={title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
+        ? <img src={img} alt={title} class="tb-cover-img" loading="lazy" data-hide-on-error />
         : <span class="tb-cover-word tb-cover-word--sm">{coverWord}</span>}
       {badge && <span class="tb-badge">{badge}</span>}
       {isBp && (

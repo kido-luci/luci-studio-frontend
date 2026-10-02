@@ -481,6 +481,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		// runs platform/element detection at module top level (was the first
 		// thing the script did); applyWinPerfMode() then adds the body class.
 		import { applyWinPerfMode } from '../scripts/layout/env';
+		import { initCoverFallback } from '../scripts/layout/coverFallback';
 		import { initCookieConsent } from '../scripts/layout/cookieConsent';
 		import { initThemeManagement } from '../scripts/layout/theme';
 		import { initCursor } from '../scripts/layout/cursor';
@@ -490,6 +491,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		import { initSmoothScroll } from '../scripts/layout/smoothScroll';
 
 		applyWinPerfMode();
+		initCoverFallback();
 		initCookieConsent();
 		initThemeManagement();
 		initCursor();

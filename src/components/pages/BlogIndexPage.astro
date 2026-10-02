@@ -125,7 +125,7 @@ const allTopics = [...topicCounts.keys()].sort(
         <a id="tb-featured" href={localizedHref(locale, `/blog/${featured.slug}/`)} class="bp-feat" data-featured-id={String(featured.id)}>
           <div class="bp-feat-fig" style={!featured.img ? `background:${featured.cover}` : undefined}>
             {featured.img
-              ? <img src={featured.img} alt={featured.title} class="tb-cover-img" loading="lazy" onerror="this.style.opacity='0'" />
+              ? <img src={featured.img} alt={featured.title} class="tb-cover-img" loading="lazy" data-hide-on-error />
               : <span class="tb-cover-word">{featured.coverWord}</span>}
             <span class="bp-mono bp-feat-callout">fig.00 — featured</span>
             <span class="bp-mono bp-feat-badge">{t('blog.featuredBadge')}</span>
