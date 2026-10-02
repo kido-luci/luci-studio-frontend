@@ -28,7 +28,11 @@ export function cachedGetAll<T>(path: string, opts: { failFast?: boolean } = {})
                 const response = await fetch(`${BASE_URL}${path}`);
                 if (!response.ok) throw new Error(`GET ${path} failed with ${response.status}`);
                 const data = await response.json();
-                return Array.isArray(data) ? data : (data || []);
+                // Go encodes a nil slice as null, so null is an empty list. Any
+                // other non-array (an error object, a wrapper) is a failure.
+                if (data === null) return [];
+                if (!Array.isArray(data)) throw new Error(`GET ${path} returned a non-array payload`);
+                return data;
             } catch (error) {
                 console.error(`Failed to fetch ${path}:`, error);
                 promise = null;
