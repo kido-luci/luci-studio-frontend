@@ -1,5 +1,5 @@
 import type { Post } from './posts';
-import { cachedGetAll, fetchOne, FAIL_FAST } from '../lib/apiClient';
+import { cachedGetAll, cachedFetchOne, FAIL_FAST } from '../lib/apiClient';
 import type { LocaleOverlay } from '../i18n';
 
 export interface Playlist {
@@ -20,5 +20,5 @@ export const playlistService = {
     getAll: cachedGetAll<Playlist>('/playlists', { failFast: FAIL_FAST }),
 
     getByID: (id: string | number): Promise<Playlist | null> =>
-        fetchOne<Playlist>(`/playlists/${id}`, { failFast: FAIL_FAST }),
+        cachedFetchOne<Playlist>(`/playlists/${id}`, { failFast: FAIL_FAST }),
 };

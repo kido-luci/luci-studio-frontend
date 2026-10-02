@@ -102,5 +102,30 @@ describe('postService', () => {
             vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
             expect(await postService.getByID('any')).toBeNull();
         });
+
+        // The en and vi routes both read every post during one build.
+        it('fetches once across callers', async () => {
+            const fetchMock = vi.fn().mockResolvedValue({
+                ok: true,
+                status: 200,
+                json: async () => samplePost,
+            });
+            vi.stubGlobal('fetch', fetchMock);
+
+            await Promise.all([postService.getByID('abc-123'), postService.getByID('abc-123')]);
+            expect(await postService.getByID('abc-123')).toEqual(samplePost);
+            expect(fetchMock).toHaveBeenCalledTimes(1);
+        });
+
+        it('does not cache a failure, so a later call fetches again', async () => {
+            const fetchMock = vi.fn()
+                .mockRejectedValueOnce(new Error('network down'))
+                .mockResolvedValue({ ok: true, status: 200, json: async () => samplePost });
+            vi.stubGlobal('fetch', fetchMock);
+
+            expect(await postService.getByID('abc-123')).toBeNull();
+            expect(await postService.getByID('abc-123')).toEqual(samplePost);
+            expect(fetchMock).toHaveBeenCalledTimes(2);
+        });
     });
 });
