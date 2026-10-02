@@ -37,11 +37,27 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      # The build fetches posts, series and lists from PUBLIC_API_URL and, as a
+      # prod build, fails if that API is unreachable. No backend runs in CI, so
+      # tools/ci/fixture-api.mjs serves a small fixed data set and the build
+      # renders real post, /vi/ and series pages instead of an empty site.
+      - name: Start fixture API
+        run: |
+          node tools/ci/fixture-api.mjs 3000 &
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:3000/posts > /dev/null && exit 0
+            sleep 1
+          done
+          echo "fixture API did not start" >&2
+          exit 1
+
       - name: Build
         run: npm run build
         env:
-          # No backend is reachable in CI. The site fetches posts at build time
-          # and fail-fasts in prod when the API is down, so allow an empty-posts
-          # build — this job verifies the site compiles, not content rendering.
-          PUBLIC_API_URL: http://localhost:3000
-          ALLOW_EMPTY_POSTS: "1"
+          PUBLIC_API_URL: http://127.0.0.1:3000
+
+      # The fixture pages rendered with their titles, the sitemap lists the
+      # posts, and no page carries an inline on*= handler (the CSP's
+      # script-src-attr 'none' would block it in production).
+      - name: Smoke check
+        run: node tools/ci/smoke.mjs
