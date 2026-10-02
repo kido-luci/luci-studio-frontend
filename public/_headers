@@ -10,7 +10,7 @@
 # inline style attributes.
 #
 # What it closes: inline event handler attributes (script-src-attr 'none';
-# handlers are bound from modules, and src/csp.test.ts plus the CI smoke check
+# handlers are bound from scripts, and src/csp.test.ts plus the CI smoke check
 # keep it that way), scripts and stylesheets from anything but the pinned CDN
 # paths, and the frame-ancestors / base-uri / object-src pivots. jsDelivr and
 # cdnjs host every npm package, so script-src names the exact GSAP 3.13.0,

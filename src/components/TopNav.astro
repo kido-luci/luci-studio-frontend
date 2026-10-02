@@ -123,6 +123,19 @@ const schemes = [
   </span>
 </nav>
 
+<script is:inline>
+  // Mobile menu toggle. Inline, right after the nav, so the burger works as soon
+  // as it is parsed; module scripts wait for the CDN scripts in <head>.
+  (function () {
+    var nav = document.querySelector('[data-bp-nav]');
+    var burger = nav && nav.querySelector('.bp-nav-burger');
+    if (!burger) return;
+    burger.addEventListener('click', function () {
+      burger.setAttribute('aria-expanded', String(nav.classList.toggle('menu-open')));
+    });
+  })();
+</script>
+
 <script>
   // Theme icon sync (sun/moon) — idempotent alongside the Layout theme script.
   const syncTheme = () => {
@@ -136,15 +149,6 @@ const schemes = [
     (window as any).toggleTheme?.();
     requestAnimationFrame(syncTheme);
   });
-
-  // Mobile menu: the burger opens and closes the nav's link sheet.
-  const nav = document.querySelector('[data-bp-nav]');
-  const burger = document.querySelector('.bp-nav-burger');
-  if (nav && burger) {
-    burger.addEventListener('click', () => {
-      burger.setAttribute('aria-expanded', String(nav.classList.toggle('menu-open')));
-    });
-  }
 
   // Color-scheme picker popover. window.setScheme + the swatch aria-checked sync
   // are provided globally by the Layout theme script; this only handles

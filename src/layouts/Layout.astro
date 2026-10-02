@@ -163,6 +163,18 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				document.documentElement.classList.add('reveal-anim');
 			})();
 		</script>
+		<script is:inline>
+			// Cover images marked data-hide-on-error go transparent when they fail to
+			// load, so the card's placeholder shows instead of a broken-image icon (what
+			// their old onerror attribute did; the CSP now blocks handler attributes).
+			// Inline in <head>, so it listens before any <img> is parsed and without
+			// waiting for the CDN scripts that hold up the module scripts. error
+			// doesn't bubble, hence the capture phase.
+			document.addEventListener('error', function (e) {
+				var img = e.target;
+				if (img instanceof HTMLImageElement && img.hasAttribute('data-hide-on-error')) img.style.opacity = '0';
+			}, true);
+		</script>
 	</head>
 	<body class="bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-clip max-w-full">
 		<!-- Custom Cursor -->
@@ -481,7 +493,6 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		// runs platform/element detection at module top level (was the first
 		// thing the script did); applyWinPerfMode() then adds the body class.
 		import { applyWinPerfMode } from '../scripts/layout/env';
-		import { initCoverFallback } from '../scripts/layout/coverFallback';
 		import { initCookieConsent } from '../scripts/layout/cookieConsent';
 		import { initThemeManagement } from '../scripts/layout/theme';
 		import { initCursor } from '../scripts/layout/cursor';
@@ -491,7 +502,6 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 		import { initSmoothScroll } from '../scripts/layout/smoothScroll';
 
 		applyWinPerfMode();
-		initCoverFallback();
 		initCookieConsent();
 		initThemeManagement();
 		initCursor();
