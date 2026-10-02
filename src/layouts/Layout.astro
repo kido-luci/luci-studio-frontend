@@ -415,7 +415,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			/* Applied via JS when Windows is detected. Disables expensive GPU ops. */
 
 			/* Kill ALL backdrop-filter across the page — the #1 perf killer on Windows Chrome.
-			   This covers: nav, tilt-cards, hero-badge, mobile menu, content wrapper, etc. */
+			   This covers: nav, mobile menu, content wrapper, etc. */
 			body.win-perf-mode * {
 				backdrop-filter: none !important;
 				-webkit-backdrop-filter: none !important;

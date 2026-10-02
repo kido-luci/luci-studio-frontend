@@ -68,13 +68,13 @@ export function initHomeScrollAnimations() {
       // state collapses to its visible default.
       mm.add(REDUCE, () => { root.classList.remove('home-anim'); });
 
-      // Full desktop treatment — steps 2–6 register their tweens inside here.
+      // Full desktop treatment — the connectors and the art-bg parallax.
       mm.add(FULL, () => {
         buildConnectors();
         buildArtParallax();
       });
 
-      // Mobile: cheap once-reveals only, no scrub / parallax — steps 2,3,5.
+      // Mobile: cheap once-reveals only (the connectors), no scrub / parallax.
       mm.add(MOBILE, () => {
         buildConnectors();
       });
