@@ -590,11 +590,19 @@ export function initComments() {
         submitBtn.textContent = _ci18n('posting', 'Posting…');
 
         try {
-          const res = await fetch(`${API_URL}/posts/${postID}/comments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
-            body: JSON.stringify({ content, parent_id: parentCommentId }),
-          });
+          // Only a failed request is a failed reply: once the server answers
+          // 2xx the reply is saved, so a later error must not invite a resend.
+          let res: Response;
+          try {
+            res = await fetch(`${API_URL}/posts/${postID}/comments`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
+              body: JSON.stringify({ content, parent_id: parentCommentId }),
+            });
+          } catch {
+            alert('Failed to post reply');
+            return;
+          }
 
           if (res.status === 401 || res.status === 403) { clearToken(); renderAuthUI(); return; }
           if (!res.ok) { const txt = await res.text(); alert(txt || 'Failed to post reply'); return; }
@@ -626,8 +634,6 @@ export function initComments() {
 
           const current = parseInt(countBadge?.textContent ?? '') || 0;
           updateCountBadge(current + 1);
-        } catch {
-          alert('Failed to post reply');
         } finally {
           submitBtn.disabled = false;
           submitBtn.textContent = _ci18n('replySubmit', 'Reply');
@@ -793,11 +799,19 @@ export function initComments() {
       submitBtn.textContent = _ci18n('posting', 'Posting…');
 
       try {
-        const res = await fetch(`${API_URL}/posts/${postID}/comments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ content }),
-        });
+        // Only a failed request is a failed post: once the server answers 2xx
+        // the comment is saved, so a later error must not invite a resend.
+        let res: Response;
+        try {
+          res = await fetch(`${API_URL}/posts/${postID}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ content }),
+          });
+        } catch {
+          alert('Failed to post comment');
+          return;
+        }
 
         if (res.status === 401 || res.status === 403) { clearToken(); renderAuthUI(); return; }
         if (!res.ok) { const t = await res.text(); alert(t || 'Failed to post comment'); return; }
@@ -816,8 +830,6 @@ export function initComments() {
         if (charCount) charCount.textContent = '0/500';
         const current = parseInt(countBadge?.textContent ?? '') || 0;
         updateCountBadge(current + 1);
-      } catch {
-        alert('Failed to post comment');
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = _ci18n('submitBtn', 'Submit');

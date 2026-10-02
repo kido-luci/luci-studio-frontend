@@ -303,6 +303,62 @@ describe('initComments', () => {
             expect(document.querySelector('[data-comment-id="1"] .recall-btn')).not.toBeNull();
         });
 
+        // Once the server has answered 2xx the comment is saved: a later failure
+        // (an unreadable body, a twemoji throw) must not tell the reader it
+        // failed, or a second Submit posts a duplicate. That failure escapes the
+        // click handler, whose promise nobody awaits, so Node reports it as an
+        // unhandled rejection; collect it here instead of failing the run.
+        async function collectUnhandled(run: () => Promise<void>) {
+            const caught: unknown[] = [];
+            const saved = process.listeners('unhandledRejection');
+            const collect = (reason: unknown) => { caught.push(reason); };
+            process.removeAllListeners('unhandledRejection');
+            process.on('unhandledRejection', collect);
+            try {
+                await run();
+                await flush();
+            } finally {
+                process.off('unhandledRejection', collect);
+                for (const listener of saved) process.on('unhandledRejection', listener);
+            }
+            return caught;
+        }
+
+        it('does not report a saved comment as failed when its response body is unreadable', async () => {
+            stubWrites([], () => ({ ...res({}, 201), json: () => Promise.reject(new SyntaxError('Unexpected end of JSON input')) }));
+            mountPage();
+            initComments();
+            await flush();
+
+            const caught = await collectUnhandled(async () => {
+                document.getElementById('comment-input')!.textContent = 'hello';
+                document.getElementById('comment-form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+                await flush();
+            });
+
+            expect(alert).not.toHaveBeenCalled();
+            expect(caught).toEqual([expect.objectContaining({ message: 'Unexpected end of JSON input' })]);
+            expect(document.querySelector<HTMLButtonElement>('#comment-form button[type="submit"]')!.disabled).toBe(false);
+        });
+
+        it('does not report a saved reply as failed when rendering it throws', async () => {
+            stubWrites([comment()], () => res(comment({ id: 3, parent_id: 1 }), 201));
+            mountPage();
+            initComments();
+            await flush();
+
+            document.querySelector<HTMLButtonElement>('[data-comment-id="1"] .reply-btn')!.click();
+            document.querySelector<HTMLElement>('.reply-input')!.textContent = 'a reply';
+            vi.stubGlobal('twemoji', { parse: () => { throw new Error('twemoji failed'); } });
+            const caught = await collectUnhandled(async () => {
+                document.querySelector<HTMLButtonElement>('.reply-submit')!.click();
+                await flush();
+            });
+
+            expect(alert).not.toHaveBeenCalled();
+            expect(caught).toEqual([expect.objectContaining({ message: 'twemoji failed' })]);
+        });
+
         it('alerts when the server refuses a recall', async () => {
             stubWrites([comment({ id: 1, user_id: 1 })], () => res({}, 500));
             mountPage();
