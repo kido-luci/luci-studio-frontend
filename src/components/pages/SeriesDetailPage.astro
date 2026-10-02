@@ -106,7 +106,7 @@ const seoDescription = playlist.description
               <a href={p.href} class="bp-track">
                 <span class="bp-track-num">{String(i + 1).padStart(2, '0')}</span>
                 <div class="bp-track-thumb">
-                  <img src={p.img} alt={p.title} loading="lazy" onerror="this.style.opacity='0'" />
+                  <img src={p.img} alt={p.title} loading="lazy" data-hide-on-error />
                 </div>
                 <div class="bp-track-meta">
                   <div class="bp-track-tags bp-mono">

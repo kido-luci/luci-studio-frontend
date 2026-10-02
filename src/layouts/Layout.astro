@@ -24,7 +24,6 @@ interface Props {
 	structuredData?: object | object[];
 	articleMeta?: { publishedTime?: string; modifiedTime?: string; tags?: string[]; author?: string };
 	googleSiteVerification?: string;
-	particleSpeed?: number;
 }
 
 const {
@@ -40,7 +39,6 @@ const {
 	structuredData,
 	articleMeta,
 	googleSiteVerification = import.meta.env.PUBLIC_GSC_VERIFICATION,
-	particleSpeed = 1,
 } = Astro.props;
 
 const canonicalURL = canonical ?? SITE_URL;
@@ -68,7 +66,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 ---
 
 <!doctype html>
-<html lang={locale} data-particle-speed={particleSpeed}>
+<html lang={locale}>
 	<head>
 		<meta charset="UTF-8" />
 		<title>{title}</title>
@@ -161,7 +159,28 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				const SCHEMES = ['violet', 'ocean', 'ember', 'forest', 'rose', 'mono'];
 				const savedScheme = localStorage.getItem('scheme');
 				document.documentElement.dataset.scheme = SCHEMES.indexOf(savedScheme) >= 0 ? savedScheme : 'ocean';
+				// Arms the reveal hidden states, and drops them again unless reveals.ts
+				// has taken over (html.reveal-init) 2.5 s from now, whichever CDN script
+				// is slow, failed or hanging, so the content shows; reveals.ts then leaves
+				// it alone. The timer starts here because module scripts only run once
+				// the CDN scripts above have settled.
+				document.documentElement.classList.add('reveal-anim');
+				setTimeout(() => {
+					if (!document.documentElement.classList.contains('reveal-init')) document.documentElement.classList.remove('reveal-anim');
+				}, 2500);
 			})();
+		</script>
+		<script is:inline>
+			// Cover images marked data-hide-on-error go transparent when they fail to
+			// load, so the card's placeholder shows instead of a broken-image icon (what
+			// their old onerror attribute did; the CSP now blocks handler attributes).
+			// Inline in <head>, so it listens before any <img> is parsed and without
+			// waiting for the CDN scripts that hold up the module scripts. error
+			// doesn't bubble, hence the capture phase.
+			document.addEventListener('error', function (e) {
+				var img = e.target;
+				if (img instanceof HTMLImageElement && img.hasAttribute('data-hide-on-error')) img.style.opacity = '0';
+			}, true);
 		</script>
 	</head>
 	<body class="bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen selection:bg-purple-500/30 selection:text-white font-['Inter',_sans-serif] overflow-x-clip max-w-full">
@@ -331,14 +350,8 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				color: var(--text-primary);
 			}
 			button,
-			[role="button"],
-			.magnetic,
-			.hero-line-bottom,
-			.hero-badge-text {
+			[role="button"] {
 				font-family: 'Boldonse', sans-serif;
-			}
-			.tag-label {
-				font-family: 'JetBrains Mono', monospace;
 			}
 			body.light-mode h1,
 			body.light-mode h2,
@@ -358,6 +371,9 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			body.light-mode ::-webkit-scrollbar-thumb:hover { background: #bbb; }
 
 			/* === CLIP-PATH REVEAL === */
+			/* The hidden start states here and under FADE SLIDE are gated on
+			   html.reveal-anim (added by the head script; reveals.ts removes it if
+			   the GSAP CDN never loads), so content is never left invisible. */
 			.reveal-word {
 				display: inline-block;
 				overflow: hidden;
@@ -365,35 +381,25 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			}
 			.reveal-word span {
 				display: inline-block;
-				transform: translateY(-60px);
-				opacity: 0;
 				transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease-out;
 			}
-			.reveal-word.revealed span {
-				transform: translateY(0);
-				opacity: 1;
-			}
-			/* Allow shimmer gradient to paint beyond the clipping box */
-			.reveal-word .text-shimmer {
-				padding-bottom: 0.1em;
-				margin-bottom: -0.1em;
+			html.reveal-anim .reveal-word span {
+				transform: translateY(-60px);
+				opacity: 0;
 			}
 
 			/* === FADE SLIDE === */
 			[data-reveal] {
-				opacity: 0;
-				transform: translateY(40px);
 				transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 				will-change: opacity, transform;
 			}
-			[data-reveal="left"] { transform: translateX(-40px); opacity: 0; }
-			[data-reveal="right"] { transform: translateX(40px); opacity: 0; }
-			[data-reveal="scale"] { transform: scale(0.92); opacity: 0; }
-			[data-reveal].is-visible {
-				opacity: 1 !important;
-				transform: translateY(0) translateX(0) scale(1) !important;
-				will-change: auto;
+			html.reveal-anim [data-reveal] {
+				opacity: 0;
+				transform: translateY(40px);
 			}
+			html.reveal-anim [data-reveal="left"] { transform: translateX(-40px); opacity: 0; }
+			html.reveal-anim [data-reveal="right"] { transform: translateX(40px); opacity: 0; }
+			html.reveal-anim [data-reveal="scale"] { transform: scale(0.92); opacity: 0; }
 			/* Reduced motion: shared reveals appear at rest — no fade/slide. */
 			@media (prefers-reduced-motion: reduce) {
 				.reveal-word span { transform: none !important; opacity: 1 !important; transition: none !important; }
@@ -405,22 +411,6 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			[data-delay="4"] { transition-delay: 0.24s; }
 			[data-delay="5"] { transition-delay: 0.30s; }
 			[data-delay="6"] { transition-delay: 0.36s; }
-
-			/* === CARD TILT === */
-			.tilt-card {
-				transform-style: preserve-3d;
-				transition: transform 0.15s ease, opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-				background-color: var(--bg-card);
-				border-color: var(--border-color);
-				transform: translateZ(0);
-			}
-			body.light-mode .tilt-card {
-				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-			}
-			.tilt-card-inner {
-				transform: translateZ(20px);
-				transform-style: preserve-3d;
-			}
 
 			/* === MOBILE GPU RELIEF: drop backdrop-filter on fixed elements === */
 			/* backdrop-filter on a fixed/sticky element re-rasterizes its blur on every
@@ -444,20 +434,10 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			/* Applied via JS when Windows is detected. Disables expensive GPU ops. */
 
 			/* Kill ALL backdrop-filter across the page — the #1 perf killer on Windows Chrome.
-			   This covers: nav, tilt-cards, hero-badge, mobile menu, content wrapper, etc. */
+			   This covers: nav, mobile menu, content wrapper, etc. */
 			body.win-perf-mode * {
 				backdrop-filter: none !important;
 				-webkit-backdrop-filter: none !important;
-			}
-
-			/* Disable 3D compositing on cards */
-			body.win-perf-mode .tilt-card {
-				transform-style: flat;
-				background-color: rgba(10, 10, 10, 0.85);
-			}
-			body.win-perf-mode .tilt-card-inner {
-				transform: none;
-				transform-style: flat;
 			}
 
 			/* Remove blend mode — causes full-page repaint compositing */
@@ -467,7 +447,7 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			}
 
 			/* Pause heavy continuous animations that Chrome/Windows can't GPU-accelerate.
-			   Shimmer, orb floats, and marquee all run full-time and drain the compositor. */
+			   Shimmer runs full-time and drains the compositor. */
 			body.win-perf-mode .text-shimmer {
 				animation: none;
 				background: linear-gradient(90deg, #a78bfa, #818cf8);
@@ -475,22 +455,6 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 				-webkit-background-clip: text;
 				-webkit-text-fill-color: transparent;
 				background-clip: text;
-			}
-			/* Exception: keep shimmer animated on the hero headline — it's the key visual */
-			body.win-perf-mode .hero-word-accent .text-shimmer {
-				animation: shimmer 6s linear infinite;
-				background: linear-gradient(90deg, #a78bfa, #818cf8, #38bdf8, #e879f9, #a78bfa);
-				background-size: 200% auto;
-				-webkit-background-clip: text;
-				-webkit-text-fill-color: transparent;
-				background-clip: text;
-			}
-			body.win-perf-mode .hero-orb {
-				animation: none;
-				filter: blur(80px);
-			}
-			body.win-perf-mode .animate-marquee {
-				animation-play-state: paused;
 			}
 
 			/* Remove expensive drop-shadow filter on headings */
@@ -502,9 +466,6 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 			body.win-perf-mode h6 {
 				filter: none;
 			}
-
-			/* === MAGNETIC BUTTON === */
-			.magnetic { display: inline-block; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 
 			/* === GRADIENT TEXT SHIMMER === */
 			@keyframes shimmer {
@@ -531,98 +492,29 @@ const isBilingual = isBilingualPath(Astro.url.pathname);
 
 			/* === COUNTER === */
 			.count-up { font-variant-numeric: tabular-nums; }
-
-			/* === LINE DRAW === */
-			.line-draw {
-				width: 0;
-				transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-			}
-			.line-draw.is-visible { width: 100%; }
-
-			/* === GLITCH === */
-			@keyframes glitch {
-				0%, 100% { clip-path: inset(0 0 100% 0); }
-				20% { clip-path: inset(30% 0 50% 0); transform: translate(-4px); }
-				40% { clip-path: inset(60% 0 10% 0); transform: translate(4px); }
-				60% { clip-path: inset(10% 0 80% 0); transform: translate(-2px); }
-				80% { clip-path: inset(80% 0 5% 0); transform: translate(2px); }
-			}
-
-			/* === LIGHT MODE: COMPONENTS === */
-
-			/* TimelineItem */
-			body.light-mode .timeline-item {
-				background-color: rgba(255, 255, 255, 0.85) !important;
-				border-color: rgba(0, 0, 0, 0.08) !important;
-				box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
-			}
-			body.light-mode .timeline-item:hover {
-				border-color: rgba(236, 72, 153, 0.3) !important;
-			}
-			body.light-mode .timeline-item h3 {
-				color: rgb(17, 24, 39) !important;
-			}
-			body.light-mode .timeline-item .text-gray-400 {
-				color: rgb(75, 85, 99) !important;
-			}
-			body.light-mode .timeline-item .text-gray-300 {
-				color: rgb(55, 65, 81) !important;
-			}
-			body.light-mode .timeline-item .border-white\/5 {
-				border-color: rgba(0, 0, 0, 0.06) !important;
-			}
-			body.light-mode .timeline-item .bg-white\/5 {
-				background-color: rgba(0, 0, 0, 0.03) !important;
-			}
-			body.light-mode .timeline-item .border-white\/10 {
-				border-color: rgba(0, 0, 0, 0.08) !important;
-			}
-			/* Tech stack pills in timeline */
-			body.light-mode .timeline-item span.bg-white\/5 {
-				background-color: rgba(0, 0, 0, 0.04) !important;
-				border-color: rgba(0, 0, 0, 0.08) !important;
-				color: rgb(75, 85, 99) !important;
-			}
-			/* Preview image border */
-			body.light-mode .timeline-item .border-white\/5.shadow-2xl {
-				border-color: rgba(0, 0, 0, 0.08) !important;
-			}
-			/* Divider lines */
-			.opacity-20 .bg-gradient-to-b {
-				background-image: linear-gradient(to bottom, #ec4899, transparent) !important;
-			}
 		</style>
 
 		<script>
 		// Layout UI subsystems — extracted to src/scripts/layout/*; invoked here in
 		// the SAME order the original single inline script ran them. Importing ./env
-		// runs platform/mobile/element detection at module top level (was the first
+		// runs platform/element detection at module top level (was the first
 		// thing the script did); applyWinPerfMode() then adds the body class.
 		import { applyWinPerfMode } from '../scripts/layout/env';
 		import { initCookieConsent } from '../scripts/layout/cookieConsent';
 		import { initThemeManagement } from '../scripts/layout/theme';
 		import { initCursor } from '../scripts/layout/cursor';
-		import { initParallax } from '../scripts/layout/parallax';
 		import { initReveals } from '../scripts/layout/reveals';
 		import { initCounters } from '../scripts/layout/counters';
-		import { initTilt } from '../scripts/layout/tilt';
-		import { initMagnetic } from '../scripts/layout/magnetic';
 		import { initNavDimmer } from '../scripts/layout/navDimmer';
-		import { initTimelineToggle, initPortfolioNav } from '../scripts/layout/timeline';
 		import { initSmoothScroll } from '../scripts/layout/smoothScroll';
 
 		applyWinPerfMode();
 		initCookieConsent();
 		initThemeManagement();
 		initCursor();
-		initParallax();
 		initReveals();
 		initCounters();
-		initTilt();
-		initMagnetic();
 		initNavDimmer();
-		initTimelineToggle();
-		initPortfolioNav();
 		initSmoothScroll();
 		</script>
 	</body>

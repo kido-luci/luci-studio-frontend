@@ -29,31 +29,4 @@ export function initHomeHeaderReveals() {
     };
     whenReady(ready, run);
   })();
-
-
-
-  // Pause infinite CSS animations when their host element is off-screen
-  (() => {
-    const pauseWhenHidden = (selector: string, root: Element | null = null) => {
-      const els = document.querySelectorAll<HTMLElement>(selector);
-      if (!els.length) return;
-      const io = new IntersectionObserver(entries => {
-        entries.forEach(e => {
-          (e.target as HTMLElement).style.animationPlayState = e.isIntersecting ? 'running' : 'paused';
-        });
-      }, { rootMargin: '100px', threshold: 0 });
-      els.forEach(el => { el.style.animationPlayState = 'paused'; io.observe(el); });
-    };
-
-    pauseWhenHidden('.hero-badge-dot');
-    pauseWhenHidden('.hero-divider-diamond');
-    pauseWhenHidden('.animate-marquee');
-    // Scroll-hint float line
-    document.querySelectorAll<HTMLElement>('[style*="animation:float"]').forEach(el => {
-      const io = new IntersectionObserver(entries => {
-        entries.forEach(e => { (e.target as HTMLElement).style.animationPlayState = e.isIntersecting ? 'running' : 'paused'; });
-      }, { threshold: 0 });
-      io.observe(el);
-    });
-  })();
 }

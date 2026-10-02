@@ -61,7 +61,7 @@ export function initCursor() {
 			kickRingAnim = () => { if (!ringRafId) ringRafId = requestAnimationFrame(doRingAnim); };
 		}
 
-		document.querySelectorAll('a, button, .tilt-card, .magnetic').forEach(el => {
+		document.querySelectorAll('a, button').forEach(el => {
 			el.addEventListener('mouseenter', () => {
 				if (isWindows) ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px) scale(2)`;
 				else { targetRingScale = 2; kickRingAnim(); }

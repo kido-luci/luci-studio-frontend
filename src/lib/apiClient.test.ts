@@ -23,10 +23,22 @@ describe('apiClient', () => {
             await expect(cachedGetAll<{ id: string }>('/posts')()).resolves.toEqual([{ id: 'a' }]);
         });
 
-        it('normalises a non-array payload to an array', async () => {
+        it('maps a null payload (a nil Go slice) to an empty array', async () => {
             vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => null }));
 
+            await expect(cachedGetAll('/posts', { failFast: true })()).resolves.toEqual([]);
+        });
+
+        it('resolves an object payload to an empty array when failFast is off', async () => {
+            vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ error: 'boom' }) }));
+
             await expect(cachedGetAll('/posts')()).resolves.toEqual([]);
+        });
+
+        it('rejects an object payload when failFast is on', async () => {
+            vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ error: 'boom' }) }));
+
+            await expect(cachedGetAll('/posts', { failFast: true })()).rejects.toThrow('non-array');
         });
 
         it('fetches once no matter how many callers ask', async () => {

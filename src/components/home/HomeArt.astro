@@ -2,9 +2,9 @@
 import { galleryService } from "../../services/gallery";
 import { formatDate } from "../../utils/blog";
 import { getLocaleFromUrl, localized } from "../../i18n";
+import { BASE_URL } from "../../lib/apiClient";
 
 const locale = getLocaleFromUrl(Astro.url);
-const API_URL = import.meta.env.PUBLIC_API_URL || "";
 
 // §04 ART — live gallery (kept masonry + lightbox subsystem). Fallback keeps the
 // section populated if the gallery API is empty at build time.
@@ -134,7 +134,7 @@ const artPieces = curated.length > 0 ? curated : artItems.map((a) => ({ ...a, ar
 </section>
 
 <!-- ART LIGHTBOX (popup) -->
-<div id="art-lightbox" class="art-lightbox" data-api-url={API_URL} aria-hidden="true" role="dialog" aria-modal="true" aria-label="Artwork viewer">
+<div id="art-lightbox" class="art-lightbox" data-api-url={BASE_URL} aria-hidden="true" role="dialog" aria-modal="true" aria-label="Artwork viewer">
   <div class="art-lightbox-bg" data-art-bgimg></div>
   <button type="button" class="art-lightbox-close" data-art-close aria-label="Close">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>

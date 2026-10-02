@@ -2,7 +2,9 @@
 // module scripts poll for the globals before wiring animations. `run` fires
 // immediately when `ready()` is already truthy. Callers that must fail open if
 // the CDN never arrives pass `timeoutMs` + `onTimeout` (e.g. un-hide content).
-// (Layout.astro's is:inline scripts keep their own copy — they can't import.)
+// timeoutMs is wall-clock time: a busy main thread (the homepage's WebGL scene)
+// delays the polls but cannot stretch the wait. Each poll checks `ready()`
+// first, so a library that arrives during a long block still runs.
 export function whenReady(
     ready: () => unknown,
     run: () => void,
@@ -12,12 +14,12 @@ export function whenReady(
         run();
         return;
     }
-    let waited = 0;
+    const start = performance.now();
     const id = setInterval(() => {
         if (ready()) {
             clearInterval(id);
             run();
-        } else if (opts.timeoutMs !== undefined && (waited += 30) >= opts.timeoutMs) {
+        } else if (opts.timeoutMs !== undefined && performance.now() - start >= opts.timeoutMs) {
             clearInterval(id);
             opts.onTimeout?.();
         }

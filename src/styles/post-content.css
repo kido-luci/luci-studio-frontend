@@ -585,3 +585,16 @@ html[lang="vi"] .reply-input[data-empty="true"]::before {
   content: 'Viết trả lời…';
 }
 
+/* Comment-thread hover and focus states (composer, comment actions, reply
+   form, confirm dialog). They used to be inline onmouseover/onmouseout and
+   onfocus/onblur handlers, which the CSP now blocks (script-src-attr 'none').
+   Each rule sets exactly what its handler wrote; !important beats the
+   element's inline base style, just as the handler's inline write did. */
+.cm-hover-brighten:hover { filter: brightness(1.08) !important; }
+.cm-hover-tint:hover { background: rgb(var(--accent-rgb) / 0.1) !important; }
+.cm-hover-wash:hover { background: color-mix(in srgb, var(--bp-ink) 6%, transparent) !important; }
+.cm-hover-ink:hover { color: var(--bp-ink) !important; }
+.cm-hover-muted:hover { color: var(--bp-muted) !important; }
+.cm-hover-danger:hover { color: #f87171 !important; }
+.cm-hover-acc:hover { color: var(--bp-acc) !important; border-color: var(--bp-acc) !important; }
+.cm-focus-acc:focus { border-color: rgb(var(--accent-rgb) / 0.4) !important; }

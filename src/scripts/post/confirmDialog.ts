@@ -33,8 +33,8 @@ export function showConfirm({ message, confirmText = 'Confirm', cancelText = 'Ca
         <p style="font-size:0.9rem;color:var(--bp-ink);font-weight:500;margin:0;line-height:1.4;">${message}</p>
       </div>
       <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
-        <button id="confirm-cancel" style="padding:0.5rem 1.1rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--bp-hair);color:var(--bp-muted);cursor:pointer;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='color-mix(in srgb, var(--bp-ink) 6%, transparent)'" onmouseout="this.style.background='transparent'">${cancelText}</button>
-        <button id="confirm-ok" style="padding:0.5rem 1.1rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border:none;cursor:pointer;transition:filter 0.2s;background:${danger ? '#ef4444' : 'var(--bp-acc)'};color:${danger ? '#fff' : 'var(--accent-ink)'};" onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter='none'">${confirmText}</button>
+        <button id="confirm-cancel" class="cm-hover-wash" style="padding:0.5rem 1.1rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--bp-hair);color:var(--bp-muted);cursor:pointer;transition:background 0.15s,color 0.15s;">${cancelText}</button>
+        <button id="confirm-ok" class="cm-hover-brighten" style="padding:0.5rem 1.1rem;border-radius:8px;font-family:var(--bp-mono);font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border:none;cursor:pointer;transition:filter 0.2s;background:${danger ? '#ef4444' : 'var(--bp-acc)'};color:${danger ? '#fff' : 'var(--accent-ink)'};">${confirmText}</button>
       </div>
     `;
 
