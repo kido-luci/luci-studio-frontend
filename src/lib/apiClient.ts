@@ -49,7 +49,7 @@ export async function fetchOne<T>(path: string, opts: { failFast?: boolean } = {
         const response = await fetch(`${BASE_URL}${path}`);
         if (response.status === 404) return null;
         if (!response.ok) throw new Error(`GET ${path} failed with ${response.status}`);
-        return response.json();
+        return await response.json();
     } catch (error) {
         console.error(`Failed to fetch ${path}:`, error);
         if (opts.failFast) throw error;
